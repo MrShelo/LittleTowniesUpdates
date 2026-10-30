@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='1.3.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='1.3.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1062,7 +1062,7 @@ function bfs(s){let c=bfsCache.get(s);if(c)return c;
       const nd=d+(stepCost(i)+stepCost(j))/2;if(dist[j]<0||nd<dist[j]-1e-6){dist[j]=nd;prev[j]=i;hpush(H,nd,j)}}}
   c={dist,prev};bfsCache.set(s,c);return c}
 function pathTo(b,e){const r=[];let i=e;while(i!==-1){r.push(i);i=b.prev[i]}return r.reverse()}
-function candidates(b,types){const out=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||!types.includes(c.t))continue;const e=entryOf(i);if(e<0||b.dist[e]<0)continue;out.push({i,e,d:b.dist[e],m:c.t==='gallery'?1+c.stores.length*0.5:1})}return out}
+function candidates(b,types){const out=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||!types.includes(c.t))continue;const e=entryOf(i);if(e<0||b.dist[e]<0)continue;out.push({i,e,d:b.dist[e],m:c.t==='gallery'?1+c.stores.length*0.5:c.t==='restaurant'?(c.up?0.5:0.35):1})}return out}
 function pickWeighted(list){if(!list.length)return null;let tot=0;for(const o of list){o.w=(o.m||1)/(o.d+2);tot+=o.w}let r=Math.random()*tot;for(const o of list){r-=o.w;if(r<=0)return o}return list[list.length-1]}
 
 /* ---------- long bridges ----------
@@ -2113,12 +2113,12 @@ document.addEventListener('visibilitychange',()=>{if(!radio.el||!radio.on)return
 const UREPO=Object.freeze('MrShelo/LittleTowniesUpdates');const uSt=document.getElementById('uSt');try{localStorage.removeItem('lt-repo')}catch(e){}
 let running=null;try{const u=JSON.parse(localStorage.getItem('lt-update')||'null');if(u&&window.__ltNew)running=u.v}catch(e){}
 document.getElementById('uVer').textContent=LT_VERSION;document.getElementById('uOld').hidden=!localStorage.getItem('lt-update');
-async function getRemote(repo,file,ver){const urls=[`https://raw.githubusercontent.com/${repo}/main/${file}?t=${Date.now()}`,`https://cdn.jsdelivr.net/gh/${repo}@${ver?'v'+ver:'main'}/${file}`];let last;
-  for(const u of urls){try{const r=await fetch(u,{cache:'no-store'});if(r.ok)return await r.text();last=new Error('HTTP '+r.status)}catch(e){last=e}}throw last||new Error('brak połączenia')}
+async function getRemote(repo,file){const urls=[[`https://api.github.com/repos/${repo}/contents/${file}?ref=main&t=${Date.now()}`,{Accept:'application/vnd.github.raw'}],[`https://raw.githubusercontent.com/${repo}/main/${file}?t=${Date.now()}`],[`https://cdn.jsdelivr.net/gh/${repo}@main/${file}`]];let last;
+  for(const[u,h]of urls){try{const r=await fetch(u,{cache:'no-store',headers:h||{}});if(r.ok)return await r.text();last=new Error('HTTP '+r.status)}catch(e){last=e}}throw last||new Error('brak połączenia')}
 function viaScript(repo,file){return new Promise((res,rej)=>{const s=document.createElement('script');window.__ltUpdate=d=>{res(d);s.remove()};s.onerror=()=>rej(new Error('nie można pobrać'));s.src=`https://cdn.jsdelivr.net/gh/${repo}@main/${file}`;document.head.appendChild(s)})}
 let uPending=null;
 async function checkUpdate(){const repo=UREPO;
-  if(uPending){uSt.textContent='Pobieram…';try{let html;try{html=await getRemote(repo,'index.html',uPending.v)}catch(e){html=(await viaScript(repo,'update.js')).html}
+  if(uPending){uSt.textContent='Pobieram…';try{let html;try{html=await getRemote(repo,'index.html')}catch(e){html=(await viaScript(repo,'update.js')).html}
       if(!html||html.indexOf('LT_VERSION')<0)throw new Error('plik gry jest niepełny');save();localStorage.setItem('lt-update',JSON.stringify({v:uPending.v,html}));uSt.textContent='Gotowe. Uruchamiam nową wersję…';setTimeout(()=>location.reload(),600)}
     catch(e){uSt.textContent='Nie udało się pobrać: '+e.message}return}
   uSt.textContent='Sprawdzam…';let info;
