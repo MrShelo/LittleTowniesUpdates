@@ -274,7 +274,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <button class="btn panel mbtn" id="mReset">Zresetuj miasto</button>
   <button class="btn panel mbtn" id="mExit">Zapisz i wyjdź</button>
   <div class="upd"><b>Aktualizacje z GitHuba</b><span class="st">Wersja gry <span id="uVer"></span></span>
-    <input id="uRepo" placeholder="użytkownik/little-townies" aria-label="Repozytorium GitHub" autocomplete="off" spellcheck="false">
+    <span class="st">Źródło: github.com/MrShelo/LittleTowniesUpdates</span>
     <button class="btn panel mbtn" id="uCheck">Sprawdź aktualizacje</button>
     <span class="st" id="uSt"></span><button class="btn panel mbtn" id="uOld" hidden>Wróć do wersji wbudowanej</button></div>
 </section></div>
@@ -291,7 +291,7 @@ window.addEventListener('error',ev=>{if(!window.__drawn)showErr(String(ev.messag
   const u=urls.shift();if(!u)return showErr('Nie udało się wczytać biblioteki three.js. Sprawdź połączenie i odśwież stronę.');
   const sc=document.createElement('script');sc.src=u;sc.onload=()=>window.THREE?start():loadThree(urls);sc.onerror=()=>loadThree(urls);
   document.head.appendChild(sc);
-})(['https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js','https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js','https://unpkg.com/three@0.128.0/build/three.min.js']);
+})([...((typeof location!=='undefined'&&(location.protocol==='file:'||/^https?:\/\/localhost/.test(location.href)))||window.Capacitor?['three.min.js']:[]),'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js','https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js','https://unpkg.com/three@0.128.0/build/three.min.js']);
 function start(){try{main()}catch(e){showErr(String(e&&e.message||e))}}
 function main(){
 const N=64, HALF=N/2;
@@ -2051,17 +2051,14 @@ document.getElementById('mVol').addEventListener('input',e=>setVol(e.target.valu
 if(radio.want){const go=e=>{removeEventListener('pointerdown',go,true);removeEventListener('keydown',go,true);if(e&&e.target&&e.target.closest&&e.target.closest('#radio'))return;if(!radio.on)radioToggle()};addEventListener('pointerdown',go,true);addEventListener('keydown',go,true)}
 document.addEventListener('visibilitychange',()=>{if(!radio.el||!radio.on)return;if(document.hidden)radio.el.pause();else radio.el.play().catch(()=>{})});
 /* ---------- updates from GitHub ---------- */
-const UREPO_DEFAULT='';const uRepo=document.getElementById('uRepo'),uSt=document.getElementById('uSt');
-try{uRepo.value=localStorage.getItem('lt-repo')||UREPO_DEFAULT}catch(e){uRepo.value=UREPO_DEFAULT}
+const UREPO=Object.freeze('MrShelo/LittleTowniesUpdates');const uSt=document.getElementById('uSt');try{localStorage.removeItem('lt-repo')}catch(e){}
 let running=null;try{const u=JSON.parse(localStorage.getItem('lt-update')||'null');if(u&&window.__ltNew)running=u.v}catch(e){}
 document.getElementById('uVer').textContent=LT_VERSION;document.getElementById('uOld').hidden=!localStorage.getItem('lt-update');
 async function getRemote(repo,file,ver){const urls=[`https://raw.githubusercontent.com/${repo}/main/${file}?t=${Date.now()}`,`https://cdn.jsdelivr.net/gh/${repo}@${ver?'v'+ver:'main'}/${file}`];let last;
   for(const u of urls){try{const r=await fetch(u,{cache:'no-store'});if(r.ok)return await r.text();last=new Error('HTTP '+r.status)}catch(e){last=e}}throw last||new Error('brak połączenia')}
 function viaScript(repo,file){return new Promise((res,rej)=>{const s=document.createElement('script');window.__ltUpdate=d=>{res(d);s.remove()};s.onerror=()=>rej(new Error('nie można pobrać'));s.src=`https://cdn.jsdelivr.net/gh/${repo}@main/${file}`;document.head.appendChild(s)})}
 let uPending=null;
-async function checkUpdate(){const repo=uRepo.value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$|\/$/g,'');
-  if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){uSt.textContent='Wpisz repozytorium w formacie użytkownik/nazwa.';return}
-  try{localStorage.setItem('lt-repo',repo)}catch(e){}
+async function checkUpdate(){const repo=UREPO;
   if(uPending){uSt.textContent='Pobieram…';try{let html;try{html=await getRemote(repo,'index.html',uPending.v)}catch(e){html=(await viaScript(repo,'update.js')).html}
       if(!html||html.indexOf('LT_VERSION')<0)throw new Error('plik gry jest niepełny');save();localStorage.setItem('lt-update',JSON.stringify({v:uPending.v,html}));uSt.textContent='Gotowe. Uruchamiam nową wersję…';setTimeout(()=>location.reload(),600)}
     catch(e){uSt.textContent='Nie udało się pobrać: '+e.message}return}
