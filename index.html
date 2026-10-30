@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='1.4.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='1.4.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -365,7 +365,9 @@ const DEF={
   park1:{name:'Skwer',cost:80,desc:'Zasięg 3×3 wokół parku. Domy w zasięgu +1 zadowolenia (parki się nie sumują).',sw:'#7cc05a',r:1},
   park2:{name:'Park',cost:200,desc:'Zasięg 5×5 wokół parku. Domy w zasięgu +1 zadowolenia (parki się nie sumują).',sw:'#4f9a3c',r:2},
   park3:{name:'Park miejski',cost:550,size:2,desc:'Zajmuje 2 pola. Zasięg 7×7 wokół każdego z nich. Domy w zasięgu +1 zadowolenia (parki się nie sumują).',sw:'#2f7e5c',r:3},
-  pole:{name:'Słup',cost:30,desc:'Ulepsza jedno pole ulicy. Słupy przewodzą prąd do budynków stojących obok.',sw:'#8a6a4a'},
+  pole:{name:'Słup',cost:30,desc:'Stawiasz na ulicy albo na trawie. Słupy łączą się ze słupami obok i przewodzą prąd do budynków stojących obok.',sw:'#8a6a4a'},
+  lpole:{name:'Słup',cost:30,desc:'Słup na trawie.',sw:'#8a6a4a'},
+  poleDel:{name:'Usuń słup',cost:0,lbl:'zwrot 50%',desc:'Zdejmuje słup z ulicy (ulica zostaje) albo usuwa słup z trawy. Zwraca połowę ceny.',sw:'#b5533c'},
   poleline:{name:'Linia słupów',cost:30,desc:'Stuknij ulicę: słupy staną na całym prostym odcinku, 30 T¢ za sztukę.',sw:'repeating-linear-gradient(90deg,#8a6a4a 0 4px,transparent 4px 8px)',unit:'T¢/szt.'},
   wind:{name:'Wiatrak',cost:400,desc:'Daje 5 MW. Postaw obok transformatora.',sw:'#e9eef1'},
   transformer:{name:'Transformator',cost:150,desc:'Łączy elektrownie ze słupami, także po przekątnej.',sw:'#5f7d70'},
@@ -375,7 +377,7 @@ const DEMAND={factoryB:3.5,mine:1,mineB:3,warehouseB:1,supermarket:2.5,smallfac:
 const WHCAP={warehouse:90,smallwh:31,warehouseB:225};
 const isWH=t=>t==='warehouse'||t==='smallwh'||t==='warehouseB';const WH_T=['warehouse','smallwh','warehouseB'];
 const UTIL_R={pump:2,tower:2,treatment:2};
-const NOROAD={hydro:1,hydrogen:1,pump:1,tower:1,outlet:1,treatment:1,farmveg:1,farmdairy:1,farmgrain:1,wind:1,transformer:1,coal:1,park1:1,park2:1,park3:1,hvpole:1};
+const NOROAD={lpole:1,hydro:1,hydrogen:1,pump:1,tower:1,outlet:1,treatment:1,farmveg:1,farmdairy:1,farmgrain:1,wind:1,transformer:1,coal:1,park1:1,park2:1,park3:1,hvpole:1};
 const DRIVE={road:1,road2:1,road3:1,roundabout:1,highway:1,bridge:1};
 const STREET={road:1,road2:1,road3:1};
 const POLEABLE={road:1,road2:1,road3:1,roundabout:1};
@@ -451,9 +453,9 @@ const facCap=c=>FAC[c.t].cap*(c.t==='landfill'?(c.lfN||1):1);
 const facTrucks=c=>c.t==='landfill'?Math.min(8,2+(c.lfN||1)):FAC[c.t].trucks;
 const parkR=c=>DEF[c.t].r+(c.up?1:0);
 const PARKS=['park1','park2','park3'];
-const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','pole','poleline']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','warehouse','smallwh','warehouseB']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain']},{name:'Usługi',tools:['shop','supermarket','gallery','hotelS','hotelB','bank']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Energia',tools:['wind','transformer','hvpole','coal','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incinerator','recycler']},{name:'Woda',tools:['pipe','pipeDel','tower','pump','treatment','outlet']}];
+const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','warehouse','smallwh','warehouseB']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain']},{name:'Usługi',tools:['shop','supermarket','gallery','hotelS','hotelB','bank']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Energia',tools:['pole','poleline','poleDel','transformer','hvpole','wind','coal','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incinerator','recycler']},{name:'Woda',tools:['pipe','pipeDel','tower','pump','treatment','outlet']}];
 const WIND_MW=5, COAL_MW=12, COAL_BURN=8;
-const TOOLS=['view','bulldoze','road','pole','poleline','house','factory','warehouse','shop','bank','wind','transformer','coal','park1','park2','park3','smallwh'];
+const TOOLS=['view','bulldoze','road','pole','poleline','poleDel','house','factory','warehouse','shop','bank','wind','transformer','coal','park1','park2','park3','smallwh'];
 const BASE_MONEY=4000, BANK_CAP=2500, WH_CAP=60, SALE=25, TRUCK_LOAD=4, MAX_CARS=400, PEOPLE_CARS=340;
 
 /* ---------- three setup ---------- */
@@ -642,6 +644,9 @@ function buildMineB(){const g=new THREE.Group();g.add(box(1.96,0.03,1.96,mat.dir
   const cv=box(0.9,0.04,0.12,M('#3b3f46'),-0.1,0.5,0.35);cv.rotation.z=0.45;g.add(cv);
   orePile(g,-0.55,0.55,0.35,0.36,'#e08a2c');orePile(g,0.0,0.7,0.22,0.2,'#e08a2c');orePile(g,0.6,-0.6,0.25,0.22);
   for(const x of[-0.2,0.2])g.add(box(0.012,0.012,1.8,mat.steel,x+0.6,0.035,0));g.add(box(0.2,0.12,0.14,M('#5d6b74'),0.6,0.04,-0.2));return g}
+function buildLPole(){const g=new THREE.Group(),H=0.88;const pl=new THREE.Mesh(G.pole,mat.wood);pl.castShadow=true;g.add(pl);
+  const arm=new THREE.Mesh(G.arm,mat.wood);arm.position.y=H-0.04;g.add(arm);for(const x of[-0.08,0.08])g.add(box(0.018,0.035,0.018,mat.white,x,H-0.03,0));
+  g.add(box(0.1,0.02,0.1,M('#6b5a44'),0,0,0));return g}
 function buildWind(){const g=new THREE.Group();
   g.add(box(0.36,0.06,0.36,mat.concrete));
   const t=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.065,1.55,10),mat.white);t.position.y=0.8;t.castShadow=true;g.add(t);
@@ -921,14 +926,14 @@ function buildHydro(){const g=new THREE.Group(),con=M('#c4c1b8'),con2=M('#a9a69c
 function buildSupermarket(){const g=new THREE.Group();g.add(box(1.94,0.04,0.94,mat.concrete));g.add(box(1.5,0.44,0.62,M('#e9eef2'),-0.1,0.04,-0.14));
   g.add(box(1.54,0.06,0.66,M('#3a7fc0'),-0.1,0.48,-0.14));g.add(box(0.8,0.24,0.02,mat.glass,-0.1,0.04,0.175));g.add(box(0.7,0.12,0.03,M('#3a7fc0'),-0.1,0.35,0.19));
   for(let k=0;k<4;k++)g.add(box(0.02,0.005,0.2,mat.dash,0.25+k*0.16,0.045,0.33));for(const x of[0.55,0.75])g.add(box(0.12,0.06,0.1,carCols[(x*10)%8|0],x,0.04,0.33));return g}
-const BUILD={factoryB:buildFactoryB,warehouseB:buildWarehouseB,mine:buildMine,mineB:buildMineB,supermarket:buildSupermarket,smallfac:()=>{const g=buildFactory();g.scale.setScalar(0.72);return g},hydro:buildHydro,hydrogen:()=>{const g=buildHydrogen();g.scale.set(1.9,1.5,1.9);return g},pump:buildPump,tower:buildTower,outlet:buildOutlet,treatment:buildTreatment,restaurant:buildRestaurant,cinema:buildCinema,theater:buildTheater,casino:buildCasino,hotelS:buildHotelS,hotelB:buildHotelB,gallery:buildGallery,farmveg:()=>buildFarm('veg'),farmdairy:()=>buildFarm('dairy'),farmgrain:()=>buildFarm('grain'),tenement:buildTenement,block:buildBlock,modern:buildModern,landfill:buildLandfill,incinerator:buildIncinerator,recycler:buildRecycler,hvpole:buildHV,smallwh:buildSmallWh,park1:()=>buildPark(1),park2:()=>buildPark(2),park3:()=>{const g=new THREE.Group(),a=buildPark(3),b=buildPark(2);a.position.x=-0.5;b.position.x=0.5;g.add(a,b);return g},house:buildHouse,factory:buildFactory,shop:buildShop,bank:buildBank,warehouse:buildWarehouse,wind:buildWind,transformer:buildTransformer,coal:buildCoal};
+const BUILD={lpole:buildLPole,factoryB:buildFactoryB,warehouseB:buildWarehouseB,mine:buildMine,mineB:buildMineB,supermarket:buildSupermarket,smallfac:()=>{const g=buildFactory();g.scale.setScalar(0.72);return g},hydro:buildHydro,hydrogen:()=>{const g=buildHydrogen();g.scale.set(1.9,1.5,1.9);return g},pump:buildPump,tower:buildTower,outlet:buildOutlet,treatment:buildTreatment,restaurant:buildRestaurant,cinema:buildCinema,theater:buildTheater,casino:buildCasino,hotelS:buildHotelS,hotelB:buildHotelB,gallery:buildGallery,farmveg:()=>buildFarm('veg'),farmdairy:()=>buildFarm('dairy'),farmgrain:()=>buildFarm('grain'),tenement:buildTenement,block:buildBlock,modern:buildModern,landfill:buildLandfill,incinerator:buildIncinerator,recycler:buildRecycler,hvpole:buildHV,smallwh:buildSmallWh,park1:()=>buildPark(1),park2:()=>buildPark(2),park3:()=>{const g=new THREE.Group(),a=buildPark(3),b=buildPark(2);a.position.x=-0.5;b.position.x=0.5;g.add(a,b);return g},house:buildHouse,factory:buildFactory,shop:buildShop,bank:buildBank,warehouse:buildWarehouse,wind:buildWind,transformer:buildTransformer,coal:buildCoal};
 function boltMesh(){const b=new THREE.Mesh(new THREE.OctahedronGeometry(0.09,0),mat.bolt);b.scale.y=1.7;b.position.set(0.22,1.05,0);b.visible=false;b.layers.set(1);return b}
 function wire(a,b,sag=0.07){const pts=[];for(let k=0;k<=10;k++){const u=k/10;pts.push(new THREE.Vector3(a.x+(b.x-a.x)*u,a.y+(b.y-a.y)*u-Math.sin(u*Math.PI)*sag,a.z+(b.z-a.z)*u))}
   return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),mat.wire)}
 
 /* ---------- state ---------- */
 let grid=new Array(N*N).fill(null);
-let counts={factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
+let counts={lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
 const pw={bank:0,matCap:0,dem:0,cap:0,ok:0,happy:0,dist:[0,0,0,0,0,0,0]};
 let envDirty=true;const crowdCov=new Uint8Array(N*N),noiseCov=new Uint8Array(N*N),entCov=new Uint8Array(N*N),pol=new Uint8Array(N*N),shopCov=new Uint8Array(N*N),parkCov=new Uint8Array(N*N);
 const winds=new Set(),bolts=new Set();
@@ -1184,13 +1189,21 @@ function rebuildRoad(i){const c=grid[i];if(!c||!DRIVE[c.t])return;const g=c.grou
     const lamp=new THREE.Mesh(G.lamp,mat.lamp);lamp.position.set(P-0.07,H-0.07,P-0.07);g.add(lamp);
     const top=new THREE.Vector3(P,H-0.03,P);
     for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const nb=grid[idx(nx,nz)];if(!nb)continue;
-      if(POLEABLE[nb.t]&&nb.pole&&(dx>0||dz>0))g.add(wire(top,new THREE.Vector3(P+dx,H-0.03,P+dz)));
+      if(isLV(idx(nx,nz))&&(dx>0||dz>0)){const o=poleOff(idx(nx,nz));g.add(wire(top,new THREE.Vector3(o+dx,H-0.03,o+dz)))}
       else if(nb.t==='transformer'&&trafoPole(idx(nx,nz))===i)g.add(wire(top,new THREE.Vector3(dx,0.52,dz)));}
     for(const[dx,dz]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const nb=grid[idx(nx,nz)];
       if(nb&&nb.t==='transformer'&&trafoPole(idx(nx,nz))===i)g.add(wire(top,new THREE.Vector3(dx,0.52,dz)))}}}
 /* a transformer draws one line, to its nearest pole (straight neighbours first) */
-function trafoPole(t){let best=-1,bd=9;for(const j of nbrs8(t)){const c=grid[j];if(!c||!POLEABLE[c.t]||!c.pole)continue;const d=Math.abs(j%N-t%N)+Math.abs(((j/N)|0)-((t/N)|0));if(d<bd||(d===bd&&j<best)){bd=d;best=j}}return best}
+const isLV=i=>{const c=grid[i];return !!c&&((POLEABLE[c.t]&&!!c.pole)||c.t==='lpole')};const poleOff=i=>grid[i]&&grid[i].t==='lpole'?0:0.4;
+function trafoPole(t){let best=-1,bd=9;for(const j of nbrs8(t)){if(!isLV(j))continue;const d=Math.abs(j%N-t%N)+Math.abs(((j/N)|0)-((t/N)|0));if(d<bd||(d===bd&&j<best)){bd=d;best=j}}return best}
+function lpoleWires(i,c){const g=c.group;if(c.wires){g.remove(c.wires);c.wires.traverse(o=>{if(o.geometry)o.geometry.dispose()})}const w=new THREE.Group();c.wires=w;g.add(w);
+  const x=i%N,z=(i/N)|0,H=0.88,top=new THREE.Vector3(0,H-0.03,0);
+  for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz),nb=grid[j];if(!nb)continue;
+    if(isLV(j)&&(dx>0||dz>0)){const o=poleOff(j);w.add(wire(top,new THREE.Vector3(o+dx,H-0.03,o+dz)))}
+    else if(nb.t==='transformer'&&trafoPole(j)===i)w.add(wire(top,new THREE.Vector3(dx,0.52,dz)))}
+  for(const[dx,dz]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(isTrafo(j)&&trafoPole(j)===i)w.add(wire(top,new THREE.Vector3(dx,0.52,dz)))}}
 function refreshBuilding(i){const c=grid[i];if(!c||DRIVE[c.t])return;if(c.t==='part'){if(grid[c.main]&&grid[c.main].t!=='part')refreshBuilding(c.main);return}
+  if(c.t==='lpole'){c.marker.visible=false;lpoleWires(i,c);return}
   if(c.tiles&&c.rot!=null&&c.model)c.model.rotation.y=c.rot*Math.PI/2;
   if(c.t==='hydro'){c.marker.visible=false;if(!water[i]){c.model.rotation.y=0;return}const w=wIdx.get(i),alongX=!!w&&w[0]===waterMesh,sg=flowSign(i,alongX?0:1);
     c.model.rotation.y=Math.atan2(alongX?sg:0,alongX?0:sg);return}
@@ -1201,7 +1214,7 @@ function refreshBuilding(i){const c=grid[i];if(!c||DRIVE[c.t])return;if(c.t==='p
   if(e>=0){if(c.tiles&&(c.tiles.length>2||c.rot!=null)){}else if(c.tiles){const gp=c.group.position;c.model.rotation.y=c.vert?(cx(e)<gp.x-0.1?-Math.PI/2:Math.PI/2):(cz(e)<gp.z-0.1?Math.PI:0)}
     else c.model.rotation.y=Math.atan2(cx(e)-cx(i),cz(e)-cz(i))}}
 function refreshAround(i){const x=i%N,z=(i/N)|0;rebuildRoad(i);refreshBuilding(i);
-  for(const j of nbrs8(i))if(grid[j]&&grid[j].t==='transformer')for(const k of nbrs8(j))if(k!==i&&Math.abs(k%N-x)+Math.abs(((k/N)|0)-z)>1)rebuildRoad(k);
+  for(const j of nbrs8(i))if(grid[j]&&grid[j].t==='transformer')for(const k of nbrs8(j))if(k!==i&&Math.abs(k%N-x)+Math.abs(((k/N)|0)-z)>1){rebuildRoad(k);if(grid[k]&&grid[k].t==='lpole')refreshBuilding(k)}
   for(const[dx,dz]of [[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);rebuildRoad(j);refreshBuilding(j)}}
 
 function roadBase(t){return t==='highway'?[G.hwBase,mat.road]:t==='bridge'?[G.deck,mat.road]:[G.roadBase,t==='road2'?mat.road2:t==='road3'?mat.road3:mat.road]}
@@ -1527,7 +1540,7 @@ function farmTick(dt,night){if(farmDirty)computeFarms();
    Generators feed a component only through an adjacent transformer.
    Consumers draw from any adjacent conductor; on a shortfall the smallest loads stay on first. */
 let powerDirty=true,powerAcc=0;
-const conductive=i=>{const c=grid[i];return !!c&&((POLEABLE[c.t]&&c.pole)||c.t==='transformer'||c.t==='hvpole')};
+const conductive=i=>{const c=grid[i];return !!c&&((POLEABLE[c.t]&&c.pole)||c.t==='lpole'||c.t==='transformer'||c.t==='hvpole')};
 const isHV=i=>!!grid[i]&&grid[i].t==='hvpole';
 const GEN_W={hydro:0.26,hydrogen:0.5,wind:0.3,coal:0.5};let topoDirty=true,dayF=1;const hvWires=new THREE.Group();scene.add(hvWires);
 const D8=[[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
@@ -1710,7 +1723,7 @@ el.addEventListener('pointermove',e=>{
   const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
   if(mode==='pending'&&Math.hypot(p.x-p.sx,p.y-p.sy)>7){
     if(p.btn===2||p.shift)mode='rotate';else if(p.btn===1)mode='pan';
-    else if(STREET[tool]||tool==='highway'||tool==='bridge'||tool==='hydro'||tool==='pole'||tool==='pipe'||tool==='pipeDel'||tool==='bulldoze'){mode='paint';lastPaint=-1;paintAt(p.sx,p.sy)}else mode='pan'}
+    else if(STREET[tool]||tool==='highway'||tool==='bridge'||tool==='hydro'||tool==='pole'||tool==='poleDel'||tool==='pipe'||tool==='pipeDel'||tool==='bulldoze'){mode='paint';lastPaint=-1;paintAt(p.sx,p.sy)}else mode='pan'}
   if(mode==='rotate'){cam.theta-=dx*0.008;cam.phi-=dy*0.006}
   else if(mode==='pan')pan(dx,dy);
   else if(mode==='paint')paintAt(e.clientX,e.clientY);
@@ -1732,7 +1745,7 @@ function hover(x,y){const i=tileAt(x,y);if(!areaT)area.visible=false;if(i<0||too
   hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;
   const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
   else if(STREET[tool]||tool==='roundabout'){const c=grid[i];ok=c?(STREET[c.t]||c.t==='roundabout')&&c.t!==tool&&money>=DEF[tool].cost-DEF[c.t].cost:!water[i]&&money>=DEF[tool].cost&&tool!=='roundabout'}
-  else if(tool==='bulldoze')ok=!!grid[i];else if(tool==='poleline')ok=!!grid[i]&&!!STREET[grid[i].t]&&money>=DEF.pole.cost;else if(tool==='pole')ok=!!grid[i]&&!!POLEABLE[grid[i].t]&&!grid[i].pole&&money>=DEF.pole.cost;else if(FP(tool)){const x=i%N,z=(i/N)|0,[fw,fh]=FP(tool);ok=x<=N-fw&&z<=N-fh&&money>=DEF[tool].cost;if(ok)for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++){const j=idx(x+dx,z+dz);if(grid[j]||water[j])ok=false}}
+  else if(tool==='bulldoze')ok=!!grid[i];else if(tool==='poleline')ok=!!grid[i]&&!!STREET[grid[i].t]&&money>=DEF.pole.cost;else if(tool==='pole')ok=money>=DEF.pole.cost&&((!grid[i]&&!water[i])||(!!grid[i]&&!!POLEABLE[grid[i].t]&&!grid[i].pole));else if(tool==='poleDel')ok=isLV(i);else if(FP(tool)){const x=i%N,z=(i/N)|0,[fw,fh]=FP(tool);ok=x<=N-fw&&z<=N-fh&&money>=DEF[tool].cost;if(ok)for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++){const j=idx(x+dx,z+dz);if(grid[j]||water[j])ok=false}}
   else ok=!grid[i]&&money>=DEF[tool].cost&&(tool==='bridge'?!!water[i]&&straightOK(i):tool==='hydro'?!!water[i]:!water[i]);
   hl.material.color.set(tool==='bulldoze'?(ok?'#e0402b':'#ffffff'):(ok?'#ffffff':'#e0402b'))}
 
@@ -1787,7 +1800,7 @@ function setHint(html,warn,temp){hintEl.innerHTML=html;hintEl.classList.toggle('
 function toolHint(){
   if(tool==='view')return'<b>Podgląd</b> · stuknij budynek, by zobaczyć stan. Przeciągnij, by przesunąć; dwa palce lub prawy przycisk obracają.';
   if(tool==='bulldoze')return'<b>Wyburz</b> · zwraca połowę kosztu. Przeciągnij, by usuwać kilka pól.';
-  const d=DEF[tool];return`<b>${d.name}</b> · ${fmt(d.cost)} T¢ · ${d.desc}`+(FP(tool)?` Stuknij miejsce, obróć i zatwierdź (${FP(tool).join('×')}).`:'')+(DEMAND[tool]?` Pobiera ${mw(DEMAND[tool])} MW.`:'')+(UPKEEP[tool]?` Utrzymanie ${UPKEEP[tool]} T¢/godz.`:'')}
+  const d=DEF[tool];return`<b>${d.name}</b> · ${d.cost?fmt(d.cost)+' T¢ · ':''}${d.desc}`+(FP(tool)?` Stuknij miejsce, obróć i zatwierdź (${FP(tool).join('×')}).`:'')+(DEMAND[tool]?` Pobiera ${mw(DEMAND[tool])} MW.`:'')+(UPKEEP[tool]?` Utrzymanie ${UPKEEP[tool]} T¢/godz.`:'')}
 function apply(i,painting){
   if(moveSrc>=0){if(painting)return;if(!grid[moveSrc]){moveSrc=-1;return}pendA=i;updateGhost();return}
   if(tool==='view')return grid[i]&&!DRIVE[grid[i].t]?openHouse(i):inspect(i);
@@ -1808,8 +1821,12 @@ function apply(i,painting){
   if(tool==='bulldoze'&&c&&c.edge){if(!painting)setHint('To droga wjazdowa do miasta dla przejezdnych. Możesz ją poszerzyć, ale nie wyburzyć.',true,true);return}
   if(tool==='bulldoze'){if(!c){if(deco.has(i)){clearDeco(i);save()}return}const refund=Math.floor((DEF[c.t].cost+(c.pole?DEF.pole.cost:0))/2);removeCell(i);
     const n=addMoney(refund);cur.refund+=n;if(n>=0.5)float(i,`+${fmt(n)} T¢`,'money');save();return}
+  if(tool==='poleDel'){if(c&&c.t==='lpole'){removeCell(i);const n=addMoney(Math.floor(DEF.pole.cost/2));cur.refund+=n;powerDirty=true;topoDirty=true;save();return}
+    if(c&&POLEABLE[c.t]&&c.pole){c.pole=false;refreshAround(i);const n=addMoney(Math.floor(DEF.pole.cost/2));cur.refund+=n;powerDirty=true;save();return}
+    if(!painting)setHint('Tu nie ma słupa.',true,true);return}
   if(tool==='pole'){
-    if(!c||!POLEABLE[c.t]){if(!painting)setHint('Słup stawia się na ulicy lub rondzie, nie na autostradzie ani moście.',true,true);return}
+    if(!c&&!water[i]){if(money<DEF.pole.cost){setHint(`Brakuje ${fmt(DEF.pole.cost-money)} T¢ na słup.`,true,true);return}spend(DEF.pole.cost);addCell(i,'lpole',true);powerDirty=true;save();return}
+    if(!c||!POLEABLE[c.t]){if(!painting)setHint(c&&c.t==='lpole'?'Tu już stoi słup.':'Słup stawia się na ulicy, rondzie albo na trawie, nie na autostradzie, moście ani budynku.',true,true);return}
     if(c.pole){if(!painting)setHint('Ta ulica ma już słup.',true,true);return}
     if(money<DEF.pole.cost){setHint(`Brakuje ${fmt(DEF.pole.cost-money)} T¢ na słup.`,true,true);return}
     spend(DEF.pole.cost);c.pole=true;refreshAround(i);powerDirty=true;save();return}
@@ -1839,6 +1856,7 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
     const jn='';
     s={road2:'<b>Dwujezdniowa</b> · 2 pasy w każdą stronę, 1,4× szybciej'+jn,road3:'<b>Trzyjezdniowa</b> · 3 pasy w każdą stronę, 1,8× szybciej'+jn,roundabout:'<b>Rondo</b> · płynny przejazd, 1,2× szybciej',
       highway:'<b>Autostrada</b> · auta jadą tu 2,2× szybciej'+jn,bridge:`<b>Most</b> · jak ${DEF[c.bt||'road'].name.toLowerCase()}: ${laneN(i)} ${laneN(i)>1?'pasy':'pas'} w każdą stronę`,
+      lpole:`<b>Słup</b> · połączenia: ${links(i).length} · zasila budynki obok`,
       hvpole:`<b>Słup WN</b> · połączenia w zasięgu 7×7: ${links(i).length}`,road:(c.pole?'<b>Jednojezdniowa ze słupem</b> · przewodzi prąd':'<b>Jednojezdniowa</b> · dodaj słup, by poprowadzić prąd')+jn,
       wind:'<b>Wiatrak</b> · '+(c.net>=0?`${WIND_MW} MW do sieci`:'<b>niepodłączony</b>: postaw obok transformator')+` · ${UPKEEP.wind} T¢/godz.`,
       transformer:`<b>Transformator</b> · łączy elektrownie obok (też po skosie) ze słupami · ${UPKEEP.transformer} T¢/godz.`,
@@ -1981,6 +1999,8 @@ highway:'<path d="M7 2.5L3 17.5M13 2.5l4 15"/><path d="M7.4 11l2.6-2.6 2.6 2.6M7
 bridge:'<path d="M2 8h16M3 8v5M17 8v5"/><path d="M5 13a5 5 0 0 1 10 0"/><path d="M2 16.5c1.5-1 2.5-1 4 0s2.5 1 4 0 2.5-1 4 0 2.5 1 4 0"/>',
 pole:'<path d="M10 3v14.5M5 5.5h10M7 8.5h6"/>',
 poleline:'<path d="M4.5 4v13.5M15.5 4v13.5M2 5.5h5M13 5.5h5"/><path d="M4.5 6c3.7 2.2 7.3 2.2 11 0"/>',
+poleDel:'<path d="M8 3v14.5M3.5 5.5h9M5.5 8.5h5"/><path d="M12.5 11.5l5 5M17.5 11.5l-5 5"/>',
+lpole:'<path d="M10 3v14.5M5 5.5h10M7 8.5h6"/>',
 house:'<path d="M3 9.5L10 3.5l7 6"/><path d="M5 8.5v9h10v-9"/><path d="M8.5 17.5v-4h3v4"/>',
 tenement:'<path d="M5 17.5v-14h10v14M3.5 17.5h13"/><path d="M7.5 6.5h1.2M11.3 6.5h1.2M7.5 9.5h1.2M11.3 9.5h1.2M7.5 12.5h1.2M11.3 12.5h1.2"/><path d="M9 17.5V15h2v2.5"/>',
 block:'<path d="M2.5 17.5V6h15v11.5M2 17.5h16"/><path d="M5 9h10M5 12h10M5 15h10"/>',
@@ -2220,7 +2240,7 @@ let last={},hudT=0;const segs={};
 for(const k of['mat',...Object.keys(goods)]){const sp=document.createElement('span');sp.style.background=GOODS[k].col;sp.title=GOODS[k].name;document.getElementById('matBar').appendChild(sp);segs[k]=sp}
 function hud(){const mc=moneyCap(),tc=matCap();const v={m:Math.round(money),mc,t:Math.round(stored()),tc};
   if(v.m!==last.m||v.mc!==last.mc){U.money.textContent=cpt(v.m);U.moneyCap.textContent=cpt(mc);U.moneyBar.style.width=(mc?v.m/mc*100:0)+'%';U.rm.classList.toggle('full',v.m>=mc);U.rm.classList.toggle('short',v.m<0);
-    for(const k in DEF)toolBtns[k].classList.toggle('poor',money<DEF[k].cost)}
+    for(const k in DEF)if(toolBtns[k])toolBtns[k].classList.toggle('poor',money<DEF[k].cost)}
   if(v.t!==last.t||v.tc!==last.tc){U.mat.textContent=cpt(v.t);U.matCap.textContent=cpt(tc);U.rt.classList.toggle('full',tc>0&&v.t>=tc);
     for(const k in segs)segs[k].style.width=(tc?have(k)/tc*100:0)+'%'}
   hudT+=1;if(hudT%20===1){let ws=0,wc=0,full=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c)continue;if(isFac(c)){ws+=c.gstock;wc+=facCap(c)}if(TRASH[c.t]&&c.trash>=TRASH[c.t].cap)full++}
