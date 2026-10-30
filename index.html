@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='1.4.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='1.4.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -50,6 +50,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
 .menuBg{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:rgba(10,14,15,.45);padding:16px}
 .menu{width:min(320px,100%);padding:18px 18px 16px;display:grid;gap:10px;background:var(--panel2)}
 .menu h2{margin:0;font:600 22px var(--font-d)}
+.diffs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.diffs .btn{display:grid;gap:1px;padding:7px 4px;text-align:center;height:auto}.diffs small{font-size:11.5px;color:var(--muted)}.diffs .btn[aria-checked="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.diffs .btn[aria-checked="true"] small{color:#fff}
 .mapb{display:grid;gap:2px;text-align:left;padding:9px 12px;height:auto}.mapb small{color:var(--muted);font-size:12px;font-weight:500;line-height:1.3}
 #over .menu{border-color:var(--warn)}#overT{color:var(--warn)}
 .menu .sub{margin:-6px 0 4px;color:var(--muted);font-size:13px}
@@ -279,7 +280,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <button class="btn panel mbtn" id="oExit">Wyjdź z gry</button>
 </section></div>
 <div class="menuBg" id="maps" hidden><section class="menu panel" role="dialog" aria-modal="true" aria-labelledby="mapsT">
-  <h2 id="mapsT">Nowe miasto</h2><p class="sub">Wybierz ukształtowanie terenu. Obecne miasto zostanie usunięte.</p>
+  <h2 id="mapsT">Nowe miasto</h2><p class="sub">Wybierz trudność i ukształtowanie terenu. Obecne miasto zostanie usunięte.</p>
+  <div class="diffs" role="radiogroup" aria-label="Trudność startu"><button class="btn panel" data-diff="easy" role="radio"><b>Łatwy</b><small>8 000 T¢</small></button><button class="btn panel" data-diff="std" role="radio"><b>Standard</b><small>6 000 T¢</small></button><button class="btn panel" data-diff="hard" role="radio"><b>Ciężki</b><small>3 800 T¢</small></button></div>
   <button class="btn panel mbtn mapb" data-map="standard"><b>Standard</b><small>1–3 rzeki, najwyżej 2 pola szerokości</small></button>
   <button class="btn panel mbtn mapb" data-map="big"><b>Dwie duże rzeki</b><small>Szerokie rzeki przecinające mapę, mało miejsca na start</small></button>
   <button class="btn panel mbtn mapb" data-map="islands"><b>Wyspy</b><small>Duża rzeka rozlewa się w odnogi wokół wysp, jak Odra we Wrocławiu</small></button>
@@ -1060,7 +1062,8 @@ const bfsCache=new Map();
 const factories=new Set();
 let cars=[];
 const popping=[];
-const moneyCap=()=>BASE_MONEY+(pw.bankCap||0);
+const DIFF={easy:{name:'Łatwy',m:2},std:{name:'Standard',m:1.5},hard:{name:'Ciężki',m:0.95},old:{name:'Standard',m:1}};let diff='std',diffPick='std';
+const baseCash=()=>Math.round(BASE_MONEY*DIFF[diff].m);const moneyCap=()=>baseCash()+(pw.bankCap||0);
 const matCap=()=>pw.matCap;
 function addMoney(x){const cap=moneyCap();if(money>=cap)return 0;const n=Math.min(cap,money+x)-money;money+=n;return n}
 function addMat(x){const n=Math.max(0,Math.min(x,matCap()-stored()));matl+=n;return n}
@@ -2123,7 +2126,7 @@ function barChart(f,unit){
     if(d.h%6===0)g+=`<text x="${x+cw/2}" y="${H-4}" text-anchor="middle">${pad2(d.h%24)}:00</text>`});
   if(!hist.length)g+=`<text x="${(W+L)/2}" y="${T+14}" text-anchor="middle">Pierwsza pełna godzina gry za ${60-Math.floor(cur.secs)} s</text>`;
   return g+'</svg>'}
-function newCity(type){saveBlocked=false;gameOver=false;toggleStats(false);closeHouse();clearCity();for(const k of [...deco])clearDeco(k);preset(type);seedDeco();save();setHint('Nowe miasto gotowe.',false,true)}
+function newCity(type,d){saveBlocked=false;gameOver=false;toggleStats(false);closeHouse();clearCity();for(const k of [...deco])clearDeco(k);preset(type,d);seedDeco();save();setHint('Nowe miasto gotowe.',false,true)}
 /* ---------- options: pause, reset, gamma, exit ---------- */
 let paused=false;const menuEl=document.getElementById('menu'),mReset=document.getElementById('mReset'),mGamma=document.getElementById('mGamma');let mArm=null;
 function setGamma(g){g=Math.max(0.6,Math.min(1.6,+g||1));const e=String(1/g);for(const id of['gR','gG','gB'])document.getElementById(id).setAttribute('exponent',e);
@@ -2142,7 +2145,9 @@ mReset.addEventListener('click',()=>{if(!mReset.classList.contains('armed')){mRe
 /* ---------- bankruptcy below −1000 T¢, and choosing the map for a new city ---------- */
 let gameOver=false;const overEl=document.getElementById('over'),mapsEl=document.getElementById('maps');
 function openMaps(cancel){paused=true;mapsEl.hidden=false;document.getElementById('mapsNo').hidden=!cancel;mapsEl.querySelector('.mapb').focus()}
-for(const b of mapsEl.querySelectorAll('.mapb'))b.addEventListener('click',()=>{mapsEl.hidden=true;overEl.hidden=true;newCity(b.dataset.map);paused=false;prev=performance.now()});
+const diffBtns=[...mapsEl.querySelectorAll('[data-diff]')];function showDiff(){for(const b of diffBtns)b.setAttribute('aria-checked',String(b.dataset.diff===diffPick))}showDiff();
+for(const b of diffBtns)b.addEventListener('click',()=>{diffPick=b.dataset.diff;showDiff()});
+for(const b of mapsEl.querySelectorAll('.mapb'))b.addEventListener('click',()=>{mapsEl.hidden=true;overEl.hidden=true;newCity(b.dataset.map,diffPick);paused=false;prev=performance.now()});
 document.getElementById('mapsNo').addEventListener('click',()=>{mapsEl.hidden=true;if(gameOver){overEl.hidden=false;return}openMenu()});
 function checkBankrupt(){if(gameOver||money>=-1000)return;gameOver=true;paused=true;closeHouse();menuEl.hidden=true;overEl.hidden=false;
   document.getElementById('overSub').textContent=`Dług miasta przekroczył 1 000 T¢ (stan konta ${fmt(money)} T¢). Bank przejął kasę miejską i gra jest przegrana.`;save()}
@@ -2237,7 +2242,7 @@ let saveBlocked=false;
 function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,off:c.off?1:0,rot:c.rot,lines:c.lines,owned:c.owned}]}
 function save(){if(saveBlocked)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
   const old=localStorage.getItem(KEY);if(old)localStorage.setItem(KEY+'-prev',old);
-  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType}))}catch(e){}}
+  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff}))}catch(e){}}
 function load(){if(loadKey(KEY))return true;if(loadKey(KEY+'-prev')){setHint('Ostatni zapis był uszkodzony, wczytano poprzedni.',true,true);return true}
   let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
   if(raw){saveBlocked=true;try{localStorage.setItem(KEY+'-broken',raw)}catch(e){}setHint('Nie udało się wczytać zapisu. Kopia jest bezpieczna i gra jej nie nadpisze. Tylko „Zresetuj miasto” zaczyna od nowa.',true,true);hintTimer=12}
@@ -2257,13 +2262,13 @@ function loadKey(K){try{let s=JSON.parse(localStorage.getItem(K)||'null');
   applyWater();
   for(const[i,t,p]of s.cells)if(DRIVE[t]){try{addCell(i,t,false);if(p)grid[i].pole=true}catch(e){console.warn('pole zapisu pominięte',i,t,e)}}
   for(const row of s.cells)if(!DRIVE[row[1]])try{placeRow(row)}catch(e){console.warn('budynek z zapisu pominięty',row[0],row[1],e)}
-  for(let i=0;i<N*N;i++)rebuildRoad(i);money=s.money||0;mapType=MAPS[s.map]?s.map:'standard';matl=s.matl||0;if(s.goods)for(const k in goods)goods[k]=s.goods[k]||0;
+  for(let i=0;i<N*N;i++)rebuildRoad(i);money=s.money||0;mapType=MAPS[s.map]?s.map:'standard';diff=DIFF[s.diff]?s.diff:'old';matl=s.matl||0;if(s.goods)for(const k in goods)goods[k]=s.goods[k]||0;
   pipe.fill(0);if(Array.isArray(s.pipes))for(const i of s.pipes)pipe[i]=1;
   if(Array.isArray(s.edges))for(const[i,o]of s.edges)if(grid[i]&&DRIVE[grid[i].t]){grid[i].edge=true;if(o)grid[i].edgeOut=true;rebuildRoad(i)}
   if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(Array.isArray(s.hist))hist=s.hist;return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
 function clearCity(){for(const c of cars)scene.remove(c.mesh);cars=[];resMap.clear();for(let i=0;i<N*N;i++)if(grid[i])removeCell(i);
   for(const f of floats)f.el.remove();floats=[]}
-function preset(type){if(type&&MAPS[type])mapType=type;pipe.fill(0);money=BASE_MONEY;matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);applyWater();makeEntries()}
+function preset(type,d){if(type&&MAPS[type])mapType=type;if(d&&DIFF[d])diff=d;pipe.fill(0);money=baseCash();matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);applyWater();makeEntries()}
 if(!load())preset();else makeEntries();
 seedDeco();
 selectTool(counts.road?'view':'road');updateCamera();
