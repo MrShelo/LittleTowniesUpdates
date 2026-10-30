@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='1.8.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='1.9.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2396,7 +2396,9 @@ document.getElementById('oNew').addEventListener('click',()=>{overEl.hidden=true
 document.getElementById('oExit').addEventListener('click',()=>{save();if(CapApp&&CapApp.exitApp){CapApp.exitApp();return}try{window.close()}catch(e){}
   document.getElementById('overT').textContent='Gra zapisana';document.getElementById('overSub').textContent='Możesz zamknąć to okno. Po powrocie wybierzesz nowe miasto.'});
 /* ---------- radio: each track is its own looping station, joined "live" at the current time ---------- */
-const STATIONS=[{name:'Nature FM',src:'music/nature.mp3'},{name:'Luxury FM',src:'music/luxury.mp3'},{name:'Lofi Radio',src:'music/lofi.mp3'}];
+const STATIONS=[{name:'Nature FM',tracks:['nature','nature2','nature3']},{name:'Luxury FM',tracks:['luxury','luxury2','luxury3']},{name:'Lofi Radio',tracks:['lofi','lofi2','lofi3']}];
+/* each track is tried locally first, then from the update repository (a build that got the new game via an update may not have the new files yet) */
+const MUSIC_SRC=f=>[`music/${f}.mp3`,`https://media.githubusercontent.com/media/MrShelo/LittleTowniesUpdates/main/music/${f}.mp3`,`https://raw.githubusercontent.com/MrShelo/LittleTowniesUpdates/main/music/${f}.mp3`];
 const radio={el:null,st:0,on:false,vol:0.6};
 try{const r=JSON.parse(localStorage.getItem('lt-radio')||'null');if(r){radio.st=Math.min(STATIONS.length-1,Math.max(0,r.st|0));radio.vol=r.vol??0.6;radio.want=!!r.on}}catch(e){}
 const radioSave=()=>{try{localStorage.setItem('lt-radio',JSON.stringify({st:radio.st,vol:radio.vol,on:radio.on}))}catch(e){}};
@@ -2405,10 +2407,17 @@ function radioUI(){const rp=document.getElementById('rPlay');rp.innerHTML=radio.
   document.getElementById('mVol').value=Math.round(radio.vol*100);document.getElementById('mVolV').textContent=Math.round(radio.vol*100)+'%'}
 function staticBurst(){try{const A=radio.ac||(radio.ac=new (window.AudioContext||window.webkitAudioContext)());const n=A.sampleRate*0.35,b=A.createBuffer(1,n,A.sampleRate),d=b.getChannelData(0);
   for(let k=0;k<n;k++)d[k]=(Math.random()*2-1)*(1-k/n);const src=A.createBufferSource(),g=A.createGain();g.gain.value=0.12*radio.vol;src.buffer=b;src.connect(g);g.connect(A.destination);src.start()}catch(e){}}
-function tune(){const S=STATIONS[radio.st];if(!radio.el){radio.el=new Audio();radio.el.loop=true;radio.el.preload='none'}
-  const a=radio.el;a.volume=radio.vol;a.src=S.src;
-  a.onloadedmetadata=()=>{if(isFinite(a.duration)&&a.duration>0)try{a.currentTime=(Date.now()/1000)%a.duration}catch(e){}};
-  if(radio.on){const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{radio.on=false;radioUI()})}}
+/* a station plays its 3 tracks in a shuffled loop; tuning in joins a random track mid-way, like live radio */
+function shuffleOrder(n,avoid){const o=[...Array(n).keys()];for(let k=n-1;k>0;k--){const j=(Math.random()*(k+1))|0;[o[k],o[j]]=[o[j],o[k]]}if(n>1&&o[0]===avoid)o.push(o.shift());return o}
+function playTrack(live){const S=STATIONS[radio.st],a=radio.el,f=S.tracks[radio.order[radio.pos]],urls=MUSIC_SRC(f);radio.try=radio.try||0;
+  a.src=urls[Math.min(radio.try,urls.length-1)];a.volume=radio.vol;
+  a.onloadedmetadata=()=>{if(live&&isFinite(a.duration)&&a.duration>0)try{a.currentTime=Math.random()*a.duration*0.8}catch(e){}};
+  if(radio.on){const pr=a.play();if(pr&&pr.catch)pr.catch(e=>{if(e&&e.name==='NotAllowedError'){radio.on=false;radioUI()}})}}
+function nextTrack(){const n=STATIONS[radio.st].tracks.length;radio.try=0;radio.pos++;if(radio.pos>=n){const last=radio.order[n-1];radio.order=shuffleOrder(n,last);radio.pos=0}playTrack(false)}
+function tune(){if(!radio.el){radio.el=new Audio();radio.el.preload='none';radio.el.addEventListener('ended',nextTrack);radio.el.addEventListener('playing',()=>{radio.fails=0});
+    radio.el.addEventListener('error',()=>{if(!radio.on)return;const urls=MUSIC_SRC(STATIONS[radio.st].tracks[radio.order[radio.pos]]);
+      if(radio.try<urls.length-1){radio.try++;playTrack(true);return}radio.fails=(radio.fails||0)+1;if(radio.fails<STATIONS[radio.st].tracks.length)nextTrack()})}
+  const n=STATIONS[radio.st].tracks.length;radio.order=shuffleOrder(n,-1);radio.pos=0;radio.try=0;radio.fails=0;playTrack(true)}
 function radioToggle(){radio.on=!radio.on;if(radio.on){staticBurst();tune()}else if(radio.el)radio.el.pause();radioUI();radioSave()}
 function radioNext(){radio.st=((radio.st|0)+1)%STATIONS.length;if(radio.el){try{radio.el.pause()}catch(e){}}if(radio.on){staticBurst();tune()}radioUI();radioSave()}
 function setVol(v){radio.vol=Math.max(0,Math.min(1,v));if(radio.el)radio.el.volume=radio.vol;radioUI();radioSave()}
