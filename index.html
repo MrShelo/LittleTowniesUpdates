@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='1.8.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='1.8.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -68,7 +68,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
 .res{padding:6px 8px 7px;min-width:0;width:178px;flex:none;box-sizing:border-box;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:5px 7px}
 .res .ic{width:18px;height:18px;flex:none}
 .res .ic.tc{display:grid;place-items:center;width:auto;min-width:18px;font:700 14px/1 var(--font-d);letter-spacing:-.02em}
-#r-money .ic{color:var(--money)} #r-mat .ic{color:var(--mat)} #r-pow .ic{color:var(--pow)} #r-waste .ic{color:#8a7458} #r-happy .ic{color:#5aa84a} #ovlBtn.on{background:var(--accent);border-color:var(--accent);color:#fff} #r-water .ic{color:#3a8fd8} #r-pop .ic{color:#7a6ad0} #r-pop .bar i{background:#7a6ad0} #r-water .bar i{background:#3a8fd8}
+#r-money .ic{color:var(--money)} #r-mat .ic{color:var(--mat)} #r-pow .ic{color:var(--pow)} #r-waste .ic{color:#8a7458} #r-happy .ic{color:#5aa84a} #ovlBtn.on{box-shadow:inset 0 0 0 2px var(--accent);color:var(--accent)} #r-water .ic{color:#3a8fd8} #r-pop .ic{color:#7a6ad0} #r-pop .bar i{background:#7a6ad0} #r-water .bar i{background:#3a8fd8}
 .lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .val{font-family:var(--font-d);font-size:16.5px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.15;background:var(--chip);border-radius:7px;padding:2px 8px;white-space:nowrap;justify-self:start}
 .val .cap{font-size:12px;color:var(--muted);font-weight:500;margin-left:2px}
@@ -120,7 +120,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .speed{display:flex;gap:1px;padding:2px}.speed .btn{background:none;border:0;min-height:34px;width:34px;font-size:11px;letter-spacing:-2px}
 .speed .btn[aria-pressed="true"]{background:var(--accent);color:#fff;border-radius:8px}
 .xp{display:grid;grid-template-columns:1fr auto;gap:3px 8px;font-size:12.5px;padding:4px 2px}.xp .bar{grid-column:1/-1}.xp small{grid-column:1/-1;color:var(--muted)}
-.ovl{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:118px;z-index:6;display:grid;gap:5px;padding:10px;width:min(230px,calc(100% - 32px))}.ovl b{font-family:var(--font-d)}.ovl .chipb{justify-content:flex-start}.ovl small{color:var(--muted);font-size:11.5px;line-height:1.35}
+.rail{position:absolute;z-index:6;left:max(12px,env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);display:grid;gap:8px}.rail .btn{width:46px;height:46px;min-height:46px}.rail .btn[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.ovl{position:absolute;left:calc(max(12px,env(safe-area-inset-left,0px)) + 56px);top:50%;transform:translateY(-50%);z-index:6;display:grid;gap:5px;padding:10px;width:min(230px,calc(100% - 32px))}.ovl b{font-family:var(--font-d)}.ovl .chipb{justify-content:flex-start}.ovl small{color:var(--muted);font-size:11.5px;line-height:1.35}
 .tip{position:fixed;z-index:40;max-width:min(300px,calc(100vw - 24px));padding:9px 12px;font-size:13.5px;line-height:1.5;pointer-events:none;background:var(--panel2);box-shadow:0 6px 18px rgba(0,0,0,.18)}
 .tip b{font-family:var(--font-d)}
 .hazard{position:absolute;inset:0;z-index:4;pointer-events:none;border:9px solid transparent;border-image:repeating-linear-gradient(45deg,#f2c641 0 14px,#1d1d1d 14px 28px) 9}
@@ -233,6 +234,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <feFuncR id="gR" type="gamma" amplitude="1" exponent="1" offset="0"/><feFuncG id="gG" type="gamma" amplitude="1" exponent="1" offset="0"/><feFuncB id="gB" type="gamma" amplitude="1" exponent="1" offset="0"/></feComponentTransfer></filter></svg>
 <main class="game" id="game">
 <div class="hazard" id="hazard" hidden aria-hidden="true"></div>
+<nav class="rail" aria-label="Widoki"><button class="btn icon panel" id="ovlBtn" aria-expanded="false" aria-label="Nakładki" title="Nakładki: zasięgi i strefy"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.8l7.5 4-7.5 4-7.5-4z"/><path d="M2.5 10.2l7.5 4 7.5-4"/><path d="M2.5 13.6l7.5 4 7.5-4"/></svg></button><button class="btn icon panel" id="statsBtn" aria-expanded="false" aria-label="Gospodarka" title="Gospodarka"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="10" width="15" height="7.5" rx="1.2"/><path d="M4.5 10V5.5h8V10"/><path d="M6.5 7.6h4"/><path d="M14.5 10V3.5h2.5V10"/><path d="M6 13.6h1.5M9.3 13.6h1.5M12.6 13.6h1.5"/></svg></button></nav>
 <div class="ovl panel" id="ovl" hidden role="group" aria-label="Nakładki"><b>Nakładki</b>
     <button class="chipb" data-ovl="police"><i style="background:#2f6fe0"></i>Zasięg policji</button><button class="chipb" data-ovl="pol"><i style="background:#d9b02a"></i>Zanieczyszczenie</button>
     <button class="chipb" data-ovl="noise"><i style="background:#9a5bd6"></i>Hałas</button><button class="chipb" data-ovl="park"><i style="background:#3cae4f"></i>Zadowolenie z parków</button>
@@ -254,7 +256,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div class="res panel" id="r-water" title="Woda (m³/godz.): zużycie / podaż; niebieski pasek = czysta, brązowy = brudna"><svg class="ic" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.8c2.8 3.6 4.8 6.4 4.8 8.8a4.8 4.8 0 0 1-9.6 0c0-2.4 2-5.2 4.8-8.8z"/></svg>
     <span class="val"><span id="wat">0</span><span class="cap">/<span id="watCap">0</span></span></span>
     <div class="bar seg"><span id="watBar" style="background:#3a8fd8"></span><span id="watBarD" style="background:#8a7a4a"></span></div>
-    <span class="val2"><svg viewBox="0 0 20 20" width="13" height="13" aria-hidden="true" fill="none" stroke="#8a7a4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 5h8.5a3.5 3.5 0 0 1 3.5 3.5v2"/><path d="M14.5 13.2c1.1 1.4 1.7 2.3 1.7 3.1a1.7 1.7 0 0 1-3.4 0c0-.8.6-1.7 1.7-3.1z" fill="#8a7a4a"/></svg>ścieki <b id="sew">0</b>/<span id="sewCap">0</span></span><div class="bar"><i id="sewBar" style="background:#8a7a4a"></i></div></div>
+    <span class="val2"><svg viewBox="0 0 20 20" width="13" height="13" aria-hidden="true" fill="none" stroke="#8a7a4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 5h8.5a3.5 3.5 0 0 1 3.5 3.5v2"/><path d="M14.5 13.2c1.1 1.4 1.7 2.3 1.7 3.1a1.7 1.7 0 0 1-3.4 0c0-.8.6-1.7 1.7-3.1z" fill="#8a7a4a"/></svg><b id="sew">0</b>/<span id="sewCap">0</span></span><div class="bar"><i id="sewBar" style="background:#8a7a4a"></i></div></div>
   <div class="res panel" id="r-pop" title="Mieszkańcy miasta · rozbudowa domów dodaje mieszkańców"><svg class="ic" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="7" r="2.6"/><path d="M2.8 16.5c.5-2.8 2.4-4.3 4.7-4.3s4.2 1.5 4.7 4.3"/><circle cx="13.8" cy="7.8" r="2.1"/><path d="M13.2 12.3c2 .1 3.6 1.4 4 4.2"/></svg>
     <span class="val"><span id="pop">0</span><span class="cap"> mieszk.</span></span>
     <div class="bar"><i id="popBar"></i></div></div>
@@ -265,10 +267,6 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <div class="clock panel"><b id="clock">Dz. 1 · 06:00</b><small id="clockSub">Dzień · 1 min = 1 godz.</small></div>
     <div class="radio panel" id="radio"><button class="btn icon" id="rPlay" aria-label="Włącz radio" title="Radio"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><path d="M6 4.5l10 5.5-10 5.5z"/></svg></button><button class="btn" id="rSt" title="Zmień stację"><small>Radio</small><b id="rName">Nature FM</b></button><button class="btn icon" id="rNext" aria-label="Następna stacja" title="Następna stacja"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><path d="M3.5 5l7 5-7 5z"/><path d="M10 5l7 5-7 5z"/><rect x="16" y="5" width="1.8" height="10" rx=".6"/></svg></button></div>
     <div class="speed panel" role="group" aria-label="Tempo gry"><button class="btn icon" data-sp="0" aria-label="Pauza" title="Pauza (spacja)">❚❚</button><button class="btn icon" data-sp="1" aria-label="Tempo ×1" title="Tempo ×1">▶</button><button class="btn icon" data-sp="2" aria-label="Tempo ×2" title="Tempo ×2">▶▶</button></div>
-    <button class="btn panel" id="ovlBtn" aria-expanded="false" title="Nakładki: zasięgi i strefy">Nakładki</button>
-    <button class="btn panel" id="statsBtn" aria-expanded="false">Gospodarka</button>
-    <button class="btn icon panel" id="rotL" aria-label="Obróć w lewo" title="Obróć w lewo">↺</button>
-    <button class="btn icon panel" id="rotR" aria-label="Obróć w prawo" title="Obróć w prawo">↻</button>
     <button class="btn icon panel" id="optBtn" aria-label="Opcje i pauza" title="Opcje (Esc)"><svg viewBox="0 0 20 20" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/><circle cx="10" cy="10" r="5.6"/></svg></button>
   </div>
 </header>
@@ -2290,8 +2288,6 @@ function showCat(k){curCat=k;catBtns.forEach((b,j)=>b.setAttribute('aria-selecte
 function selectTool(t){rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel');pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=false;for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
   const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);setHint(toolHint());hl.visible=false}
 showCat(0);
-document.getElementById('rotL').addEventListener('click',()=>{cam.theta+=Math.PI/4;updateCamera()});
-document.getElementById('rotR').addEventListener('click',()=>{cam.theta-=Math.PI/4;updateCamera()});
 const statsEl=document.getElementById('stats'),statsBtn=document.getElementById('statsBtn');
 function toggleStats(open){statsEl.hidden=!open;statsBtn.setAttribute('aria-expanded',String(open));if(open)renderStats()}
 statsBtn.addEventListener('click',()=>toggleStats(statsEl.hidden));
@@ -2465,7 +2461,7 @@ function drawOvl(){if(ovlMode==='none'){ovlMesh.count=0;return}let n=0;const col
 function setOvl(m){ovlMode=m;for(const b of document.querySelectorAll('[data-ovl]'))b.setAttribute('aria-pressed',String(b.dataset.ovl===m));document.getElementById('ovlNote').textContent=m==='none'?'':OVL[m].note;
   document.getElementById('ovlBtn').classList.toggle('on',m!=='none');drawOvl()}
 for(const b of document.querySelectorAll('[data-ovl]'))b.addEventListener('click',()=>setOvl(b.dataset.ovl));
-document.getElementById('ovlBtn').addEventListener('click',()=>{const o=document.getElementById('ovl');o.hidden=!o.hidden;try{const br=document.getElementById('ovlBtn').getBoundingClientRect(),gr=document.getElementById('game').getBoundingClientRect();o.style.top=Math.round(br.bottom-gr.top+8)+'px'}catch(e){}document.getElementById('ovlBtn').setAttribute('aria-expanded',String(!o.hidden))});
+document.getElementById('ovlBtn').addEventListener('click',()=>{const o=document.getElementById('ovl');o.hidden=!o.hidden;document.getElementById('ovlBtn').setAttribute('aria-expanded',String(!o.hidden))});
 function ovlTick(dt){if(ovlMode==='none')return;ovlT-=dt;if(ovlT<=0){ovlT=0.5;drawOvl()}}
 const saveNow=()=>{try{save()}catch(e){}};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow()});
