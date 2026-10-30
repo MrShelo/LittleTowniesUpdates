@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='1.3.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='1.3.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1112,6 +1112,15 @@ function rebuildBridges(){bridgeTypes();for(const o of[...bridgeDeco.children]){
   bridgeDirty=false}
 
 /* ---------- road visuals ---------- */
+/* sidewalks: a raised strip on every side of a street with no road beyond it, and a corner block where two connected sides meet */
+const WALK_W=0.08,WALK_H=0.022;const GW={x:new THREE.BoxGeometry(1,WALK_H,WALK_W).translate(0,0.04+WALK_H/2,0),z:new THREE.BoxGeometry(WALK_W,WALK_H,1).translate(0,0.04+WALK_H/2,0),c:new THREE.BoxGeometry(WALK_W,WALK_H,WALK_W).translate(0,0.04+WALK_H/2,0),
+  ex:new THREE.BoxGeometry(1,0.006,0.012).translate(0,0.04+WALK_H+0.003,0),ez:new THREE.BoxGeometry(0.012,0.006,1).translate(0,0.04+WALK_H+0.003,0)};for(const k in GW)GW[k].userData.keep=true;
+const matWalk=M('#cdc9bf'),matCurb=M('#ecebe6');
+function addSidewalks(g,x,z){const P=0.5-WALK_W/2,open=(dx,dz)=>{const nx=x+dx,nz=z+dz;return nx<0||nz<0||nx>=N||nz>=N?false:!isDrive(idx(nx,nz))};
+  for(const[dx,dz]of DIRS){if(!open(dx,dz))continue;const m=new THREE.Mesh(dx?GW.z:GW.x,matWalk);m.position.set(dx*P,0,dz*P);m.receiveShadow=true;g.add(m);
+    const e=new THREE.Mesh(dx?GW.ez:GW.ex,matCurb);e.position.set(dx*(0.5-WALK_W),0,dz*(0.5-WALK_W));g.add(e)}
+  for(const[sx,sz]of[[1,1],[1,-1],[-1,1],[-1,-1]]){if(open(sx,0)||open(0,sz))continue;const nx=x+sx,nz=z+sz;if(nx>=0&&nz>=0&&nx<N&&nz<N&&isDrive(idx(nx,nz)))continue;
+    const m=new THREE.Mesh(GW.c,matWalk);m.position.set(sx*P,0,sz*P);m.receiveShadow=true;g.add(m)}}
 function rebuildRoad(i){const c=grid[i];if(!c||!DRIVE[c.t])return;const g=c.group;
   while(g.children.length>1)g.remove(g.children[g.children.length-1]);
   const et=effType(i),x=i%N,z=(i/N)|0,hw=et==='highway',br=c.t==='bridge',y=hw?0.051:0.046;let n=0,ax=false,az=false;
@@ -1127,6 +1136,7 @@ function rebuildRoad(i){const c=grid[i];if(!c||!DRIVE[c.t])return;const g=c.grou
     else if(et==='road'){const d=new THREE.Mesh(dx?G.dashX:G.dashZ,mat.dash);d.position.set(dx*0.29,y,dz*0.29);g.add(d)}
     else{for(const o of[-0.022,0.022]){const m=new THREE.Mesh(dx?G.c2:G.c2z,mat.dash);m.position.set(dx*0.25+(dx?0:o),y,dz*0.25+(dz?0:o));g.add(m)}
       for(const o of(et==='road2'?[-0.22,0.22]:[-0.155,0.155,-0.29,0.29])){const m=new THREE.Mesh(dx?G.laneX:G.laneZ,mat.dash);m.position.set(dx*0.3+(dx?0:o),y,dz*0.3+(dz?0:o));g.add(m)}}}
+  if(STREET[c.t]||c.t==='roundabout')addSidewalks(g,x,z);
   if(c.t==='roundabout'){g.add(new THREE.Mesh(G.curb,mat.white));const is=new THREE.Mesh(G.island,mat.parkG);is.receiveShadow=true;g.add(is);
     const r=new THREE.Mesh(G.rring,mat.dash);r.position.y=0.047;g.add(r);parkTree(g,0,0,0.3);g.children[g.children.length-1].position.y=0.12}
   else if(n===0){const d=new THREE.Mesh(G.dot,hw?mat.yellow:mat.dash);d.position.y=y;g.add(d)}
