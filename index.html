@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='1.7.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='1.8.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -68,7 +68,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
 .res{padding:6px 8px 7px;min-width:0;width:178px;flex:none;box-sizing:border-box;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:5px 7px}
 .res .ic{width:18px;height:18px;flex:none}
 .res .ic.tc{display:grid;place-items:center;width:auto;min-width:18px;font:700 14px/1 var(--font-d);letter-spacing:-.02em}
-#r-money .ic{color:var(--money)} #r-mat .ic{color:var(--mat)} #r-pow .ic{color:var(--pow)} #r-waste .ic{color:#8a7458} #r-happy .ic{color:#5aa84a} #r-water .ic{color:#3a8fd8} #r-pop .ic{color:#7a6ad0} #r-pop .bar i{background:#7a6ad0} #r-water .bar i{background:#3a8fd8}
+#r-money .ic{color:var(--money)} #r-mat .ic{color:var(--mat)} #r-pow .ic{color:var(--pow)} #r-waste .ic{color:#8a7458} #r-happy .ic{color:#5aa84a} #ovlBtn.on{background:var(--accent);border-color:var(--accent);color:#fff} #r-water .ic{color:#3a8fd8} #r-pop .ic{color:#7a6ad0} #r-pop .bar i{background:#7a6ad0} #r-water .bar i{background:#3a8fd8}
 .lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .val{font-family:var(--font-d);font-size:16.5px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.15;background:var(--chip);border-radius:7px;padding:2px 8px;white-space:nowrap;justify-self:start}
 .val .cap{font-size:12px;color:var(--muted);font-weight:500;margin-left:2px}
@@ -120,6 +120,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .speed{display:flex;gap:1px;padding:2px}.speed .btn{background:none;border:0;min-height:34px;width:34px;font-size:11px;letter-spacing:-2px}
 .speed .btn[aria-pressed="true"]{background:var(--accent);color:#fff;border-radius:8px}
 .xp{display:grid;grid-template-columns:1fr auto;gap:3px 8px;font-size:12.5px;padding:4px 2px}.xp .bar{grid-column:1/-1}.xp small{grid-column:1/-1;color:var(--muted)}
+.ovl{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:118px;z-index:6;display:grid;gap:5px;padding:10px;width:min(230px,calc(100% - 32px))}.ovl b{font-family:var(--font-d)}.ovl .chipb{justify-content:flex-start}.ovl small{color:var(--muted);font-size:11.5px;line-height:1.35}
 .tip{position:fixed;z-index:40;max-width:min(300px,calc(100vw - 24px));padding:9px 12px;font-size:13.5px;line-height:1.5;pointer-events:none;background:var(--panel2);box-shadow:0 6px 18px rgba(0,0,0,.18)}
 .tip b{font-family:var(--font-d)}
 .hazard{position:absolute;inset:0;z-index:4;pointer-events:none;border:9px solid transparent;border-image:repeating-linear-gradient(45deg,#f2c641 0 14px,#1d1d1d 14px 28px) 9}
@@ -232,6 +233,10 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <feFuncR id="gR" type="gamma" amplitude="1" exponent="1" offset="0"/><feFuncG id="gG" type="gamma" amplitude="1" exponent="1" offset="0"/><feFuncB id="gB" type="gamma" amplitude="1" exponent="1" offset="0"/></feComponentTransfer></filter></svg>
 <main class="game" id="game">
 <div class="hazard" id="hazard" hidden aria-hidden="true"></div>
+<div class="ovl panel" id="ovl" hidden role="group" aria-label="Nakładki"><b>Nakładki</b>
+    <button class="chipb" data-ovl="police"><i style="background:#2f6fe0"></i>Zasięg policji</button><button class="chipb" data-ovl="pol"><i style="background:#d9b02a"></i>Zanieczyszczenie</button>
+    <button class="chipb" data-ovl="noise"><i style="background:#9a5bd6"></i>Hałas</button><button class="chipb" data-ovl="park"><i style="background:#3cae4f"></i>Zadowolenie z parków</button>
+    <button class="chipb" data-ovl="ent"><i style="background:#e0569a"></i>Zadowolenie z rozrywki</button><button class="chipb" data-ovl="none">Wyłącz</button><small id="ovlNote"></small></div>
 <div id="app"></div>
 <header class="hud">
   <div class="res panel" id="r-money" title="Gotówka (T¢): stan / limit"><span class="ic tc" aria-hidden="true">T¢</span>
@@ -258,8 +263,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <div class="bar"><i id="happyBar"></i></div></div>
   <div class="side">
     <div class="clock panel"><b id="clock">Dz. 1 · 06:00</b><small id="clockSub">Dzień · 1 min = 1 godz.</small></div>
-    <div class="radio panel" id="radio"><button class="btn icon" id="rPlay" aria-label="Włącz radio" title="Radio">▶</button><button class="btn" id="rSt" title="Zmień stację"><small>Radio</small><b id="rName">Nature FM</b></button><button class="btn icon" id="rNext" aria-label="Następna stacja" title="Następna stacja">⏭</button></div>
+    <div class="radio panel" id="radio"><button class="btn icon" id="rPlay" aria-label="Włącz radio" title="Radio"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><path d="M6 4.5l10 5.5-10 5.5z"/></svg></button><button class="btn" id="rSt" title="Zmień stację"><small>Radio</small><b id="rName">Nature FM</b></button><button class="btn icon" id="rNext" aria-label="Następna stacja" title="Następna stacja"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><path d="M3.5 5l7 5-7 5z"/><path d="M10 5l7 5-7 5z"/><rect x="16" y="5" width="1.8" height="10" rx=".6"/></svg></button></div>
     <div class="speed panel" role="group" aria-label="Tempo gry"><button class="btn icon" data-sp="0" aria-label="Pauza" title="Pauza (spacja)">❚❚</button><button class="btn icon" data-sp="1" aria-label="Tempo ×1" title="Tempo ×1">▶</button><button class="btn icon" data-sp="2" aria-label="Tempo ×2" title="Tempo ×2">▶▶</button></div>
+    <button class="btn panel" id="ovlBtn" aria-expanded="false" title="Nakładki: zasięgi i strefy">Nakładki</button>
     <button class="btn panel" id="statsBtn" aria-expanded="false">Gospodarka</button>
     <button class="btn icon panel" id="rotL" aria-label="Obróć w lewo" title="Obróć w lewo">↺</button>
     <button class="btn icon panel" id="rotR" aria-label="Obróć w prawo" title="Obróć w prawo">↻</button>
@@ -267,6 +273,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   </div>
 </header>
 <footer class="dock">
+  
   <div class="insp panel" id="insp" hidden aria-live="polite"></div>
   <div class="place panel" id="place" hidden><span id="placeT"></span><button class="btn panel" id="pRot" title="Obróć (R)">↻ Obróć</button><button class="btn panel ok" id="pOk" title="Postaw (Enter)">✓ Postaw</button><button class="btn icon panel" id="pNo" aria-label="Anuluj" title="Anuluj">✕</button></div>
   <div class="hint panel" id="hint" aria-live="polite"></div>
@@ -371,8 +378,9 @@ const DEF={
   outlet:{name:'Wylot ścieków',cost:150,desc:'Zrzuca do rzeki do 25 m³/godz. ścieków (z drugą rurą 50). Nadmiar się cofa: domy w sieci tracą 1 zadowolenia. Postaw tuż przy wodzie. Brudzi rzekę z prądem.',sw:'#7a5a3a'},
   treatment:{name:'Oczyszczalnia',cost:1200,desc:'Prąd bierze ze słupa lub transformatora w promieniu 2 pól. Przerabia 30 m³/godz. ścieków: z każdych 10 m³ robi 3 m³ czystej wody z powrotem do sieci i 3 m³ brudnej do wylotu.',sw:'#5f9b8a'},
   bank:{name:'Bank',cost:500,desc:'Podnosi limit gotówki o 2 500 T¢.',sw:'#ddd3b8'},
-  policeS:{name:'Komisariat',cost:800,desc:'Zasięg 9×9. 2 radiowozy patrolują okolicę i jadą na interwencje. Ulepszenie „Drugi garaż”: +2 radiowozy do interwencji.',sw:'#2f5fa8',area:4},
-  policeB:{name:'Duży komisariat',cost:2500,size:4,desc:'Zajmuje 2×2 pola. Zasięg 13×13, 4 radiowozy patrolowe. Ulepszenie „Drugi garaż”: +2 radiowozy do interwencji.',sw:'#1f3f7a',area:6},
+  policeS:{name:'Komisariat',cost:800,desc:'Zasięg 9×9, cele na 10 osób. 2 radiowozy patrolują i jadą na interwencje. Ulepszenia: „Drugi garaż” (+2 radiowozy do interwencji), „Większy rewir” (+2 pola zasięgu w każdą stronę).',sw:'#2f5fa8',area:4},
+  policeB:{name:'Duży komisariat',cost:2500,size:4,desc:'Zajmuje 2×2 pola. Zasięg 13×13, cele na 25 osób, 4 radiowozy patrolowe. Ulepszenia: „Drugi garaż”, „Większy rewir”.',sw:'#1f3f7a',area:6},
+  prison:{name:'Więzienie',cost:4000,fw:3,fh:3,desc:'3×3 pola za drucianym płotem, 100 miejsc (ulepszenie: blok na +30). Radiowozy przywożą zatrzymanych z komisariatów. Każdy więzień kosztuje 5 T¢/godz. i wychodzi po 2–3 dniach.',sw:'#6b7480'},
   bakery:{name:'Piekarnia',cost:220,desc:'Sprzedaje pieczywo (ceny +25%). Sama piecze: 1 t zboża z magazynów daje 3 bochenki na półce. Gdy brak zboża, bierze pieczywo z magazynu.',sw:'#d9a35a'},
   warehouseB:{name:'Wielki magazyn',cost:600,size:2,desc:'Zajmuje 2 pola. Podnosi limit magazynów o 225 t (2,5× magazyn). Ulepszenie podwaja pojemność.',sw:'#b8864a'},
   factoryB:{name:'Duża fabryka',cost:700,size:2,desc:'Zajmuje 2 pola. Na start 1 linia ogólna; w karcie fabryki wykupujesz do 3 różnych linii (każda 400 T¢). Linie pracują po kolei.',sw:'#7b8696'},
@@ -391,7 +399,7 @@ const DEF={
   transformer:{name:'Transformator',cost:150,desc:'Łączy elektrownie ze słupami, także po przekątnej.',sw:'#5f7d70'},
   coal:{name:'El. węglowa',cost:800,desc:'Daje 12 MW, spala 1 t materiałów co 8 s. Włącza się, gdy wiatraki nie wystarczają.',sw:'#5a4a44'},
 };
-const DEMAND={policeS:1,policeB:2.5,bakery:0.6,factoryB:3.5,mine:1,mineB:3,warehouseB:1,supermarket:2.5,smallfac:1,pump:1,tower:0.5,treatment:2,restaurant:0.8,cinema:1.5,theater:1.5,casino:3,hotelS:1,hotelB:3,gallery:3,tenement:1.2,block:2,modern:2.5,house:0.5,factory:2,warehouse:0.5,smallwh:0.25,shop:1,bank:5,incinerator:1,recycler:1.5};
+const DEMAND={prison:3,policeS:1,policeB:2.5,bakery:0.6,factoryB:3.5,mine:1,mineB:3,warehouseB:1,supermarket:2.5,smallfac:1,pump:1,tower:0.5,treatment:2,restaurant:0.8,cinema:1.5,theater:1.5,casino:3,hotelS:1,hotelB:3,gallery:3,tenement:1.2,block:2,modern:2.5,house:0.5,factory:2,warehouse:0.5,smallwh:0.25,shop:1,bank:5,incinerator:1,recycler:1.5};
 const WHCAP={warehouse:90,smallwh:31,warehouseB:225};
 const isWH=t=>t==='warehouse'||t==='smallwh'||t==='warehouseB';const WH_T=['warehouse','smallwh','warehouseB'];
 const UTIL_R={pump:2,tower:2,treatment:2};
@@ -428,7 +436,7 @@ const TIER={0:{trips:3,work:0.4,name:'Zrozpaczeni'},6:{trips:14,work:1.75,name:'
 const HCOL={0:'#8a2a2a',1:'#d4483a',2:'#e58a3a',3:'#d9b23a',4:'#7dbb4a',5:'#2f9e5a',6:'#1f8a8a'};const HMAX=6;
 const SHOP_R=5;
 const ROAD_UPK={road:1,road2:2,road3:3,roundabout:2,highway:4,bridge:5};
-const UPKEEP={policeS:60,policeB:160,hydro:30,hydrogen:280,pump:20,tower:15,outlet:5,treatment:60,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:25,wind:60,coal:150,park1:10,park2:25,park3:45,landfill:20,incinerator:60,recycler:50};
+const UPKEEP={policeS:120,policeB:320,prison:200,hydro:30,hydrogen:280,pump:20,tower:15,outlet:5,treatment:60,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:25,wind:60,coal:150,park1:10,park2:25,park3:45,landfill:20,incinerator:60,recycler:50};
 /* waste: houses and parks fill steadily, factories per truck produced, shops per sale; pickup is due every ~6 h (work) or ~12 h (homes, parks) ±15% */
 const TRASH={supermarket:{cap:50,per:0.15,every:6},smallfac:{cap:24,per:0.3,every:6},house:{cap:18,rate:1,every:12},tenement:{cap:36,rate:2.5,every:12},block:{cap:60,rate:5,every:12},modern:{cap:60,rate:4,every:12},park1:{cap:10,rate:0.5,every:12},park2:{cap:10,rate:0.5,every:12},park3:{cap:10,rate:0.5,every:12},
   bakery:{cap:30,per:0.2,every:6},factory:{cap:40,per:0.6,every:6},factoryB:{cap:60,per:0.8,every:6},mine:{cap:30,per:0.4,every:8},mineB:{cap:60,per:0.8,every:6},farmveg:{cap:20,per:0.5,every:12},farmdairy:{cap:20,per:0.6,every:12},farmgrain:{cap:20,per:0.4,every:12},shop:{cap:30,per:0.2,every:6},gallery:{cap:60,per:0.2,every:6},restaurant:{cap:30,per:0.3,every:6},cinema:{cap:30,per:0.15,every:6},theater:{cap:30,per:0.15,every:6},casino:{cap:30,per:0.2,every:6},hotelS:{cap:30,per:0.4,every:12},hotelB:{cap:60,per:0.5,every:12}};
@@ -445,13 +453,14 @@ const UPG={smallfac:{name:'Linia specjalistyczna',cost:250,upkeep:10,desc:'Wybó
   park3:{name:'Większy zasięg',cost:200,upkeep:0,desc:'Zasięg 9×9 zamiast 7×7'},
   shop:{name:'Kasy SCO',cost:150,upkeep:5,desc:'Kasy samoobsługowe: obsługa +50% (15 klientów/godz.), kolejka znika szybciej i rzadziej robi się tłok'},
   supermarket:{name:'Kasy SCO',cost:350,upkeep:10,desc:'Kasy samoobsługowe: obsługa +50% (60 klientów/godz.), kolejka znika szybciej i rzadziej robi się tłok'},
+  prison:{name:'Dodatkowy blok',cost:1800,upkeep:40,desc:'+30 miejsc: 130 więźniów'},
   policeS:{name:'Drugi garaż',cost:600,upkeep:30,desc:'+2 radiowozy do interwencji (stoją w garażu, wyjeżdżają tylko na wezwanie)'},policeB:{name:'Drugi garaż',cost:900,upkeep:40,desc:'+2 radiowozy do interwencji (stoją w garażu, wyjeżdżają tylko na wezwanie)'},
   hydrogen:{name:'Ogniwa paliwowe nowej generacji',cost:1500,upkeep:25,desc:'+10 MW (55 MW z czystą wodą)'},
   restaurant:{name:'Wykwintna restauracja',cost:450,upkeep:15,desc:'Dwupiętrowy lokal, zasięg rozrywki 5×5 zamiast 3×3, kolejka 20 gości zamiast 10'}};
 const UPGF={factory:{name:'Filtry',cost:300,upkeep:15,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},factoryB:{name:'Filtry',cost:450,upkeep:20,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},smallfac:{name:'Filtry',cost:180,upkeep:10,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},
   incinerator:{name:'Filtry',cost:500,upkeep:25,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, spalanie −10%'},coal:{name:'Filtry',cost:600,upkeep:30,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, moc −10%'}};
 const OUT_R=25;
-const UPG2={pump:{name:'Druga rura',cost:200,upkeep:10,desc:'Podwaja pobór: 80 m³/godz.'},outlet:{name:'Druga rura zrzutu',cost:120,upkeep:5,desc:'Podwaja przepustowość: 50 m³/godz.'},wind:{name:'Wzmocniony napęd',cost:450,upkeep:15,desc:'+3 MW, większy wirnik'}};
+const UPG2={policeS:{name:'Większy rewir',cost:700,upkeep:30,desc:'Zasięg +2 pola w każdą stronę: 13×13'},policeB:{name:'Większy rewir',cost:1200,upkeep:50,desc:'Zasięg +2 pola w każdą stronę: 17×17'},prison:{name:'Blok pracy',cost:1500,upkeep:40,desc:'Każdy nowy więzień ma 30% szans na pracę: 1–3 T¢/godz. od osoby'},pump:{name:'Druga rura',cost:200,upkeep:10,desc:'Podwaja pobór: 80 m³/godz.'},outlet:{name:'Druga rura zrzutu',cost:120,upkeep:5,desc:'Podwaja przepustowość: 50 m³/godz.'},wind:{name:'Wzmocniony napęd',cost:450,upkeep:15,desc:'+3 MW, większy wirnik'}};
 const STORE_COST=100,STORE_MAX=7,GAL_BASE=4;const galUsed=c=>c.stores.length+(c.cinema?1:0),galFull=c=>!c.up&&galUsed(c)>=GAL_BASE;
 const isFactory=t=>t==='factory'||t==='smallfac'||t==='factoryB';const isMine=t=>t==='mine'||t==='mineB';const isWork=t=>isFactory(t)||isMine(t);
 const WORK_T=['factory','smallfac','factoryB','mine','mineB'];const MINE_T={mine:8/3,mineB:40/3};const LINE_COST=400,LINE_UPK=15,LINES_MAX=3;
@@ -474,7 +483,7 @@ const facCap=c=>FAC[c.t].cap*(c.t==='landfill'?(c.lfN||1):1);
 const facTrucks=c=>c.t==='landfill'?Math.min(8,2+(c.lfN||1)):FAC[c.t].trucks;
 const parkR=c=>DEF[c.t].r+(c.up?1:0);
 const PARKS=['park1','park2','park3'];
-const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','warehouse','smallwh','warehouseB']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain']},{name:'Usługi',tools:['shop','bakery','supermarket','gallery','bank']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB']},{name:'Energia',tools:['pole','poleline','poleDel','transformer','hvpole','wind','coal','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incinerator','recycler']},{name:'Woda',tools:['pipe','pipeDel','tower','pump','treatment','outlet']}];
+const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','warehouse','smallwh','warehouseB']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain']},{name:'Usługi',tools:['shop','bakery','supermarket','gallery','bank']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prison']},{name:'Energia',tools:['pole','poleline','poleDel','transformer','hvpole','wind','coal','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incinerator','recycler']},{name:'Woda',tools:['pipe','pipeDel','tower','pump','treatment','outlet']}];
 const WIND_MW=5, COAL_MW=12, COAL_BURN=8;
 const TOOLS=['view','bulldoze','road','pole','poleline','poleDel','house','factory','warehouse','shop','bank','wind','transformer','coal','park1','park2','park3','smallwh'];
 const BASE_MONEY=4000, BANK_CAP=2500, WH_CAP=60, SALE=25, TRUCK_LOAD=4, MAX_CARS=400, PEOPLE_CARS=340;
@@ -721,6 +730,16 @@ function buildPoliceB(){const g=new THREE.Group(),bl=M('#1f4fa8');g.add(box(1.96
   g.add(box(0.5,0.3,0.7,M('#d9dde2'),0.68,0.03,-0.55));for(const z of[-0.75,-0.4])g.add(box(0.02,0.22,0.26,mat.facDark,0.425,0.03,z));
   for(let k=0;k<4;k++)g.add(box(0.02,0.004,0.3,mat.white,-0.85+k*0.28,0.032,0.55));
   g.add(box(0.03,1.2,0.03,mat.steel,0.8,0.03,0.8));g.add(box(0.08,0.05,0.08,M('#d63b3b'),0.8,1.23,0.8));return g}
+function buildPrison(){const g=new THREE.Group(),wall=M('#b9bcc0'),dark=M('#6b7078');g.add(box(2.96,0.03,2.96,mat.concrete));
+  g.add(box(1.5,0.55,0.6,wall,-0.2,0.03,-0.6));g.add(box(0.6,0.55,1.5,wall,-0.65,0.03,0.1));g.add(box(1.54,0.04,0.64,dark,-0.2,0.58,-0.6));g.add(box(0.64,0.04,1.54,dark,-0.65,0.58,0.1));
+  for(let k=0;k<6;k++)g.add(box(0.06,0.08,0.01,mat.dark,-0.85+k*0.26,0.32,-0.295));for(let k=0;k<5;k++)g.add(box(0.01,0.08,0.06,mat.dark,-0.345,0.32,-0.3+k*0.26));
+  g.add(box(0.9,0.02,0.7,M('#a9a395'),0.55,0.03,0.6));for(const x of[0.35,0.75])g.add(box(0.012,0.3,0.012,mat.white,x,0.03,0.6));g.add(box(0.5,0.012,0.012,mat.white,0.55,0.3,0.6));
+  for(const[x,z]of[[-1.35,-1.35],[1.35,-1.35],[-1.35,1.35],[1.35,1.35]]){g.add(box(0.14,0.8,0.14,wall,x,0.03,z));g.add(box(0.22,0.1,0.22,mat.glass,x,0.83,z));g.add(box(0.26,0.04,0.26,dark,x,0.93,z))}
+  const fence=new THREE.MeshBasicMaterial({color:'#9aa3ab',transparent:true,opacity:0.35,side:THREE.DoubleSide,depthWrite:false});
+  for(const[px,pz,ry]of[[0,1.45,0],[0,-1.45,0],[1.45,0,Math.PI/2],[-1.45,0,Math.PI/2]]){const sg=new THREE.Group();sg.position.set(px,0,pz);sg.rotation.y=ry;
+    for(let k=0;k<=10;k++)sg.add(box(0.02,0.42,0.02,mat.steel,-1.35+k*0.27,0.03,0));const n=new THREE.Mesh(new THREE.PlaneGeometry(2.7,0.4),fence);n.position.y=0.23;sg.add(n);
+    for(const y of[0.44,0.47])sg.add(box(2.7,0.006,0.006,mat.steel,0,y,0));g.add(sg)}
+  g.add(box(0.5,0.3,0.02,dark,0.55,0.03,1.46));return g}
 function buildWind(){const g=new THREE.Group();
   g.add(box(0.36,0.06,0.36,mat.concrete));
   const t=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.065,1.55,10),mat.white);t.position.y=0.8;t.castShadow=true;g.add(t);
@@ -823,7 +842,7 @@ function buildRecycler(){const g=new THREE.Group();g.add(box(0.9,0.04,0.86,mat.c
 function paintModel(c,m){for(const o of c.model.userData.paint||[])o.material=m}
 function filterVisual(c){const m=c.model;if(!m||m.userData.flt)return;m.userData.flt=true;for(const p of m.userData.puffs||[])p.material.color.set('#f6f7f8');
   const sb=m.userData.sb||{x:0.3,y:0.85,z:-0.25};m.add(box(0.14,0.06,0.14,M('#d9dee2'),sb.x,sb.y-0.12,sb.z))}
-function addUpgrade2Visual(c){const m=c.model;if(!m||m.userData.upg2)return;m.userData.upg2=true;
+function addUpgrade2Visual(c){if(c.t==='prison'){c.model.add(box(0.7,0.3,0.5,M('#c9b48a'),0.55,0.03,0.0));c.model.add(box(0.74,0.03,0.54,M('#6b7078'),0.55,0.33,0.0));return}if(isPolice(c.t)){c.model.add(box(0.03,0.6,0.03,mat.steel,isPolice(c.t)&&c.t==='policeB'?-0.9:-0.38,0.03,-0.38));c.model.add(box(0.16,0.04,0.04,mat.steel,c.t==='policeB'?-0.9:-0.38,0.6,-0.38));return}const m=c.model;if(!m||m.userData.upg2)return;m.userData.upg2=true;
   if(c.t==='pump'||c.t==='outlet'){const pp=part(FK.cyl,M('#5a6b78'),c.t==='pump'?0.06:0.1,c.t==='pump'?0.5:0.4,c.t==='pump'?0.06:0.1,0.22,0.1,0.25);pp.rotation.x=Math.PI/2;m.add(pp)}
   if(c.t==='wind'){m.userData.rotor.scale.setScalar(1.3);m.userData.nac.scale.set(1.35,1.35,1.3);m.add(box(0.1,0.04,0.1,mat.chim,0,1.48,0.06))}}
 function addUpgradeVisual(c){const m=c.model;if(!m||m.userData.upg)return;m.userData.upg=true;
@@ -843,6 +862,7 @@ function addUpgradeVisual(c){const m=c.model;if(!m||m.userData.upg)return;m.user
     const cap=new THREE.Mesh(new THREE.ConeGeometry(0.12,0.1,12),mat.facDark);cap.position.set(-0.32,0.62,-0.24);m.add(cap)}
   else if(c.t==='coal'){m.add(box(0.22,0.22,0.2,mat.gtruck,0.3,0.04,-0.32));m.add(box(0.24,0.03,0.22,mat.bagG,0.3,0.26,-0.32))}
   else if(c.t==='restaurant'){for(const ch of [...m.children])ch.visible=false;m.add(buildFancyRestaurant())}
+  else if(c.t==='prison'){m.add(box(0.8,0.5,0.6,M('#b9bcc0'),0.5,0.03,-0.55));m.add(box(0.84,0.04,0.64,M('#6b7078'),0.5,0.53,-0.55));for(let k=0;k<3;k++)m.add(box(0.06,0.08,0.01,mat.dark,0.3+k*0.2,0.3,-0.245))}
   else if(c.t==='policeS'){m.add(box(0.34,0.24,0.32,M('#d9dde2'),0.22,0.03,0.2));m.add(box(0.02,0.18,0.26,mat.facDark,0.39,0.03,0.2))}
   else if(c.t==='policeB'){m.add(box(0.5,0.3,0.5,M('#d9dde2'),0.68,0.03,0.15));m.add(box(0.02,0.22,0.36,mat.facDark,0.425,0.03,0.15))}
   else if(c.t==='hydrogen'){for(const x of[-0.3,-0.1,0.1,0.3]){const t=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.24,10),M('#7fd0e6'));t.position.set(x,0.24,0.36);t.castShadow=true;m.add(t);m.add(box(0.05,0.02,0.05,mat.bolt,x,0.36,0.36))}}
@@ -1003,14 +1023,14 @@ function buildHydro(){const g=new THREE.Group(),con=M('#c4c1b8'),con2=M('#a9a69c
 function buildSupermarket(){const g=new THREE.Group();g.add(box(1.94,0.04,0.94,mat.concrete));g.add(box(1.5,0.44,0.62,M('#e9eef2'),-0.1,0.04,-0.14));
   g.add(box(1.54,0.06,0.66,M('#3a7fc0'),-0.1,0.48,-0.14));g.add(box(0.8,0.24,0.02,mat.glass,-0.1,0.04,0.175));g.add(box(0.7,0.12,0.03,M('#3a7fc0'),-0.1,0.35,0.19));
   for(let k=0;k<4;k++)g.add(box(0.02,0.005,0.2,mat.dash,0.25+k*0.16,0.045,0.33));for(const x of[0.55,0.75])g.add(box(0.12,0.06,0.1,carCols[(x*10)%8|0],x,0.04,0.33));return g}
-const BUILD={policeS:buildPoliceS,policeB:buildPoliceB,bakery:buildBakery,lpole:buildLPole,factoryB:buildFactoryB,warehouseB:buildWarehouseB,mine:buildMine,mineB:buildMineB,supermarket:buildSupermarket,smallfac:()=>{const g=buildFactory();g.scale.setScalar(0.72);return g},hydro:buildHydro,hydrogen:()=>{const g=buildHydrogen();g.scale.set(1.9,1.5,1.9);return g},pump:buildPump,tower:buildTower,outlet:buildOutlet,treatment:buildTreatment,restaurant:buildRestaurant,cinema:buildCinema,theater:buildTheater,casino:buildCasino,hotelS:buildHotelS,hotelB:buildHotelB,gallery:buildGallery,farmveg:()=>buildFarm('veg'),farmdairy:()=>buildFarm('dairy'),farmgrain:()=>buildFarm('grain'),tenement:()=>buildTenementL(0),block:()=>buildBlockL(0),modern:()=>buildModernL(0),landfill:buildLandfill,incinerator:buildIncinerator,recycler:buildRecycler,hvpole:buildHV,smallwh:buildSmallWh,park1:()=>buildPark(1),park2:()=>buildPark(2),park3:()=>{const g=new THREE.Group(),a=buildPark(3),b=buildPark(2);a.position.x=-0.5;b.position.x=0.5;g.add(a,b);return g},house:()=>buildHouseL(0),factory:buildFactory,shop:buildShop,bank:buildBank,warehouse:buildWarehouse,wind:buildWind,transformer:buildTransformer,coal:buildCoal};
+const BUILD={prison:buildPrison,policeS:buildPoliceS,policeB:buildPoliceB,bakery:buildBakery,lpole:buildLPole,factoryB:buildFactoryB,warehouseB:buildWarehouseB,mine:buildMine,mineB:buildMineB,supermarket:buildSupermarket,smallfac:()=>{const g=buildFactory();g.scale.setScalar(0.72);return g},hydro:buildHydro,hydrogen:()=>{const g=buildHydrogen();g.scale.set(1.9,1.5,1.9);return g},pump:buildPump,tower:buildTower,outlet:buildOutlet,treatment:buildTreatment,restaurant:buildRestaurant,cinema:buildCinema,theater:buildTheater,casino:buildCasino,hotelS:buildHotelS,hotelB:buildHotelB,gallery:buildGallery,farmveg:()=>buildFarm('veg'),farmdairy:()=>buildFarm('dairy'),farmgrain:()=>buildFarm('grain'),tenement:()=>buildTenementL(0),block:()=>buildBlockL(0),modern:()=>buildModernL(0),landfill:buildLandfill,incinerator:buildIncinerator,recycler:buildRecycler,hvpole:buildHV,smallwh:buildSmallWh,park1:()=>buildPark(1),park2:()=>buildPark(2),park3:()=>{const g=new THREE.Group(),a=buildPark(3),b=buildPark(2);a.position.x=-0.5;b.position.x=0.5;g.add(a,b);return g},house:()=>buildHouseL(0),factory:buildFactory,shop:buildShop,bank:buildBank,warehouse:buildWarehouse,wind:buildWind,transformer:buildTransformer,coal:buildCoal};
 function boltMesh(){const b=new THREE.Mesh(new THREE.OctahedronGeometry(0.09,0),mat.bolt);b.scale.y=1.7;b.position.set(0.22,1.05,0);b.visible=false;b.layers.set(1);return b}
 function wire(a,b,sag=0.07){const pts=[];for(let k=0;k<=10;k++){const u=k/10;pts.push(new THREE.Vector3(a.x+(b.x-a.x)*u,a.y+(b.y-a.y)*u-Math.sin(u*Math.PI)*sag,a.z+(b.z-a.z)*u))}
   return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),mat.wire)}
 
 /* ---------- state ---------- */
 let grid=new Array(N*N).fill(null);
-let counts={policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
+let counts={prison:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
 const pw={bank:0,matCap:0,dem:0,cap:0,ok:0,happy:0,dist:[0,0,0,0,0,0,0]};
 let envDirty=true;const crowdCov=new Uint8Array(N*N),noiseCov=new Uint8Array(N*N),entCov=new Uint8Array(N*N),pol=new Uint8Array(N*N),shopCov=new Uint8Array(N*N),parkCov=new Uint8Array(N*N);
 const winds=new Set(),bolts=new Set();
@@ -1025,7 +1045,7 @@ function upgCount(t){let n=0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.up&&
 function upgCount2(t){let n=0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.up2&&c.t===t)n++}return n}
 /* switched-off buildings cost nothing */
 const upkeepRate=night=>{let s=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||c.off)continue;if(UPKEEP[c.t])s+=UPKEEP[c.t]*(night&&PARKS.includes(c.t)?0.5:1);
-  if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t];if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(c.filt&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s};
+  if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t];if(c.jail)s+=JAIL_FEE*c.jail.length;if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(c.filt&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s};
 /* day and night: 1 real minute = 1 game hour; people sleep 22:00–06:00 */
 const hourOf=t=>(t/60)%24;
 const isNight=()=>{const h=hourOf(gameT);return h>=22||h<6};
@@ -1364,7 +1384,7 @@ function carMesh(kind){const g=new THREE.Group();
     g.add(box(0.22,0.17,0.24,mat.gtruck,0,0.03,-0.05));g.add(box(0.2,0.03,0.2,mat.bagG,0,0.2,-0.05))}
   else if(kind==='visitor'){g.add(box(0.2,0.08,0.34,VISC[(Math.random()*VISC.length)|0],0,0.03,0));g.add(box(0.17,0.07,0.17,mat.cabin,0,0.11,-0.02));g.add(box(0.13,0.05,0.14,mat.dark,0,0.18,-0.02))}
   else if(kind==='police'){g.add(box(0.2,0.08,0.34,M('#f4f6f8'),0,0.03,0));g.add(box(0.205,0.035,0.34,M('#1f4fa8'),0,0.055,0));g.add(box(0.17,0.07,0.17,mat.cabin,0,0.11,-0.02));
-    const r=box(0.05,0.03,0.05,new THREE.MeshBasicMaterial({color:'#ff3b30'}),-0.04,0.18,-0.02),b=box(0.05,0.03,0.05,new THREE.MeshBasicMaterial({color:'#2f7bff'}),0.04,0.18,-0.02);g.add(r,b);g.userData.bar=[r,b]}
+    const r=box(0.05,0.015,0.05,new THREE.MeshBasicMaterial({color:'#ff3b30'}),-0.04,0.18,-0.02),b=box(0.05,0.015,0.05,new THREE.MeshBasicMaterial({color:'#2f7bff'}),0.04,0.18,-0.02);g.add(r,b);g.userData.bar=[r,b]}
   else if(kind==='van'){g.add(box(0.2,0.15,0.34,mat.vanW,0,0.03,0));g.add(box(0.205,0.03,0.2,mat.awn,0,0.1,-0.05));g.add(box(0.16,0.06,0.02,mat.cabin,0,0.11,0.17))}
   else{g.add(box(0.2,0.08,0.34,carCols[(Math.random()*carCols.length)|0],0,0.03,0));g.add(box(0.17,0.07,0.17,mat.cabin,0,0.11,-0.02))}
   for(const[a,b]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const w=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.06,0.07),mat.tire);w.position.set(a*0.105,0.03,b*(kind==='truck'?0.13:0.1));g.add(w)}
@@ -1376,7 +1396,7 @@ function carMesh(kind){const g=new THREE.Group();
   g.scale.setScalar(0.01);scene.add(g);return g}
 function createCar(kind,path,o){const c=Object.assign({kind,path,seg:0,dist:0,phase:'go',speed:kind==='police'?1.8:kind==='visitor'?1.6:kind==='truck'?1.05:kind==='garbage'?1.1:kind==='van'?1.3:1.5+Math.random()*0.3,
   mesh:carMesh(kind),rot:null,grow:0,li:(Math.random()*3)|0,id:++carSeq,res:-1,inRes:false,wait:0,ghost:0,vOff:null,lnSeg:-1},o);if(path.length>1){c.li=pickLane(c,path[0],path[1])}c.lp=c.ln=c.li;cars.push(c);placeCar(c);if(o&&o.home!=null)exitFrom(c,o.home);return c}
-function removeCar(c){releaseRes(c);if(c.kind==='garbage')releaseG(c);
+function removeCar(c){releaseRes(c);if(c.pass&&c.pass.length){const pr=grid[c.dest];if(pr&&pr.inbound)pr.inbound=Math.max(0,pr.inbound-c.pass.length);const st=grid[c.home];if(st&&st.jail)st.jail.push(...c.pass);c.pass=[]}if(c.kind==='garbage')releaseG(c);
   if(c.kind==='van'&&!c.delivered){c.delivered=true;const d=grid[c.dest];if(d&&isShop(d.t))d.incoming=Math.max(0,d.incoming-c.load);for(const k in c.items)addGood(k,c.items[k])}
   c.dead=true;scene.remove(c.mesh)}
 function perp(a,b){const dx=cx(b)-cx(a),dz=cz(b)-cz(a);return[-dz,dx]}
@@ -1515,14 +1535,14 @@ const edgeOuts=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].edgeOut
 /* hotel attractiveness 0–3: a park in range, entertainment (its own attraction or one nearby), a shop within 5 tiles */
 function hotelStars(i){const c=grid[i];if(!c||(c.t!=='hotelS'&&c.t!=='hotelB'))return 0;const ts=tilesOf(i);return(ts.some(k=>parkCov[k])?1:0)+((c.t==='hotelB'&&c.attr)||ts.some(k=>entCov[k])?1:0)+(ts.some(k=>shopCov[k])?1:0)}
 /* ---------- police: patrols, crimes, bank robberies ---------- */
-const POL={policeS:{r:4,patrol:2},policeB:{r:6,patrol:4}};const isPolice=t=>t==='policeS'||t==='policeB';
+const POL={policeS:{r:4,patrol:2,cells:10},policeB:{r:6,patrol:4,cells:25}};const polRad=c=>POL[c.t].r+(c.up2?2:0);const isPolice=t=>t==='policeS'||t==='policeB';
 let crimes=[],crimeSeq=0,crimeT=40,heistT=240;const pinG=new THREE.ConeGeometry(0.12,0.3,8).rotateX(Math.PI);pinG.userData.keep=true;
 const matPin=new THREE.MeshBasicMaterial({color:'#ff3b30'}),matPinH=new THREE.MeshBasicMaterial({color:'#ffcc00'});
-const stCover=(st,i)=>{const c=grid[st];if(!c)return false;const r=POL[c.t].r;return tilesOf(st).some(t=>Math.abs(t%N-i%N)<=r&&Math.abs(((t/N)|0)-((i/N)|0))<=r)};
+const stCover=(st,i)=>{const c=grid[st];if(!c)return false;const r=polRad(c);return tilesOf(st).some(t=>Math.abs(t%N-i%N)<=r&&Math.abs(((t/N)|0)-((i/N)|0))<=r)};
 const stations=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isPolice(c.t)&&!c.off&&c.powered&&entryOf(i)>=0)o.push(i)}return o};
-const polCars=st=>cars.filter(c=>!c.dead&&c.kind==='police'&&c.home===st);
+const polCars=st=>cars.filter(c=>!c.dead&&c.kind==='police'&&c.home===st&&c.role!=='transport');
 function popNow(){let p=0;for(const c of grid)if(c&&HLV[c.t]&&!c.off)p+=residents(c);return p}
-function roadsNear(st){const c=grid[st],r=POL[c.t].r,o=[];for(const t of tilesOf(st))for(const j of inRange(t,r,isDrive))if(!grid[j].edge)o.push(j);return[...new Set(o)]}
+function roadsNear(st){const c=grid[st],r=polRad(c),o=[];for(const t of tilesOf(st))for(const j of inRange(t,r,isDrive))if(!grid[j].edge)o.push(j);return[...new Set(o)]}
 function curTile(c){return c.path[Math.min(c.path.length-1,c.seg+(c.dist>0.5?1:0))]}
 function sendTo(c,target,phase){const b=bfs(curTile(c));if(b.dist[target]<0)return false;const p=pathTo(b,target);if(p.length<2)p.push(p[0]);c.path=p;c.seg=0;c.dist=0;c.phase=phase||'go';c.lnSeg=-1;c.lp=c.ln=c.li;return true}
 function newPatrol(c){const st=c.home;if(!grid[st]||!isPolice(grid[st].t)||grid[st].off)return sendHome(c);const rs=roadsNear(st);const b=bfs(curTile(c));
@@ -1540,16 +1560,33 @@ function dispatch(cr){const sts=stations().filter(st=>stCover(st,cr.i));if(!sts.
   opts.sort((a,q)=>a.d-q.d);for(const o of opts){if(cr.sent>=cr.need)break;let c=o.c;if(!c){c=spawnPatrol(o.st,'reserve');if(!c)continue}
     if(!sendTo(c,cr.e,'go'))continue;c.task=cr.id;c.speed=2.4;cr.sent++}}
 function policeArrive(c){if(c.phase==='back')return removeCar(c);
+  if(c.role==='transport'){deliverInmates(c);return goBack(c,c.dest,c.home)}
   if(c.task){const cr=crimes.find(q=>q.id===c.task);c.task=null;c.speed=1.8;if(cr&&cr.t>0){cr.arr++;if(cr.arr>=cr.need)endCrime(cr,true)}}
   if(c.role==='reserve')return sendHome(c);newPatrol(c)}
-function endCrime(cr,ok){crimes=crimes.filter(q=>q!==cr);scene.remove(cr.pin);cr.t=0;
-  if(ok){cur.crimeOk++;float(cr.i,cr.heist?'napad udaremniony!':'sprawca złapany','neutral');if(cr.heist){setHint('<b>Napad udaremniony.</b> Policja zdążyła.',false,true);hintEl.hidden=false}return}
+function endCrime(cr,ok){crimes=crimes.filter(q=>q!==cr);scene.remove(cr.pin);const left=Math.max(0,cr.t),T0=cr.heist?40:28;cr.t=0;
+  if(ok){cur.crimeOk++;jailAt(cr,left/T0);float(cr.i,cr.heist?'napad udaremniony!':'sprawca złapany','neutral');if(cr.heist){setHint('<b>Napad udaremniony.</b> Policja zdążyła.',false,true);hintEl.hidden=false}return}
   const loss=cr.heist?Math.round(cr.loss*(1-Math.min(cr.arr,cr.need)/cr.need)):cr.loss;if(loss>0){money-=loss;cur.crimeLoss+=loss;cur.crimeLost++;float(cr.i,`−${fmt(loss)} T¢ ${cr.heist?'z banku':'kradzież'}`,'warn');
     if(cr.heist){setHint(`<b>Napad na bank:</b> stracono ${fmt(loss)} T¢`+(cr.arr?` (dojechało ${cr.arr} z ${cr.need} radiowozów)`:' (policja nie dojechała)'),true,true);hintEl.hidden=false}}
   else{cur.crimeOk++;float(cr.i,'napad udaremniony!','neutral')}
   for(const c of cars)if(!c.dead&&c.kind==='police'&&c.task===cr.id){c.task=null;c.speed=1.8;if(c.role==='reserve')sendHome(c);else newPatrol(c)}}
 let polFlash=0;
-function policeTick(dt,night){if(!dt)return;polFlash+=dt;
+/* the caught go to the nearest station's cells; sentence 2–3 days: longer for a bigger theft and a quick catch */
+const PRISON_CAP=100,JAIL_FEE=5;
+function jailAt(cr,speed){const sts=stations().filter(st=>stCover(st,cr.i));if(!sts.length)return;const lf=cr.heist?cr.loss/1250:cr.loss/75;
+  const n=cr.heist?cr.need:1;for(let k=0;k<n;k++){const st=sts.find(q=>(grid[q].jail||[]).length<POL[grid[q].t].cells);if(!st){float(cr.i,'cele pełne: sprawca wypuszczony','warn');return}
+    const g=grid[st];g.jail=g.jail||[];g.jail.push({rel:gameT+60*(48+24*Math.min(1,0.6*lf+0.4*speed)),w:0})}}
+const prisonCap=c=>PRISON_CAP+(c.up?30:0);
+function inmates(){let n=0,w=0;for(const c of grid)if(c&&c.jail&&c.t!=='part'){n+=c.jail.length;for(const q of c.jail)w+=q.w||0}return{n,w}}
+function prisonRoom(){let best=-1,room=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='prison'||c.off||!c.powered||entryOf(i)<0)continue;const r=prisonCap(c)-(c.jail||[]).length-(c.inbound||0);if(r>room){room=r;best=i}}return best}
+function jailTick(dt){for(const c of grid){if(!c||!c.jail||!c.jail.length)continue;const before=c.jail.length;c.jail=c.jail.filter(q=>q.rel>gameT);if(c.jail.length<before)cur.freed=(cur.freed||0)+before-c.jail.length}
+  for(let st=0;st<N*N;st++){const g=grid[st];if(!g||!isPolice(g.t)||!g.jail||!g.jail.length||g.off)continue;g.trT=(g.trT||0)-dt;if(g.trT>0)continue;g.trT=20;
+    const pr=prisonRoom();if(pr<0)continue;const room=prisonCap(grid[pr])-(grid[pr].jail||[]).length-(grid[pr].inbound||0),load=Math.min(6,room,g.jail.length);if(load<=0)continue;
+    const s0=entryOf(st),e=entryOf(pr);if(s0<0||e<0)continue;const b=bfs(s0);if(b.dist[e]<0)continue;const pass=g.jail.splice(0,load);grid[pr].inbound=(grid[pr].inbound||0)+load;
+    const v=createCar('police',pathTo(b,e),{home:st,dest:pr,role:'transport',task:null,pass});v.speed=1.5;float(st,`transport ${load} os. do więzienia`,'neutral')}}
+function deliverInmates(c){const pr=grid[c.dest];if(pr&&pr.t==='prison'){pr.inbound=Math.max(0,(pr.inbound||0)-c.pass.length);pr.jail=pr.jail||[];
+    for(const q of c.pass){q.w=pr.up2&&Math.random()<0.3?1+((Math.random()*3)|0):0;pr.jail.push(q)}float(c.dest,`+${c.pass.length} więźniów`,'neutral')}
+  else{const st=grid[c.home];if(st&&st.jail)st.jail.push(...c.pass)}c.pass=[]}
+function policeTick(dt,night){if(!dt)return;polFlash+=dt;jailTick(dt);
   for(const st of stations()){const g=grid[st];const pc=polCars(st).filter(c=>c.role==='patrol').length;if(pc<POL[g.t].patrol&&cars.length<MAX_CARS&&(g.spawnT=(g.spawnT||0)-dt)<=0){g.spawnT=1.5;spawnPatrol(st,'patrol')}}
   for(const c of cars)if(!c.dead&&c.kind==='police'&&c.mesh.userData.bar){const on=!!c.task,f=Math.floor(polFlash*6)%2;const[r,b]=c.mesh.userData.bar;r.visible=!on||f===0;b.visible=!on||f===1}
   if(crimeRate(night)){crimeT-=dt;if(crimeT<=0){crimeT=60/crimeRate(night)*rnd(0.6,1.4);const pool=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&(HLV[c.t]||isShop(c.t))&&!c.off&&entryOf(i)>=0)pool.push(i)}if(pool.length)newCrime(pool[(Math.random()*pool.length)|0],false)}}
@@ -1758,7 +1795,7 @@ function computePower(dt){if(topoDirty)rebuildHV();computeDams();const dm=isNigh
    Pipes form networks (orthogonal neighbours). A building joins the network of a pipe under any of its tiles or right next to it.
    Supply: towers (clean), pumps (clean, or dirty when the river beside them is polluted), treatment plants (30% of treated sewage comes back clean).
    All water used becomes sewage: plants treat it, outlets dump the rest into the river. Night halves use. Units: m³ per game hour. */
-const WATER={policeS:1,policeB:2,bakery:0.8,factoryB:4,mine:0.5,mineB:1.5,supermarket:2,hydrogen:10,smallfac:1.5,house:1,tenement:2.5,block:5,modern:5,shop:0.5,gallery:1.5,restaurant:1.5,hotelS:2,hotelB:5,factory:3,cinema:1,theater:1,casino:1.5,bank:0.5};
+const WATER={prison:5,policeS:1,policeB:2,bakery:0.8,factoryB:4,mine:0.5,mineB:1.5,supermarket:2,hydrogen:10,smallfac:1.5,house:1,tenement:2.5,block:5,modern:5,shop:0.5,gallery:1.5,restaurant:1.5,hotelS:2,hotelB:5,factory:3,cinema:1,theater:1,casino:1.5,bank:0.5};
 const PUMP_R=40,TOWER_R=15,TREAT_R=30;
 const pipe=new Uint8Array(N*N),riverDirty=new Uint8Array(N*N);let pipeDirty=true,riverSig='';
 const wtr={outCap:0,over:0,clean:0,dirty:0,dem:0,treated:0,out:0,none:0,sick:0};
@@ -2044,7 +2081,7 @@ const inspEl=document.getElementById('insp');let inspI=-1,focus=null;
 const sameType=t=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].t===t)o.push(i);return o};
 const houses=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&HOUSING[grid[i].t])o.push(i);return o};
 function openHouse(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;inspI=i;inspEl.hidden=false;hintEl.hidden=true;ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
-  const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):DEF[c.t].area,'hold');
+  const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):DEF[c.t].area,'hold');
   else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');renderInsp()}
 function closeHouse(){if(areaT>1e8){areaT=0;area.visible=false}inspI=-1;inspEl.hidden=true;hintEl.hidden=false;ring.visible=false}
 function stepHouse(d){const c=grid[inspI];if(!c)return closeHouse();const list=sameType(c.t);let k=list.indexOf(inspI);
@@ -2103,7 +2140,9 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(c.t==='restaurant'){R('Półki z jedzeniem',`${shelfTotal(c)}/${SHOP_SLOTS}`+(c.incoming?` (+${c.incoming} w drodze)`:''));for(const k of FOOD)R(`<span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}`,`${c.shelf[k]||0} szt. · mag. ${fmt(goods[k])}`);R('Posiłek',`${PRICE.restaurant} T¢`)}
   if(entR(c))R('Rozrywka',`zasięg ${2*entR(c)+1}×${2*entR(c)+1}, +1 zadowolenia`);
   if(c.t==='cinema'||c.t==='theater'||c.t==='casino')R(c.t==='casino'?'Stawka':'Bilet',c.t==='casino'?`${PRICE.casino} T¢ (wygrane gości: −150…−600 T¢)`:`${PRICE[c.t]} T¢`);
-  if(isPolice(c.t)){const pc=polCars(i);R('Zasięg',`${POL[c.t].r*2+1}×${POL[c.t].r*2+1}`);R('Patrole',`${pc.filter(q=>q.role==='patrol').length} / ${POL[c.t].patrol} na ulicach`);R('Do interwencji w garażu',c.up?`${2-pc.filter(q=>q.role==='reserve').length} / 2`:'brak (dobuduj drugi garaż)');R('Interwencje teraz',`${pc.filter(q=>q.task).length}`)}
+  if(c.t==='prison'){const j=c.jail||[],w=j.filter(q=>q.w).length;R('Więźniowie',`${j.length} / ${prisonCap(c)}`+(c.inbound?` (+${c.inbound} w drodze)`:''),j.length>=prisonCap(c)?'warnv':'');R('Koszt',`${JAIL_FEE} T¢/godz. za więźnia: ${fmt(JAIL_FEE*j.length)} T¢/godz.`);
+    R('Pracujący',c.up2?`${w} · ${fmt(j.reduce((a,q)=>a+(q.w||0),0))} T¢/godz.`:'dobuduj blok pracy');if(j.length){const nx=Math.min(...j.map(q=>q.rel));R('Najbliższe wyjście',`za ${Math.max(1,Math.round((nx-gameT)/60))} godz. gry`)}}
+  if(isPolice(c.t)){const pc=polCars(i);R('Zasięg',`${polRad(c)*2+1}×${polRad(c)*2+1}`);R('Cele',`${(c.jail||[]).length} / ${POL[c.t].cells}`+(counts.prison?'':' · brak więzienia: zatrzymani zostają tutaj'),(c.jail||[]).length>=POL[c.t].cells?'warnv':'');R('Patrole',`${pc.filter(q=>q.role==='patrol').length} / ${POL[c.t].patrol} na ulicach`);R('Do interwencji w garażu',c.up?`${2-pc.filter(q=>q.role==='reserve').length} / 2`:'brak (dobuduj drugi garaż)');R('Interwencje teraz',`${pc.filter(q=>q.task).length}`)}
   if(c.t==='hotelS'||c.t==='hotelB'){const ts=tilesOf(i),st=hotelStars(i);R('Atrakcyjność',`${'★'.repeat(st)}${'☆'.repeat(3-st)} ${st}/3 · +${st*25}% przyjezdnych`,st?'':'warnv');
     R(ts.some(k=>parkCov[k])?'✓ park w zasięgu':'✗ brak parku w zasięgu','');R((c.t==='hotelB'&&c.attr)||ts.some(k=>entCov[k])?'✓ rozrywka (atrakcja hotelu albo obok)':'✗ brak rozrywki','');R(ts.some(k=>shopCov[k])?'✓ sklep w 5 polach':'✗ brak sklepu w 5 polach','');R('Nocleg',`${PRICE[c.t]} T¢ od przyjezdnego`);R('Przyjezdni',`+${c.t==='hotelS'?4:10} aut/godz. na każdym wjeździe`)}
   if(c.t==='hotelB'){if(c.attr)R('Atrakcja',ATTR[c.attr]+` · ${PRICE[c.attr]} T¢`);else pick=`<div class="chips">${Object.keys(ATTR).map(k=>`<button class="chipb" data-attr="${k}"${money<ATTR_COST?' disabled style="opacity:.5"':''}><i style="background:${ATTR_COL[k]}"></i>+ ${ATTR[k]} · ${ATTR_COST} T¢</button>`).join('')}</div>`}
@@ -2226,6 +2265,7 @@ hydrogen:'<circle cx="6.5" cy="9" r="3.5"/><circle cx="13.5" cy="9" r="3.5"/><pa
 supermarket:'<path d="M2.5 4h2l2 9h9l1.5-6.5H6"/><circle cx="8" cy="16" r="1.3"/><circle cx="14" cy="16" r="1.3"/>',
 energy:'<path d="M11.5 2.5L4.5 11h5l-1 6.5 7-8.5h-5z"/>',
 shield:'<path d="M10 2.5l6 2.3v4.6c0 3.9-2.6 6.6-6 8.1-3.4-1.5-6-4.2-6-8.1V4.8z"/><path d="M7.5 10l1.8 1.8 3.4-3.6"/>',
+prison:'<rect x="3" y="3" width="14" height="14" rx="1"/><path d="M7 3v14M10 3v14M13 3v14"/>',
 policeS:'<path d="M10 2.5l6 2.3v4.6c0 3.9-2.6 6.6-6 8.1-3.4-1.5-6-4.2-6-8.1V4.8z"/><path d="M10 6.5l1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3z"/>',
 policeB:'<path d="M2.5 17.5V7l7.5-4 7.5 4v10.5"/><path d="M10 7.5l.9 1.8 2 .3-1.4 1.4.3 2-1.8-.9-1.8.9.3-2-1.4-1.4 2-.3z"/><path d="M6 17.5v-3h8v3"/>',
 suitcase:'<rect x="2.5" y="6.5" width="15" height="10.5" rx="1.6"/><path d="M7 6.5V4.6a1.1 1.1 0 0 1 1.1-1.1h3.8A1.1 1.1 0 0 1 13 4.6v1.9M2.5 11h15M8.5 11v1.6h3V11"/>',
@@ -2300,7 +2340,7 @@ function renderStats(){
     Object.keys(UPG).filter(t=>UPG[t].upkeep).map(t=>{const k=upgCount(t);return k?`<span>${UPG[t].name}: ${k} × ${UPG[t].upkeep} T¢</span><span>${fmt(k*UPG[t].upkeep)} T¢/godz.</span>`:''}).join('')+
     Object.keys(UPG2).map(t=>{const k=upgCount2(t);return k?`<span>${UPG2[t].name}: ${k} × ${UPG2[t].upkeep} T¢</span><span>${fmt(k*UPG2[t].upkeep)} T¢/godz.</span>`:''}).join('');
   const nextBill=30-Math.floor(gameT%30);
-  {const ref=last||cur;document.getElementById('stSafe').innerHTML=`<span>Komisariaty</span><span>${(counts.policeS||0)+(counts.policeB||0)}</span><span>Przestępstwa udaremnione (godz.)</span><span>${ref.crimeOk||0}</span><span>Nieudaremnione (godz.)</span><span class="${ref.crimeLost?'neg':''}">${ref.crimeLost||0}</span><span>Straty (godz.)</span><span class="${ref.crimeLoss?'neg':''}">${fmt(ref.crimeLoss||0)} T¢</span><span>Trwające zdarzenia</span><span>${crimes.length}</span>`+(counts.bank?`<span>Ryzyko napadu na bank</span><span>${Math.round(Math.min(0.85,0.3*counts.bank)*100)}% co kilka godzin</span>`:'')}
+  {const ref=last||cur;document.getElementById('stSafe').innerHTML=`<span>Komisariaty</span><span>${(counts.policeS||0)+(counts.policeB||0)}</span><span>Przestępstwa udaremnione (godz.)</span><span>${ref.crimeOk||0}</span><span>Nieudaremnione (godz.)</span><span class="${ref.crimeLost?'neg':''}">${ref.crimeLost||0}</span><span>Straty (godz.)</span><span class="${ref.crimeLoss?'neg':''}">${fmt(ref.crimeLoss||0)} T¢</span><span>Trwające zdarzenia</span><span>${crimes.length}</span>`+(()=>{const m=inmates();return m.n?`<span>Zatrzymani i więźniowie</span><span>${m.n} · ${fmt(m.n*JAIL_FEE)} T¢/godz.</span>`+(m.w?`<span>Praca więźniów</span><span class="pos">+${fmt(m.w)} T¢/godz.</span>`:''):''})()+(counts.bank?`<span>Ryzyko napadu na bank</span><span>${Math.round(Math.min(0.85,0.3*counts.bank)*100)}% co kilka godzin</span>`:'')}
   document.getElementById('stUpk').innerHTML=rows2+`<span><b>Razem w dzień</b></span><span><b>${fmt(upkeepRate(false))} T¢/godz.</b></span>`+
     `<span>W nocy (parki ×0,5)</span><span>${fmt(upkeepRate(true))} T¢/godz.</span>`+
     `<span>Rachunek co 30 min gry (o :00 i :30)</span><span>${fmt(upkeepRate(isNight())/2)} T¢</span><span>Następny za</span><span>${nextBill} min</span>`;
@@ -2364,7 +2404,7 @@ const STATIONS=[{name:'Nature FM',src:'music/nature.mp3'},{name:'Luxury FM',src:
 const radio={el:null,st:0,on:false,vol:0.6};
 try{const r=JSON.parse(localStorage.getItem('lt-radio')||'null');if(r){radio.st=Math.min(STATIONS.length-1,Math.max(0,r.st|0));radio.vol=r.vol??0.6;radio.want=!!r.on}}catch(e){}
 const radioSave=()=>{try{localStorage.setItem('lt-radio',JSON.stringify({st:radio.st,vol:radio.vol,on:radio.on}))}catch(e){}};
-function radioUI(){const rp=document.getElementById('rPlay');rp.textContent=radio.on?'❚❚':'▶';rp.setAttribute('aria-label',radio.on?'Wycisz radio':'Włącz radio');
+function radioUI(){const rp=document.getElementById('rPlay');rp.innerHTML=radio.on?'<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><rect x="5" y="4.5" width="3.2" height="11" rx=".8"/><rect x="11.8" y="4.5" width="3.2" height="11" rx=".8"/></svg>':'<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><path d="M6 4.5l10 5.5-10 5.5z"/></svg>';rp.setAttribute('aria-label',radio.on?'Wycisz radio':'Włącz radio');
   document.getElementById('rName').textContent=STATIONS[radio.st].name;document.getElementById('radio').classList.toggle('on',radio.on);
   document.getElementById('mVol').value=Math.round(radio.vol*100);document.getElementById('mVolV').textContent=Math.round(radio.vol*100)+'%'}
 function staticBurst(){try{const A=radio.ac||(radio.ac=new (window.AudioContext||window.webkitAudioContext)());const n=A.sampleRate*0.35,b=A.createBuffer(1,n,A.sampleRate),d=b.getChannelData(0);
@@ -2374,7 +2414,7 @@ function tune(){const S=STATIONS[radio.st];if(!radio.el){radio.el=new Audio();ra
   a.onloadedmetadata=()=>{if(isFinite(a.duration)&&a.duration>0)try{a.currentTime=(Date.now()/1000)%a.duration}catch(e){}};
   if(radio.on){const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{radio.on=false;radioUI()})}}
 function radioToggle(){radio.on=!radio.on;if(radio.on){staticBurst();tune()}else if(radio.el)radio.el.pause();radioUI();radioSave()}
-function radioNext(){radio.st=(radio.st+1)%STATIONS.length;if(radio.on){staticBurst();tune()}radioUI();radioSave()}
+function radioNext(){radio.st=((radio.st|0)+1)%STATIONS.length;if(radio.el){try{radio.el.pause()}catch(e){}}if(radio.on){staticBurst();tune()}radioUI();radioSave()}
 function setVol(v){radio.vol=Math.max(0,Math.min(1,v));if(radio.el)radio.el.volume=radio.vol;radioUI();radioSave()}
 document.getElementById('rPlay').addEventListener('click',radioToggle);document.getElementById('rNext').addEventListener('click',radioNext);document.getElementById('rSt').addEventListener('click',radioNext);
 document.getElementById('mVol').addEventListener('input',e=>setVol(e.target.value/100));radioUI();
@@ -2411,6 +2451,22 @@ for(const r of document.querySelectorAll('.res')){const mv=()=>{if(r.hasAttribut
   try{new MutationObserver(mv).observe(r,{attributes:true,attributeFilter:['title']})}catch(e){}
   r.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')showTip(r)});r.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&tipSrc===r)hideTip()});
   r.addEventListener('click',()=>{if(tipSrc===r&&!tipEl.hidden)return hideTip();showTip(r);clearTimeout(tipT);tipT=setTimeout(()=>{if(tipSrc===r)hideTip()},5000)})}
+/* overlays: tint every tile covered by police, smog, noise, park or entertainment happiness */
+const ovlMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(0.98,0.98).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.42,depthWrite:false}),N*N);
+ovlMesh.frustumCulled=false;ovlMesh.count=0;ovlMesh.renderOrder=3;colorBuf(ovlMesh,N*N,new THREE.Color('#ffffff'));scene.add(ovlMesh);let ovlMode='none',ovlT=0;
+const OVL={police:{c:['#2f6fe0'],note:'Niebieskie pola: zasięg komisariatów. Przestępstwa poza nim kończą się stratą.'},pol:{c:['#c9c23a','#e0962a'],note:'Żółte: lekki smog (−1 zadowolenia), pomarańczowe: silny (−2).'},
+  noise:{c:['#9a5bd6'],note:'Fioletowe: hałas wiatraków i transformatorów (−1 zadowolenia).'},park:{c:['#3cae4f'],note:'Zielone: dom tutaj ma +1 zadowolenia z parku.'},ent:{c:['#e0569a'],note:'Różowe: dom tutaj ma +1 zadowolenia z rozrywki.'}};
+function ovlVal(i){if(ovlMode==='pol')return pol[i];if(ovlMode==='noise')return noiseCov[i]?1:0;if(ovlMode==='park')return parkCov[i]?1:0;if(ovlMode==='ent')return entCov[i]?1:0;return 0}
+function drawOvl(){if(ovlMode==='none'){ovlMesh.count=0;return}let n=0;const col=new THREE.Color();let cov=null;
+  if(ovlMode==='police'){cov=new Uint8Array(N*N);for(const st of stations()){const r=polRad(grid[st]);for(const t of tilesOf(st)){const x=t%N,z=(t/N)|0;for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)cov[idx(nx,nz)]=1}}}}
+  for(let i=0;i<N*N;i++){const v=cov?cov[i]:ovlVal(i);if(!v||water[i])continue;dObj.position.set(cx(i),0.075,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();ovlMesh.setMatrixAt(n,dObj.matrix);
+    const cs=OVL[ovlMode].c;col.set(cs[Math.min(cs.length,v)-1]);ovlMesh.setColorAt(n,col);n++}
+  ovlMesh.count=n;ovlMesh.instanceMatrix.needsUpdate=true;if(ovlMesh.instanceColor)ovlMesh.instanceColor.needsUpdate=true}
+function setOvl(m){ovlMode=m;for(const b of document.querySelectorAll('[data-ovl]'))b.setAttribute('aria-pressed',String(b.dataset.ovl===m));document.getElementById('ovlNote').textContent=m==='none'?'':OVL[m].note;
+  document.getElementById('ovlBtn').classList.toggle('on',m!=='none');drawOvl()}
+for(const b of document.querySelectorAll('[data-ovl]'))b.addEventListener('click',()=>setOvl(b.dataset.ovl));
+document.getElementById('ovlBtn').addEventListener('click',()=>{const o=document.getElementById('ovl');o.hidden=!o.hidden;try{const br=document.getElementById('ovlBtn').getBoundingClientRect(),gr=document.getElementById('game').getBoundingClientRect();o.style.top=Math.round(br.bottom-gr.top+8)+'px'}catch(e){}document.getElementById('ovlBtn').setAttribute('aria-expanded',String(!o.hidden))});
+function ovlTick(dt){if(ovlMode==='none')return;ovlT-=dt;if(ovlT<=0){ovlT=0.5;drawOvl()}}
 const saveNow=()=>{try{save()}catch(e){}};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow()});
 window.addEventListener('pagehide',saveNow);window.addEventListener('beforeunload',saveNow);window.addEventListener('blur',saveNow);
@@ -2460,7 +2516,7 @@ function hud(){const mc=moneyCap(),tc=matCap();const v={m:Math.round(money),mc,t
 /* ---------- save / preset ---------- */
 const KEY='siatkowo-v4';
 let saveBlocked=false;
-function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,off:c.off?1:0,rot:c.rot,rot1:c.rot1,lv:c.lv||0,xp:c.xp?Math.round(c.xp*1000)/1000:0,lines:c.lines,owned:c.owned}]}
+function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,off:c.off?1:0,rot:c.rot,rot1:c.rot1,jail:c.jail&&c.jail.length?c.jail.map(q=>[Math.round(q.rel),q.w||0]):undefined,lv:c.lv||0,xp:c.xp?Math.round(c.xp*1000)/1000:0,lines:c.lines,owned:c.owned}]}
 function save(){if(saveBlocked)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
   const old=localStorage.getItem(KEY);if(old)localStorage.setItem(KEY+'-prev',old);
   localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff}))}catch(e){}}
@@ -2473,7 +2529,7 @@ function placeRow(row,anim){let[i,t,p,st,up,tr,gs,sec,x]=row;addCell(i,t,!!anim,
     if(x&&(t==='restaurant'||t==='bakery'))c.shelf=x.shelf||{};if(x&&t==='hotelB'&&x.attr&&ATTR[x.attr]){c.attr=x.attr;c.model.userData.attrSign.material=M(ATTR_COL[x.attr])}if(x&&x.up2&&UPG2[t]){c.up2=true;addUpgrade2Visual(c)}if(x&&x.filt&&UPGF[t]){c.filt=true;filterVisual(c)}if(x&&x.off)c.off=true;
     if(x&&isFactory(t)&&LINES[x.line]&&!FREE_LINES[x.line])up=1;
     if(x&&t==='shop'&&SPECS[x.spec]){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(x&&isFactory(t)&&LINES[x.line]){c.line=x.line;paintModel(c,GM[c.line])}if(x&&isFarm(t))c.acc=x.acc||0;
-    if(up&&UPG[t]){c.up=true;addUpgradeVisual(c);if(t==='coal'){c.gstock=0;c.gin=0;c.gtrucks=0}}if(TRASH[t])c.trash=tr||0;if(isFac(c))c.gstock=gs||0;if(x&&x.rot!=null&&c.tiles){c.rot=x.rot;refreshBuilding(i)}if(x&&x.rot1!=null&&!c.tiles){c.rot1=x.rot1;refreshBuilding(i)}if(x&&HLV[t]){c.xp=x.xp||0;if(x.lv){c.lv=Math.min(x.lv,HLV[t].res.length-1);setHousingModel(i)}}if(x&&t==='factoryB'){c.owned=(x.owned||[]).filter(k=>LINES[k]&&k!=='mix');c.lines=(x.lines||['mix']).filter(k=>k==='mix'||c.owned.includes(k)).slice(0,LINES_MAX);if(!c.lines.length)c.lines=['mix'];paintLines(c)}}
+    if(up&&UPG[t]){c.up=true;addUpgradeVisual(c);if(t==='coal'){c.gstock=0;c.gin=0;c.gtrucks=0}}if(TRASH[t])c.trash=tr||0;if(isFac(c))c.gstock=gs||0;if(x&&x.rot!=null&&c.tiles){c.rot=x.rot;refreshBuilding(i)}if(x&&x.rot1!=null&&!c.tiles){c.rot1=x.rot1;refreshBuilding(i)}if(x&&Array.isArray(x.jail))c.jail=x.jail.map(([rel,w])=>({rel,w}));if(x&&HLV[t]){c.xp=x.xp||0;if(x.lv){c.lv=Math.min(x.lv,HLV[t].res.length-1);setHousingModel(i)}}if(x&&t==='factoryB'){c.owned=(x.owned||[]).filter(k=>LINES[k]&&k!=='mix');c.lines=(x.lines||['mix']).filter(k=>k==='mix'||c.owned.includes(k)).slice(0,LINES_MAX);if(!c.lines.length)c.lines=['mix'];paintLines(c)}}
 function loadKey(K){try{let s=JSON.parse(localStorage.getItem(K)||'null');
   for(const[key,old]of[['siatkowo-v3',32],['siatkowo-v2',20]]){if(s||K!==KEY)break;const o=JSON.parse(localStorage.getItem(key)||'null');
     if(o&&o.cells&&o.cells.length){const off=(N-old)/2;o.cells=o.cells.map(([i,t,p])=>[idx(i%old+off,((i/old)|0)+off),t,p]);s=o}}
@@ -2556,14 +2612,15 @@ function frame(now){requestAnimationFrame(frame);
     if(c.timer<=0){const iv=60/(TIER[c.happy??3].trips*H.trips*hMul(c))*(night?2:1);c.timer+=iv;if(c.timer<=0)c.timer=iv;if(cars.length<PEOPLE_CARS)spawnCommuter(i)}}
   buildOcc();for(const c of cars)if(!c.dead)updateCar(c,dt);
   if(cars.some(c=>c.dead))cars=cars.filter(c=>!c.dead);
-  constructTick(dt);policeTick(dt,night);
+  constructTick(dt);policeTick(dt,night);ovlTick(Math.max(dt,0.016));
   for(let k=popping.length-1;k>=0;k--){const p=popping[k];p.t+=dt*5;const s=p.t>=1?1:0.5+0.5*Math.sin(p.t*Math.PI/2)*1.08;p.g.scale.setScalar(Math.min(s,1.05));if(p.t>=1){p.g.scale.setScalar(1);popping.splice(k,1)}}
   powerAcc+=dt;if(powerAcc>=0.25||powerDirty){computePower(powerAcc);powerAcc=0}
   const hBefore=Math.floor(gameT/60),halfBefore=Math.floor(gameT/30);gameT+=dt;cur.secs+=dt;cur.powDem+=pw.dem*dt;cur.powCap+=pw.cap*dt;
   if(Math.floor(gameT/30)!==halfBefore){const bill=Math.round(upkeepRate(isNight())/2);
     if(bill>0){money-=bill;cur.upkeep+=bill;setHint(`Rachunek za utrzymanie: −${fmt(bill)} T¢ (co 30 min gry)`+(money<0?` · Dług ${fmt(-money)} T¢: poniżej −1 000 T¢ miasto zbankrutuje!`:''),money<0,true)}}
   checkBankrupt();
-  if(Math.floor(gameT/60)!==hBefore){cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();save()}
+  if(Math.floor(gameT/60)!==hBefore){{const w=inmates().w;if(w>0){const n=addMoney(w);cur.inc+=n;cur.prisonInc=(cur.prisonInc||0)+n}}
+cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();save()}
   statsAcc+=dt;if(!statsEl.hidden&&statsAcc>0.5){statsAcc=0;renderStats()}
   for(const g of factories){const b=g.userData.sb||{x:0.3,y:0.85,z:-0.25,spread:0.25};const on=!g.userData.off&&!reduce;const ps=g.userData.puffs||[];
     ps.forEach((p,k)=>{p.visible=on;if(!on)return;const u=(time*0.45+k/ps.length)%1;p.position.set(b.x+u*b.spread,b.y+u*0.9,b.z);
