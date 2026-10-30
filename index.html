@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='1.3.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='1.3.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -417,7 +417,7 @@ const UPG={smallfac:{name:'Linia specjalistyczna',cost:250,upkeep:10,desc:'Wybó
   park3:{name:'Większy zasięg',cost:200,upkeep:0,desc:'Zasięg 9×9 zamiast 7×7'},
   shop:{name:'Kasy SCO',cost:150,upkeep:5,desc:'Kasy samoobsługowe: obsługa +50% (15 klientów/godz.), kolejka znika szybciej i rzadziej robi się tłok'},
   supermarket:{name:'Kasy SCO',cost:350,upkeep:10,desc:'Kasy samoobsługowe: obsługa +50% (60 klientów/godz.), kolejka znika szybciej i rzadziej robi się tłok'},
-  restaurant:{name:'Wykwintna restauracja',cost:450,upkeep:15,desc:'Dwupiętrowy lokal, zasięg rozrywki 5×5 zamiast 3×3'}};
+  restaurant:{name:'Wykwintna restauracja',cost:450,upkeep:15,desc:'Dwupiętrowy lokal, zasięg rozrywki 5×5 zamiast 3×3, kolejka 20 gości zamiast 10'}};
 const UPGF={factory:{name:'Filtry',cost:300,upkeep:15,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},smallfac:{name:'Filtry',cost:180,upkeep:10,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},
   incinerator:{name:'Filtry',cost:500,upkeep:25,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, spalanie −10%'},coal:{name:'Filtry',cost:600,upkeep:30,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, moc −10%'}};
 const OUT_R=25;
@@ -1413,7 +1413,7 @@ function wasteTick(dt,night){
 const sellsOf=c=>c.t==='restaurant'?FOOD:c.t==='gallery'?[...new Set(c.stores.flatMap(s=>SPECS[s].sells))]:SPECS[c.spec].sells;
 const slotsOf=c=>c.t==='gallery'?SHOP_SLOTS*c.stores.length:c.t==='supermarket'?45:SHOP_SLOTS;
 /* customers per game hour a shop can serve; above that it is crowded */
-const SCAP=c=>(c.up&&(c.t==='shop'||c.t==='supermarket')?1.5:1)*SCAP0(c);const SCAP0=c=>c.t==='supermarket'?40:c.t==='gallery'?8*Math.max(1,c.stores.length):c.t==='restaurant'?10:c.t==='shop'?10:0;
+const SCAP=c=>(c.up&&(c.t==='shop'||c.t==='supermarket')?1.5:1)*SCAP0(c);const SCAP0=c=>c.t==='supermarket'?40:c.t==='gallery'?8*Math.max(1,c.stores.length):c.t==='restaurant'?(c.up?20:10):c.t==='shop'?10:0;
 const shelfTotal=c=>Object.values(c.shelf||{}).reduce((a,b)=>a+b,0);
 function pickShelf(c){const l=sellsOf(c).filter(k=>(c.shelf[k]||0)>0);return l[(Math.random()*l.length)|0]}
 /* a factory with 2 shifts turns its inputs into 4 t of product and ships it */
