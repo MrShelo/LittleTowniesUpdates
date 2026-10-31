@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.3.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.3.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2689,18 +2689,31 @@ document.addEventListener('visibilitychange',()=>{if(!radio.el||!radio.on)return
 const UREPO=Object.freeze('MrShelo/LittleTowniesUpdates');const uSt=document.getElementById('uSt');try{localStorage.removeItem('lt-repo')}catch(e){}
 let running=null;try{const u=JSON.parse(localStorage.getItem('lt-update')||'null');if(u&&window.__ltNew)running=u.v}catch(e){}
 document.getElementById('uVer').textContent=LT_VERSION;document.getElementById('uOld').hidden=!localStorage.getItem('lt-update');
-async function getRemote(repo,file){const urls=[[`https://api.github.com/repos/${repo}/contents/${file}?ref=main&t=${Date.now()}`,{Accept:'application/vnd.github.raw'}],[`https://raw.githubusercontent.com/${repo}/main/${file}?t=${Date.now()}`],[`https://cdn.jsdelivr.net/gh/${repo}@main/${file}`]];let last;
-  for(const[u,h]of urls){try{const r=await fetch(u,{cache:'no-store',headers:h||{}});if(r.ok)return await r.text();last=new Error('HTTP '+r.status)}catch(e){last=e}}throw last||new Error('brak połączenia')}
+/* several independent sources are asked at once and the newest version wins, so one stale cache or a rate-limited API can't hide an update */
+async function fetchTxt(u,h){const ac=typeof AbortController!=='undefined'?new AbortController():null;const tm=setTimeout(()=>ac&&ac.abort(),12000);
+  try{const r=await fetch(u,{cache:'no-store',headers:h||{},signal:ac?ac.signal:undefined});if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}finally{clearTimeout(tm)}}
+const uSrc=repo=>[
+  ['GitHub API',f=>fetchTxt(`https://api.github.com/repos/${repo}/contents/${f}?ref=main&t=${Date.now()}`,{Accept:'application/vnd.github.raw'})],
+  ['GitHub raw',f=>fetchTxt(`https://raw.githubusercontent.com/${repo}/main/${f}?t=${Date.now()}`)],
+  ['jsDelivr (wydanie)',async(f,v)=>{if(!v)v=JSON.parse(await fetchTxt(`https://data.jsdelivr.com/v1/packages/gh/${repo}/resolved?specifier=latest&t=${Date.now()}`)).version;if(!v)throw new Error('brak wydań');return fetchTxt(`https://cdn.jsdelivr.net/gh/${repo}@${v}/${f}`)}],
+  ['jsDelivr',f=>{try{fetch(`https://purge.jsdelivr.net/gh/${repo}@main/${f}`,{mode:'no-cors'}).catch(()=>{})}catch(e){}return fetchTxt(`https://cdn.jsdelivr.net/gh/${repo}@main/${f}?t=${Date.now()}`)}]];
+async function getRemote(repo,file){let last;for(const[n,fn]of uSrc(repo)){try{return await fn(file)}catch(e){last=e}}throw last||new Error('brak połączenia')}
 function viaScript(repo,file){return new Promise((res,rej)=>{const s=document.createElement('script');window.__ltUpdate=d=>{res(d);s.remove()};s.onerror=()=>rej(new Error('nie można pobrać'));s.src=`https://cdn.jsdelivr.net/gh/${repo}@main/${file}`;document.head.appendChild(s)})}
 let uPending=null;
 async function checkUpdate(){const repo=UREPO;
-  if(uPending){uSt.textContent='Pobieram…';try{let html;try{html=await getRemote(repo,'index.html')}catch(e){html=(await viaScript(repo,'update.js')).html}
-      if(!html||html.indexOf('LT_VERSION')<0)throw new Error('plik gry jest niepełny');save();localStorage.setItem('lt-update',JSON.stringify({v:uPending.v,html}));uSt.textContent='Gotowe. Uruchamiam nową wersję…';setTimeout(()=>location.reload(),600)}
-    catch(e){uSt.textContent='Nie udało się pobrać: '+e.message}return}
-  uSt.textContent='Sprawdzam…';let info;
-  try{info=JSON.parse(await getRemote(repo,'version.json'))}catch(e){try{const d=await viaScript(repo,'update.js');info={v:d.v,notes:d.notes}}catch(e2){uSt.textContent='Brak połączenia z GitHubem ('+e.message+').';return}}
-  if(ltCmpV(info.v,LT_VERSION)>0){uPending=info;uSt.textContent=`Dostępna wersja ${info.v}${info.notes?': '+info.notes:''}`;document.getElementById('uCheck').textContent=`Pobierz i uruchom ${info.v}`}
-  else uSt.textContent=`Masz najnowszą wersję (${LT_VERSION}).`}
+  if(uPending){uSt.textContent='Pobieram…';const want=uPending.v,srcs=uSrc(repo).sort((x,y)=>(y[0]===uPending.src)-(x[0]===uPending.src));let html=null,errs=[];
+    for(const[n,fn]of srcs){try{const h=await fn('index.html',n==='jsDelivr (wydanie)'?want:undefined);const m=/LT_VERSION='([^']+)'/.exec(h);if(m&&ltCmpV(m[1],want)>=0){html=h;break}errs.push(n+': starsza kopia')}catch(e){errs.push(n+': '+e.message)}}
+    if(!html){try{const d=await viaScript(repo,'update.js');if(d&&d.html&&ltCmpV(d.v,want)>=0)html=d.html}catch(e){}}
+    if(!html){uSt.textContent='Nie udało się pobrać '+want+' ('+errs.join('; ')+'). Spróbuj za chwilę.';return}
+    save();localStorage.setItem('lt-update',JSON.stringify({v:want,html}));uSt.textContent='Gotowe. Uruchamiam nową wersję…';setTimeout(()=>location.reload(),600);return}
+  uSt.textContent='Sprawdzam…';const srcs=uSrc(repo);
+  const res=await Promise.all(srcs.map(([n,fn])=>fn('version.json').then(t=>({n,info:JSON.parse(t)}),e=>({n,err:e.message}))));
+  let best=null;for(const r of res)if(r.info&&r.info.v&&(!best||ltCmpV(r.info.v,best.info.v)>0))best=r;
+  if(!best){try{const d=await viaScript(repo,'update.js');best={n:'jsDelivr (skrypt)',info:{v:d.v,notes:d.notes}}}catch(e){}}
+  const errs=res.filter(r=>r.err).map(r=>r.n+': '+r.err).join('; ');
+  if(!best){uSt.textContent='Brak połączenia z GitHubem ('+errs+').';return}
+  if(ltCmpV(best.info.v,LT_VERSION)>0){uPending={v:best.info.v,notes:best.info.notes,src:best.n};uSt.textContent=`Dostępna wersja ${best.info.v}${best.info.notes?': '+best.info.notes:''}`;document.getElementById('uCheck').textContent=`Pobierz i uruchom ${best.info.v}`}
+  else uSt.textContent=`Masz najnowszą wersję (${LT_VERSION}). Sprawdzono: ${res.map(r=>r.n+(r.info?' '+r.info.v:' ✗')).join(' · ')}`}
 document.getElementById('uCheck').addEventListener('click',checkUpdate);
 document.getElementById('uOld').addEventListener('click',()=>{save();try{localStorage.removeItem('lt-update')}catch(e){}location.reload()});
 /* readable tooltips for the HUD tiles (hover with a mouse, tap on touch) and for entry roads */
