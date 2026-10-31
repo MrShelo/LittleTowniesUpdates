@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.0.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.0.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -94,7 +94,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   padding-bottom:10px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .dock > *{pointer-events:auto}
-.hint{justify-self:center;max-width:min(560px,100%);padding:8px 14px;font-size:13.5px;line-height:1.4;text-align:center;text-wrap:balance}
+.hint:empty{display:none}.hint{justify-self:center;max-width:min(560px,100%);padding:8px 14px;font-size:13.5px;line-height:1.4;text-align:center;text-wrap:balance}
 .hint b{font-weight:600}
 .hint.warn{color:var(--warn);border-color:var(--warn)}
 .build{justify-self:center;max-width:100%;min-width:0;display:grid;gap:6px;padding:6px}
@@ -1950,7 +1950,7 @@ function computePower(dt){if(topoDirty)rebuildHV();computeDams();const dm=isNigh
     if(k<0&&c.t!=='wind'){const h=inRange(i,HV_R,isHV);if(h.length)k=comp[h[0]]}c.net=k;gens.push(i)}
   {const seen=new Set();for(const i of gens){if(grid[i].t!=='hydro'||seen.has(i))continue;const cl=[i];seen.add(i);for(let h=0;h<cl.length;h++)for(const j of nbrs(cl[h]))if(grid[j]&&grid[j].t==='hydro'&&!grid[j].off&&!seen.has(j)){seen.add(j);cl.push(j)}
     const k=cl.map(j=>grid[j].net).find(v=>v>=0);for(const j of cl){grid[j].net=k===undefined?-1:k;grid[j].damN=cl.length}}}
-  for(const i of gens){const c=grid[i];if(c.t==='wind'&&c.net>=0){c.wake=nbrs8(i).filter(j=>grid[j]&&grid[j].t==='wind').length;const mwv=Math.max(0,WIND_MW+(c.up2?3:0)-c.wake)+(c.up?SOLAR_MW*dayF:0);sup[c.net]+=mwv;cap+=mwv}}
+  for(const i of gens){const c=grid[i];if(c.t==='wind'&&c.net>=0){c.wake=nbrs8(i).filter(j=>grid[j]&&grid[j].t==='wind').length;const mwv=Math.max(0,WIND_MW+(c.up2?3:0)-c.wake)+(c.up?SOLAR_MW*dayF:0);c.windMW=mwv;sup[c.net]+=mwv;cap+=mwv}}
   for(const i of gens){const c=grid[i];c.mw=0;if(c.net<0)continue;if(c.t==='hydro'){c.mw=water[i]?(damSealed[i]?7.5:0):nearWater(i)>=0?15:0;sup[c.net]+=c.mw;cap+=c.mw}
     if(c.t==='hydrogen'){c.mw=(c.water==='ok'?45:c.water==='dirty'?22:0)+(c.up&&c.water==='ok'?10:c.up&&c.water==='dirty'?5:0);sup[c.net]+=c.mw;cap+=c.mw}}
   for(const i of gens){const c=grid[i];if(c.t!=='coal')continue;c.running=false;c.fuel=c.fuel||0;
@@ -2080,7 +2080,7 @@ function updateCamera(){const lim=HALF;cam.target.x=Math.max(-lim,Math.min(lim,c
   cam.phi=Math.max(0.3,Math.min(1.3,cam.phi));cam.radius=Math.max(6,Math.min(110,cam.radius));
   const s=Math.sin(cam.phi);camera.position.set(cam.target.x+cam.radius*s*Math.sin(cam.theta),cam.radius*Math.cos(cam.phi),cam.target.z+cam.radius*s*Math.cos(cam.theta));
   camera.lookAt(cam.target)}
-function pan(dx,dy){focus=null;const k=cam.radius*0.0016;const rx=Math.cos(cam.theta),rz=-Math.sin(cam.theta);const fx=-Math.sin(cam.theta),fz=-Math.cos(cam.theta);
+function pan(dx,dy){focus=null;if(tut&&tut.on&&Math.abs(dx)+Math.abs(dy)>2)tut.moved=(tut.moved||0)+Math.abs(dx)+Math.abs(dy);const k=cam.radius*0.0016;const rx=Math.cos(cam.theta),rz=-Math.sin(cam.theta);const fx=-Math.sin(cam.theta),fz=-Math.cos(cam.theta);
   cam.target.x+=(-dx*rx+dy*fx)*k;cam.target.z+=(-dx*rz+dy*fz)*k}
 
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3();
@@ -2103,13 +2103,13 @@ el.addEventListener('pointermove',e=>{
   if(mode==='pending'&&Math.hypot(p.x-p.sx,p.y-p.sy)>7){
     if(p.btn===2||p.shift)mode='rotate';else if(p.btn===1)mode='pan';
     else if(STREET[tool]||tool==='highway'||tool==='bridge'||tool==='hydro'||tool==='pole'||tool==='poleDel'||tool==='pipe'||tool==='pipeDel'||tool==='bulldoze'){mode='paint';lastPaint=-1;paintAt(p.sx,p.sy)}else mode='pan'}
-  if(mode==='rotate'){cam.theta-=dx*0.008;cam.phi-=dy*0.006}
+  if(mode==='rotate'){cam.theta-=dx*0.008;cam.phi-=dy*0.006;if(tut&&tut.on)tut.turned=(tut.turned||0)+Math.abs(dx)}
   else if(mode==='pan')pan(dx,dy);
   else if(mode==='paint')paintAt(e.clientX,e.clientY);
   else if(mode==='multi'&&ptrs.size===2){const n=twoInfo();const mv=[...ptrs.values()].map(q=>Math.hypot(q.x-(q.mx0??q.x),q.y-(q.my0??q.y)));
     if(!multi.kind&&Math.max(...mv)>14)multi.kind=Math.min(...mv)<8?'zoom':'rotate';const kind=multi.kind;
     if(kind==='zoom'&&n.d>0&&multi.d>0)cam.radius*=multi.d/n.d;
-    else if(kind==='rotate'){let da=n.ang-multi.ang;da=Math.atan2(Math.sin(da),Math.cos(da));cam.theta-=da}
+    else if(kind==='rotate'){let da=n.ang-multi.ang;da=Math.atan2(Math.sin(da),Math.cos(da));cam.theta-=da;if(tut&&tut.on)tut.turned=(tut.turned||0)+Math.abs(da)*200}
     multi=Object.assign(n,{kind})}
   if(e.pointerType==='mouse')hover(e.clientX,e.clientY);
   updateCamera()});
@@ -2188,7 +2188,7 @@ document.getElementById('pRot').addEventListener('click',rotateFP);document.getE
 const hintEl=document.getElementById('hint');let hintTimer=0;
 function setHint(html,warn,temp){hintEl.innerHTML=html;hintEl.classList.toggle('warn',!!warn);hintTimer=temp?2.6:0}
 function toolHint(){
-  if(tool==='view')return'<b>Podgląd</b> · stuknij budynek, by zobaczyć stan. Przeciągnij, by przesunąć; dwa palce lub prawy przycisk obracają.';
+  if(tool==='view')return'';
   if(tool==='bulldoze')return'<b>Wyburz</b> · zwraca połowę kosztu. Przeciągnij, by usuwać kilka pól.';
   const d=DEF[tool];return`<b>${d.name}</b> · ${d.cost?fmt(d.cost)+' T¢ · ':''}${d.desc}`+(FP(tool)?` Stuknij miejsce, obróć i zatwierdź (${FP(tool).join('×')}).`:BUILD[tool]&&!DRIVE[tool]?' R obraca budynek.':'')+(DEMAND[tool]?` Pobiera ${mw(DEMAND[tool])} MW.`:'')+(UPKEEP[tool]?` Utrzymanie ${UPKEEP[tool]} T¢/godz.`:'')}
 function apply(i,painting){
@@ -2263,7 +2263,7 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
 const inspEl=document.getElementById('insp');let inspI=-1,focus=null;
 const sameType=t=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].t===t)o.push(i);return o};
 const houses=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&HOUSING[grid[i].t])o.push(i);return o};
-function openHouse(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;inspI=i;inspEl.hidden=false;hintEl.hidden=true;ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
+function openHouse(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;inspI=i;inspEl.hidden=false;hintEl.hidden=true;ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
   const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):DEF[c.t].area,'hold');
   else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');renderInsp()}
 function closeHouse(){if(areaT>1e8){areaT=0;area.visible=false}inspI=-1;inspEl.hidden=true;hintEl.hidden=false;ring.visible=false}
@@ -2332,6 +2332,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(EDU[c.t]){let n=0;const r=EDU[c.t].r,ts=tilesOf(i);for(let j=0;j<N*N;j++){const h=grid[j];if(!h||!h.pp)continue;if(!tilesOf(j).some(k=>ts.some(t=>Math.abs(t%N-k%N)<=r&&Math.abs(((t/N)|0)-((k/N)|0))<=r)))continue;for(const q of h.pp){const s=stageOf(q.a);if(EDU[c.t].k==='p'?s===1:s===2)n++}}R('Uczniowie w zasięgu',`${n}`);R('Zasięg',`${r} pól od budynku`);if(EDU[c.t].lyc)R('Bonus','zarobki w zasięgu +5%');if(EDU[c.t].tech)R('Bonus','fabryki, wytwórnie +5%, magazyny +5%')}
   if(c.t==='prison'){const j=c.jail||[],w=j.filter(q=>q.w).length;R('Więźniowie',`${j.length} / ${prisonCap(c)}`+(c.inbound?` (+${c.inbound} w drodze)`:''),j.length>=prisonCap(c)?'warnv':'');R('Koszt',`${JAIL_FEE} T¢/godz. za więźnia: ${fmt(JAIL_FEE*j.length)} T¢/godz.`);
     R('Pracujący',c.up2?`${w} · ${fmt(j.reduce((a,q)=>a+(q.w||0),0))} T¢/godz.`:'dobuduj blok pracy');if(j.length){const nx=Math.min(...j.map(q=>q.rel));R('Najbliższe wyjście',`za ${Math.max(1,Math.round((nx-gameT)/60))} godz. gry`)}}
+  if(c.t==='wind'){R('Moc',c.net<0?'niepodłączony: postaw transformator obok':`${mw(Math.round((c.windMW||0)*10)/10)} MW`,c.net<0?'warnv':'');if(c.wake)R('Cień innych wiatraków',`−${c.wake} MW`,'warnv');if(c.up)R('Panele słoneczne',`+${mw(Math.round(SOLAR_MW*dayF*10)/10)} MW teraz`)}
   if(isPolice(c.t)){const pc=polCars(i);R('Zasięg',`${polRad(c)*2+1}×${polRad(c)*2+1}`);R('Cele',`${(c.jail||[]).length} / ${POL[c.t].cells}`+(counts.prison?'':' · brak więzienia: zatrzymani zostają tutaj'),(c.jail||[]).length>=POL[c.t].cells?'warnv':'');R('Patrole',`${pc.filter(q=>q.role==='patrol').length} / ${POL[c.t].patrol} na ulicach`);R('Do interwencji w garażu',c.up?`${2-pc.filter(q=>q.role==='reserve').length} / 2`:'brak (dobuduj drugi garaż)');R('Interwencje teraz',`${pc.filter(q=>q.task).length}`)}
   if(c.t==='hotelS'||c.t==='hotelB'){const ts=tilesOf(i),st=hotelStars(i);R('Atrakcyjność',`${'★'.repeat(st)}${'☆'.repeat(3-st)} ${st}/3 · +${st*25}% przyjezdnych`,st?'':'warnv');
     R(ts.some(k=>parkCov[k])?'✓ park w zasięgu':'✗ brak parku w zasięgu','');R((c.t==='hotelB'&&c.attr)||ts.some(k=>entCov[k])?'✓ rozrywka (atrakcja hotelu albo obok)':'✗ brak rozrywki','');R(ts.some(k=>shopCov[k])?'✓ sklep w 5 polach':'✗ brak sklepu w 5 polach','');R('Nocleg',`${PRICE[c.t]} T¢ od przyjezdnego`);R('Przyjezdni',`+${c.t==='hotelS'?4:10} aut/godz. na każdym wjeździe`)}
@@ -2693,9 +2694,12 @@ function ovlTick(dt){if(ovlMode==='none')return;ovlT-=dt;if(ovlT<=0){ovlT=0.5;dr
 /* tutorial: a checklist for a new city that leads to the first steady income; can be skipped */
 let tut=null;
 const TUT=[
+  ['Przesuń mapę','Przeciągnij jednym palcem albo lewym przyciskiem myszy.',()=>!!(tut&&tut.moved>150)],
+  ['Obróć widok','Dwa palce obracają się wokół siebie, na komputerze prawy przycisk myszy.',()=>!!(tut&&tut.turned>120)],
   ['Połącz ulicę z drogą wjazdową','Drogi → Jednojezdniowa. Poprowadź ją od drogi wjazdowej przy krawędzi mapy.',()=>{let n=0;for(const c of grid)if(c&&STREET[c.t]&&!c.edge)n++;return n>=3}],
   ['Postaw 2 domy przy ulicy','Domy → Dom jednorodzinny albo kamienica.',()=>{let n=0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HLV[c.t]&&entryOf(i)>=0)n++}return n>=2}],
   ['Postaw wiatrak i transformator obok niego','Energia → Wiatrak, potem Transformator na sąsiednim polu.',()=>grid.some(c=>c&&c.t==='wind'&&c.net>=0)],
+  ['Sprawdź wiatrak w podglądzie','Wybierz narzędzie Podgląd (oko) i stuknij wiatrak: zobaczysz, ile prądu daje.',()=>!!(tut&&tut.windSeen)],
   ['Doprowadź prąd słupami','Energia → Słup albo Linia słupów na ulicy od transformatora do domów.',()=>grid.some(c=>c&&HLV[c.t]&&c.powered)],
   ['Daj domom wodę','Woda → Pompa przy rzece, potem Rury od pompy do domów.',()=>grid.some(c=>c&&HLV[c.t]&&c.water==='ok')],
   ['Postaw magazyn','Przemysł → Magazyn. Tu trafiają materiały i towary.',()=>grid.some(c=>c&&isWH(c.t)&&c.powered)],
