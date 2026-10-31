@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.3.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.3.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1165,7 +1165,9 @@ function buildHydroOld(){const g=new THREE.Group();g.add(box(0.96,0.06,0.8,mat.c
   const sp=part(FK.body,M('#cfe9ef'),0.9,0.02,0.2,0,-0.2,0.48);sp.castShadow=false;g.add(sp);return g}
 function buildHydrogen(){const g=new THREE.Group();g.add(box(0.94,0.04,0.94,mat.concrete));
   const tw=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.19,0.5,18,1,true),new THREE.MeshLambertMaterial({color:'#d6d2c8',side:THREE.DoubleSide}));tw.position.set(-0.2,0.29,-0.2);tw.castShadow=true;g.add(tw);
-  for(const[y,r,x]of[[0.62,0.09,-0.2],[0.72,0.075,-0.17],[0.8,0.06,-0.22]]){const st=part(FK.ball,M('#f4f6f8'),r*1.2,r,r*1.2,x,y,-0.2);st.castShadow=false;g.add(st)}
+  /* steam rises from the cooling tower (animated with the chimney smoke) */
+  const puffs=[];for(let k=0;k<5;k++){const p=new THREE.Mesh(new THREE.SphereGeometry(0.09,8,6),new THREE.MeshLambertMaterial({color:'#f6f8fa',transparent:true,opacity:.7,depthWrite:false}));p.castShadow=false;g.add(p);puffs.push(p)}
+  g.userData.puffs=puffs;g.userData.sb={x:-0.2,y:0.56,z:-0.2,spread:0.12,rise:0.55,op:0.8};
   g.add(box(0.46,0.2,0.28,M('#e8eef2'),0.08,0.04,0.24));g.add(box(0.48,0.04,0.3,M('#c9643a'),0.08,0.24,0.24));g.add(box(0.14,0.08,0.01,M('#c9643a'),-0.06,0.1,0.385));
   const pp=part(FK.cyl,mat.steel,0.03,0.4,0.03,0.05,0.12,0.02);pp.rotation.z=Math.PI/2;g.add(pp);
   for(const[a,b]of[[-0.06,-0.06],[0.06,0.06],[-0.06,0.06],[0.06,-0.06]])g.add(box(0.018,0.34,0.018,mat.steel,0.24+a*0.6,0.04,-0.22+b*0.6));
@@ -1530,7 +1532,7 @@ function addCell(i,t,anim=true,second=-1){const extra=Array.isArray(second)?seco
   if(DRIVE[t]){const[bg,bm]=roadBase(t);const s=new THREE.Mesh(bg,bm);s.receiveShadow=true;s.castShadow=t==='bridge';g.add(s)}
   else{const model=t==='park3'&&!extra.length?buildPark(3):t==='incinerator'&&!extra.length?buildIncinerator():BUILD[t]();if(cell.vert)model.rotation.y=Math.PI/2;
     if(extra.length>1){const xs=[i,...extra].map(k=>k%N),zs=[i,...extra].map(k=>(k/N)|0);if(Math.max(...zs)-Math.min(...zs)>Math.max(...xs)-Math.min(...xs))model.rotation.y=Math.PI/2}g.add(model);cell.model=model;cell.marker=markerMesh();g.add(cell.marker);
-    if(isFactory(t)||t==='coal'||t==='incinerator')factories.add(model);if(t==='wind')winds.add(model.userData.rotor);
+    if(isFactory(t)||t==='coal'||t==='incinerator'||t==='hydrogen')factories.add(model);if(t==='wind')winds.add(model.userData.rotor);
     if(DEMAND[t]){cell.bolt=boltMesh();g.add(cell.bolt);bolts.add(cell.bolt)}}
   if(t==='shop'){cell.shelf={};cell.incoming=0;cell.spec='mall';paintModel(cell,SM.mall)}
   if(t==='bakery'){cell.shelf={};cell.incoming=0;cell.bake=0}
@@ -1982,7 +1984,7 @@ function computePower(dt){if(topoDirty)rebuildHV();computeDams();const dm=isNigh
     const k=cl.map(j=>grid[j].net).find(v=>v>=0);for(const j of cl){grid[j].net=k===undefined?-1:k;grid[j].damN=cl.length}}}
   for(const i of gens){const c=grid[i];if(c.t==='wind'&&c.net>=0){c.wake=nbrs8(i).filter(j=>grid[j]&&grid[j].t==='wind').length;const mwv=Math.max(0,WIND_MW+(c.up2?3:0)-c.wake)+(c.up?SOLAR_MW*dayF:0);c.windMW=mwv;sup[c.net]+=mwv;cap+=mwv}}
   for(const i of gens){const c=grid[i];c.mw=0;if(c.net<0)continue;if(c.t==='hydro'){c.mw=water[i]?(damSealed[i]?7.5:0):nearWater(i)>=0?15:0;sup[c.net]+=c.mw;cap+=c.mw}
-    if(c.t==='hydrogen'){c.mw=(c.water==='ok'?45:c.water==='dirty'?22:0)+(c.up&&c.water==='ok'?15:c.up&&c.water==='dirty'?7.5:0);sup[c.net]+=c.mw;cap+=c.mw}}
+    if(c.t==='hydrogen'){if(c.model)c.model.userData.off=!(c.water==='ok'||c.water==='dirty');c.mw=(c.water==='ok'?45:c.water==='dirty'?22:0)+(c.up&&c.water==='ok'?15:c.up&&c.water==='dirty'?7.5:0);sup[c.net]+=c.mw;cap+=c.mw}}
   for(const i of gens){const c=grid[i];if(c.t!=='coal')continue;c.running=false;c.fuel=c.fuel||0;
     if(c.net<0)continue;const CMW=COAL_MW*(c.filt?0.9:1);if(c.fuel>0||matl>=1)cap+=CMW;
     if(sup[c.net]<dem[c.net]-1e-6){
@@ -2949,8 +2951,8 @@ function frame(now){requestAnimationFrame(frame);
 cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();save()}
   statsAcc+=dt;if(!statsEl.hidden&&statsAcc>0.5){statsAcc=0;renderStats()}
   for(const g of factories){const b=g.userData.sb||{x:0.3,y:0.85,z:-0.25,spread:0.25};const on=!g.userData.off&&!reduce;const ps=g.userData.puffs||[];
-    ps.forEach((p,k)=>{p.visible=on;if(!on)return;const u=(time*0.45+k/ps.length)%1;p.position.set(b.x+u*b.spread,b.y+u*0.9,b.z);
-    p.scale.setScalar(0.6+u*1.6);p.material.opacity=0.65*(1-u)})}
+    ps.forEach((p,k)=>{p.visible=on;if(!on)return;const u=(time*0.45+k/ps.length)%1;p.position.set(b.x+u*b.spread,b.y+u*(b.rise||0.9),b.z);
+    p.scale.setScalar(0.6+u*1.6);p.material.opacity=(b.op||0.65)*(1-u)})}
   if(!reduce){for(const r of winds)r.rotation.z-=dt*2.4;for(const b of bolts)if(b.visible)b.rotation.y+=dt*2}
   updateFloats(dt);updateStatus(Math.max(dt,0.016));
   if(bridgeDirty)rebuildBridges();
