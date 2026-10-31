@@ -1,1 +1,1 @@
-{"v": "3.3.1", "notes": "3.3.1: pewniejsze sprawdzanie aktualizacji — gra pyta naraz GitHub API, GitHub raw i jsDelivr i bierze najnowszą wersję; przy pobieraniu sprawdza, że plik ma właściwą wersję."}
+{"v": "3.3.2", "notes": "3.3.2: pewniejsze sprawdzanie aktualizacji — gra pyta naraz GitHub API, GitHub raw i jsDelivr i bierze najnowszą wersję; przy pobieraniu sprawdza, że plik ma właściwą wersję."}
