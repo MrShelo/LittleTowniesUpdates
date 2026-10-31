@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.2.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.2.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -720,9 +720,9 @@ function lifeHour(i,c,six){if(!c.pp||c.aband)return;const cap=residents(c),h=c.h
   if(h<=1&&c.pp.length&&Math.random()<0.08)c.pp.splice((Math.random()*c.pp.length)|0,1);
   if(c.pp.length>cap)c.pp.length=cap}
 function peopleBox(i,c){if(!c.pp)return'';const st=[0,0,0,0,0];for(const q of c.pp)st[stageOf(q.a)]++;const ts=tilesOf(i),ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]);
-  const sick=c.pp.filter(q=>q.s===1).length,hosp=c.pp.filter(q=>q.s===2).length,sc=sickChance(i),sf=sickFactors(i);
+  const sick=c.pp.filter(q=>q.s===1).length,hosp=c.pp.filter(q=>q.s===2).length,sc=sickChance(i);
   return`<div class="facts">`+STAGES.map((S,k)=>`<span>${S[1]}</span><span>${st[k]}${k===1&&st[1]?ep?' · w szkole':' · bez szkoły':''}${k===2&&st[2]?es?' · w szkole':' · bez szkoły':''}</span>`).join('')+
-    `<span>Chorzy</span><span class="${sick?'neg':''}">${sick} bez leczenia · ${hosp} w szpitalu</span><span>Szansa choroby</span><span class="${sc>0.08?'neg':''}">${Math.round(sc*100)}%/godz.</span><span>Chroni (−4% każde)</span><span>${[['water','woda'],['power','prąd'],['air','czyste powietrze'],['park','park'],['med','opieka medyczna']].map(([k,n])=>sf[k]?'✓ '+n:'<span class="neg">✗ '+n+'</span>').join(' · ')}</span>`+
+    `<span>Chorzy</span><span class="${sick?'neg':''}">${sick} bez leczenia · ${hosp} w szpitalu</span><span>Szansa choroby</span><span class="${sc>0.08?'neg':''}">${Math.round(sc*100)}%/godz.</span>`+
     (c.dead?`<span>Zmarli w domu</span><span class="neg">${c.dead} · czekają na karawan</span>`:'')+(gameT-(c.lastBuy??gameT)>2880?`<span>Ostatnie zakupy</span><span class="neg">${Math.floor((gameT-c.lastBuy)/60)} godz. temu</span>`:'')+`</div>`}
 /* hearses take the dead to a cemetery or crematorium with free places */
 function dcFree(c){return dCap(c)-((c.bodies||0)+(c.urn?c.urn.length:0)+(c.inbound||0))}
@@ -2017,20 +2017,20 @@ function computeWater(){const comp=new Int32Array(N*N).fill(-1);let nc=0;
   buildTaps();
   if(xray)buildPipes(comp,S)}
 /* ---------- pipes view ---------- */
-const tapMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),M('#3a8fd8'),N*N*2);tapMesh.frustumCulled=false;tapMesh.count=0;scene.add(tapMesh);let tapSig='';
-function buildTaps(){const pts=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||DRIVE[c.t]||!WATER[c.t]||!(c.wnet>=0))continue;
-    for(const t of tilesOf(i))for(const j of nbrs(t))if(pipe[j]&&grid[j]&&DRIVE[grid[j].t]){pts.push([t,j]);break}}
-  const sig=pts.map(p=>p.join('-')).join(',');if(sig===tapSig)return;tapSig=sig;let n=0;
-  for(const[t,j]of pts){const dx=cx(t)-cx(j),dz=cz(t)-cz(j);dObj.rotation.set(0,0,0);dObj.position.set(cx(j)+dx*0.5,0.05,cz(j)+dz*0.5);dObj.scale.set(dx?0.22:0.07,0.05,dz?0.22:0.07);dObj.updateMatrix();tapMesh.setMatrixAt(n++,dObj.matrix);
-    dObj.position.set(cx(j)+dx*0.42,0.09,cz(j)+dz*0.42);dObj.scale.set(0.07,0.06,0.07);dObj.updateMatrix();tapMesh.setMatrixAt(n++,dObj.matrix)}
-  tapMesh.count=n;tapMesh.instanceMatrix.needsUpdate=true}
+/* service connections: thin pipes from the main under the street (tile centre) into each connected building; drawn only in the pipe view */
+let taps=[];const TAPG={x:new THREE.BoxGeometry(1,0.04,0.05),z:new THREE.BoxGeometry(0.05,0.04,1),end:new THREE.BoxGeometry(0.1,0.07,0.1)};for(const k in TAPG)TAPG[k].userData.keep=true;
+function buildTaps(){taps=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||DRIVE[c.t]||!WATER[c.t]||!(c.wnet>=0))continue;
+    for(const t of tilesOf(i))for(const j of nbrs(t))if(pipe[j]&&grid[j]&&DRIVE[grid[j].t]){taps.push([i,t,j]);break}}}
+function drawTaps(){const L=0.75;for(const[i,t,j]of taps){const c=grid[i],m=PM[c.water==='ok'?'ok':c.water==='dirty'?'dirty':'none'],dx=Math.sign(cx(t)-cx(j)),dz=Math.sign(cz(t)-cz(j));
+    const a=new THREE.Mesh(dx?TAPG.x:TAPG.z,m);a.scale.set(dx?L:1,1,dz?L:1);a.position.set(cx(j)+dx*L/2,0.05,cz(j)+dz*L/2);a.renderOrder=5;pipeG.add(a);
+    const e=new THREE.Mesh(TAPG.end,m);e.position.set(cx(j)+dx*L,0.06,cz(j)+dz*L);e.renderOrder=5;pipeG.add(e)}}
 let xray=false;const pipeG=new THREE.Group();pipeG.visible=false;scene.add(pipeG);
 const PG={node:new THREE.BoxGeometry(0.2,0.08,0.2),ax:new THREE.BoxGeometry(1,0.06,0.09),az:new THREE.BoxGeometry(0.09,0.06,1)};for(const k in PG)PG[k].userData.keep=true;
 const PM={ok:new THREE.MeshBasicMaterial({color:'#3aa0f0'}),dirty:new THREE.MeshBasicMaterial({color:'#8a7a4a'}),none:new THREE.MeshBasicMaterial({color:'#9aa3a8'})};
 function buildPipes(comp,S){pipeG.clear();const st=k=>k<0?'none':S[k].clean>0.01?'ok':S[k].dirty>0.01?'dirty':'none';
   for(let i=0;i<N*N;i++){if(!pipe[i])continue;const m=PM[st(comp[i])],x=i%N,z=(i/N)|0;const n=new THREE.Mesh(PG.node,m);n.position.set(cx(i),0.06,cz(i));n.renderOrder=5;pipeG.add(n);
     if(x<N-1&&pipe[i+1]){const a=new THREE.Mesh(PG.ax,m);a.position.set(cx(i)+0.5,0.06,cz(i));a.renderOrder=5;pipeG.add(a)}
-    if(z<N-1&&pipe[i+N]){const a=new THREE.Mesh(PG.az,m);a.position.set(cx(i),0.06,cz(i)+0.5);a.renderOrder=5;pipeG.add(a)}}}
+    if(z<N-1&&pipe[i+N]){const a=new THREE.Mesh(PG.az,m);a.position.set(cx(i),0.06,cz(i)+0.5);a.renderOrder=5;pipeG.add(a)}}drawTaps()}
 function xrayMats(root,on,set){root.traverse(o=>{if(!o.material||o.isLine)return;for(const m of Array.isArray(o.material)?o.material:[o.material])set.add(m)})}
 function setXray(on){if(on===xray)return;xray=on;const set=new Set();for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.group)xrayMats(c.group,on,set)}
   xrayMats(bridgeDeco,on,set);for(const m of[dTr,dPi,dBl,gBl,gSt,gSm,gFh])set.add(m.material);
