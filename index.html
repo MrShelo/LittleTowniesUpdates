@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.0.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.0.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -463,7 +463,7 @@ const SOLD=Object.keys(GOODS).filter(k=>!GOODS[k].raw);
 const FREE_LINES={mix:1};const LMETA=k=>k==='mix'?{name:'Towary ogólne (losowo)',col:'#9a8fb0'}:GOODS[k];
 const SPEC_BONUS=1.25;const priceAt=(c,k)=>c&&c.t==='restaurant'?PRICE.restaurant:Math.round(GOODS[k].price*(c&&c.spec!=='mall'?SPEC_BONUS:1));
 const LINES0={mix:{in:{mat:1}},bread:{in:{grain:2}},drinks:{in:{veg:2}},clothes:{in:{mat:2}},electronics:{in:{mat:3}},furniture:{in:{mat:3}},toys:{in:{mat:1}},cosmetics:{in:{mat:1}},tools:{in:{mat:2}}};
-const LINES={};for(const k in LINES0){const inp=Object.assign({},LINES0[k].in||{});inp.mat=(inp.mat||0)+1;LINES[k]={in:inp}}
+const LINES={};for(const k in LINES0){const inp=Object.assign({},LINES0[k].in||{});if(k==='bread')inp.grain=(inp.grain||0)+1;else inp.mat=(inp.mat||0)+1;LINES[k]={in:inp}}
 const SPECS={food:{name:'Spożywczy',sells:['veg','dairy','bread','drinks'],col:'#3aa39a'},fashion:{name:'Odzieżowy',sells:['clothes'],col:'#b45ab4'},
   tech:{name:'RTV i AGD',sells:['electronics'],col:'#3b4a6b'},home:{name:'Meblowy',sells:['furniture'],col:'#8a5a3a'},toy:{name:'Zabawki',sells:['toys'],col:'#e8503a'},
   beauty:{name:'Drogeria',sells:['cosmetics'],col:'#e98aa8'},diy:{name:'Budowlany',sells:['tools'],col:'#7d8790'},mall:{name:'Wielobranżowy',sells:SOLD,col:'#c9a74a'}};
@@ -1713,7 +1713,7 @@ const matPin=new THREE.MeshBasicMaterial({color:'#ff3b30'}),matPinH=new THREE.Me
 const stCover=(st,i)=>{const c=grid[st];if(!c)return false;const r=polRad(c);return tilesOf(st).some(t=>Math.abs(t%N-i%N)<=r&&Math.abs(((t/N)|0)-((i/N)|0))<=r)};
 const stations=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isPolice(c.t)&&!c.off&&c.powered&&entryOf(i)>=0)o.push(i)}return o};
 const polCars=st=>cars.filter(c=>!c.dead&&c.kind==='police'&&c.home===st&&c.role!=='transport');
-function popNow(){let p=0;for(const c of grid)if(c&&HLV[c.t]&&!c.off)p+=residents(c);return p}
+function popNow(){let p=0;for(const c of grid)if(c&&HLV[c.t])p+=popOf(c);return p}
 function roadsNear(st){const c=grid[st],r=polRad(c),o=[];for(const t of tilesOf(st))for(const j of inRange(t,r,isDrive))if(!grid[j].edge)o.push(j);return[...new Set(o)]}
 function curTile(c){return c.path[Math.min(c.path.length-1,c.seg+(c.dist>0.5?1:0))]}
 function sendTo(c,target,phase){const b=bfs(curTile(c));if(b.dist[target]<0)return false;const p=pathTo(b,target);if(p.length<2)p.push(p[0]);c.path=p;c.seg=0;c.dist=0;c.phase=phase||'go';c.lnSeg=-1;c.lp=c.ln=c.li;return true}
@@ -1838,7 +1838,8 @@ const SCAP=c=>(c.up&&(c.t==='shop'||c.t==='supermarket')?1.5:1)*SCAP0(c)*(c.edu&
 const shelfTotal=c=>Object.values(c.shelf||{}).reduce((a,b)=>a+b,0);
 function pickShelf(c){const l=sellsOf(c).filter(k=>(c.shelf[k]||0)>0);return l[(Math.random()*l.length)|0]}
 /* a factory with 2 shifts turns its inputs into 4 t of product and ships it */
-const MIXG=SOLD.filter(k=>k!=='veg');
+/* general lines make neither fresh food nor bread: vegetables and dairy only come from farms, bread from bakeries or the grain-only bread line */
+const MIXG=SOLD.filter(k=>k!=='veg'&&k!=='dairy'&&k!=='bread');
 function mixPick(){let tot=0;const SOLD=MIXG;const w=SOLD.map(k=>{const v=1/(1+goods[k]);tot+=v;return v});let r=Math.random()*tot;for(let k=0;k<SOLD.length;k++){r-=w[k];if(r<=0)return SOLD[k]}return SOLD[0]}
 function produce(i,d){
   if(isMine(d.t)){const units=MINE_T[d.t]*(d.techB?1.05:1);if(!spawnTruck(i,'mat',units)){d.work=2;return}d.work-=2;cur.made.mat=(cur.made.mat||0)+units;addTrash(d,TRASH[d.t].per);float(i,`+${mw(Math.round(units*10)/10)} t materiałów →`,'mat');return}
@@ -2751,8 +2752,8 @@ function hud(){const mc=moneyCap(),tc=matCap();const v={m:Math.round(money),mc,t
   hudT+=1;if(hudT%20===1){let ws=0,wc=0,full=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c)continue;if(isFac(c)){ws+=c.gstock;wc+=facCap(c)}if(TRASH[c.t]&&c.trash>=TRASH[c.t].cap)full++}
     U.waste.textContent=cpt(ws);U.wasteCap.textContent=cpt(wc);U.wasteBar.style.width=(wc?Math.min(1,ws/wc)*100:0)+'%';U.rw.classList.toggle('short',full>0||(wc>0&&ws>=wc*0.95));
     U.rw.title=`Odpady (t): ${fmt(ws)} / ${fmt(wc)} w wysypiskach, spalarniach i recyklingu`+(full?` · pełne kosze: ${full}`:'');
-    {let pop=0,cap=0;for(const c of grid)if(c&&HLV[c.t]&&!c.off){pop+=residents(c);cap+=HLV[c.t].res[hMax(c)]}document.getElementById('pop').textContent=cpt(pop);document.getElementById('popBar').style.width=(cap?pop/cap*100:0)+'%';
-      document.getElementById('r-pop').title=`Mieszkańcy: ${fmt(pop)} · po pełnej rozbudowie obecnych domów: ${fmt(cap)}`}
+    {let pop=0,cap=0;for(const c of grid)if(c&&HLV[c.t]){pop+=popOf(c);cap+=c.aband?0:residents(c)}document.getElementById('pop').textContent=cpt(pop);document.getElementById('popBar').style.width=(cap?pop/cap*100:0)+'%';
+      document.getElementById('r-pop').title=`Mieszkańcy teraz (w każdym wieku): ${fmt(pop)} · miejsc w domach: ${fmt(cap)}`}
     const n=pw.dist.reduce((a,b)=>a+b,0);U.happy.textContent=n?mw(Math.round(pw.happy*10)/10):'–';U.happyBar.style.width=(n?pw.happy/HMAX*100:0)+'%';
     {const sup=wtr.clean+wtr.dirty,uc=Math.min(wtr.dem,wtr.clean),ud=Math.min(Math.max(0,wtr.dem-wtr.clean),wtr.dirty);U.wat.textContent=cpt(Math.round(wtr.dem));U.watCap.textContent=cpt(Math.round(sup));U.watBar.style.width=(sup?uc/sup*100:(wtr.dem?100:0))+'%';document.getElementById('watBarD').style.width=(sup?ud/sup*100:0)+'%'}
     {const need=wtr.out+wtr.over;document.getElementById('sew').textContent=cpt(Math.round(need));document.getElementById('sewCap').textContent=cpt(Math.round(wtr.outCap));document.getElementById('sewBar').style.width=(wtr.outCap?Math.min(1,need/wtr.outCap)*100:(need?100:0))+'%';U.rwt.classList.toggle('oversew',wtr.over>0.05)}
