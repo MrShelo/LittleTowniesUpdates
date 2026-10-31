@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.3.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.3.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -401,7 +401,7 @@ const DEF={
   pipe:{name:'Rura',cost:5,desc:'Rura wodno-kanalizacyjna pod ziemią. Kładź ją pod budynkami i ulicami, a przez rzekę po moście, przeciągnij, by położyć kilka pól. Budynek łączy się, gdy rura leży pod nim albo tuż obok.',sw:'#3a8fd8',unit:'T¢/pole'},
   pipeDel:{name:'Usuń rurę',cost:0,desc:'Usuwa rurę z pola, zwraca 2 T¢. Przeciągnij, by usunąć kilka.',sw:'#7d8790',lbl:'zwrot 2 T¢'},
   hydro:{name:'Tama (el. wodna)',cost:1200,desc:'Segment tamy stawiany na wodzie: 7,5 MW z każdego pola, bez paliwa. Przeciągnij w poprzek rzeki. Działa dopiero, gdy zamknie przepływ: przy kilku rzekach trzeba zatamować każde źródło. Za tamą woda opada o 15%, a pompy tam pobierają 20% mniej. Łączy się przez transformator obok albo słup WN.',sw:'#3f7fb0'},
-  hydrogen:{name:'Elektrownia wodorowa',cost:5000,size:4,desc:'Zajmuje 2×2 pola. 45 MW z wodoru, drogie utrzymanie. Zużywa 10 m³/godz. czystej wody z rur (z brudną daje połowę). Łączy się przez transformator obok albo słup WN.',sw:'#d9e6ef'},
+  hydrogen:{name:'Elektrownia geotermalna',cost:5000,size:4,desc:'Zajmuje 2×2 pola. 45 MW z ciepła ziemi, drogie utrzymanie. Zużywa 10 m³/godz. czystej wody z rur na parę (z brudną daje połowę), ale nie oddaje ścieków. Ulepszenie: drugi odwiert. Łączy się przez transformator obok albo słup WN.',sw:'#d9e6ef'},
   pump:{name:'Pompa wody',cost:300,desc:'Pobiera 40 m³/godz. z rzeki. Postaw tuż przy wodzie. Prąd ze słupa lub transformatora w promieniu 2 pól. Gdy rzeka obok jest brudna od ścieków, pompuje brudną wodę.',sw:'#2f6fb5'},
   tower:{name:'Wieża ciśnień',cost:450,desc:'Czerpie 15 m³/godz. czystej wody z gruntu, w dowolnym miejscu. Prąd ze słupa lub transformatora w promieniu 2 pól.',sw:'#8fb7d4'},
   outlet:{name:'Wylot ścieków',cost:150,desc:'Zrzuca do rzeki do 25 m³/godz. ścieków (z drugą rurą 50). Nadmiar się cofa: domy w sieci tracą 1 zadowolenia. Postaw tuż przy wodzie. Brudzi rzekę z prądem.',sw:'#7a5a3a'},
@@ -498,7 +498,7 @@ const UPG={
   supermarket:{name:'Kasy SCO',cost:350,upkeep:10,desc:'Kasy samoobsługowe: obsługa +50% (60 klientów/godz.), kolejka znika szybciej i rzadziej robi się tłok'},
   prison:{name:'Dodatkowy blok',cost:1800,upkeep:40,desc:'+30 miejsc: 130 więźniów'},
   policeS:{name:'Drugi garaż',cost:600,upkeep:30,desc:'+2 radiowozy do interwencji (stoją w garażu, wyjeżdżają tylko na wezwanie)'},policeB:{name:'Drugi garaż',cost:900,upkeep:40,desc:'+2 radiowozy do interwencji (stoją w garażu, wyjeżdżają tylko na wezwanie)'},
-  hydrogen:{name:'Ogniwa paliwowe nowej generacji',cost:1500,upkeep:25,desc:'+10 MW (55 MW z czystą wodą)'},
+  hydrogen:{name:'Drugi odwiert',cost:2000,upkeep:60,desc:'+15 MW (60 MW z czystą wodą)'},
   shop1:{name:'Dodatkowe piętro',cost:400,upkeep:10,desc:'30 klientów/godz. i 30 miejsc na półkach'},
   cemB:{name:'Katakumby',cost:1500,upkeep:15,desc:'Podziemne katakumby pod środkiem cmentarza: +20 miejsc (300)'},crem:{name:'Drugi piec kremacyjny',cost:2000,upkeep:40,desc:'Druga komora kremacyjna: 160 miejsc'},
   restaurant:{name:'Wykwintna restauracja',cost:450,upkeep:15,desc:'Dwupiętrowy lokal, zasięg rozrywki 5×5 zamiast 3×3, kolejka 20 gości zamiast 10'}};
@@ -1018,7 +1018,7 @@ function addUpgradeVisual(c){const m=c.model;if(!m||m.userData.upg)return;m.user
   else if(c.t==='crem'){const ch=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.08,0.75,10),mat.brick);ch.position.set(0.75,0.4,0.6);ch.castShadow=true;m.add(ch);m.add(box(0.4,0.3,0.4,M('#bdb5aa'),0.75,0.03,0.6))}
   else if(c.t==='policeS'){m.add(box(0.34,0.24,0.32,M('#d9dde2'),0.22,0.03,0.2));m.add(box(0.02,0.18,0.26,mat.facDark,0.39,0.03,0.2))}
   else if(c.t==='policeB'){m.add(box(0.5,0.3,0.5,M('#d9dde2'),0.68,0.03,0.15));m.add(box(0.02,0.22,0.36,mat.facDark,0.425,0.03,0.15))}
-  else if(c.t==='hydrogen'){for(const x of[-0.3,-0.1,0.1,0.3]){const t=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.24,10),M('#7fd0e6'));t.position.set(x,0.24,0.36);t.castShadow=true;m.add(t);m.add(box(0.05,0.02,0.05,mat.bolt,x,0.36,0.36))}}
+  else if(c.t==='hydrogen'){for(const[a,b]of[[-0.06,-0.06],[0.06,0.06],[-0.06,0.06],[0.06,-0.06]])m.add(box(0.018,0.34,0.018,mat.steel,0.38+a*0.6,0.04,0.02+b*0.6));m.add(box(0.12,0.02,0.12,mat.steel,0.38,0.2,0.02));m.add(box(0.06,0.02,0.06,mat.steel,0.38,0.38,0.02));m.add(part(FK.cyl,M('#c9643a'),0.07,0.06,0.07,0.38,0.04,0.02))}
   else if(c.t==='shop1'){shopFloor(c)}
   else if(c.t==='shop'||c.t==='supermarket'){const pos=c.t==='shop'?[[-0.33,0.44],[0.33,0.44]]:[[0.3,0.24],[0.44,0.24],[0.58,0.24]];
     for(const[x,z]of pos){m.add(box(0.09,0.15,0.08,mat.steel,x,0.02,z));const sc=box(0.07,0.05,0.01,mat.glass2,x,0.12,z+0.042);m.add(sc);m.add(box(0.05,0.012,0.04,mat.white,x,0.17,z))}
@@ -1164,9 +1164,12 @@ function buildHydroOld(){const g=new THREE.Group();g.add(box(0.96,0.06,0.8,mat.c
   g.add(box(0.94,0.06,0.46,mat.white,0,0.46,-0.2));g.add(box(0.32,0.22,0.24,M('#3f7fb0'),0.22,0.52,-0.24));g.add(box(0.12,0.04,0.25,mat.bolt,0.22,0.6,-0.11));
   const sp=part(FK.body,M('#cfe9ef'),0.9,0.02,0.2,0,-0.2,0.48);sp.castShadow=false;g.add(sp);return g}
 function buildHydrogen(){const g=new THREE.Group();g.add(box(0.94,0.04,0.94,mat.concrete));
-  for(const[x,z]of[[-0.22,-0.2],[0.22,-0.2]]){g.add(part(FK.ball,mat.white,0.17,0.17,0.17,x,0.3,z));for(const[a,b]of[[-0.1,-0.1],[0.1,0.1],[-0.1,0.1],[0.1,-0.1]])g.add(box(0.02,0.16,0.02,mat.steel,x+a,0.04,z+b))}
-  g.add(box(0.5,0.26,0.3,M('#e8eef2'),0,0.04,0.22));g.add(box(0.52,0.05,0.32,M('#3a8fd8'),0,0.22,0.22));g.add(box(0.16,0.08,0.01,M('#3a8fd8'),-0.12,0.12,0.375));
-  const pp=part(FK.cyl,mat.steel,0.02,0.44,0.02,0,0.24,-0.2);pp.rotation.z=Math.PI/2;g.add(pp);return g}
+  const tw=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.19,0.5,18,1,true),new THREE.MeshLambertMaterial({color:'#d6d2c8',side:THREE.DoubleSide}));tw.position.set(-0.2,0.29,-0.2);tw.castShadow=true;g.add(tw);
+  for(const[y,r,x]of[[0.62,0.09,-0.2],[0.72,0.075,-0.17],[0.8,0.06,-0.22]]){const st=part(FK.ball,M('#f4f6f8'),r*1.2,r,r*1.2,x,y,-0.2);st.castShadow=false;g.add(st)}
+  g.add(box(0.46,0.2,0.28,M('#e8eef2'),0.08,0.04,0.24));g.add(box(0.48,0.04,0.3,M('#c9643a'),0.08,0.24,0.24));g.add(box(0.14,0.08,0.01,M('#c9643a'),-0.06,0.1,0.385));
+  const pp=part(FK.cyl,mat.steel,0.03,0.4,0.03,0.05,0.12,0.02);pp.rotation.z=Math.PI/2;g.add(pp);
+  for(const[a,b]of[[-0.06,-0.06],[0.06,0.06],[-0.06,0.06],[0.06,-0.06]])g.add(box(0.018,0.34,0.018,mat.steel,0.24+a*0.6,0.04,-0.22+b*0.6));
+  g.add(box(0.12,0.02,0.12,mat.steel,0.24,0.2,-0.22));g.add(box(0.06,0.02,0.06,mat.steel,0.24,0.38,-0.22));g.add(part(FK.cyl,M('#c9643a'),0.07,0.06,0.07,0.24,0.04,-0.22));return g}
 function buildHydro(){const g=new THREE.Group(),con=M('#c4c1b8'),con2=M('#a9a69c');
   g.add(box(1,0.06-BED_Y,0.46,con,0,BED_Y,-0.02));g.add(box(1,0.025,0.5,mat.white,0,0.06,-0.02));
   for(const z of[-0.26,0.22]){g.add(box(1,0.05,0.015,mat.steel,0,0.085,z));for(const x of[-0.45,-0.15,0.15,0.45])g.add(box(0.015,0.05,0.015,mat.steel,x,0.085,z))}
@@ -1296,7 +1299,11 @@ function computeDams(){lowW.fill(0);damSealed.fill(0);const seen=new Uint8Array(
     const reach=new Uint8Array(N*N),q=[...srcT].filter(i=>!isDam(i));for(const i of q)reach[i]=1;
     for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(water[j]&&!reach[j]&&!isDam(j)){reach[j]=1;q.push(j)}
     let anyLow=false;for(const j of comp)if(!isDam(j)&&!reach[j]){lowW[j]=1;anyLow=true}
-    const sealed=sinks.length?!sinks.some(j=>reach[j]):anyLow;if(sealed)for(const j of comp)if(isDam(j))damSealed[j]=1}
+    /* every dam line works on its own: it is sealed when water on one side is fed by a source and water on the other side is not,
+       so a river with several outflows can be dammed on any branch, and below a confluence each feeding source must be dammed */
+    const dg=new Uint8Array(N*N);for(const d0 of comp){if(!isDam(d0)||dg[d0])continue;const grp=[d0];dg[d0]=1;let up=false,down=false;
+      for(let h=0;h<grp.length;h++)for(const j of nbrs(grp[h])){if(!water[j])continue;if(isDam(j)){if(!dg[j]){dg[j]=1;grp.push(j)}}else if(reach[j])up=true;else down=true}
+      if(up&&down)for(const j of grp)damSealed[j]=1}}
   const sig=lowW.join('');if(sig!==lowSig){lowSig=sig;applyWaterLevels()}}
 function applyWaterLevels(){for(const[i,[m,k]]of wIdx){dObj.position.set(cx(i),lowW[i]?-LOW_DROP:0,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();m.setMatrixAt(k,dObj.matrix)}
   for(const m of[waterMesh,waterMeshV])m.instanceMatrix.needsUpdate=true;for(const b of wBlocks)b.y=lowW[b.i]?-LOW_DROP:0}
@@ -1970,7 +1977,7 @@ function computePower(dt){if(topoDirty)rebuildHV();computeDams();const dm=isNigh
     const k=cl.map(j=>grid[j].net).find(v=>v>=0);for(const j of cl){grid[j].net=k===undefined?-1:k;grid[j].damN=cl.length}}}
   for(const i of gens){const c=grid[i];if(c.t==='wind'&&c.net>=0){c.wake=nbrs8(i).filter(j=>grid[j]&&grid[j].t==='wind').length;const mwv=Math.max(0,WIND_MW+(c.up2?3:0)-c.wake)+(c.up?SOLAR_MW*dayF:0);c.windMW=mwv;sup[c.net]+=mwv;cap+=mwv}}
   for(const i of gens){const c=grid[i];c.mw=0;if(c.net<0)continue;if(c.t==='hydro'){c.mw=water[i]?(damSealed[i]?7.5:0):nearWater(i)>=0?15:0;sup[c.net]+=c.mw;cap+=c.mw}
-    if(c.t==='hydrogen'){c.mw=(c.water==='ok'?45:c.water==='dirty'?22:0)+(c.up&&c.water==='ok'?10:c.up&&c.water==='dirty'?5:0);sup[c.net]+=c.mw;cap+=c.mw}}
+    if(c.t==='hydrogen'){c.mw=(c.water==='ok'?45:c.water==='dirty'?22:0)+(c.up&&c.water==='ok'?15:c.up&&c.water==='dirty'?7.5:0);sup[c.net]+=c.mw;cap+=c.mw}}
   for(const i of gens){const c=grid[i];if(c.t!=='coal')continue;c.running=false;c.fuel=c.fuel||0;
     if(c.net<0)continue;const CMW=COAL_MW*(c.filt?0.9:1);if(c.fuel>0||matl>=1)cap+=CMW;
     if(sup[c.net]<dem[c.net]-1e-6){
@@ -1990,6 +1997,8 @@ function computePower(dt){if(topoDirty)rebuildHV();computeDams();const dm=isNigh
    Pipes form networks (orthogonal neighbours). A building joins the network of a pipe under any of its tiles or right next to it.
    Supply: towers (clean), pumps (clean, or dirty when the river beside them is polluted), treatment plants (30% of treated sewage comes back clean).
    All water used becomes sewage: plants treat it, outlets dump the rest into the river. Night halves use. Units: m³ per game hour. */
+/* water users that return no sewage (the geothermal plant turns its water into steam) */
+const NOSEW={hydrogen:1};
 const WATER={clinic:2,hosp:6,hospC:15,crem:2,schoolS:1,school:2,lyceum:4,techn:4,bankG:1,shop1:0.8,prison:5,policeS:1,policeB:2,bakery:0.8,factoryB:4,mine:0.5,mineB:1.5,supermarket:2,hydrogen:10,smallfac:1.5,house:1,tenement:2.5,block:5,modern:5,shop:0.5,gallery:1.5,restaurant:1.5,hotelS:2,hotelB:5,factory:3,cinema:1,theater:1,casino:1.5,bank:0.5};
 const PUMP_R=40,TOWER_R=15,TREAT_R=30;
 const pipe=new Uint8Array(N*N),riverDirty=new Uint8Array(N*N),riverDirt=new Float32Array(N*N);let riverSrc=[],riverT=0;
@@ -2013,14 +2022,14 @@ function computeWater(){const comp=new Int32Array(N*N).fill(-1);let nc=0;
     if(c.t==='treatment'){c.treated=0;if(c.powered){N2.treat+=TREAT_R;N2.plants.push(i)}}
     if(c.t==='outlet'){c.dis=0;if(nearWater(i)>=0)N2.outlets.push(i)}}
   wtr.outCap=0;wtr.over=0;wtr.clean=0;wtr.dirty=0;wtr.dem=0;wtr.treated=0;wtr.out=0;wtr.none=0;wtr.sick=0;
-  for(const n of S){const D=n.cons.reduce((a,i)=>a+WATER[grid[i].t]*hMul(grid[i])*dm,0),treated=Math.min(D,n.treat);n.clean+=0.3*treated;
+  for(const n of S){const D=n.cons.reduce((a,i)=>a+WATER[grid[i].t]*hMul(grid[i])*dm,0),Ds=n.cons.reduce((a,i)=>a+(NOSEW[grid[i].t]?0:WATER[grid[i].t]*hMul(grid[i])*dm),0),treated=Math.min(Ds,n.treat);n.clean+=0.3*treated;
     for(const i of n.plants)grid[i].treated=treated/n.plants.length;
-    const out=(D-treated)+0.3*treated,ocap=n.outlets.reduce((a,i)=>a+OUT_R*(grid[i].up2?2:1),0),disp=Math.min(out,ocap);
+    const out=(Ds-treated)+0.3*treated,ocap=n.outlets.reduce((a,i)=>a+OUT_R*(grid[i].up2?2:1),0),disp=Math.min(out,ocap);
     for(const i of n.outlets)grid[i].dis=ocap?disp*OUT_R*(grid[i].up2?2:1)/ocap:0;
     const over=Math.max(0,out-ocap),back=over>0.01;wtr.outCap+=ocap;wtr.over+=over;
     wtr.clean+=n.clean;wtr.dirty+=n.dirty;wtr.dem+=D;wtr.treated+=treated;wtr.out+=disp;
     let lc=n.clean,ld=n.dirty;n.cons.sort((a,b)=>WATER[grid[a].t]-WATER[grid[b].t]);
-    for(const i of n.cons){const c=grid[i],d=WATER[c.t]*hMul(c)*dm;c.sewer=back;if(lc>=d-1e-6){lc-=d;c.water='ok'}else if(lc+ld>=d-1e-6){ld-=d-lc;lc=0;c.water='dirty'}else c.water='none'}}
+    for(const i of n.cons){const c=grid[i],d=WATER[c.t]*hMul(c)*dm;c.sewer=back&&!NOSEW[c.t];if(lc>=d-1e-6){lc-=d;c.water='ok'}else if(lc+ld>=d-1e-6){ld-=d-lc;lc=0;c.water='dirty'}else c.water='none'}}
   for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HOUSING[c.t]){if(c.water==='none')wtr.none++;if(c.water==='dirty')wtr.sick++}}
   /* sewage enters the river at the outlet and is carried downstream: it spreads across the river's width and along the flow, never upstream */
   riverSrc=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='outlet'||!(c.dis>0))continue;const w=nearWater(i);if(w>=0)riverSrc.push([w,Math.min(1,0.31/Math.pow(0.96,Math.min(30,6+c.dis/2)))])}
@@ -2387,7 +2396,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(c.t==='bank')R('Limit gotówki',`+${fmt(BANK_CAP*(c.up?2:1))} T¢`+(c.powered?'':' (nieaktywny)'));
   if(PARKS.includes(c.t)){const r=parkR(c);R('Zasięg',`${2*r+1}×${2*r+1}`);if(full)R('Stan','nie działa: pełno śmieci','warnv')}
   if(c.t==='wind'){if(c.wake)R('Sąsiednie wiatraki',`${c.wake} · −${c.wake} MW`,'warnv');R('Moc',`${Math.max(0,WIND_MW+(c.up2?3:0)-(c.wake||0))} MW`+(c.up?` + ${mw(Math.round(SOLAR_MW*dayF*10)/10)} MW z paneli`:''));R('Sieć',c.net>=0?'podłączony':'brak transformatora obok',c.net>=0?'':'warnv')}
-  if(c.t==='hydro'&&water[i])R('Przepływ',damSealed[i]?'zatamowany, turbiny pracują':'woda omija tamę: zatamuj całą szerokość i każde źródło rzeki',damSealed[i]?'':'warnv');
+  if(c.t==='hydro'&&water[i])R('Przepływ',damSealed[i]?'zatamowany, turbiny pracują':'woda omija tamę: zatamuj całą szerokość koryta (a poniżej połączenia rzek każdą rzekę, która tu wpływa)',damSealed[i]?'':'warnv');
   if(c.t==='hydro'){R('Tama',`${c.damN||1} ${(c.damN||1)===1?'segment':'segmenty'} · ${mw((c.damN||1)*7.5)} MW razem`);R('Moc segmentu',c.net<0?'niepodłączona: transformator obok albo słup WN':`${c.mw||0} MW`,c.net<0?'warnv':'')}
   if(c.t==='hydrogen')R('Moc',c.net<0?'niepodłączona: transformator obok albo słup WN':c.mw?`${c.mw} MW`+(c.water==='dirty'?' (brudna woda)':''):'brak wody z rur',c.net<0||!c.mw?'warnv':'');
   if(c.t==='coal'){R('Stan',c.net<0?'niepodłączona':c.running?`pracuje, ${COAL_MW} MW`:'czeka (wiatraki wystarczają lub brak węgla)',c.net<0?'warnv':'')}
@@ -2498,7 +2507,7 @@ outlet:'<path d="M2.5 6.5h8v4h-8M10.5 8.5h2"/><path d="M13.5 10c1 1.2 1.6 2.3 1.
 treatment:'<ellipse cx="6.5" cy="12" rx="4" ry="2"/><path d="M2.5 12v3c0 1.1 1.8 2 4 2s4-.9 4-2v-3"/><path d="M13.5 4c1.7 2.2 2.8 3.9 2.8 5.3a2.8 2.8 0 0 1-5.6 0c0-1.4 1.1-3.1 2.8-5.3z"/>',
 smallfac:'<path d="M4 17.5V11l3.5 2v-2l3.5 2V7h3v10.5z"/>',
 hydro:'<path d="M3 4h14v6H3z"/><path d="M6 10v3M10 10v3M14 10v3"/><path d="M2.5 16.5c1.5-1 2.5-1 4 0s2.5 1 4 0 2.5-1 4 0 2 .8 3 .4"/>',
-hydrogen:'<circle cx="6.5" cy="9" r="3.5"/><circle cx="13.5" cy="9" r="3.5"/><path d="M4 17.5h12M6.5 12.5v5M13.5 12.5v5"/>',
+hydrogen:'<path d="M5 17.5h10M6.5 17.5l1-8h5l1 8"/><path d="M8.5 6.5c-1-1 0-2 1-2.5M11.5 6.5c-1-1 0-2 1-2.5"/>',
 supermarket:'<path d="M2.5 4h2l2 9h9l1.5-6.5H6"/><circle cx="8" cy="16" r="1.3"/><circle cx="14" cy="16" r="1.3"/>',
 energy:'<path d="M11.5 2.5L4.5 11h5l-1 6.5 7-8.5h-5z"/>',
 cross:'<rect x="3" y="3" width="14" height="14" rx="3"/><path d="M10 6.5v7M6.5 10h7"/>',
@@ -2795,12 +2804,12 @@ const U={clockSub:document.getElementById('clockSub'),clock:document.getElementB
   happy:document.getElementById('happy'),happyBar:document.getElementById('happyBar'),
   pow:document.getElementById('pow'),powCap:document.getElementById('powCap'),powBar:document.getElementById('powBar'),rp:document.getElementById('r-pow')};
 /* short numbers keep the HUD from jumping: 100 000+ as k, millions as M; power switches to GW from 1000 MW */
-const cpt=n=>{const a=Math.abs(n);return a>=1e6?(n/1e6).toLocaleString('pl-PL',{maximumFractionDigits:a>=1e7?0:1})+'M':a>=1e5?Math.round(n/1e3).toLocaleString('pl-PL')+'k':fmt(n)};
+const cpt=(n,th=1e4)=>{const a=Math.abs(n),f1=v=>(Math.round(v*10)/10).toLocaleString('pl-PL',{maximumFractionDigits:1});return a>=999950?f1(n/1e6)+'M':a>=th?f1(n/1e3)+'k':fmt(n)};
 const pwr=(x,gw)=>gw?(x/1000).toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2}):x.toLocaleString('pl-PL',{minimumFractionDigits:1,maximumFractionDigits:1});
 let last={},hudT=0;const segs={};
 for(const k of['mat',...Object.keys(goods)]){const sp=document.createElement('span');sp.style.background=GOODS[k].col;sp.title=GOODS[k].name;document.getElementById('matBar').appendChild(sp);segs[k]=sp}
 function hud(){const mc=moneyCap(),tc=matCap();const v={m:Math.round(money),mc,t:Math.round(stored()),tc};
-  {const L=hist[hist.length-1],d=L?Math.round(opNet(L)):null,el=document.getElementById('moneyD');if(d!==last.md){last.md=d;el.textContent=d==null?'':(d>=0?'+':'−')+cpt(Math.abs(d));el.className='dlt '+(d==null?'':d>=0?'pos':'neg');el.title='Wynik ostatniej pełnej godziny: przychody minus utrzymanie i straty (bez budowy, ulepszeń i pożyczek)'}}
+  {const L=hist[hist.length-1],d=L?Math.round(opNet(L)):null,el=document.getElementById('moneyD');if(d!==last.md){last.md=d;el.textContent=d==null?'':(d>=0?'+':'−')+cpt(Math.abs(d),1e3);el.className='dlt '+(d==null?'':d>=0?'pos':'neg');el.title='Wynik ostatniej pełnej godziny: przychody minus utrzymanie i straty (bez budowy, ulepszeń i pożyczek)'}}
   if(v.m!==last.m||v.mc!==last.mc){U.money.textContent=cpt(v.m);U.moneyCap.textContent=cpt(mc);U.moneyBar.style.width=(mc?v.m/mc*100:0)+'%';U.rm.classList.toggle('full',v.m>=mc);U.rm.classList.toggle('short',v.m<0);
     for(const k in DEF)if(toolBtns[k])toolBtns[k].classList.toggle('poor',money<DEF[k].cost)}
   if(v.t!==last.t||v.tc!==last.tc){U.mat.textContent=cpt(v.t);U.matCap.textContent=cpt(tc);U.rt.classList.toggle('full',tc>0&&v.t>=tc);
