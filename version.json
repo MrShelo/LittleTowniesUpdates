@@ -1,1 +1,1 @@
-{"v": "3.2.2", "notes": "3.2.2: utrzymanie dróg liczone na 12 godzin (1 T¢ zwykła droga, więcej dla większych), przyłącza wody tylko w widoku rur, aż do rury pod środkiem ulicy"}
+{"v": "3.3.0", "notes": "3.3: sklep bez magazynu od razu importuje towar furgonetką spoza miasta; z magazynem importuje, gdy przez godzinę gry brakuje w nim jego towaru. W karcie sklepu wiersz Dostawy."}

@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.2.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.3.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1863,13 +1863,22 @@ function produce(i,d){
 /* a shop at 10 items or fewer (counting vans on the way) orders up to 5, taking whatever it sells and is lowest on the shelf */
 function spawnVan(s){const sh=grid[s];const e=entryOf(s);if(e<0)return false;const b=bfs(e);
   const sells=sellsOf(sh);if(!sells.length)return false;
-  const list=candidates(b,WH_T).filter(o=>grid[o.i].powered);if(!list.length)return false;
-  if(!sells.some(k=>goods[k]>=1)){const k=sells.reduce((a,q)=>(sh.shelf[q]||0)<(sh.shelf[a]||0)?q:a,sells[0]);importGood(k,VAN_MAX)}
+  const list=candidates(b,WH_T).filter(o=>grid[o.i].powered);
+  /* no warehouse reachable: the shop imports straight away; warehouses without its goods for an hour: it imports too */
+  if(!list.length){sh.dry=null;return shopImport(s,b)}
+  if(!sells.some(k=>goods[k]>=1)){if(sh.dry==null)sh.dry=gameT;if(gameT-sh.dry>=60)return shopImport(s,b);return false}
+  sh.dry=null;
   list.sort((p,q)=>p.d-q.d);let room=Math.min(VAN_MAX,slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;
   while(room>0){let best=null,bv=1e9;for(const k of sells){if(goods[k]<1)continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
     items[best]=(items[best]||0)+1;goods[best]-=1;load++;room--}
   if(!load)return false;cur.matShop+=load;cur.vans++;sh.incoming+=load;
   createCar('van',pathTo(b,list[0].e).reverse(),{home:list[0].i,dest:s,load,items});return true}
+function shopImport(s,b){const sh=grid[s],sells=sellsOf(sh);const outs=edgeOuts().filter(o=>b.dist[o]>=0);if(!outs.length||!sells.length)return false;
+  let room=Math.min(VAN_MAX,slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;
+  while(room>0){let best=sells[0],bv=1e9;for(const k of sells){const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}items[best]=(items[best]||0)+1;load++;room--}
+  if(!load)return false;const o=outs.reduce((a,q)=>b.dist[q]<b.dist[a]?q:a,outs[0]);
+  for(const k in items){imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+items[k]}
+  cur.vans++;sh.incoming+=load;sh.impT=gameT;createCar('van',pathTo(b,o).reverse(),{home:o,dest:s,load,items,imp:true});float(s,'import','warn');return true}
 function bakeTick(dt){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='bakery'||c.off||!c.powered)continue;c.bake=(c.bake||0)+dt;
   if(c.bake<6)continue;c.bake=0;if((c.shelf.bread||0)+3>SHOP_SLOTS||goods.grain<1)continue;goods.grain-=1;c.shelf.bread=(c.shelf.bread||0)+3;cur.used.grain=(cur.used.grain||0)+1;cur.made.bread=(cur.made.bread||0)+3}}
 function supplyShops(){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||!isShop(c.t))continue;
@@ -2297,7 +2306,7 @@ function loanDay(){if(!loan)return;const L=LOANS[loan.k],inst=Math.round(loan.le
 function loanUI(){const el=document.getElementById('loanBox');if(!el)return;if(loan){const L=LOANS[loan.k];el.innerHTML=`<div class="loan"><span><b>${L.name}</b> · zostało ${fmt(loan.left)} T¢, ${loan.daysLeft} ${loan.daysLeft===1?'dzień':'dni'}</span><span>Najbliższa rata o północy: <b>${fmt(loanDue())} T¢</b> (odsetki ${mw(L.rate*100)}% dziennie od reszty)</span><button class="btn panel" id="loanPay"${money<loan.left?' disabled':''}>Spłać teraz ${fmt(loan.left)} T¢</button></div>`;document.getElementById('loanPay').onclick=payLoanOff;return}
   el.innerHTML='<div class="loan">'+Object.entries(LOANS).map(([k,L])=>{const lock=L.need&&!counts[L.need];return`<button class="btn panel" data-loan="${k}"${lock?' disabled':''}>${L.name} na ${L.days} dni · ${mw(L.rate*100)}% dziennie${lock?'<br><small>wymaga banku rezerw złota</small>':''}</button>`}).join('')+'<small>Naraz możesz mieć jedną pożyczkę.</small></div>';
   for(const b of el.querySelectorAll('[data-loan]'))b.onclick=()=>takeLoan(b.dataset.loan);
-  const im=document.getElementById('impN');if(im){const ks=importKinds();im.innerHTML=ks.length?`Importowane teraz: ${ks.map(k=>GOODS[k].name.toLowerCase()).join(', ')} · +${ks.length*IMPORT_FEE} T¢/godz. utrzymania`:`Brak importu. Gdy w magazynach zabraknie potrzebnego towaru, miasto sprowadzi go samo za ${IMPORT_FEE} T¢/godz. za każdy rodzaj.`}}
+  const im=document.getElementById('impN');if(im){const ks=importKinds();im.innerHTML=ks.length?`Importowane teraz: ${ks.map(k=>GOODS[k].name.toLowerCase()).join(', ')} · +${ks.length*IMPORT_FEE} T¢/godz. utrzymania`:`Brak importu. Sklep bez magazynu (albo gdy w magazynach przez godzinę brakuje jego towaru) sprowadza towar sam furgonetką spoza miasta, a fabryki dostają brakujące surowce. Każdy importowany rodzaj kosztuje ${IMPORT_FEE} T¢/godz.`}}
 /* automatic imports: a missing input is brought in, and each imported kind adds to the upkeep for an hour */
 const IMPORT_FEE=3;let imports={};
 function importGood(k,n){if(n<=0)return;if(k==='mat')matl+=n;else goods[k]=(goods[k]||0)+n;imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
@@ -2343,6 +2352,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
     R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':'pracuje',full||!c.powered?'warnv':'');
     if(c.t!=='smallfac')pick=`<div class="chips">${Object.keys(LINES).map(k=>{const lock=!FREE_LINES[k]&&!c.up;return`<button class="chipb" data-line="${k}" aria-pressed="${k===c.line}"${lock?' style="opacity:.5"':''}><i style="background:${LMETA(k).col}"></i>${lock?'🔒 ':''}${LMETA(k).name}</button>`}).join('')}</div>`}
   if(SCAP(c))R('Klienci',`${mw(Math.round((c.vis||0)*10)/10)} w kolejce · do ${SCAP(c)}/godz.`+(c.crowd?' · tłok!':''),c.crowd?'warnv':'');
+  if(isShop(c.t)&&sellsOf(c).length&&!c.off)R('Dostawy',c.impT!=null&&gameT-c.impT<60?'import spoza miasta (+'+IMPORT_FEE+' T¢/godz. za rodzaj)':c.dry!=null?`magazyny puste · import za ${Math.max(0,Math.ceil(60-(gameT-c.dry)))} min`:'z magazynu',c.impT!=null&&gameT-c.impT<60||c.dry!=null?'warnv':'');
   if(c.t==='supermarket'){R('Półki',`${shelfTotal(c)}/45`+(c.incoming?` (+${c.incoming} w drodze)`:''));for(const k of SOLD)R(`<span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}`,`${c.shelf[k]||0} szt. · ${priceAt(c,k)} T¢`)}
   if(c.t==='shop'||c.t==='shop1'){const S=SPECS[c.spec];R('Rodzaj',S.name);R('Półki',`${shelfTotal(c)}/${slotsOf(c)}`+(c.incoming?` (+${c.incoming} w drodze)`:''));
     for(const k of S.sells)R(`<span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}`,`${c.shelf[k]||0} szt. · ${priceAt(c,k)} T¢ · mag. ${fmt(goods[k])}`);
