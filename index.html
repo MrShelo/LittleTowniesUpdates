@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.2.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.2.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -477,7 +477,8 @@ const SHOP_SLOTS=15,VAN_MAX=5,HV_R=3;
 const TIER={0:{trips:3,work:0.4,name:'Zrozpaczeni'},7:{trips:15,work:1.9,name:'Bardzo szczęśliwi'},8:{trips:16,work:2,name:'W siódmym niebie'},6:{trips:14,work:1.75,name:'Zachwyceni'},1:{trips:4,work:0.5,name:'Niezadowoleni'},2:{trips:6,work:0.75,name:'Słabo'},3:{trips:8,work:1,name:'Przeciętnie'},4:{trips:10,work:1.25,name:'Zadowoleni'},5:{trips:12,work:1.5,name:'Szczęśliwi'}};
 const HCOL={0:'#8a2a2a',1:'#d4483a',2:'#e58a3a',3:'#d9b23a',4:'#7dbb4a',5:'#2f9e5a',6:'#1f8a8a',7:'#2a7fb8',8:'#5a5fd0'};const HMAX=8;
 const SHOP_R=5;
-const ROAD_UPK={road:1,road2:2,road3:3,roundabout:2,highway:4,bridge:5};
+/* road upkeep is per 12 game hours: 1 T¢ per plain road tile, more for bigger roads */
+const ROAD_UPK={road:1,road2:2,road3:3,roundabout:2,highway:4,bridge:5},ROAD_PER=12;
 const UPKEEP={clinic:80,hosp:250,hospC:600,cemS:20,cemB:60,crem:150,schoolS:60,school:120,lyceum:260,techn:260,policeS:120,policeB:320,prison:200,hydro:30,hydrogen:280,pump:20,tower:15,outlet:5,treatment:60,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:25,wind:60,coal:150,park1:10,park2:25,park3:45,landfill:20,incinerator:60,recycler:50};
 /* waste: houses and parks fill steadily, factories per truck produced, shops per sale; pickup is due every ~6 h (work) or ~12 h (homes, parks) ±15% */
 const TRASH={supermarket:{cap:50,per:0.15,every:6},smallfac:{cap:24,per:0.3,every:6},house:{cap:18,rate:1,every:12},tenement:{cap:36,rate:2.5,every:12},block:{cap:60,rate:5,every:12},modern:{cap:60,rate:4,every:12},park1:{cap:10,rate:0.5,every:12},park2:{cap:10,rate:0.5,every:12},park3:{cap:10,rate:0.5,every:12},
@@ -1199,9 +1200,9 @@ function upgCount2(t){let n=0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.up2
 /* switched-off buildings cost nothing */
 /* the daytime upkeep, item by item, for the economy panel */
 let upkCat='Wszystko',upkSort='cat';
-function upkeepItems(){const map=new Map(),add=(cat,name,unit,n=1)=>{const k=cat+'|'+name+'|'+unit;const q=map.get(k)||{cat,name,unit,n:0,sum:0};q.n+=n;q.sum+=unit*n;map.set(k,q)};
+function upkeepItems(){const map=new Map(),add=(cat,name,unit,n=1,per=1)=>{const k=cat+'|'+name+'|'+unit+'|'+per;const q=map.get(k)||{cat,name,unit,per,n:0,sum:0};q.n+=n;q.sum+=unit*n/per;map.set(k,q)};
   for(const c of grid){if(!c||c.t==='part'||c.off)continue;const cat=TCAT[c.t]||(DRIVE[c.t]?'Drogi':'Inne');
-    if(UPKEEP[c.t])add(cat,DEF[c.t].name,UPKEEP[c.t]);if(ROAD_UPK[c.t]&&!c.edge)add('Drogi',c.t==='bridge'?'Mosty':DEF[c.t].name,ROAD_UPK[c.t]);
+    if(UPKEEP[c.t])add(cat,DEF[c.t].name,UPKEEP[c.t]);if(ROAD_UPK[c.t]&&!c.edge)add('Drogi',c.t==='bridge'?'Mosty':DEF[c.t].name,ROAD_UPK[c.t],1,ROAD_PER);
     if(c.up&&UPG[c.t]&&UPG[c.t].upkeep)add(cat,`${UPG[c.t].name} (${DEF[c.t].name.toLowerCase()})`,UPG[c.t].upkeep);if(c.up2&&UPG2[c.t]&&UPG2[c.t].upkeep)add(cat,`${UPG2[c.t].name} (${DEF[c.t].name.toLowerCase()})`,UPG2[c.t].upkeep);
     if(c.filt&&UPGF[c.t])add(cat,`Filtry (${DEF[c.t].name.toLowerCase()})`,UPGF[c.t].upkeep);if(c.owned&&c.owned.length)add(cat,'Linie produkcyjne (duża fabryka)',LINE_UPK,c.owned.length);
     if(c.jail&&c.jail.length)add('Policja','Więźniowie i zatrzymani',JAIL_FEE,c.jail.length)}
@@ -1210,7 +1211,7 @@ function upkeepItems(){const map=new Map(),add=(cat,name,unit,n=1)=>{const k=cat
 const opNet=o=>o.inc-o.upkeep-(o.crimeLoss||0);
 const netOf=o=>o.inc+o.refund-o.build-o.upkeep-(o.crimeLoss||0)+(o.loanIn||0)-(o.loanPay||0);
 const upkeepRate=night=>{let s=IMPORT_FEE*importKinds().length;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||c.off)continue;if(UPKEEP[c.t])s+=UPKEEP[c.t]*(night&&PARKS.includes(c.t)?0.5:1);
-  if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t];if(c.jail)s+=JAIL_FEE*c.jail.length;if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(c.filt&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s};
+  if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t]/ROAD_PER;if(c.jail)s+=JAIL_FEE*c.jail.length;if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(c.filt&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s};
 /* day and night: 1 real minute = 1 game hour; people sleep 22:00–06:00 */
 const hourOf=t=>(t/60)%24;
 const isNight=()=>{const h=hourOf(gameT);return h>=22||h<6};
@@ -2424,6 +2425,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
 
 /* ---------- UI ---------- */
 const fmt=n=>Math.round(n).toLocaleString('pl-PL');
+const fmt1=n=>Math.abs(n)<100&&Math.round(n)!==n?(Math.round(n*10)/10).toLocaleString('pl-PL'):fmt(n);
 const toolsEl=document.getElementById('tools'),catsEl=document.getElementById('cats');
 const toolBtns={},catBtns=[];let curCat=0;
 /* line icons for the build menu, 20×20, drawn with currentColor */
@@ -2575,8 +2577,8 @@ function renderStats(){
   document.getElementById('upkCtl').innerHTML=`<div class="chips">${['Wszystko',...cats].map(k=>`<button class="chipb" data-ucat="${k}" aria-pressed="${upkCat===k}">${k}</button>`).join('')}</div>`+
     `<div class="chips">Sortuj: ${[['cat','kategorie'],['sum','kwota'],['name','nazwa']].map(([k,n])=>`<button class="chipb" data-usort="${k}" aria-pressed="${upkSort===k}">${n}</button>`).join('')}</div>`;
   const shown=items.filter(q=>upkCat==='Wszystko'||q.cat===upkCat).sort(upkSort==='sum'?(x,y)=>y.sum-x.sum:upkSort==='name'?(x,y)=>x.name.localeCompare(y.name,'pl'):(x,y)=>PCATS.indexOf(x.cat)-PCATS.indexOf(y.cat)||y.sum-x.sum);
-  let rows2='',lastCat='';for(const q of shown){if(upkSort==='cat'&&q.cat!==lastCat){lastCat=q.cat;const tot=shown.filter(z=>z.cat===q.cat).reduce((a,z)=>a+z.sum,0);rows2+=`<span class="ucat">${q.cat}</span><span class="ucat">${fmt(tot)} T¢/godz.</span>`}
-    rows2+=`<span>${q.name}${q.n>1||q.unit?`: ${q.n} × ${q.unit} T¢`:''}</span><span>${fmt(q.sum)} T¢/godz.</span>`}
+  let rows2='',lastCat='';for(const q of shown){if(upkSort==='cat'&&q.cat!==lastCat){lastCat=q.cat;const tot=shown.filter(z=>z.cat===q.cat).reduce((a,z)=>a+z.sum,0);rows2+=`<span class="ucat">${q.cat}</span><span class="ucat">${fmt1(tot)} T¢/godz.</span>`}
+    rows2+=`<span>${q.name}${q.n>1||q.unit?`: ${q.n} × ${q.unit} T¢${q.per>1?' / '+q.per+' godz.':''}`:''}</span><span>${fmt1(q.sum)} T¢/godz.</span>`}
   if(upkCat!=='Wszystko')rows2+=`<span><b>Razem: ${upkCat}</b></span><span><b>${fmt(shown.reduce((a,z)=>a+z.sum,0))} T¢/godz.</b></span>`;
   const nextBill=30-Math.floor(gameT%30);
   {const ref=last||cur;document.getElementById('stSafe').innerHTML=`<span>Komisariaty</span><span>${(counts.policeS||0)+(counts.policeB||0)}</span><span>Przestępstwa udaremnione (godz.)</span><span>${ref.crimeOk||0}</span><span>Nieudaremnione (godz.)</span><span class="${ref.crimeLost?'neg':''}">${ref.crimeLost||0}</span><span>Straty (godz.)</span><span class="${ref.crimeLoss?'neg':''}">${fmt(ref.crimeLoss||0)} T¢</span><span>Trwające zdarzenia</span><span>${crimes.length}</span>`+(()=>{const m=inmates();return m.n?`<span>Zatrzymani i więźniowie</span><span>${m.n} · ${fmt(m.n*JAIL_FEE)} T¢/godz.</span>`+(m.w?`<span>Praca więźniów</span><span class="pos">+${fmt(m.w)} T¢/godz.</span>`:''):''})()+(counts.bank?`<span>Ryzyko napadu na bank</span><span>${Math.round(Math.min(0.85,0.3*(counts.bank+counts.bankG))*50)}% co kilka godzin (o połowę mniej w zasięgu policji)</span>`:'')}
