@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.3.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.3.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -390,7 +390,7 @@ const DEF={
   incS:{name:'Mała spalarnia',cost:900,desc:'1 pole. Spala 20 t odpadów na godz. (bufor 60 t). Można dokupić drugi komin: 40 t/godz. Pobiera 1 MW i dymi.',sw:'#a39890'},
   incinerator:{name:'Spalarnia',cost:1400,fw:2,fh:3,desc:'Zajmuje 2×3 pola. 1 komin: 20 t odpadów na godz., dokupisz drugi i trzeci komin (+20 t każdy). Bufor 150 t, 4 śmieciarki. Pobiera 1 MW i dymi.',sw:'#9a8f86'},
   recycler:{name:'Recykling',cost:700,desc:'Przerabia 10 t odpadów na godz. na 5 t materiałów (bufor 60 t), 3 śmieciarki. Pobiera 1,5 MW.',sw:'#4f9a6a'},
-  hvpole:{name:'Słup WN',cost:120,desc:'Wysokie napięcie: łączy się z innymi słupami WN, transformatorami i el. węglowymi w zasięgu 7×7. Nie z wiatrakami.',sw:'#8c959d',area:3},
+  hvpole:{name:'Słup WN',cost:120,desc:'Wysokie napięcie: łączy się z innymi słupami WN, transformatorami i el. węglowymi w zasięgu 7×7 (po ulepszeniu 11×11). Nie z wiatrakami.',sw:'#8c959d',area:3},
   gallery:{name:'Galeria handlowa',cost:1500,desc:'Zajmuje 2×2 pola. W karcie galerii wykupujesz lokale (sklep 100 T¢): na parterze 4 (np. 3 sklepy i kino), po dobudowie piętra wszystkie. Każdy to 15 miejsc na półkach, ceny +25% i więcej klientów.',sw:'#d8c48a',size:4},
   restaurant:{name:'Restauracja',cost:400,desc:'Rozrywka w zasięgu 3×3 (+1 zadowolenia). Zużywa jedzenie z magazynów, posiłek 35 T¢. Najtańsza w utrzymaniu.',sw:'#d9773a'},
   cinema:{name:'Kino',cost:900,desc:'Rozrywka w zasięgu 5×5 (+1 zadowolenia). Bilet 30 T¢.',sw:'#7a2a3a'},
@@ -486,6 +486,7 @@ const TRASH={supermarket:{cap:50,per:0.15,every:6},smallfac:{cap:24,per:0.3,ever
 const FAC={landfill:{cap:300,trucks:3,rate:0},incinerator:{cap:150,trucks:4,rate:20},recycler:{cap:60,trucks:3,rate:10},coal:{cap:20,trucks:1,rate:4}};
 const GT_CAP=25,REC_YIELD=0.5,SOLAR_MW=2;
 const UPG={
+  hvpole:{name:'Wyższy słup',cost:150,upkeep:0,desc:'Zasięg +2 pola w każdą stronę: 11×11'},
   warehouse:{name:'Dodatkowe piętro',cost:200,upkeep:0,desc:'Podwaja pojemność: 180 t'},warehouseB:{name:'Dodatkowe piętro',cost:450,upkeep:0,desc:'Podwaja pojemność: 450 t'},
   gallery:{name:'Dobudowa piętra',cost:1200,upkeep:20,desc:'Drugie piętro: wszystkie sklepy i kino naraz, +16 klientów/godz.'},smallwh:{name:'Podmagazyn',cost:80,upkeep:0,desc:'+1/3 pojemności: 41 t'},
   incinerator:{name:'Drugi komin',cost:700,upkeep:30,desc:'+20 t/godz.: razem 40 t/godz.'},bank:{name:'Powiększenie skarbca',cost:800,upkeep:0,desc:'Dodatkowe piętro, limit gotówki ×2: 12 000 T¢'},
@@ -996,6 +997,8 @@ function addUpgrade2Visual(c){if(c.t==='incinerator'&&c.model&&c.model.userData.
   if(c.t==='pump'||c.t==='outlet'){const pp=part(FK.cyl,M('#5a6b78'),c.t==='pump'?0.06:0.1,c.t==='pump'?0.5:0.4,c.t==='pump'?0.06:0.1,0.22,0.1,0.25);pp.rotation.x=Math.PI/2;m.add(pp)}
   if(c.t==='wind'){m.userData.rotor.scale.setScalar(1.3);m.userData.nac.scale.set(1.35,1.35,1.3);m.add(box(0.1,0.04,0.1,mat.chim,0,1.48,0.06))}}
 function addUpgradeVisual(c){const m=c.model;if(!m||m.userData.upg)return;m.userData.upg=true;
+  if(c.t==='hvpole'){const V=(x,y,z)=>new THREE.Vector3(x,y,z);for(const[sx,sz]of[[-1,-1],[1,-1],[1,1],[-1,1]])lat(m,V(sx*0.04,1.38,sz*0.04),V(sx*0.03,1.7,sz*0.03),0.012);
+    m.add(box(0.6,0.03,0.04,mat.steel,0,1.6,0));for(const x of[-0.26,0.26])m.add(box(0.025,0.09,0.025,mat.insul,x,1.51,0));lat(m,V(-0.3,1.6,0),V(-0.03,1.7,0),0.006);lat(m,V(0.3,1.6,0),V(0.03,1.7,0),0.006)}
   if(c.t==='wind'){for(const[x,z,r]of[[0.28,0,0],[-0.28,0,Math.PI],[0,0.28,Math.PI/2],[0,-0.28,-Math.PI/2]]){const p=new THREE.Group();p.position.set(x,0.12,z);p.rotation.y=r;
       const pan=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.2,0.3),mat.solar);pan.rotation.z=-0.55;p.add(pan);p.add(box(0.02,0.1,0.02,mat.steel,0,-0.12,0));m.add(p)}}
   else if(c.t==='warehouse'){m.userData.roof.position.y+=0.26;m.add(box(0.9,0.26,0.78,mat.wh,0,0.3,0));for(const x of[-0.27,0,0.27])m.add(box(0.14,0.07,0.8,mat.glass,x,0.4,0));m.add(box(0.92,0.03,0.8,mat.whRoof,0,0.3,0))}
@@ -1948,6 +1951,9 @@ function farmTick(dt,night){if(farmDirty)computeFarms();
 let powerDirty=true,powerAcc=0;
 const conductive=i=>{const c=grid[i];return !!c&&((POLEABLE[c.t]&&c.pole)||c.t==='lpole'||c.t==='transformer'||c.t==='hvpole')};
 const isHV=i=>!!grid[i]&&grid[i].t==='hvpole';
+/* HV reach: 3 tiles each way, 5 after the upgrade; two poles link when either reaches the other */
+const hvR=i=>HV_R+(grid[i]&&grid[i].up?2:0),cheb=(a,b)=>Math.max(Math.abs(a%N-b%N),Math.abs(((a/N)|0)-((b/N)|0))),HV_MAX=HV_R+2;
+const hvReach=(p,j)=>cheb(p,j)<=hvR(p);
 const GEN_W={hydro:0.26,hydrogen:0.5,wind:0.3,coal:0.5};let topoDirty=true,dayF=1;const hvWires=new THREE.Group();scene.add(hvWires);
 const D8=[[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
 function nbrs8(i){const x=i%N,z=(i/N)|0,o=[];for(const[dx,dz]of D8){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)o.push(idx(nx,nz))}return o}
@@ -1958,13 +1964,13 @@ function inRange(i,r,f){const x=i%N,z=(i/N)|0,o=[];for(let dz=-r;dz<=r;dz++)for(
   if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(f(j))o.push(j)}return o}
 /* HV poles link to HV poles and transformers within 7×7; local poles link orthogonally, transformers also diagonally */
 function links(a){const t=grid[a].t;
-  if(t==='hvpole')return inRange(a,HV_R,j=>isHV(j)||isTrafo(j));
+  if(t==='hvpole')return inRange(a,HV_MAX,j=>(isHV(j)&&(hvReach(a,j)||hvReach(j,a)))||(isTrafo(j)&&hvReach(a,j)));
   const o=nbrs8(a).filter(j=>conductive(j)&&!isHV(j)&&(orth(a,j)||isTrafo(a)||isTrafo(j)));
-  if(t==='transformer')for(const j of inRange(a,HV_R,isHV))o.push(j);return o}
-const topY=i=>{const t=grid[i].t;return t==='hvpole'?1.32:t==='transformer'?0.5:0.62};
+  if(t==='transformer')for(const j of inRange(a,HV_MAX,j=>isHV(j)&&hvReach(j,a)))o.push(j);return o}
+const topY=i=>{const t=grid[i].t;return t==='hvpole'?(grid[i].up?1.62:1.32):t==='transformer'?0.5:0.62};
 function rebuildHV(){for(const m of hvWires.children)m.geometry.dispose();hvWires.clear();
-  for(let i=0;i<N*N;i++){if(!isHV(i))continue;const A=new THREE.Vector3(cx(i),1.32,cz(i));
-    for(const j of inRange(i,HV_R,j=>(isHV(j)&&j>i)||isTrafo(j)||(grid[j]&&grid[j].t==='coal'))){const B=new THREE.Vector3(cx(j),topY(j),cz(j));hvWires.add(wire(A,B,0.06*A.distanceTo(B)))}}
+  for(let i=0;i<N*N;i++){if(!isHV(i))continue;const A=new THREE.Vector3(cx(i),topY(i),cz(i));
+    for(const j of inRange(i,HV_MAX,j=>(isHV(j)&&j>i&&(hvReach(i,j)||hvReach(j,i)))||((isTrafo(j)||(grid[j]&&grid[j].t==='coal'))&&hvReach(i,j)))){const B=new THREE.Vector3(cx(j),topY(j),cz(j));hvWires.add(wire(A,B,0.06*A.distanceTo(B)))}}
   {const done=new Set();for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!GEN_W[c.t]||done.has(i))continue;
       let tiles=tilesOf(i);if(c.t==='hydro'){const cl=[i];done.add(i);for(let h=0;h<cl.length;h++)for(const j of nbrs(cl[h]))if(grid[j]&&grid[j].t==='hydro'&&!done.has(j)){done.add(j);cl.push(j)}tiles=cl.sort((a,b)=>a-b)}
       let hit=null;for(const t of tiles){for(const j of nbrs8(t))if(isTrafo(j)){hit=[t,j];break}if(hit)break}if(!hit)continue;
@@ -1979,7 +1985,7 @@ function computePower(dt){if(topoDirty)rebuildHV();computeDams();const dm=isNigh
     c.net=k;totDem+=DEMAND[c.t]*dm;{const ck=TCAT[c.t]||'Inne';pcat[ck]=(pcat[ck]||0)+DEMAND[c.t]*dm}if(k>=0){dem[k]+=DEMAND[c.t]*dm;cons.push(i)}}
   const GENS={wind:1,coal:1,hydro:1,hydrogen:1};const gens=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!GENS[c.t])continue;let k=-1;if(c.off){c.net=-1;c.running=false;if(c.model)c.model.userData.off=true;continue}
     for(const t of tilesOf(i)){for(const j of nbrs8(t))if(isTrafo(j)){k=comp[j];break}if(k>=0)break}
-    if(k<0&&c.t!=='wind'){const h=inRange(i,HV_R,isHV);if(h.length)k=comp[h[0]]}c.net=k;gens.push(i)}
+    if(k<0&&c.t!=='wind'){const h=inRange(i,HV_MAX,j=>isHV(j)&&hvReach(j,i));if(h.length)k=comp[h[0]]}c.net=k;gens.push(i)}
   {const seen=new Set();for(const i of gens){if(grid[i].t!=='hydro'||seen.has(i))continue;const cl=[i];seen.add(i);for(let h=0;h<cl.length;h++)for(const j of nbrs(cl[h]))if(grid[j]&&grid[j].t==='hydro'&&!grid[j].off&&!seen.has(j)){seen.add(j);cl.push(j)}
     const k=cl.map(j=>grid[j].net).find(v=>v>=0);for(const j of cl){grid[j].net=k===undefined?-1:k;grid[j].damN=cl.length}}}
   for(const i of gens){const c=grid[i];if(c.t==='wind'&&c.net>=0){c.wake=nbrs8(i).filter(j=>grid[j]&&grid[j].t==='wind').length;const mwv=Math.max(0,WIND_MW+(c.up2?3:0)-c.wake)+(c.up?SOLAR_MW*dayF:0);c.windMW=mwv;sup[c.net]+=mwv;cap+=mwv}}
@@ -2290,14 +2296,14 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
     s={road2:'<b>Dwujezdniowa</b> · 2 pasy w każdą stronę, 1,4× szybciej'+jn,road3:'<b>Trzyjezdniowa</b> · 3 pasy w każdą stronę, 1,8× szybciej'+jn,roundabout:'<b>Rondo</b> · płynny przejazd, 1,2× szybciej',
       highway:'<b>Autostrada</b> · auta jadą tu 2,2× szybciej'+jn,bridge:`<b>Most</b> · jak ${DEF[c.bt||'road'].name.toLowerCase()}: ${laneN(i)} ${laneN(i)>1?'pasy':'pas'} w każdą stronę`,
       lpole:`<b>Słup</b> · połączenia: ${links(i).length} · zasila budynki obok`,
-      hvpole:`<b>Słup WN</b> · połączenia w zasięgu 7×7: ${links(i).length}`,road:(c.pole?'<b>Jednojezdniowa ze słupem</b> · przewodzi prąd':'<b>Jednojezdniowa</b> · dodaj słup, by poprowadzić prąd')+jn,
+      hvpole:`<b>Słup WN${c.up?' (wyższy)':''}</b> · połączenia w zasięgu ${c.up?'11×11':'7×7'}: ${links(i).length}`,road:(c.pole?'<b>Jednojezdniowa ze słupem</b> · przewodzi prąd':'<b>Jednojezdniowa</b> · dodaj słup, by poprowadzić prąd')+jn,
       wind:'<b>Wiatrak</b> · '+(c.net>=0?`${WIND_MW} MW do sieci`:'<b>niepodłączony</b>: postaw obok transformator')+` · ${UPKEEP.wind} T¢/godz.`,
       transformer:`<b>Transformator</b> · łączy elektrownie obok (też po skosie) ze słupami · ${UPKEEP.transformer} T¢/godz.`,
       coal:'<b>El. węglowa</b> · '+(c.net<0?'<b>niepodłączona</b>: postaw obok transformator':c.running?`pracuje, ${COAL_MW} MW`:'czeka: wiatraki wystarczają albo brak węgla')+` · ${UPKEEP.coal} T¢/godz.`,house:'<b>Rezydencja</b>',factory:`<b>Fabryka</b> · zmiany do kolejnej ciężarówki: ${c.work}/2`,
       bakery:`<b>Piekarnia</b> · ${c.shelf?c.shelf.bread||0:0} bochenków`,gallery:'<b>Galeria handlowa</b>',restaurant:'<b>Restauracja</b>',cinema:'<b>Kino</b>',theater:'<b>Teatr</b>',casino:'<b>Kasyno</b>',hotelS:'<b>Mały hotel</b>',hotelB:'<b>Duży hotel</b>',tenement:'<b>Kamienica</b>',block:'<b>Tani blok</b>',modern:'<b>Apartamentowiec</b>',
       shop:`<b>Sklep</b> · półki ${c.shelf?shelfTotal(c):0}/${SHOP_SLOTS}`,bank:`<b>Bank</b> · +${fmt(BANK_CAP)} T¢ limitu`,warehouse:`<b>Magazyn</b> · +${WH_CAP} t limitu`,smallwh:`<b>Mały magazyn</b> · +${WHCAP.smallwh} t limitu`,
       park1:`<b>Skwer</b> · zasięg 3×3 · ${UPKEEP.park1} T¢/godz.`,park2:`<b>Park</b> · zasięg 5×5 · ${UPKEEP.park2} T¢/godz.`,park3:`<b>Park miejski</b> · zasięg 7×7 · ${UPKEEP.park3} T¢/godz.`}[c.t]+pwr+no;
-    if(DEF[c.t].r||DEF[c.t].area)showArea(i,DEF[c.t].r?parkR(c):DEF[c.t].area,true);
+    if(DEF[c.t].r||DEF[c.t].area)showArea(i,DEF[c.t].r?parkR(c):c.t==='hvpole'?hvR(i):DEF[c.t].area,true);
     if(pol[i]&&!isFactory(c.t)&&c.t!=='coal')s+=pol[i]===2?' · smog (żółte pole)':' · lekki smog'}
   setHint(s,false,true)}
 
@@ -2306,7 +2312,7 @@ const inspEl=document.getElementById('insp');let inspI=-1,focus=null;
 const sameType=t=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].t===t)o.push(i);return o};
 const houses=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&HOUSING[grid[i].t])o.push(i);return o};
 function openHouse(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;inspI=i;inspEl.hidden=false;hintEl.hidden=true;ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
-  const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):DEF[c.t].area,'hold');
+  const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold');
   else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');renderInsp()}
 function closeHouse(){if(areaT>1e8){areaT=0;area.visible=false}inspI=-1;inspEl.hidden=true;hintEl.hidden=false;ring.visible=false}
 function stepHouse(d){const c=grid[inspI];if(!c)return closeHouse();const list=sameType(c.t);let k=list.indexOf(inspI);
@@ -2333,7 +2339,7 @@ function toggleOff(i){const c=grid[i];if(!c||DRIVE[c.t]||HOUSING[c.t])return;c.o
 function buyUpgrade(i,slot='up'){const c=grid[i],U=c&&(slot==='up'?UPG:slot==='up2'?UPG2:UPGF)[c.t];if(!U||c[slot])return;if(c.t==='incinerator'&&slot==='up2'&&!c.tiles)return;if(c.t==='incinerator'&&slot==='up2'&&!c.up){setHint('Najpierw dokup drugi komin.',true,true);hintEl.hidden=false;return}
   if(money<U.cost){setHint(`Brakuje ${fmt(U.cost-money)} T¢ na ulepszenie.`,true,true);hintEl.hidden=false;return}
   spend(U.cost);c[slot]=true;if(slot==='up2')addUpgrade2Visual(c);else if(slot==='filt')filterVisual(c);else addUpgradeVisual(c);if(c.t==='coal'){c.gstock=c.gstock||0;c.gin=c.gin||0;c.gtrucks=c.gtrucks||0}
-  powerDirty=true;envDirty=true;float(i,U.name,'neutral');save();renderInsp();if(PARKS.includes(c.t))showArea(i,parkR(c),true)}
+  powerDirty=true;envDirty=true;if(c.t==='hvpole')topoDirty=true;float(i,U.name,'neutral');save();renderInsp();if(c.t==='hvpole')showArea(i,hvR(i),true);if(PARKS.includes(c.t))showArea(i,parkR(c),true)}
 /* the next building type (in build-menu order) that exists on the map */
 const TYPE_ORDER=CATS.flatMap(c=>c.tools).filter(t=>!DRIVE[t]&&t!=='pole'&&t!=='poleline'&&t!=='pipe'&&t!=='pipeDel');
 function nextType(t){const k=TYPE_ORDER.indexOf(t);for(let j=1;j<=TYPE_ORDER.length;j++){const u=TYPE_ORDER[(k+j)%TYPE_ORDER.length];if(u!==t&&counts[u]>0)return u}return null}
@@ -2413,7 +2419,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(c.t==='treatment'){R('Oczyszcza',`${mw(Math.round((c.treated||0)*10)/10)} / ${TREAT_R} m³/godz.`);R('Oddaje czystej',`${mw(Math.round((c.treated||0)*3)/10)} m³/godz.`);R('Sieć',c.wnet>=0?'podłączona':'brak rury',c.wnet>=0?'':'warnv')}
   if(c.t==='outlet'){R('Zrzut do rzeki',nearWater(i)<0?'brak wody obok':`${mw(Math.round((c.dis||0)*10)/10)} / ${OUT_R*(c.up2?2:1)} m³/godz.`,nearWater(i)<0?'warnv':'');R('Sieć',c.wnet>=0?'podłączony':'brak rury',c.wnet>=0?'':'warnv')}
   if(c.t==='transformer')R('Łączy','elektrownie i słupy obok, słupy WN w 7×7');
-  if(c.t==='hvpole')R('Połączenia w 7×7',links(i).length);
+  if(c.t==='hvpole')R(`Połączenia w ${c.up?'11×11':'7×7'}`,links(i).length);
   if(c.t==='landfill'&&!c.lfHub){const cl=lfClusters.find(o=>o.tiles.includes(i));if(cl){const H=grid[cl.hub];R('Multiblok',`${cl.tiles.length} pól · biuro przy ulicy`);R('Odpady (cały multiblok)',`${fmt(H.gstock)} / ${fmt(facCap(H))} t`)}}
   if(isFac(c)){let wait=0;for(const g of grid)if(g&&TRASH[g.t]&&g.want&&!g.truckOn&&g.trash>=1)wait++;
     if(c.noRoad)R('Dojazd','brak ulicy przy budynku','warnv');else if(wait&&!c.reachN)R('Połączenie','brak drogi do budynków czekających na odbiór','warnv');else if(wait)R('W zasięgu',`${c.reachN} budynków czeka na odbiór`);
