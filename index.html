@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.3.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.3.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1294,16 +1294,21 @@ function computeDams(){lowW.fill(0);damSealed.fill(0);const seen=new Uint8Array(
     if(!comp.some(isDam))continue;
     const edge=new Set(comp.filter(onEdge)),mouths=[],used=new Set();
     for(const e of edge){if(used.has(e))continue;const m=[e];used.add(e);for(let h=0;h<m.length;h++)for(const j of nbrs(m[h]))if(edge.has(j)&&!used.has(j)){used.add(j);m.push(j)}mouths.push(m)}
-    let src=mouths.filter(m=>m.some(i=>i%N===0||i<N));if(mouths.length===1&&comp.length>mouths[0].length*6){let far=comp[0],fd=-1;for(const j of comp)if(flowD[j]>fd&&mouths[0].indexOf(j)<0){fd=flowD[j];far=j}const fl=comp.reduce((a,j)=>flowD[j]===0?j:a,far);src=[[fl]]}else if(!src.length&&mouths.length)src=[mouths.reduce((a,b)=>Math.min(...a.map(i=>i%N+((i/N)|0)))<=Math.min(...b.map(i=>i%N+((i/N)|0)))?a:b)];
+    /* the source is the same one the current animation flows from (flowD 0), so what you see flowing out is an outflow */
+    let src=mouths.filter(m=>m.some(i=>flowD[i]===0));if(!src.length)src=mouths.filter(m=>m.some(i=>i%N===0||i<N));if(mouths.length===1&&comp.length>mouths[0].length*6){let far=comp[0],fd=-1;for(const j of comp)if(flowD[j]>fd&&mouths[0].indexOf(j)<0){fd=flowD[j];far=j}const fl=comp.reduce((a,j)=>flowD[j]===0?j:a,far);src=[[fl]]}else if(!src.length&&mouths.length)src=[mouths.reduce((a,b)=>Math.min(...a.map(i=>i%N+((i/N)|0)))<=Math.min(...b.map(i=>i%N+((i/N)|0)))?a:b)];
     const srcT=new Set(src.flat()),sinks=[...edge].filter(i=>!srcT.has(i));
     const reach=new Uint8Array(N*N),q=[...srcT].filter(i=>!isDam(i));for(const i of q)reach[i]=1;
     for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(water[j]&&!reach[j]&&!isDam(j)){reach[j]=1;q.push(j)}
     let anyLow=false;for(const j of comp)if(!isDam(j)&&!reach[j]){lowW[j]=1;anyLow=true}
     /* every dam line works on its own: it is sealed when water on one side is fed by a source and water on the other side is not,
        so a river with several outflows can be dammed on any branch, and below a confluence each feeding source must be dammed */
-    const dg=new Uint8Array(N*N);for(const d0 of comp){if(!isDam(d0)||dg[d0])continue;const grp=[d0];dg[d0]=1;let up=false,down=false;
-      for(let h=0;h<grp.length;h++)for(const j of nbrs(grp[h])){if(!water[j])continue;if(isDam(j)){if(!dg[j]){dg[j]=1;grp.push(j)}}else if(reach[j])up=true;else down=true}
-      if(up&&down)for(const j of grp)damSealed[j]=1}}
+    /* water still runs through a working dam's turbines, so dams further down the river (in series) work too */
+    const fed=reach.slice(),groups=[],dg=new Uint8Array(N*N);
+    for(const d0 of comp){if(!isDam(d0)||dg[d0])continue;const grp=[d0];dg[d0]=1;for(let h=0;h<grp.length;h++)for(const j of nbrs(grp[h]))if(water[j]&&isDam(j)&&!dg[j]){dg[j]=1;grp.push(j)}groups.push(grp)}
+    for(let changed=true;changed;){changed=false;for(const grp of groups){if(damSealed[grp[0]])continue;let up=false;const dn=[];
+        for(const d of grp)for(const j of nbrs(d))if(water[j]&&!isDam(j)){if(fed[j])up=true;else dn.push(j)}
+        if(!up||!dn.length)continue;for(const j of grp)damSealed[j]=1;changed=true;
+        for(const j of dn)fed[j]=1;for(let h=0;h<dn.length;h++)for(const k of nbrs(dn[h]))if(water[k]&&!fed[k]&&!isDam(k)){fed[k]=1;dn.push(k)}}}}
   const sig=lowW.join('');if(sig!==lowSig){lowSig=sig;applyWaterLevels()}}
 function applyWaterLevels(){for(const[i,[m,k]]of wIdx){dObj.position.set(cx(i),lowW[i]?-LOW_DROP:0,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();m.setMatrixAt(k,dObj.matrix)}
   for(const m of[waterMesh,waterMeshV])m.instanceMatrix.needsUpdate=true;for(const b of wBlocks)b.y=lowW[b.i]?-LOW_DROP:0}

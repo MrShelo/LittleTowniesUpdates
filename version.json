@@ -1,1 +1,1 @@
-{"v": "3.3.3", "notes": "3.3.3: tama działa na każdej odnodze rzeki (każda linia tamy osobno), elektrownia wodorowa → geotermalna (bez ścieków, ulepszenie: drugi odwiert +15 MW), HUD: kwoty od 10 tys. jako 36,5k, miliony jako 1,2M, saldo godziny od 1000 jako +4,1k"}
+{"v": "3.3.4", "notes": "3.3.4: tama liczy źródło tak jak pokazuje nurt rzeki (inne ujścia to wypływy), tamy jedna za drugą też działają"}
