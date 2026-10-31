@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.1.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.2.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -694,11 +694,12 @@ function setHousingModel(i){const c=grid[i];if(!c||!HBUILD[c.t])return;setTimeou
 /* unhappy homes empty out: at 0 after ~6 h, at 1 after ~24 h, at 2 after ~48 h (game time), each time with a 50% chance; they come back after 6 h at 4+ */
 const ABAND_T=[360,1440,2880];
 /* residents: ages, illness, hospital stays, births, moving in and out, deaths */
-const AGE_H=2/24,STAGES=[[0,'Dzieci',7],[7,'Uczniowie podstawówki',15],[15,'Uczniowie liceum/technikum',19],[19,'Dorośli',65],[65,'Seniorzy',200]];
+const AGE_H=1/24,STAGES=[[0,'Dzieci',7],[7,'Uczniowie podstawówki',15],[15,'Uczniowie liceum/technikum',19],[19,'Dorośli',65],[65,'Seniorzy',200]];
 const stageOf=a=>a<7?0:a<15?1:a<19?2:a<65?3:4;
 function newPerson(a){return{a,s:0,si:0,sk:0,h:0,hi:-1}}
 function seedPeople(c,frac){const n=Math.round(residents(c)*frac);c.pp=[];for(let k=0;k<n;k++){const r=Math.random();c.pp.push(newPerson(r<0.2?rnd(0,7):r<0.33?rnd(7,15):r<0.4?rnd(15,19):r<0.88?rnd(19,64):rnd(65,80)))}c.lastBuy=gameT}
-function riskLvl(i){const ts=tilesOf(i),park=ts.some(k=>parkCov[k]),sm=ts.some(k=>pol[k]);return(park?0:1)+(sm?1:0)+1}
+function sickFactors(i){const c=grid[i],ts=tilesOf(i);return{water:c.water==='ok',power:!!c.powered,air:!ts.some(k=>pol[k]),park:ts.some(k=>parkCov[k]),med:ts.some(k=>medCov[k])}}
+function sickChance(i){const f=sickFactors(i);return Math.max(0,0.2-0.04*Object.values(f).filter(Boolean).length)}
 function medFor(i){const ts=tilesOf(i);let best=-1,room=0;for(let j=0;j<N*N;j++){const m=grid[j];if(!m||!MED[m.t]||m.off||!m.powered)continue;const r=MED[m.t].r;
   if(!tilesOf(j).some(t=>ts.some(k=>Math.abs(t%N-k%N)<=r&&Math.abs(((t/N)|0)-((k/N)|0))<=r)))continue;const fr=medCap(m)-(m.pat||0);if(fr>room){room=fr;best=j}}return best}
 function die(i,c,k){const q=c.pp[k];if(q.s===2&&grid[q.hi]&&grid[q.hi].pat)grid[q.hi].pat--;c.pp.splice(k,1);c.dead=(c.dead||0)+1;cur.deaths=(cur.deaths||0)+1}
@@ -710,7 +711,7 @@ function lifeHour(i,c,six){if(!c.pp||c.aband)return;const cap=residents(c),h=c.h
     if(q.s===1){q.sk++;if(q.sk>=24){q.s=0;q.sk=0}}else if(q.s===2){q.h--;if(q.h<=0){q.s=0;const m=grid[q.hi];if(m&&m.pat)m.pat--;q.hi=-1}}}
   if(c.lastBuy==null)c.lastBuy=gameT;if(safe)c.lastBuy=gameT;if(gameT-c.lastBuy>4320&&c.pp.length){c.starveT=(c.starveT||0)+60;if(c.starveT>=1440){c.starveT=0;die(i,c,(Math.random()*c.pp.length)|0);float(i,'mieszkaniec zmarł: brak zakupów od 3 dni','warn')}}else c.starveT=0;
   const healthy=()=>c.pp.filter(q=>q.s===0);
-  if(!safe&&c.pp.length&&Math.random()<[0,0.1,0.2,0.3][riskLvl(i)]){const hs=healthy();if(hs.length){const q=hs[(Math.random()*hs.length)|0];q.s=1;q.si++;q.sk=0}}
+  if(!safe&&c.pp.length&&Math.random()<sickChance(i)){const hs=healthy();if(hs.length){const q=hs[(Math.random()*hs.length)|0];q.s=1;q.si++;q.sk=0}}
   if(six&&!safe){const sick=c.pp.filter(q=>q.s===1).length;for(let k=0;k<sick;k++)if(Math.random()<0.4){const hs=healthy();if(hs.length){const q=hs[(Math.random()*hs.length)|0];q.s=1;q.si++;q.sk=0}}}
   for(const q of c.pp)if(q.s===1){const m=medFor(i);if(m<0)break;q.s=2;q.h=8;q.hi=m;grid[m].pat=(grid[m].pat||0)+1}
   const adults=c.pp.filter(q=>q.a>=19&&q.a<65).length;
@@ -719,9 +720,9 @@ function lifeHour(i,c,six){if(!c.pp||c.aband)return;const cap=residents(c),h=c.h
   if(h<=1&&c.pp.length&&Math.random()<0.08)c.pp.splice((Math.random()*c.pp.length)|0,1);
   if(c.pp.length>cap)c.pp.length=cap}
 function peopleBox(i,c){if(!c.pp)return'';const st=[0,0,0,0,0];for(const q of c.pp)st[stageOf(q.a)]++;const ts=tilesOf(i),ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]);
-  const sick=c.pp.filter(q=>q.s===1).length,hosp=c.pp.filter(q=>q.s===2).length,rl=riskLvl(i);
+  const sick=c.pp.filter(q=>q.s===1).length,hosp=c.pp.filter(q=>q.s===2).length,sc=sickChance(i),sf=sickFactors(i);
   return`<div class="facts">`+STAGES.map((S,k)=>`<span>${S[1]}</span><span>${st[k]}${k===1&&st[1]?ep?' · w szkole':' · bez szkoły':''}${k===2&&st[2]?es?' · w szkole':' · bez szkoły':''}</span>`).join('')+
-    `<span>Chorzy</span><span class="${sick?'neg':''}">${sick} bez leczenia · ${hosp} w szpitalu</span><span>Ryzyko choroby</span><span class="${rl>1?'neg':''}">${['','niskie (10%/godz.)','średnie (20%/godz.)','wysokie (30%/godz.)'][rl]}</span>`+
+    `<span>Chorzy</span><span class="${sick?'neg':''}">${sick} bez leczenia · ${hosp} w szpitalu</span><span>Szansa choroby</span><span class="${sc>0.08?'neg':''}">${Math.round(sc*100)}%/godz.</span><span>Chroni (−4% każde)</span><span>${[['water','woda'],['power','prąd'],['air','czyste powietrze'],['park','park'],['med','opieka medyczna']].map(([k,n])=>sf[k]?'✓ '+n:'<span class="neg">✗ '+n+'</span>').join(' · ')}</span>`+
     (c.dead?`<span>Zmarli w domu</span><span class="neg">${c.dead} · czekają na karawan</span>`:'')+(gameT-(c.lastBuy??gameT)>2880?`<span>Ostatnie zakupy</span><span class="neg">${Math.floor((gameT-c.lastBuy)/60)} godz. temu</span>`:'')+`</div>`}
 /* hearses take the dead to a cemetery or crematorium with free places */
 function dcFree(c){return dCap(c)-((c.bodies||0)+(c.urn?c.urn.length:0)+(c.inbound||0))}
@@ -1206,6 +1207,7 @@ function upkeepItems(){const map=new Map(),add=(cat,name,unit,n=1)=>{const k=cat
     if(c.jail&&c.jail.length)add('Policja','Więźniowie i zatrzymani',JAIL_FEE,c.jail.length)}
   for(const k of importKinds())add('Import',`Import: ${GOODS[k].name.toLowerCase()}`,IMPORT_FEE);
   return[...map.values()]}
+const opNet=o=>o.inc-o.upkeep-(o.crimeLoss||0);
 const netOf=o=>o.inc+o.refund-o.build-o.upkeep-(o.crimeLoss||0)+(o.loanIn||0)-(o.loanPay||0);
 const upkeepRate=night=>{let s=IMPORT_FEE*importKinds().length;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||c.off)continue;if(UPKEEP[c.t])s+=UPKEEP[c.t]*(night&&PARKS.includes(c.t)?0.5:1);
   if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t];if(c.jail)s+=JAIL_FEE*c.jail.length;if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(c.filt&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s};
@@ -1297,7 +1299,7 @@ function computeDams(){lowW.fill(0);damSealed.fill(0);const seen=new Uint8Array(
   const sig=lowW.join('');if(sig!==lowSig){lowSig=sig;applyWaterLevels()}}
 function applyWaterLevels(){for(const[i,[m,k]]of wIdx){dObj.position.set(cx(i),lowW[i]?-LOW_DROP:0,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();m.setMatrixAt(k,dObj.matrix)}
   for(const m of[waterMesh,waterMeshV])m.instanceMatrix.needsUpdate=true;for(const b of wBlocks)b.y=lowW[b.i]?-LOW_DROP:0}
-function applyWater(){let nh=0,nv=0;wIdx.clear();const run=(i,dx,dz)=>{let k=0,x=i%N,z=(i/N)|0;for(;;){x+=dx;z+=dz;if(x<0||z<0||x>=N||z>=N||!water[idx(x,z)])break;k++}return k};
+function applyWater(){riverDirt.fill(0);riverDirty.fill(0);let nh=0,nv=0;wIdx.clear();const run=(i,dx,dz)=>{let k=0,x=i%N,z=(i/N)|0;for(;;){x+=dx;z+=dz;if(x<0||z<0||x>=N||z>=N||!water[idx(x,z)])break;k++}return k};
   for(let i=0;i<N*N;i++)if(water[i]){dObj.position.set(cx(i),0,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();
     const h=run(i,1,0)+run(i,-1,0),v=run(i,0,1)+run(i,0,-1);if(h>=v){wIdx.set(i,[waterMesh,nh]);waterMesh.setMatrixAt(nh++,dObj.matrix)}else{wIdx.set(i,[waterMeshV,nv]);waterMeshV.setMatrixAt(nv++,dObj.matrix)}clearDeco(i);groundDeco(i,false)}
   computeFlow();buildCurrent(i=>(run(i,1,0)+run(i,-1,0))>=(run(i,0,1)+run(i,0,-1))?0:1);tickCurrent(0);paintRiver();
@@ -1725,7 +1727,8 @@ function newPatrol(c){const st=c.home;if(!grid[st]||!isPolice(grid[st].t)||grid[
 function sendHome(c){const st=c.home,e=grid[st]?entryOf(st):-1;c.task=null;c.speed=1.8;if(e<0||!sendTo(c,e,'back'))removeCar(c)}
 function spawnPatrol(st,role){const e=entryOf(st);if(e<0)return null;const rs=roadsNear(st),b=bfs(e);const ok=rs.filter(t=>b.dist[t]>0);if(!ok.length&&role==='patrol')return null;
   const t=role==='patrol'?ok[(Math.random()*ok.length)|0]:e;const p=role==='patrol'?pathTo(b,t):[e,e];return createCar('police',p,{home:st,dest:-1,role,task:null})}
-function crimeRate(night){const p=popNow();return p?Math.max(0.4,p/120)*(night?1.4:1):0}
+function crimeRate(night){const p=popNow();return p?Math.max(0.2,p/240)*(night?1.4:1):0}
+const policed=i=>stations().some(st=>stCover(st,i));
 function makePin(i,big){const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};const el=document.createElement('div');el.className='st crimeChip'+(big?' big':'');
   el.innerHTML=`<i class="s-crime" title="${big?'Napad na bank':'Przestępstwo'}"><svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${big?'<path d="M2.5 8L10 3.5 17.5 8M4 8.5v6M8 8.5v6M12 8.5v6M16 8.5v6M2.5 17h15"/>':'<path d="M10 2.8L18 16.8H2z"/><path d="M10 8v4"/><path d="M10 14.3h.01"/>'}</svg></i>`;
   document.getElementById('floats').appendChild(el);return{el,x:gp.x,z:gp.z,y:big?1.9:1.4,remove(){el.remove()}}}
@@ -1768,8 +1771,8 @@ function deliverInmates(c){const pr=grid[c.dest];if(pr&&pr.t==='prison'){pr.inbo
 function policeTick(dt,night){if(!dt)return;polFlash+=dt;jailTick(dt);
   for(const st of stations()){const g=grid[st];const pc=polCars(st).filter(c=>c.role==='patrol').length;if(pc<POL[g.t].patrol&&cars.length<MAX_CARS&&(g.spawnT=(g.spawnT||0)-dt)<=0){g.spawnT=1.5;spawnPatrol(st,'patrol')}}
   for(const c of cars)if(!c.dead&&c.kind==='police'&&c.mesh.userData.bar){const on=!!c.task,f=Math.floor(polFlash*6)%2;const[r,b]=c.mesh.userData.bar;r.visible=!on||f===0;b.visible=!on||f===1}
-  if(crimeRate(night)&&!firstDay()){crimeT-=dt;if(crimeT<=0){crimeT=60/crimeRate(night)*rnd(0.6,1.4);const pool=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&(HLV[c.t]||isShop(c.t))&&!c.off&&entryOf(i)>=0)pool.push(i)}if(pool.length)newCrime(pool[(Math.random()*pool.length)|0],false)}}
-  if(counts.bank+counts.bankG&&!firstDay()){heistT-=dt;if(heistT<=0){heistT=rnd(150,330);if(Math.random()<Math.min(0.85,0.3*(counts.bank+counts.bankG))){const bs=[];for(let i=0;i<N*N;i++)if(grid[i]&&(grid[i].t==='bank'||grid[i].t==='bankG')&&entryOf(i)>=0)bs.push(i);if(bs.length)newCrime(bs[(Math.random()*bs.length)|0],true)}}}
+  if(crimeRate(night)&&!firstDay()){crimeT-=dt;if(crimeT<=0){crimeT=60/crimeRate(night)*rnd(0.6,1.4);const pool=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&(HLV[c.t]||isShop(c.t))&&!c.off&&entryOf(i)>=0)pool.push(i)}if(pool.length){const ci=pool[(Math.random()*pool.length)|0];if(!policed(ci)||Math.random()<0.5)newCrime(ci,false)}}}
+  if(counts.bank+counts.bankG&&!firstDay()){heistT-=dt;if(heistT<=0){heistT=rnd(150,330);if(Math.random()<Math.min(0.85,0.3*(counts.bank+counts.bankG))*0.5){const bs=[];for(let i=0;i<N*N;i++)if(grid[i]&&(grid[i].t==='bank'||grid[i].t==='bankG')&&entryOf(i)>=0)bs.push(i);if(bs.length){const bi=bs[(Math.random()*bs.length)|0];if(!policed(bi)||Math.random()<0.5)newCrime(bi,true)}}}}
   for(const cr of [...crimes]){cr.t-=dt;cr.pin.el.classList.toggle('blink',Math.floor(polFlash*3)%2===0);if(cr.sent<cr.need&&Math.random()<dt)dispatch(cr);if(cr.t<=0)endCrime(cr,false)}}
 function visitorRate(){let r=3;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||(c.t!=='hotelS'&&c.t!=='hotelB'))continue;r+=(c.t==='hotelS'?4:10)*(1+0.25*hotelStars(i))}return r}
 function spawnVisitor(i){const b=bfs(i);const list=candidates(b,SERVICES).filter(o=>{const g=grid[o.i];return g.t==='hotelS'||g.t==='hotelB'||entR(g)>0||isShop(g.t)});
@@ -1979,7 +1982,11 @@ function computePower(dt){if(topoDirty)rebuildHV();computeDams();const dm=isNigh
    All water used becomes sewage: plants treat it, outlets dump the rest into the river. Night halves use. Units: m³ per game hour. */
 const WATER={clinic:2,hosp:6,hospC:15,crem:2,schoolS:1,school:2,lyceum:4,techn:4,bankG:1,shop1:0.8,prison:5,policeS:1,policeB:2,bakery:0.8,factoryB:4,mine:0.5,mineB:1.5,supermarket:2,hydrogen:10,smallfac:1.5,house:1,tenement:2.5,block:5,modern:5,shop:0.5,gallery:1.5,restaurant:1.5,hotelS:2,hotelB:5,factory:3,cinema:1,theater:1,casino:1.5,bank:0.5};
 const PUMP_R=40,TOWER_R=15,TREAT_R=30;
-const pipe=new Uint8Array(N*N),riverDirty=new Uint8Array(N*N);let pipeDirty=true,riverSig='';
+const pipe=new Uint8Array(N*N),riverDirty=new Uint8Array(N*N),riverDirt=new Float32Array(N*N);let riverSrc=[],riverT=0;
+/* sewage enters at the outlets and drifts downstream about one tile every 3 game minutes; when the outlets stop, the river slowly washes itself clean */
+function riverTick(dt){riverT+=dt;if(riverT<3)return;riverT=0;const nd=new Float32Array(N*N);
+  for(let j=0;j<N*N;j++){if(!water[j])continue;let v=riverDirt[j]*0.45;for(const u of nbrs(j))if(water[u]&&flowD[u]>=0&&flowD[u]<=flowD[j])v=Math.max(v,riverDirt[u]*(flowD[u]<flowD[j]?0.96:0.8));nd[j]=v<0.02?0:v}
+  for(const[w,v]of riverSrc)nd[w]=Math.max(nd[w],v);riverDirt.set(nd);let ch=false;for(let j=0;j<N*N;j++){const d=water[j]&&riverDirt[j]>0.3?1:0;if(d!==riverDirty[j]){riverDirty[j]=d;ch=true}}if(ch){riverSig=riverDirty.join('');paintRiver()}}let pipeDirty=true,riverSig='';
 const wtr={outCap:0,over:0,clean:0,dirty:0,dem:0,treated:0,out:0,none:0,sick:0};
 function nearWater(i){for(const j of tilesOf(i))for(const k of nbrs(j))if(water[k])return k;return -1}
 function computeWater(){const comp=new Int32Array(N*N).fill(-1);let nc=0;
@@ -2006,13 +2013,17 @@ function computeWater(){const comp=new Int32Array(N*N).fill(-1);let nc=0;
     for(const i of n.cons){const c=grid[i],d=WATER[c.t]*hMul(c)*dm;c.sewer=back;if(lc>=d-1e-6){lc-=d;c.water='ok'}else if(lc+ld>=d-1e-6){ld-=d-lc;lc=0;c.water='dirty'}else c.water='none'}}
   for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HOUSING[c.t]){if(c.water==='none')wtr.none++;if(c.water==='dirty')wtr.sick++}}
   /* sewage enters the river at the outlet and is carried downstream: it spreads across the river's width and along the flow, never upstream */
-  riverDirty.fill(0);
-  for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='outlet'||!(c.dis>0))continue;const w=nearWater(i);if(w<0)continue;const L=Math.min(30,6+c.dis/2),f0=flowD[w];
-    const seen=new Set([w]),q=[w];riverDirty[w]=1;
-    for(let h=0;h<q.length;h++){const a=q[h];for(const j of nbrs(a)){if(!water[j]||seen.has(j))continue;if(flowD[j]<f0-1||flowD[j]-f0>L)continue;seen.add(j);riverDirty[j]=1;q.push(j)}}}
-  const sig=riverDirty.join('');if(sig!==riverSig){riverSig=sig;paintRiver()}
+  riverSrc=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='outlet'||!(c.dis>0))continue;const w=nearWater(i);if(w>=0)riverSrc.push([w,Math.min(1,0.31/Math.pow(0.96,Math.min(30,6+c.dis/2)))])}
+  buildTaps();
   if(xray)buildPipes(comp,S)}
 /* ---------- pipes view ---------- */
+const tapMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),M('#3a8fd8'),N*N*2);tapMesh.frustumCulled=false;tapMesh.count=0;scene.add(tapMesh);let tapSig='';
+function buildTaps(){const pts=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||DRIVE[c.t]||!WATER[c.t]||!(c.wnet>=0))continue;
+    for(const t of tilesOf(i))for(const j of nbrs(t))if(pipe[j]&&grid[j]&&DRIVE[grid[j].t]){pts.push([t,j]);break}}
+  const sig=pts.map(p=>p.join('-')).join(',');if(sig===tapSig)return;tapSig=sig;let n=0;
+  for(const[t,j]of pts){const dx=cx(t)-cx(j),dz=cz(t)-cz(j);dObj.rotation.set(0,0,0);dObj.position.set(cx(j)+dx*0.5,0.05,cz(j)+dz*0.5);dObj.scale.set(dx?0.22:0.07,0.05,dz?0.22:0.07);dObj.updateMatrix();tapMesh.setMatrixAt(n++,dObj.matrix);
+    dObj.position.set(cx(j)+dx*0.42,0.09,cz(j)+dz*0.42);dObj.scale.set(0.07,0.06,0.07);dObj.updateMatrix();tapMesh.setMatrixAt(n++,dObj.matrix)}
+  tapMesh.count=n;tapMesh.instanceMatrix.needsUpdate=true}
 let xray=false;const pipeG=new THREE.Group();pipeG.visible=false;scene.add(pipeG);
 const PG={node:new THREE.BoxGeometry(0.2,0.08,0.2),ax:new THREE.BoxGeometry(1,0.06,0.09),az:new THREE.BoxGeometry(0.09,0.06,1)};for(const k in PG)PG[k].userData.keep=true;
 const PM={ok:new THREE.MeshBasicMaterial({color:'#3aa0f0'}),dirty:new THREE.MeshBasicMaterial({color:'#8a7a4a'}),none:new THREE.MeshBasicMaterial({color:'#9aa3a8'})};
@@ -2568,7 +2579,7 @@ function renderStats(){
     rows2+=`<span>${q.name}${q.n>1||q.unit?`: ${q.n} × ${q.unit} T¢`:''}</span><span>${fmt(q.sum)} T¢/godz.</span>`}
   if(upkCat!=='Wszystko')rows2+=`<span><b>Razem: ${upkCat}</b></span><span><b>${fmt(shown.reduce((a,z)=>a+z.sum,0))} T¢/godz.</b></span>`;
   const nextBill=30-Math.floor(gameT%30);
-  {const ref=last||cur;document.getElementById('stSafe').innerHTML=`<span>Komisariaty</span><span>${(counts.policeS||0)+(counts.policeB||0)}</span><span>Przestępstwa udaremnione (godz.)</span><span>${ref.crimeOk||0}</span><span>Nieudaremnione (godz.)</span><span class="${ref.crimeLost?'neg':''}">${ref.crimeLost||0}</span><span>Straty (godz.)</span><span class="${ref.crimeLoss?'neg':''}">${fmt(ref.crimeLoss||0)} T¢</span><span>Trwające zdarzenia</span><span>${crimes.length}</span>`+(()=>{const m=inmates();return m.n?`<span>Zatrzymani i więźniowie</span><span>${m.n} · ${fmt(m.n*JAIL_FEE)} T¢/godz.</span>`+(m.w?`<span>Praca więźniów</span><span class="pos">+${fmt(m.w)} T¢/godz.</span>`:''):''})()+(counts.bank?`<span>Ryzyko napadu na bank</span><span>${Math.round(Math.min(0.85,0.3*counts.bank)*100)}% co kilka godzin</span>`:'')}
+  {const ref=last||cur;document.getElementById('stSafe').innerHTML=`<span>Komisariaty</span><span>${(counts.policeS||0)+(counts.policeB||0)}</span><span>Przestępstwa udaremnione (godz.)</span><span>${ref.crimeOk||0}</span><span>Nieudaremnione (godz.)</span><span class="${ref.crimeLost?'neg':''}">${ref.crimeLost||0}</span><span>Straty (godz.)</span><span class="${ref.crimeLoss?'neg':''}">${fmt(ref.crimeLoss||0)} T¢</span><span>Trwające zdarzenia</span><span>${crimes.length}</span>`+(()=>{const m=inmates();return m.n?`<span>Zatrzymani i więźniowie</span><span>${m.n} · ${fmt(m.n*JAIL_FEE)} T¢/godz.</span>`+(m.w?`<span>Praca więźniów</span><span class="pos">+${fmt(m.w)} T¢/godz.</span>`:''):''})()+(counts.bank?`<span>Ryzyko napadu na bank</span><span>${Math.round(Math.min(0.85,0.3*(counts.bank+counts.bankG))*50)}% co kilka godzin (o połowę mniej w zasięgu policji)</span>`:'')}
   {const st=[0,0,0,0,0];let sick=0,hos=0,dead=0,pupP=0,pupS=0,schP=0,schS=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!c.pp)continue;const ts=tilesOf(i),ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]);dead+=c.dead||0;
     for(const q of c.pp){const s=stageOf(q.a);st[s]++;if(q.s===1)sick++;if(q.s===2)hos++;if(s===1){pupP++;if(ep)schP++}if(s===2){pupS++;if(es)schS++}}}
     let beds=0,bedsU=0,pl=0,plU=0;for(const c of grid){if(c&&MED[c.t]){beds+=medCap(c);bedsU+=c.pat||0}if(c&&DCARE[c.t]){pl+=dCap(c);plU+=(c.bodies||0)+(c.urn?c.urn.length:0)}}const ref=last||cur;
@@ -2765,7 +2776,7 @@ const pwr=(x,gw)=>gw?(x/1000).toLocaleString('pl-PL',{minimumFractionDigits:2,ma
 let last={},hudT=0;const segs={};
 for(const k of['mat',...Object.keys(goods)]){const sp=document.createElement('span');sp.style.background=GOODS[k].col;sp.title=GOODS[k].name;document.getElementById('matBar').appendChild(sp);segs[k]=sp}
 function hud(){const mc=moneyCap(),tc=matCap();const v={m:Math.round(money),mc,t:Math.round(stored()),tc};
-  {const L=hist[hist.length-1],d=L?Math.round(netOf(L)):null,el=document.getElementById('moneyD');if(d!==last.md){last.md=d;el.textContent=d==null?'':(d>=0?'+':'−')+cpt(Math.abs(d));el.className='dlt '+(d==null?'':d>=0?'pos':'neg');el.title='Saldo ostatniej pełnej godziny gry'}}
+  {const L=hist[hist.length-1],d=L?Math.round(opNet(L)):null,el=document.getElementById('moneyD');if(d!==last.md){last.md=d;el.textContent=d==null?'':(d>=0?'+':'−')+cpt(Math.abs(d));el.className='dlt '+(d==null?'':d>=0?'pos':'neg');el.title='Wynik ostatniej pełnej godziny: przychody minus utrzymanie i straty (bez budowy, ulepszeń i pożyczek)'}}
   if(v.m!==last.m||v.mc!==last.mc){U.money.textContent=cpt(v.m);U.moneyCap.textContent=cpt(mc);U.moneyBar.style.width=(mc?v.m/mc*100:0)+'%';U.rm.classList.toggle('full',v.m>=mc);U.rm.classList.toggle('short',v.m<0);
     for(const k in DEF)if(toolBtns[k])toolBtns[k].classList.toggle('poor',money<DEF[k].cost)}
   if(v.t!==last.t||v.tc!==last.tc){U.mat.textContent=cpt(v.t);U.matCap.textContent=cpt(tc);U.rt.classList.toggle('full',tc>0&&v.t>=tc);
@@ -2888,7 +2899,7 @@ function frame(now){requestAnimationFrame(frame);
     if(c.timer<=0){const iv=60/(TIER[c.happy??3].trips*H.trips*hMul(c))*(night?2:1);c.timer+=iv;if(c.timer<=0)c.timer=iv;if(cars.length<PEOPLE_CARS)spawnCommuter(i)}}
   buildOcc();for(const c of cars)if(!c.dead)updateCar(c,dt);
   if(cars.some(c=>c.dead))cars=cars.filter(c=>!c.dead);
-  constructTick(dt);policeTick(dt,night);tutTick(Math.max(dt,0.016));ovlTick(Math.max(dt,0.016));
+  constructTick(dt);policeTick(dt,night);riverTick(dt);tutTick(Math.max(dt,0.016));ovlTick(Math.max(dt,0.016));
   for(let k=popping.length-1;k>=0;k--){const p=popping[k];p.t+=dt*5;const s=p.t>=1?1:0.5+0.5*Math.sin(p.t*Math.PI/2)*1.08;p.g.scale.setScalar(Math.min(s,1.05));if(p.t>=1){p.g.scale.setScalar(1);popping.splice(k,1)}}
   powerAcc+=dt;if(powerAcc>=0.25||powerDirty){computePower(powerAcc);powerAcc=0}
   const hBefore=Math.floor(gameT/60),halfBefore=Math.floor(gameT/30);gameT+=dt;cur.secs+=dt;cur.powDem+=pw.dem*dt;if(pw.cat){cur.powCat=cur.powCat||{};for(const k in pw.cat)cur.powCat[k]=(cur.powCat[k]||0)+pw.cat[k]*dt}cur.powCap+=pw.cap*dt;
