@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='4.1.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='4.1.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -587,11 +587,15 @@ const BASE_MONEY=4000, BANK_CAP=6000, WH_CAP=60, SALE=25, TRUCK_LOAD=4, MAX_CARS
 
 /* ---------- three setup ---------- */
 const app=document.getElementById('app');
+const disposeTree=o=>{try{o.traverse(q=>{if(q.geometry&&!q.geometry.userData.keep)q.geometry.dispose()})}catch(e){}};
 let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:true})}catch(e){showErr('Ta przeglądarka nie obsługuje WebGL albo ma go wyłączonego.');return}
 const touch=matchMedia('(pointer:coarse)').matches;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,touch?1.5:2));
-renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();showErr('Przeglądarka odebrała grze kontekst grafiki (za mało pamięci). Odśwież stronę.')});
+let ctxLost=false;
+renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();ctxLost=true;try{save()}catch(_){}try{setHint('Grafika chwilowo niedostępna – odzyskuję…',true,true);hintEl.hidden=false}catch(_){}
+  setTimeout(()=>{if(!ctxLost)return;try{save();sessionStorage.setItem('lt-cont','1')}catch(_){}location.reload()},4000)});
+renderer.domElement.addEventListener('webglcontextrestored',()=>{ctxLost=false;try{setHint('Grafika odzyskana.',false,true)}catch(_){}});
 renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 app.appendChild(renderer.domElement);
 const scene=new THREE.Scene();
@@ -696,13 +700,15 @@ const mat={road:M('#3d4248'),dash:M('#ece3bf'),roof:M('#9b4a3a'),roof2:M('#5e6f8
 mat.skylight=M('#9cb7c4');
 mat.head=M('#f3ecd2');mat.tail=M('#7a2a24');
 mat.beam=new THREE.MeshBasicMaterial({color:'#ffe6a3',transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending});
-const CL={light:new THREE.BoxGeometry(0.045,0.028,0.016),beam:new THREE.PlaneGeometry(0.24,0.5).rotateX(-Math.PI/2)};
+const CL={light:new THREE.BoxGeometry(0.045,0.028,0.016),beam:new THREE.PlaneGeometry(0.24,0.5).rotateX(-Math.PI/2)};CL.light.userData.keep=true;CL.beam.userData.keep=true;
 for(const k in CL)CL[k].userData.keep=true;
 const houseCols=['#efd2b4','#e9e2cf','#cfe0d6','#f2c9be','#d6dbe8','#e7d9a8'].map(M);
 mat.signB=M('#2f6fb5');
 const VISC=['#a9c7e8','#f2d7a8','#c6e2b5','#e7b9c9','#d9d9d9'].map(M);
 const carCols=['#e25b45','#2f6fb5','#f2c14e','#f4f1ea','#4a9d6c','#7b5ea7','#2b2f36','#e98a3a'].map(M);
-const box=(w,h,d,m,x=0,y=0,z=0)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y+h/2,z);o.castShadow=true;o.receiveShadow=true;return o};
+/* one shared geometry per box size: thousands of cars, trains and scaffolds no longer leave GPU buffers behind */
+const BOXG=new Map();const boxGeo=(w,h,d)=>{const k=w+'|'+h+'|'+d;let g=BOXG.get(k);if(!g){g=new THREE.BoxGeometry(w,h,d);g.userData.keep=true;BOXG.set(k,g)}return g};
+const box=(w,h,d,m,x=0,y=0,z=0)=>{const o=new THREE.Mesh(boxGeo(w,h,d),m);o.position.set(x,y+h/2,z);o.castShadow=true;o.receiveShadow=true;return o};
 
 function markerMesh(){const g=new THREE.Group();
   const c=new THREE.Mesh(new THREE.ConeGeometry(0.1,0.22,4),mat.warnM);c.rotation.x=Math.PI;c.position.y=0.11;
@@ -1468,7 +1474,7 @@ function startConstruction(cell){const m=cell.model;if(!m)return;let H=0.6;try{c
   constructs.push({cell,m,sc,cr,jib,s0,u:0,dur:2.6+0.5*(cell.tiles?cell.tiles.length:1)})}
 function constructTick(dt){for(let k=constructs.length-1;k>=0;k--){const C=constructs[k],c=C.cell;const gone=!grid.includes(c);
     C.u+=dt/C.dur;const u=C.u;C.jib.rotation.y+=dt*0.9;
-    if(gone||c.model!==C.m||u>=1){c.group.remove(C.sc,C.cr);C.m.visible=true;C.m.scale.copy(C.s0);constructs.splice(k,1);continue}
+    if(gone||c.model!==C.m||u>=1){c.group.remove(C.sc,C.cr);disposeTree(C.sc);disposeTree(C.cr);C.m.visible=true;C.m.scale.copy(C.s0);constructs.splice(k,1);continue}
     if(u<0.3){C.sc.scale.y=Math.max(0.001,u/0.3);C.cr.scale.y=Math.min(1,0.05+u/0.12);C.m.visible=false}
     else if(u<0.85){C.sc.scale.y=1;C.cr.scale.y=1;C.m.visible=true;C.m.scale.set(C.s0.x,C.s0.y*Math.max(0.02,(u-0.3)/0.55),C.s0.z)}
     else{C.m.scale.copy(C.s0);const f=1-(u-0.85)/0.15;C.sc.scale.y=Math.max(0.001,f);C.cr.scale.y=Math.max(0.001,f)}}}
@@ -1682,7 +1688,7 @@ function carMesh(kind){const g=new THREE.Group();
     for(const z of[-0.18,-0.06,0.06])g.add(box(0.07,0.005,0.012,mat.steel,0,0.19,z));const r=box(0.05,0.015,0.05,new THREE.MeshBasicMaterial({color:'#ff3b30'}),-0.05,0.17,0.15),b=box(0.05,0.015,0.05,new THREE.MeshBasicMaterial({color:'#fff3c4'}),0.05,0.17,0.15);g.add(r,b);g.userData.bar=[r,b]}
   else if(kind==='van'){g.add(box(0.2,0.15,0.34,mat.vanW,0,0.03,0));g.add(box(0.205,0.03,0.2,mat.awn,0,0.1,-0.05));g.add(box(0.16,0.06,0.02,mat.cabin,0,0.11,0.17))}
   else{g.add(box(0.2,0.08,0.34,carCols[(Math.random()*carCols.length)|0],0,0.03,0));g.add(box(0.17,0.07,0.17,mat.cabin,0,0.11,-0.02))}
-  for(const[a,b]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const w=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.06,0.07),mat.tire);w.position.set(a*0.105,0.03,b*(kind==='truck'?0.13:0.1));g.add(w)}
+  for(const[a,b]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const w=new THREE.Mesh(boxGeo(0.03,0.06,0.07),mat.tire);w.position.set(a*0.105,0.03,b*(kind==='truck'?0.13:0.1));g.add(w)}
   /* head and tail lights; at night they glow and a soft beam lights the road ahead */
   const big=kind==='truck'||kind==='garbage',fz=big?0.228:0.172,bz=kind==='truck'?-0.222:kind==='garbage'?-0.172:-0.172,ly=big?0.08:0.075;
   for(const x of[-0.065,0.065]){const h=new THREE.Mesh(CL.light,mat.head);h.position.set(x,ly,fz);g.add(h);
@@ -1693,7 +1699,7 @@ function createCar(kind,path,o){const c=Object.assign({kind,path,seg:0,dist:0,ph
   mesh:carMesh(kind),rot:null,grow:0,li:(Math.random()*3)|0,id:++carSeq,res:-1,inRes:false,wait:0,ghost:0,vOff:null,lnSeg:-1},o);if(path.length>1){c.li=pickLane(c,path[0],path[1])}c.lp=c.ln=c.li;cars.push(c);placeCar(c);if(o&&o.home!=null)exitFrom(c,o.home);return c}
 function removeCar(c){releaseRes(c);if(c.kind==='hearse'&&c.load){const h=grid[c.dest],d=grid[c.home];if(c.phase==='go'){if(h){h.dead=(h.dead||0)+c.load;h.hearse=false}if(d)d.inbound=Math.max(0,(d.inbound||0)-c.load)}else hearseDeliver(c);c.load=0}if(c.pass&&c.pass.length){const pr=grid[c.dest];if(pr&&pr.inbound)pr.inbound=Math.max(0,pr.inbound-c.pass.length);const st=grid[c.home];if(st&&st.jail)st.jail.push(...c.pass);c.pass=[]}if(c.kind==='garbage')releaseG(c);
   if(c.kind==='van'&&!c.delivered){c.delivered=true;const d=grid[c.dest];if(d&&isShop(d.t))d.incoming=Math.max(0,d.incoming-c.load);for(const k in c.items)addGood(k,c.items[k])}
-  c.dead=true;scene.remove(c.mesh)}
+  c.dead=true;scene.remove(c.mesh);disposeTree(c.mesh)}
 function perp(a,b){const dx=cx(b)-cx(a),dz=cz(b)-cz(a);return[-dz,dx]}
 let carSeq=0;const occ=new Map(),resMap=new Map();
 const laneN=i=>grid[i]?LANES[effType(i)]||1:1;
@@ -1907,7 +1913,7 @@ function spawnTrain(st,kind){const p=railPath(st);if(!p||!p.length)return null;c
 function trainPos(tr,u){const p=tr.p,L=p.length;u=Math.max(0,Math.min(L-1,u));const a=Math.min(L-1,Math.floor(u)),b=Math.min(L-1,a+1),f=u-a;const x=cx(p[a])+(cx(p[b])-cx(p[a]))*f,z=cz(p[a])+(cz(p[b])-cz(p[a]))*f;
   const y=water[p[f<0.5?a:b]]?0.06:0.01;const dx=cx(p[b])-cx(p[a]),dz=cz(p[b])-cz(p[a]);return{x,z,y,rot:dx||dz?Math.atan2(dx,dz):null}}
 function placeTrain(tr){tr.parts.forEach((q,k)=>{const P=trainPos(tr,tr.u-k*0.55);q.position.set(P.x,P.y,P.z);if(P.rot!=null)q.rotation.y=P.rot;q.visible=tr.u-k*0.55>-0.4})}
-function removeTrain(tr){trains=trains.filter(q=>q!==tr);scene.remove(tr.g)}
+function removeTrain(tr){trains=trains.filter(q=>q!==tr);scene.remove(tr.g);disposeTree(tr.g)}
 /* freight: per ramp a good, a mode (import/export/off) and an hourly amount from 10, in steps of 5 */
 const FR_MIN=10,FR_STEP=5,FR_MAX=60,FR_IMP=0.8,FR_EXP=0.5,FR_GOODS=['mat',...Object.keys(GOODS)];
 const frName=k=>k==='mat'?'Materiały':GOODS[k].name,frPrice=k=>k==='mat'||!GOODS[k].price?8:GOODS[k].price;
@@ -3192,7 +3198,8 @@ function buildDemo(){saveBlocked=true;clearCity();for(const k of [...deco])clear
   cam.radius=17;cam.phi=0.95;seedDeco();updateCamera()}
 let booted=load();
 if(booted){makeEntries();recountPatients();seedDeco()}else if(window.__testUnlock){preset();seedDeco();setTimeout(tutStart,0)}else buildDemo();
-refreshLocks();if(!window.__testUnlock){openTitle();if(oldSave)document.getElementById('oldSave').hidden=false}else if(booted)setTimeout(tutRender,0);
+refreshLocks();let autoCont=false;try{autoCont=booted&&sessionStorage.getItem('lt-cont')==='1';sessionStorage.removeItem('lt-cont')}catch(e){}
+if(!window.__testUnlock&&!autoCont){openTitle();if(oldSave)document.getElementById('oldSave').hidden=false}else if(autoCont){paused=false;setTimeout(tutRender,0);setHint('Gra wróciła po utracie grafiki. Miasto jest zapisane.',false,true)}else if(booted)setTimeout(tutRender,0);
 selectTool(counts.road&&booted?'view':'road');updateCamera();
 if(!booted)setHint('<b>Pusta działka</b> · masz '+fmt(money)+' T¢. Połóż ulice (przez rzekę mostem, skrzyżowania zamień na ronda), dostaw słupy, a obok nich budynki. Prąd da wiatrak z transformatorem. Fabryki dają losowe towary dla sklepu. Gdy kosze się zapełnią, postaw wysypisko.',false,true);if(!booted)hintTimer=9;
 computePower(0);
