@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='4.9.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='4.9.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -125,6 +125,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .hint b{font-weight:600}
 .hint.warn{color:var(--warn);border-color:var(--warn)}
 .build{justify-self:center;max-width:100%;min-width:0;display:grid;gap:6px;padding:6px}
+.dockRow{justify-self:center;display:flex;gap:6px;align-items:stretch;max-width:100%;min-width:0}.dockRow .build{min-width:0}
+.modeP{display:grid;gap:5px;padding:6px;align-content:space-between;flex:0 0 auto}.modeP .mrow{display:flex;gap:4px}.modeP .msub{display:flex;gap:4px;justify-content:center}
+.msub button{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);display:grid;place-items:center;cursor:pointer;padding:0}.msub button svg{width:17px;height:17px}.msub button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}.msub button:disabled{opacity:.3;cursor:default}
+@media (max-width:700px){.modeP .tool .ct{display:none}.modeP .tool .nm{font-size:12px}.dockRow{gap:4px}}
+@media (max-width:560px){.dockRow{flex-direction:column;align-items:stretch;width:100%}.modeP{display:flex;align-items:center;justify-content:space-between;padding:4px 6px}.modeP .mrow .tool{padding:4px 8px 4px 5px}.msub button{width:32px;height:28px}}
 .cats{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
 .cat{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;font:600 12.5px var(--font-b);letter-spacing:.02em;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
@@ -334,8 +339,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div class="insp panel" id="insp" hidden aria-live="polite"></div>
   <div class="place panel" id="place" hidden><span id="placeT"></span><button class="btn panel" id="pRot" title="Obróć (R)">↻ Obróć</button><button class="btn panel ok" id="pOk" title="Postaw (Enter)">✓ Postaw</button><button class="btn icon panel" id="pNo" aria-label="Anuluj" title="Anuluj">✕</button></div>
   <div class="hint panel" id="hint" aria-live="polite"></div>
+  <div class="dockRow"><div class="modeP panel" id="modeP"><div class="mrow" id="modeRow"></div><div class="msub" id="msub" role="group" aria-label="Tryb"></div></div>
   <div class="build panel"><div class="cats" id="cats" role="tablist" aria-label="Kategorie budowy"></div>
-    <div class="tools" id="tools" role="toolbar" aria-label="Budowanie"></div></div>
+    <div class="tools" id="tools" role="toolbar" aria-label="Budowanie"></div></div></div>
 </footer>
 <div id="floats"></div>
 <div id="stat"></div>
@@ -458,6 +464,7 @@ const DEF={
   trainSt:{name:'Dworzec kolejowy',cost:3500,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Gdy tory łączą go z krawędzią mapy, co 2 godziny przyjeżdża pociąg z turystami (+60% turystów). Taksówki odbierają ich z dworca.',sw:'#3d6fa8'},
   freightSt:{name:'Dworzec towarowy',cost:4000,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Pociąg towarowy co godzinę: stały import do magazynów albo eksport z magazynów wybranego towaru, od 10 kg/godz. co 5. Wymaga torów do krawędzi mapy.',sw:'#6b5a3c'},
   heliB:{name:'Baza helikopterów gaśniczych',cost:6000,size:4,desc:'Zajmuje 2×2 pola. Helikopter gaśniczy leci prosto do pożaru w zasięgu 25 pól (51×51) i gasi go z góry – także tam, gdzie wóz nie dojedzie. Potrzebuje prądu i wody. Ulepszenie: drugi helikopter.',sw:'#b8241c',area:25},
+  crosswalk:{name:'Przejście dla pieszych',cost:20,desc:'Pasy i znak na prostym odcinku ulicy. Nie stawia się ich na skrzyżowaniach. Usuwasz je w Wyburz → „Przejścia”.',sw:'#f4f6f8'},
   roadSvc:{name:'Służby drogowe',cost:600,size:2,desc:'Zajmuje 2 pola. Zamiatarki sprzątają śmieci z ulic, a ekipy czyszczą parki i farmy zabrudzone smogiem w zasięgu 21×21.',sw:'#e07b1a',area:10},
   fireS:{name:'Mała straż pożarna',cost:900,desc:'Zasięg 9×9, 1 wóz strażacki. Gasi pożar w pół godziny od przyjazdu. Ulepszenia: „Drugi garaż” (+1 wóz), „Większy rewir” (zasięg +2).',sw:'#c8372d',area:4},
   fireB:{name:'Komenda straży pożarnej',cost:2800,size:4,desc:'Zajmuje 2×2 pola. Zasięg 13×13, 2 wozy strażackie. Ulepszenia: „Drugi garaż” (+2 wozy), „Większy rewir”.',sw:'#a8241c',area:6},
@@ -586,7 +593,7 @@ const facCap=c=>FAC[c.t].cap*(c.t==='landfill'?(c.lfN||1):c.t==='incinerator'&&!
 const facTrucks=c=>c.t==='landfill'?Math.min(8,2+(c.lfN||1)):FAC[c.t].trucks;
 const parkR=c=>DEF[c.t].r+(c.up?1:0);
 const PARKS=['park1','park2','park3'];
-const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge']},{name:'Transport',tools:['rail','taxi','trainSt','freightSt']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','warehouse','smallwh','warehouseB']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','poleDel','transformer','hvpole','wind','coal','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','roadSvc']},{name:'Woda',tools:['pipe','pipeDel','tower','pump','treatment','outlet']}];
+const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','crosswalk']},{name:'Transport',tools:['rail','taxi','trainSt','freightSt']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','warehouse','smallwh','warehouseB']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','transformer','hvpole','wind','coal','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','roadSvc']},{name:'Woda',tools:['pipe','tower','pump','treatment','outlet']}];
 const WIND_MW=6, COAL_MW=16, COAL_BURN=8;
 const TOOLS=['view','bulldoze','road','pole','poleline','poleDel','house','factory','warehouse','shop','bank','wind','transformer','coal','park1','park2','park3','smallwh'];
 const BASE_MONEY=4000, BANK_CAP=6000, WH_CAP=60, SALE=25, TRUCK_LOAD=4, MAX_CARS=400, PEOPLE_CARS=340;
@@ -773,7 +780,7 @@ const firstDay=()=>gameT<1440;
 /* ---------- milestones: the number of people living in the city unlocks buildings, services and hazards (no money, just an order) ---------- */
 const MS=[{name:'Osada',pop:0},{name:'Wioska',pop:15},{name:'Mała wieś',pop:100},{name:'Miasteczko',pop:250},{name:'Małe miasto',pop:500},{name:'Miasto',pop:900},{name:'Duże miasto',pop:1500},{name:'Aglomeracja',pop:2500},{name:'Metropolia',pop:4000}];
 const MS_OF={};[
- 'road house pole poleline poleDel transformer wind pipe pipeDel pump tower outlet shop smallfac smallwh mine farmveg farmgrain landfill park1',
+ 'road crosswalk house pole poleline poleDel transformer wind pipe pipeDel pump tower outlet shop smallfac smallwh mine farmveg farmgrain landfill park1',
  'tenement roadSvc farmdairy factory warehouse restaurant park2 bridge',
  'road2 clinic cemS schoolS policeS fireS hvpole coal recycler shop1',
  'block supermarket hotelS cinema hydro treatment school incS taxi',
@@ -1685,7 +1692,7 @@ function addCell(i,t,anim=true,second=-1){const extra=Array.isArray(second)?seco
 function removeCell(i){let c=grid[i];if(!c)return;if(c.t==='part'){i=c.main;c=grid[i];if(!c||c.t==='part'){grid[i]=null;return}}scene.remove(c.group);if(c.model){factories.delete(c.model);if(c.model.userData.rotor)winds.delete(c.model.userData.rotor)}if(c.bolt)bolts.delete(c.bolt);
   c.group.traverse(o=>{if(o.geometry&&!o.geometry.userData.keep)o.geometry.dispose()});
   if(c.t==='bridge'&&pipe[i]){pipe[i]=0}
-  if(c.railFx){scene.remove(c.railFx);c.railFx=null}if(c.rail||c.t==='rail'||c.t==='trainSt'||c.t==='freightSt'){railVer++;setTimeout(railRefreshAll,0)}
+  if(c.railFx){scene.remove(c.railFx);c.railFx=null}if(c.crossFx){scene.remove(c.crossFx);c.crossFx=null}if(c.rail||c.t==='rail'||c.t==='trainSt'||c.t==='freightSt'){railVer++;setTimeout(railRefreshAll,0)}
   counts[c.t]--;grid[i]=null;if(DRIVE[c.t]){roadVer++;bfsCache.clear();bridgeDirty=true}if(c.t==='hvpole'||c.t==='transformer'||GEN_W[c.t])topoDirty=true;
   farmDirty=true;
   if(c.tiles)for(const j of c.tiles)if(j!==i){grid[j]=null;refreshAround(j);groundDeco(j,!water[j])}
@@ -1908,6 +1915,12 @@ function endCrime(cr,ok){crimes=crimes.filter(q=>q!==cr);cr.pin.remove();const l
   else{cur.crimeOk++;float(cr.i,'napad udaremniony!','neutral')}
   for(const c of cars)if(!c.dead&&c.kind==='police'&&c.task===cr.id){c.task=null;c.speed=1.8;if(c.role==='reserve')sendHome(c);else newPatrol(c)}}
 let polFlash=0;
+/* pedestrian crossings: only on straight stretches of an ordinary street */
+const roadNbrs=i=>nbrs(i).filter(j=>grid[j]&&DRIVE[grid[j].t]);
+function crossOK(i){const c=grid[i];if(!c||!STREET[c.t]||c.edge||c.rail)return false;const n=roadNbrs(i);if(n.length!==2)return false;const[a,b]=n;return a%N===b%N||((a/N)|0)===((b/N)|0)}
+function drawCross(i){const c=grid[i];if(!c)return;if(c.crossFx){scene.remove(c.crossFx);c.crossFx=null}if(!c.cross)return;const n=roadNbrs(i),alongX=n.length&&((n[0]/N)|0)===((i/N)|0);const g=new THREE.Group(),w=M('#f4f6f8');
+  for(let k=-3;k<=3;k++){const b=alongX?box(0.07,0.008,0.7,w,k*0.11,0.03,0):box(0.7,0.008,0.07,w,0,0.03,k*0.11);b.castShadow=false;g.add(b)}
+  const px=alongX?0.42:0.44,pz=alongX?0.44:0.42;g.add(box(0.02,0.36,0.02,mat.steel,px,0.03,pz));g.add(box(0.1,0.1,0.01,M('#2f6fe0'),px,0.36,pz));g.position.set(cx(i),0,cz(i));scene.add(g);c.crossFx=g}
 /* ---------- litter on the streets (communal tax above 5%) and smog dirt on parks and farms; road services clean both ---------- */
 const SVC_R=10,litM=[M('#c9b26a'),M('#7a8a9a'),M('#b8453a')];
 function setLitter(i,n){const c=grid[i];if(!c||!DRIVE[c.t])return;c.litter=Math.max(0,Math.min(3,n));if(c.litFx){c.group.remove(c.litFx);c.litFx=null}if(!c.litter)return;const g=new THREE.Group();
@@ -2440,7 +2453,7 @@ function tileAt(px,py){const r=renderer.domElement.getBoundingClientRect();ndc.s
   ray.setFromCamera(ndc,camera);if(!ray.ray.intersectPlane(plane,hit))return -1;
   const x=Math.floor(hit.x+HALF),z=Math.floor(hit.z+HALF);if(x<0||z<0||x>=N||z>=N)return -1;return idx(x,z)}
 
-let tool='view';
+let tool='view',lineRun=false,lineA=-1,lineB=-1;
 const ptrs=new Map();let mode='none',multi=null,lastPaint=-1;
 const el=renderer.domElement;
 el.addEventListener('contextmenu',e=>e.preventDefault());
@@ -2454,10 +2467,12 @@ el.addEventListener('pointermove',e=>{
   const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
   if(mode==='pending'&&Math.hypot(p.x-p.sx,p.y-p.sy)>7){
     if(p.btn===2||p.shift)mode='rotate';else if(p.btn===1)mode='pan';
-    else if(STREET[tool]||tool==='rail'||tool==='highway'||tool==='bridge'||tool==='hydro'||tool==='pole'||tool==='poleDel'||tool==='pipe'||tool==='pipeDel'||tool==='bulldoze'){mode='paint';lastPaint=-1;paintAt(p.sx,p.sy)}else mode='pan'}
+    else if(buildMode==='line'&&MODE_OK(tool)&&moveSrc<0){mode='line';lineA=tileAt(p.sx,p.sy);lineB=lineA;showLine()}
+    else if(STREET[tool]||tool==='crosswalk'||tool==='rail'||tool==='highway'||tool==='bridge'||tool==='hydro'||tool==='pole'||tool==='poleDel'||tool==='pipe'||tool==='pipeDel'||tool==='bulldoze'){mode='paint';lastPaint=-1;paintAt(p.sx,p.sy)}else mode='pan'}
   if(mode==='rotate'){cam.theta-=dx*0.008;cam.phi-=dy*0.006;if(tut&&tut.on)tut.turned=(tut.turned||0)+Math.abs(dx)}
   else if(mode==='pan')pan(dx,dy);
   else if(mode==='paint')paintAt(e.clientX,e.clientY);
+  else if(mode==='line'){const t=tileAt(e.clientX,e.clientY);if(t>=0&&t!==lineB){lineB=t;showLine()}}
   else if(mode==='multi'&&ptrs.size===2){const n=twoInfo();const mv=[...ptrs.values()].map(q=>Math.hypot(q.x-(q.mx0??q.x),q.y-(q.my0??q.y)));
     if(!multi.kind&&Math.max(...mv)>14)multi.kind=Math.min(...mv)<8?'zoom':'rotate';const kind=multi.kind;
     if(kind==='zoom'&&n.d>0&&multi.d>0)cam.radius*=multi.d/n.d;
@@ -2467,16 +2482,24 @@ el.addEventListener('pointermove',e=>{
   updateCamera()});
 function endPtr(e){const p=ptrs.get(e.pointerId);if(!p)return;
   if(mode==='pending'&&e.type==='pointerup'&&p.btn===0){const i=tileAt(e.clientX,e.clientY);if(i>=0)apply(i)}
+  if(mode==='line'&&e.type==='pointerup'){placeLine();lineA=lineB=-1;hl.scale.set(1,1,1)}
   ptrs.delete(e.pointerId);if(ptrs.size===0)mode='none';else if(mode==='multi')mode='none'}
 el.addEventListener('pointerup',endPtr);el.addEventListener('pointercancel',endPtr);
 el.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){hl.visible=false;hoverI=-1;if(ghost&&pendA<0&&moveSrc<0)ghost.visible=false;if(!areaT)area.visible=false}});
 el.addEventListener('wheel',e=>{e.preventDefault();cam.radius*=Math.exp(e.deltaY*0.0012);updateCamera()},{passive:false});
+function lineTiles(){if(lineA<0||lineB<0)return[];const ax=lineA%N,az=(lineA/N)|0,bx=lineB%N,bz=(lineB/N)|0,hor=Math.abs(bx-ax)>=Math.abs(bz-az),fp=FP(tool)||[1,1],st=hor?fp[0]:fp[1];
+  const o=[];const n=Math.floor(Math.abs(hor?bx-ax:bz-az)/st);const sg=Math.sign(hor?bx-ax:bz-az)||1;for(let k=0;k<=n;k++){const x=hor?ax+sg*k*st:ax,z=hor?az:az+sg*k*st;if(x>=0&&z>=0&&x<N&&z<N)o.push(idx(x,z))}return o}
+function showLine(){const ts=lineTiles();if(!ts.length)return;const fp=FP(tool)||[1,1];let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;for(const t of ts){x0=Math.min(x0,cx(t));z0=Math.min(z0,cz(t));x1=Math.max(x1,cx(t)+fp[0]-1);z1=Math.max(z1,cz(t)+fp[1]-1)}
+  hl.visible=true;hl.scale.set(x1-x0+1,z1-z0+1,1);hl.position.x=(x0+x1)/2;hl.position.z=(z0+z1)/2;hl.material.color.set('#ffffff');setHint(`Linia: ${ts.length} × ${DEF[tool].name} · ok. ${fmt(ts.length*(FP(tool)?fpCost():DEF[tool].cost))} T¢`,false,true)}
+function placeLine(){const ts=lineTiles();if(!ts.length)return;lineRun=true;let n=0;const m0=money;
+  try{for(const t of ts){if(FP(tool)){pendA=t;const T=curT(),tt=fpTiles(t);if(fpOK(tt,T)&&money>=fpCost()){placeFP();n++}else pendA=-1}else{const had=grid[t];apply(t,true);if(!had&&grid[t])n++}}}finally{lineRun=false}
+  updateGhost();setHint(n?`Postawiono w linii: ${n} × ${DEF[tool]?DEF[tool].name:''} za ${fmt(m0-money)} T¢.`:'Nic nie postawiono: pola zajęte albo brak gotówki.',!n,true);hintEl.hidden=false}
 function paintAt(x,y){const i=tileAt(x,y);if(i<0||i===lastPaint)return;lastPaint=i;apply(i,true)}
-function hover(x,y){const i=tileAt(x,y);if(!areaT)area.visible=false;hoverI=i;showGhost1(i);
+function hover(x,y){if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{hover(x,y)}finally{tool=sv}return}const i=tileAt(x,y);if(!areaT)area.visible=false;hoverI=i;showGhost1(i);
   if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,grid[i].t==='rail'?'Tory wjazdowe · połącz z nimi dworzec, a pociągi przywiozą turystów':'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
   const ar=DEF[tool]&&(DEF[tool].r||DEF[tool].area);if(ar)showArea(i,ar,false);
   hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;
-  const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c||(!!STREET[c.t]&&!c.rail&&!c.edge))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
+  const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='crosswalk')ok=crossOK(i)&&!grid[i].cross&&money>=DEF.crosswalk.cost;else if(tool==='crossDel')ok=!!grid[i]&&!!grid[i].cross;else if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c||(!!STREET[c.t]&&!c.rail&&!c.edge))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
   else if(STREET[tool]||tool==='roundabout'){const c=grid[i];ok=c?(STREET[c.t]||c.t==='roundabout')&&c.t!==tool&&money>=DEF[tool].cost-DEF[c.t].cost:!water[i]&&money>=DEF[tool].cost&&tool!=='roundabout'}
   else if(tool==='bulldoze')ok=!!grid[i];else if(tool==='poleline')ok=!!grid[i]&&!!STREET[grid[i].t]&&money>=DEF.pole.cost;else if(tool==='pole')ok=money>=DEF.pole.cost&&((!grid[i]&&!water[i])||(!!grid[i]&&!!POLEABLE[grid[i].t]&&!grid[i].pole));else if(tool==='poleDel')ok=isLV(i);else if(FP(tool)){const x=i%N,z=(i/N)|0,[fw,fh]=FP(tool);ok=x<=N-fw&&z<=N-fh&&money>=DEF[tool].cost;if(ok)for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++){const j=idx(x+dx,z+dz);if(grid[j]||water[j])ok=false}}
   else ok=!grid[i]&&money>=DEF[tool].cost&&(tool==='bridge'?!!water[i]&&straightOK(i):tool==='hydro'?!!water[i]:!water[i]);
@@ -2516,7 +2539,7 @@ function placeFP(){if(pendA<0)return;const T=curT(),t=fpTiles(pendA),cost=fpCost
   if(moveSrc>=0){const src=moveSrc;moveSrc=-1;doMove(src,a,t,cost);updateGhost();hintEl.hidden=false;
     if(entryOf(a)<0&&!NOROAD[T])setHint('Przeniesiono. Budynek nie ma dojazdu: dołóż ulicę obok.',true,true);else setHint(`Przeniesiono za ${fmt(cost)} T¢.`,false,true);return}
   spend(cost);addCell(a,tool,true,t.slice(1));if(grid[a]&&grid[a].tiles){grid[a].rot=rotIdx;refreshBuilding(a)}updateGhost();hintEl.hidden=false;
-  if(entryOf(a)<0)setHint('Budynek nie ma dojazdu. Dołóż ulicę obok, by zaczął działać.',true,true);else setHint(toolHint());save()}
+  if(entryOf(a)<0)setHint('Budynek nie ma dojazdu. Dołóż ulicę obok, by zaczął działać.',true,true);else setHint(toolHint());save();afterPlace(true)}
 function cancelFP(){pendA=-1;const mv=moveSrc>=0;moveSrc=-1;updateGhost();hintEl.hidden=false;if(mv)setHint('Przenoszenie anulowane.',false,true)}
 /* R: single-tile buildings get a fixed facing (auto = front to the street); with a building open in the inspector, R turns that building */
 let rot1=null,hoverI=-1;
@@ -2544,6 +2567,7 @@ function toolHint(){
   if(tool==='bulldoze')return'<b>Wyburz</b> · zwraca połowę kosztu. Przeciągnij, by usuwać kilka pól.';
   const d=DEF[tool];return`<b>${d.name}</b> · ${d.cost?fmt(d.cost)+' T¢ · ':''}${d.desc}`+(FP(tool)?` Stuknij miejsce, obróć i zatwierdź (${FP(tool).join('×')}).`:BUILD[tool]&&!DRIVE[tool]?' R obraca budynek.':'')+(DEMAND[tool]?` Pobiera ${mw(DEMAND[tool])} MW.`:'')+(UPKEEP[tool]?` Utrzymanie ${UPKEEP[tool]} T¢/godz.`:'')}
 function apply(i,painting){
+  if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{apply(i,painting)}finally{tool=sv}return}
   if(moveSrc>=0){if(painting)return;if(!grid[moveSrc]){moveSrc=-1;return}pendA=i;updateGhost();return}
   if(tool==='view')return grid[i]&&!DRIVE[grid[i].t]?openHouse(i):inspect(i);
   if(tool==='pipe'){if(water[i]&&!(grid[i]&&grid[i].t==='bridge')){if(!painting)setHint('Przez rzekę rurę prowadzi się mostem: postaw most i połóż rurę na nim.',true,true);return}if(pipe[i])return;
@@ -2559,6 +2583,9 @@ function apply(i,painting){
       if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢ na: ${DEF[tool].name.toLowerCase()}.`,true,true);return}
       spend(cost);convertRoad(i,tool);save();return}
     if(tool==='roundabout'){if(!painting)setHint('Rondo stawia się na istniejącej ulicy, najlepiej na skrzyżowaniu.',true,true);return}}
+  if(tool==='crosswalk'){if(!c||!STREET[c.t]){if(!painting)setHint('Przejście stawia się na zwykłej ulicy.',true,true);return}if(c.cross)return;if(!crossOK(i)){if(!painting)setHint('Przejścia nie da się postawić na skrzyżowaniu ani zakręcie – tylko na prostym odcinku.',true,true);return}
+    if(money<DEF.crosswalk.cost){setHint(`Brakuje ${fmt(DEF.crosswalk.cost-money)} T¢.`,true,true);return}spend(DEF.crosswalk.cost);c.cross=true;drawCross(i);save();return}
+  if(tool==='crossDel'){if(!c||!c.cross){if(!painting)setHint('Tu nie ma przejścia dla pieszych.',true,true);return}c.cross=false;drawCross(i);const n=addMoney(Math.floor(DEF.crosswalk.cost/2));cur.refund+=n;save();return}
   if(tool==='rail'){if(c&&c.t==='rail')return;if(c&&(!STREET[c.t]||c.rail||c.edge)){if(!painting)setHint(c.rail?'Tu już są tory.':'Tory przejdą tylko przez zwykłą ulicę (przejazd kolejowy) albo wolne pole i wodę.',true,true);return}
     if(money<DEF.rail.cost){setHint(`Brakuje ${fmt(DEF.rail.cost-money)} T¢ na tory.`,true,true);return}spend(DEF.rail.cost);
     if(c){c.rail=true;railVer++;drawCrossing(i);railRefreshNear(i)}else addCell(i,'rail',false);save();return}
@@ -2595,7 +2622,8 @@ function apply(i,painting){
   if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢ na: ${DEF[tool].name.toLowerCase()}.`,true,true);return}
   spend(cost);lockBuy();addCell(i,tool==='incS'?'incinerator':tool);if(rot1!=null&&grid[i]&&!grid[i].tiles){grid[i].rot1=rot1;refreshBuilding(i)}if(DEF[tool].r||DEF[tool].area)showArea(i,DEF[tool].r||DEF[tool].area,true);
   if(!DRIVE[tool]&&!NOROAD[tool]&&entryOf(i)<0)setHint('Budynek nie ma dojazdu. Dołóż ulicę obok, by zaczął działać.',true,true);
-  save()}
+  save();afterPlace(painting)}
+function afterPlace(quiet){if(buildMode==='one'&&MODE_OK(tool)&&!lineRun){const t=tool;selectTool('view');if(!quiet)setHint(`Postawiono: ${DEF[t].name}. Tryb „Pojedynczo” – wróciłeś do podglądu.`,false,true)}}
 function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[i]&&!grid[i]){setHint('<b>Rura</b> · łączy budynki z siecią wodną',false,true);return}const c=grid[i];let s;
   const smog=pol[i]===2?' Silny smog: dom tutaj −2 zadowolenia.':pol[i]===1?' Lekki smog: dom tutaj −1 zadowolenia.':'';
   if(c&&c.edge&&c.t==='rail')s='<b>Tory wjazdowe</b> · połącz z nimi tory od dworca: przyjadą pociągi z turystami. Nie da się ich wyburzyć.';else if(c&&c.edge)s='<b>Droga wjazdowa</b> · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem. Można ją poszerzyć, nie można wyburzyć.';
@@ -2799,6 +2827,8 @@ const toolsEl=document.getElementById('tools'),catsEl=document.getElementById('c
 const toolBtns={},catBtns=[];let curCat=0;
 /* line icons for the build menu, 20×20, drawn with currentColor */
 const ICO={
+crosswalk:'<path d="M3 5.5h14M3 14.5h14"/><path d="M5.5 7.5v5M8.5 7.5v5M11.5 7.5v5M14.5 7.5v5"/>',
+crossDel:'<path d="M3 5.5h14M3 14.5h14M6 7v6M10 7v6M14 7v6"/><path d="M13 2l4 4M17 2l-4 4"/>',
 roadSvc:'<path d="M13.5 2.5l-5 9"/><path d="M6 10.5l5 2.5-1.2 4.5H3.5z"/><path d="M14 14.5h3M15 17.5h2.5"/>',
 heliB:'<path d="M3 5h14M10 5v2.5"/><path d="M5.5 10.5c0-1.7 1.6-3 3.5-3h2.2c2.4 0 4.3 1.5 4.3 3.4v.6c0 1.1-.9 2-2 2H8c-1.4 0-2.5-1.1-2.5-2.5z"/><path d="M5.5 10.5H2.5M8 13v3M13 13v3M6.5 16h8"/>',
 rail:'<path d="M6.5 2.5L4.5 17.5M13.5 2.5l2 15M5.6 6h8.8M5.1 10h9.8M4.7 14h10.6"/>',
@@ -2898,8 +2928,16 @@ function mkTool(t){const b=document.createElement('button');b.className='tool';b
   else{const d=DEF[t],bg=/^#/.test(d.sw)?d.sw:'#8a6a4a';sw=`background:${bg};color:${icoInk(bg)}`;nm=d.name;ct=d.lbl||fmt(d.cost)+' '+(d.unit||'T¢')}
   b.innerHTML=`<span class="sw" style="${sw}">${svgI(t,17)}</span><span class="nm">${nm}</span><span class="ct">${ct}</span>`;
   b.setAttribute('aria-pressed','false');b.addEventListener('click',()=>selectTool(t));toolBtns[t]=b;return b}
-toolsEl.append(mkTool('view'),mkTool('bulldoze'));
-const sep=document.createElement('span');sep.className='sep';toolsEl.append(sep);
+document.getElementById('modeRow').append(mkTool('view'),mkTool('bulldoze'));
+/* build modes (one / many / line) and demolish modes (all / pipes / power / crossings) */
+let buildMode='one',delMode='all';try{buildMode=localStorage.getItem('lt-bmode')||'one'}catch(e){}if(!['one','many','line'].includes(buildMode))buildMode='one';if(window.__testUnlock)buildMode='many';
+const MODE_OK=t=>!!t&&!!DEF[t]&&!DRIVE[t]&&!['pipe','pole','poleline','rail','pipeDel','poleDel','crosswalk','lpole'].includes(t);
+const DELT={pipe:'pipeDel',power:'poleDel',cross:'crossDel'};
+const BMODES=[['one','Pojedynczo: po postawieniu wraca do podglądu','<rect x="6" y="6" width="8" height="8" rx="1.2"/>'],['many','Wiele: stawiaj, aż wrócisz do podglądu','<rect x="2.5" y="3" width="6" height="6" rx="1"/><rect x="11.5" y="5" width="6" height="6" rx="1"/><rect x="5" y="11.5" width="6" height="6" rx="1"/>'],['line','Linia: przeciągnij poziomo albo pionowo','<rect x="2" y="7.5" width="4.6" height="5" rx=".8"/><rect x="7.7" y="7.5" width="4.6" height="5" rx=".8"/><rect x="13.4" y="7.5" width="4.6" height="5" rx=".8"/>']];
+const DMODES=[['all','Wyburzaj wszystko','<path d="M4.5 4.5l11 11M15.5 4.5l-11 11"/>'],['pipe','Usuwaj tylko rury (zwrot 2 T¢)',null],['power','Usuwaj tylko słupy (zwrot 50%)',null],['cross','Usuwaj tylko przejścia dla pieszych','<path d="M3 5.5h14M3 14.5h14M6 7v6M10 7v6M14 7v6"/>']];
+function renderModes(){const box=document.getElementById('msub');const del=tool==='bulldoze';const L=del?DMODES:BMODES;
+  box.innerHTML=L.map(([k,tt,ic])=>`<button type="button" data-m="${k}" title="${tt}" aria-label="${tt}" aria-pressed="${(del?delMode:buildMode)===k}" ${!del&&tool!=='view'&&!MODE_OK(tool)?'disabled':''}><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ic||ICO[DELT[k]]}</svg></button>`).join('');
+  for(const b of box.querySelectorAll('button'))b.onclick=()=>{if(del){delMode=b.dataset.m;setXray(delMode==='pipe');document.getElementById('hazard').hidden=false;setHint(toolHint())}else{buildMode=b.dataset.m;try{localStorage.setItem('lt-bmode',buildMode)}catch(e){}setHint(toolHint())}renderModes()}}
 CATS.forEach((c,k)=>{const b=document.createElement('button');b.type='button';b.className='cat';b.innerHTML=svgI(CAT_ICO[k],14)+`<span>${c.name}</span>`;b.setAttribute('role','tab');
   b.addEventListener('click',()=>showCat(k));catsEl.append(b);catBtns.push(b);for(const t of c.tools)toolsEl.append(mkTool(t))});
 function showCat(k){if(catBtns[k]&&catBtns[k].hidden){k=catBtns.findIndex(b=>!b.hidden);if(k<0)k=0}curCat=k;catBtns.forEach((b,j)=>b.setAttribute('aria-selected',String(j===k)));
@@ -2907,7 +2945,7 @@ function showCat(k){if(catBtns[k]&&catBtns[k].hidden){k=catBtns.findIndex(b=>!b.
 /* a category tab exists only once something in it is unlocked */
 function refreshLocks(){CATS.forEach((c,k)=>{catBtns[k].hidden=!c.tools.some(unlocked)});showCat(curCat)}
 function selectTool(t){if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel');pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=false;for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
-  const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);setHint(toolHint());hl.visible=false}
+  const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);if(t==='bulldoze'&&delMode==='pipe')setXray(true);setHint(toolHint());hl.visible=false;renderModes()}
 showCat(0);
 const statsEl=document.getElementById('stats'),statsBtn=document.getElementById('statsBtn');
 document.getElementById('upkCtl').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.ucat)upkCat=b.dataset.ucat;if(b.dataset.usort)upkSort=b.dataset.usort;renderStats()});
@@ -3243,7 +3281,7 @@ let saveBlocked=false;
 function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,filtOff:c.filtOff?1:undefined,off:c.off?1:0,rot:c.rot,rot1:c.rot1,aband:c.aband?1:undefined,ruin:c.ruin?1:undefined,dirt:c.dirt?Math.round(c.dirt*100)/100:undefined,fr:c.fr?c.fr.map(r0=>({...r0})):undefined,waiting:c.waiting||undefined,burn:c.burn?Math.round(gameT-c.burn.t0):undefined,pp:c.pp&&c.pp.length?c.pp.map(q=>[Math.round(q.a*10)/10,q.s,q.si,q.h||0,q.s===2?q.hi:-1]):undefined,dead:c.dead||undefined,lb:c.lastBuy!=null?Math.round(gameT-c.lastBuy):undefined,bodies:c.bodies||undefined,urn:c.urn&&c.urn.length?c.urn.map(t=>Math.round(t-gameT)):undefined,lowT:c.lowT?Math.round(c.lowT*1000)/1000:undefined,jail:c.jail&&c.jail.length?c.jail.map(q=>[Math.round(q.rel),q.w||0]):undefined,lv:c.lv||0,xp:c.xp?Math.round(c.xp*1000)/1000:0,lines:c.lines,owned:c.owned}]}
 function save(){if(saveBlocked)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
   const old=localStorage.getItem(KEY);if(old)localStorage.setItem(KEY+'-prev',old);
-  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,taxes:TAX,loan,sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),ms:msLevel,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
+  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,taxes:TAX,loan,sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),ms:msLevel,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
 function load(){if(loadKey(KEY))return true;if(oldSave){try{const r=localStorage.getItem(KEY);if(r&&!localStorage.getItem(KEY+'-pre4'))localStorage.setItem(KEY+'-pre4',r)}catch(e){}saveBlocked=true;return false}if(loadKey(KEY+'-prev')){setHint('Ostatni zapis był uszkodzony, wczytano poprzedni.',true,true);return true}
   let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
   if(raw){saveBlocked=true;try{localStorage.setItem(KEY+'-broken',raw)}catch(e){}setHint('Nie udało się wczytać zapisu. Kopia jest bezpieczna i gra jej nie nadpisze. Tylko „Zresetuj miasto” zaczyna od nowa.',true,true);hintTimer=12}
@@ -3271,6 +3309,7 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
   for(let i=0;i<N*N;i++)rebuildRoad(i);money=s.money||0;mapType=MAPS[s.map]?s.map:'standard';diff=DIFF[s.diff]?s.diff:'old';taxRate=s.tax>=10&&s.tax<=20?s.tax:12;TAX={...TAX0};if(s.taxes&&typeof s.taxes==='object'){for(const k in TAX0)if(Number.isFinite(s.taxes[k]))TAX[k]=s.taxes[k]}else for(const k of['house','tenement','block','modern'])TAX[k]=taxRate;loan=s.loan&&LOANS[s.loan.k]?s.loan:null;imports={};if(s.imports)for(const k in s.imports)imports[k]=(s.gameT||gameT)+s.imports[k];tut=s.tut&&s.tut.on?s.tut:null;matl=s.matl||0;if(s.goods)for(const k in goods)goods[k]=s.goods[k]||0;
   pipe.fill(0);if(Array.isArray(s.pipes))for(const i of s.pipes)pipe[i]=1;
   if(Array.isArray(s.litter))for(const[i,n]of s.litter)setLitter(i,n);
+  if(Array.isArray(s.cross))for(const i of s.cross)if(grid[i]&&STREET[grid[i].t]){grid[i].cross=true;drawCross(i)}
   if(Array.isArray(s.rails))for(const i of s.rails)if(grid[i]&&STREET[grid[i].t])grid[i].rail=true;railVer++;railRefreshAll();
   if(Array.isArray(s.edges))for(const[i,o]of s.edges){if(grid[i]&&grid[i].t==='rail'){grid[i].edge=true;continue}if(grid[i]&&DRIVE[grid[i].t]){grid[i].edge=true;if(o)grid[i].edgeOut=true;rebuildRoad(i)}}
   if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(!window.__testUnlock)msLevel=Math.max(0,Math.min(MS.length-1,s.ms|0));if(typeof s.name==='string'&&s.name.trim())cityName=s.name.trim().slice(0,24);for(const[i,a]of loadFires){if(!grid[i])continue;if(a<0)makeRuin(i,true);else startFire(i,a)}loadFires=[];if(Array.isArray(s.hist))hist=s.hist;return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
