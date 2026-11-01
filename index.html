@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='3.3.7';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='3.9.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -47,6 +47,33 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
 .err{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:min(420px,calc(100% - 32px));padding:16px 18px;font-size:14px;line-height:1.45;text-align:center}
 .err b{display:block;font-family:var(--font-d);font-size:17px;margin-bottom:4px}
 #app canvas{display:block;touch-action:none;cursor:crosshair}
+.title{position:absolute;inset:0;z-index:19;display:grid;grid-template-columns:minmax(0,420px);align-content:center;padding:24px max(24px,6vw);background:linear-gradient(90deg,rgba(12,18,20,.62),rgba(12,18,20,.18) 55%,rgba(12,18,20,0))}
+.title .tbox{display:grid;gap:10px;padding:22px 22px 18px;background:var(--panel2);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.title h1{margin:0;font:700 34px/1.05 var(--font-d);letter-spacing:.3px}.title h1 small{display:block;font:500 13px var(--font-b);color:var(--muted);margin-top:6px;letter-spacing:0}
+.title .mbtn{display:grid;justify-items:center;gap:1px}.title .mbtn small{font-size:11.5px;opacity:.85;font-weight:400}
+.title .tver{margin:2px 0 0;color:var(--muted);font-size:12px}
+.credits{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));display:grid;justify-items:end;gap:6px;color:#fff;text-decoration:none;font:600 12px var(--font-b);text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.credits .ps{display:grid;justify-items:center;gap:4px;background:#000;border-radius:10px;padding:10px 12px 8px;box-shadow:0 4px 16px rgba(0,0,0,.35);text-shadow:none}.credits .ps img{width:84px;height:auto;display:block}.credits .ps em{font-style:normal;font-size:11px;color:#cfd6d8}
+.credits:hover .ps,.credits:focus-visible .ps{outline:2px solid #39b7ff;outline-offset:2px}
+.intitle .hud,.intitle .dock,.intitle .rail,.intitle #tut,.intitle .ovl,.intitle #floats,.intitle #stat,.intitle .stats,.intitle .order{display:none!important}
+.oldsave{border-color:var(--accent)!important}
+.order{position:absolute;inset:0;z-index:25;display:grid;place-items:center;pointer-events:none}
+.order .ob{pointer-events:auto;display:grid;justify-items:center;gap:6px;padding:18px 22px 16px;background:var(--panel2);border-radius:16px;box-shadow:0 12px 50px rgba(0,0,0,.3);max-width:min(420px,calc(100% - 32px));text-align:center;animation:ordIn .5s cubic-bezier(.2,1.4,.4,1)}
+.order .ob b{font:700 19px var(--font-d)}.order .ob small{color:var(--muted);font-size:13px;line-height:1.4}.order .ob .k{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#b8860b;font-weight:700}
+.order svg{width:96px;height:auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))}
+@keyframes ordIn{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.order .ob{animation:none}}
+.msp{width:min(320px,calc(100% - 80px));max-height:min(70vh,560px);overflow:auto;align-content:start}
+.msp .mrow{display:grid;grid-template-columns:34px 1fr;gap:4px 8px;padding:8px 0;border-top:1px solid var(--line)}.msp .mrow:first-of-type{border-top:0}
+.msp .md{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 14px var(--font-d);background:var(--chip);color:var(--muted);grid-row:span 2}
+.msp .mrow.ok .md{background:radial-gradient(circle at 35% 30%,#ffe9a3,#e0a91c 60%,#a8760c);color:#5a3d00;box-shadow:0 0 0 2px #f6d36a}
+.msp .mrow.next .md{box-shadow:0 0 0 2px var(--accent);color:var(--fg)}
+.msp .mt{display:flex;justify-content:space-between;gap:6px;font-weight:600;font-size:13.5px}.msp .mt span{color:var(--muted);font-weight:500;font-size:12px}
+.msp .ml{font-size:12px;color:var(--muted);line-height:1.45}.msp .ml i{font-style:normal;color:var(--warn)}
+.msp .pb{height:6px;border-radius:3px;background:var(--chip);overflow:hidden;margin-top:4px}.msp .pb i{display:block;height:100%;background:var(--accent)}
+.cityName{display:grid;grid-template-columns:1fr auto;gap:6px}.cityName input,.mapsName input{min-height:38px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--fg);padding:0 10px;font:500 14px var(--font-b);min-width:0}
+.mapsName{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+@media (max-width:560px){.title{grid-template-columns:1fr;align-content:end;padding:16px 16px 150px;background:linear-gradient(0deg,rgba(12,18,20,.55),rgba(12,18,20,0) 70%)}.credits .ps img{width:64px}}
 .menuBg{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:rgba(10,14,15,.45);padding:16px}
 .menu{width:min(320px,100%);padding:18px 18px 16px;display:grid;gap:10px;background:var(--panel2)}
 .menu h2{margin:0;font:600 22px var(--font-d)}
@@ -262,7 +289,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="hazard" id="hazard" hidden aria-hidden="true"></div>
 <aside class="tut panel" id="tut" hidden aria-label="Samouczek"></aside>
 <div class="ovl panel taxp" id="taxp" hidden><b>Biznes</b><span class="bh">Podatki od mieszkańców</span><label class="vol" for="taxR"><span>Stawka</span><b id="taxV">12%</b></label><input type="range" id="taxR" min="10" max="20" step="1" value="12"><small id="taxN"></small><span class="bh">Pożyczki</span><div id="loanBox"></div><span class="bh">Import</span><small id="impN"></small></div>
-<nav class="rail" aria-label="Widoki"><button class="btn icon panel" id="ovlBtn" aria-expanded="false" aria-label="Nakładki" title="Nakładki: zasięgi i strefy"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.8l7.5 4-7.5 4-7.5-4z"/><path d="M2.5 10.2l7.5 4 7.5-4"/><path d="M2.5 13.6l7.5 4 7.5-4"/></svg></button><button class="btn icon panel" id="taxBtn" aria-expanded="false" aria-label="Biznes: podatki i pożyczki" title="Biznes: podatki i pożyczki"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="15" height="10.5" rx="1.6"/><path d="M7 6.5V4.6a1.1 1.1 0 0 1 1.1-1.1h3.8A1.1 1.1 0 0 1 13 4.6v1.9"/><path d="M8 13.8l4-4.2"/><circle cx="8.3" cy="10" r=".8"/><circle cx="11.7" cy="13.4" r=".8"/></svg></button><button class="btn icon panel" id="statsBtn" aria-expanded="false" aria-label="Gospodarka" title="Gospodarka"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="10" width="15" height="7.5" rx="1.2"/><path d="M4.5 10V5.5h8V10"/><path d="M6.5 7.6h4"/><path d="M14.5 10V3.5h2.5V10"/><path d="M6 13.6h1.5M9.3 13.6h1.5M12.6 13.6h1.5"/></svg></button></nav>
+<nav class="rail" aria-label="Widoki"><button class="btn icon panel" id="msBtn" aria-expanded="false" aria-label="Kamienie milowe" title="Kamienie milowe"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h8v4.2a4 4 0 0 1-8 0z"/><path d="M6 5H3.5v1.2A2.8 2.8 0 0 0 6.3 9M14 5h2.5v1.2A2.8 2.8 0 0 1 13.7 9"/><path d="M10 11.7v2.8M7 17.5h6M8 14.5h4v3H8z"/></svg></button><button class="btn icon panel" id="ovlBtn" aria-expanded="false" aria-label="Nakładki" title="Nakładki: zasięgi i strefy"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.8l7.5 4-7.5 4-7.5-4z"/><path d="M2.5 10.2l7.5 4 7.5-4"/><path d="M2.5 13.6l7.5 4 7.5-4"/></svg></button><button class="btn icon panel" id="taxBtn" aria-expanded="false" aria-label="Biznes: podatki i pożyczki" title="Biznes: podatki i pożyczki"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="15" height="10.5" rx="1.6"/><path d="M7 6.5V4.6a1.1 1.1 0 0 1 1.1-1.1h3.8A1.1 1.1 0 0 1 13 4.6v1.9"/><path d="M8 13.8l4-4.2"/><circle cx="8.3" cy="10" r=".8"/><circle cx="11.7" cy="13.4" r=".8"/></svg></button><button class="btn icon panel" id="statsBtn" aria-expanded="false" aria-label="Gospodarka" title="Gospodarka"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="10" width="15" height="7.5" rx="1.2"/><path d="M4.5 10V5.5h8V10"/><path d="M6.5 7.6h4"/><path d="M14.5 10V3.5h2.5V10"/><path d="M6 13.6h1.5M9.3 13.6h1.5M12.6 13.6h1.5"/></svg></button></nav>
+<div class="ovl panel msp" id="msp" hidden aria-label="Kamienie milowe"></div>
+<div class="order" id="order" hidden role="status" aria-live="polite"></div>
 <div class="ovl panel" id="ovl" hidden role="group" aria-label="Nakładki"><b>Nakładki</b>
     <button class="chipb" data-ovl="police"><i style="background:#2f6fe0"></i>Zasięg policji</button><button class="chipb" data-ovl="pol"><i style="background:#d9b02a"></i>Zanieczyszczenie</button>
     <button class="chipb" data-ovl="noise"><i style="background:#9a5bd6"></i>Hałas</button><button class="chipb" data-ovl="park"><i style="background:#3cae4f"></i>Zadowolenie z parków</button>
@@ -309,7 +338,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div id="floats"></div>
 <div id="stat"></div>
 <section class="stats panel" id="stats" hidden aria-label="Gospodarka">
-  <header><div><h2>Gospodarka miasta</h2><p class="sub" id="stClock"></p></div><button class="btn icon panel" id="statsClose" aria-label="Zamknij">×</button></header>
+  <header><div><h2 id="stTitle">Gospodarka miasta</h2><p class="sub" id="stClock"></p></div><button class="btn icon panel" id="statsClose" aria-label="Zamknij">×</button></header>
   <div><h3>Bilans na godzinę gry</h3><div style="overflow-x:auto"><table class="tbl" id="stTbl"></table></div></div>
   <div class="chart"><h3>Saldo gotówki · ostatnie 24 godz.</h3><div id="chMoney"></div></div>
   <div class="chart"><h3>Saldo magazynów · ostatnie 24 godz.</h3><div id="chMat"></div></div>
@@ -326,11 +355,12 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="menuBg" id="over" hidden><section class="menu panel" role="alertdialog" aria-modal="true" aria-labelledby="overT">
   <h2 id="overT">Bankructwo</h2><p class="sub" id="overSub">Dług miasta przekroczył 1 000 T¢. Bank przejął kasę miejską i gra jest przegrana.</p>
   <button class="btn panel mbtn primary" id="oNew">Zacznij od nowa</button>
-  <button class="btn panel mbtn" id="oExit">Wyjdź z gry</button>
+  <button class="btn panel mbtn" id="oExit">Menu główne</button>
 </section></div>
 <div class="menuBg" id="maps" hidden><section class="menu panel" role="dialog" aria-modal="true" aria-labelledby="mapsT">
-  <h2 id="mapsT">Nowe miasto</h2><p class="sub">Wybierz trudność i ukształtowanie terenu. Obecne miasto zostanie usunięte.</p>
-  <div class="diffs" role="radiogroup" aria-label="Trudność startu"><button class="btn panel" data-diff="easy" role="radio"><b>Łatwy</b><small>8 200 T¢</small></button><button class="btn panel" data-diff="std" role="radio"><b>Standard</b><small>6 200 T¢</small></button><button class="btn panel" data-diff="hard" role="radio"><b>Ciężki</b><small>4 000 T¢</small></button></div>
+  <h2 id="mapsT">Nowe miasto</h2><p class="sub" id="mapsSub">Nazwij miasto, wybierz trudność i ukształtowanie terenu.</p>
+  <label class="mapsName" for="cityIn">Nazwa miasta<input id="cityIn" maxlength="24" autocomplete="off" spellcheck="false"></label>
+  <div class="diffs" role="radiogroup" aria-label="Trudność startu"><button class="btn panel" data-diff="easy" role="radio"><b>Łatwy</b><small>8 500 T¢</small></button><button class="btn panel" data-diff="std" role="radio"><b>Standard</b><small>6 500 T¢</small></button><button class="btn panel" data-diff="hard" role="radio"><b>Ciężki</b><small>2 500 T¢</small></button></div>
   <button class="btn panel mbtn mapb" data-map="standard"><b>Standard</b><small>1–3 rzeki, najwyżej 2 pola szerokości</small></button>
   <button class="btn panel mbtn mapb" data-map="big"><b>Dwie duże rzeki</b><small>Szerokie rzeki przecinające mapę, mało miejsca na start</small></button>
   <button class="btn panel mbtn mapb" data-map="lake"><b>Duże jezioro</b><small>Jezioro co najmniej 6×6 i wypływająca z niego rzeka</small></button>
@@ -340,16 +370,28 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="menuBg" id="menu" hidden><section class="menu panel" role="dialog" aria-modal="true" aria-labelledby="menuT">
   <h2 id="menuT">Pauza</h2><p class="sub" id="menuSub">Czas w mieście stoi.</p>
   <button class="btn panel mbtn primary" id="mResume">Wznów grę</button>
+  <div class="cityName" id="mNameRow"><input id="mName" maxlength="24" aria-label="Nazwa miasta" autocomplete="off" spellcheck="false"><button class="btn panel" id="mNameOk">Zmień nazwę</button></div>
   <label class="gam" for="mGamma"><span>Gamma</span><b id="mGammaV">1,00</b></label>
   <input type="range" id="mGamma" min="0.6" max="1.6" step="0.05" value="1">
   <label class="vol" for="mVol"><span>Głośność radia</span><b id="mVolV">60%</b></label>
   <input type="range" id="mVol" min="0" max="100" step="5" value="60">
   <button class="btn panel mbtn" id="mReset">Zresetuj miasto</button>
-  <button class="btn panel mbtn" id="mExit">Zapisz i wyjdź</button>
+  <button class="btn panel mbtn" id="mExit">Zapisz i wróć do menu</button><button class="btn panel mbtn" id="mBack" hidden>Wróć</button>
   <div class="upd"><b>Aktualizacje z GitHuba</b><span class="st">Wersja gry <span id="uVer"></span></span>
     <button class="btn panel mbtn" id="uCheck">Sprawdź aktualizacje</button>
     <span class="st" id="uSt"></span><button class="btn panel mbtn" id="uOld" hidden>Wróć do wersji wbudowanej</button></div>
 </section></div>
+<div class="title" id="title" hidden><div class="tbox" role="dialog" aria-labelledby="tT"><h1 id="tT">Little Townies<small>Zbuduj swoje miasteczko</small></h1>
+  <button class="btn panel mbtn primary" id="tCont" hidden>Kontynuuj<small id="tContS"></small></button>
+  <button class="btn panel mbtn" id="tNew">Nowa gra</button>
+  <button class="btn panel mbtn" id="tOpt">Opcje</button>
+  <button class="btn panel mbtn" id="tExit">Wyjdź</button>
+  <p class="tver">Wersja <span id="tVer"></span></p></div>
+  <a class="credits" href="https://psinteractive.tech" target="_blank" rel="noopener"><span>Autorzy:</span><span class="ps"><img alt="PS Interactive" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACQCAMAAAC4a5CyAAAAwFBMVEUAAAD29/gLrPj4+Pjc3NwgbvIEsfibL90B+/1tK9QMpOarq6sMaqQIw/4Hm60LoNmn1/bU1NQKanENevZXyflmJaeaV+FmZmYAAP9Rq/OpqakdW7gdFmvPoegibudgK65xGuphYP0VjbwZbMyoU/tdJKD8Av2vIbNuDHZbG7dlTeSrnOzNIM01IbEWZaCeLdKWH6CPJ6ySNePGHbnKX9gNirRTVal7NM+nFrKlLtpiMcT/XP8xMJw1Oc1ToP8GwPWAMQUEAAAAQHRSTlMA+/kIivsI/AL2ZBUW/hmi/loOCf4T/Q0B+1GREf1glhIFlKwGWAIJDev7/v4LUV9nmTH8/mYEWemXnwKL/Ahm86W/+gAADLNJREFUeNrdnA17oroSgFOgiIIoIEVdt9pWq23Xfm3b7WnP7vn//+pmJkQCBEjQbvvcec6pH0B4mclMJpO4hMhlQx47nc49ickHiE16hmH06Gt72ZD1AQHH4wLgwDD6gwMArj5KgxTQ2A/wksR3d3cxBT2EzLZSQOdwz3x5edneviTudmMyE78LQfaFiuP15hDPgICbPOBhZUxmb923LRm3tnAcF/FCJzwoYLfbXdTqYEH+vZp/pJYaAOfz+ZbUdcMzQrpdilnVW8hnC0Wbr8jlB7XuebaXvnUiuySRHYHYwqE/9P9lTN1o2dT22Xa7/eNIZfm+XC7fN39Nh2eLj2rau6XCfIt435RljtLQu2b/Uvl2LpX5A73+YUUaHiwiEQ3rxxjWPXJqHKtKByWu7ngh7Rez39fHv4/7hkxOsIF/1sv1uh7QNo4zwGNNQGi79ga/f/8+lvIZ19jAXZOBAdAoAhoKijwB6SQ1LVPxrkEqNIjysAKJq4cBB/sd64MM8EhHHu5BynbeRjN8jMYGvjM9rh+XKu6iD/gD5HUjS3vUAJ8Q8LHeyjTIQTSkog34k8qPh9LY452enuoA/kNlozLa9wxNwCcE3KxFFY69MKJskxsqzSZ++v6dQcaL+CVGqY6GtxfUo4+05en15897IvryHwp4o3w964eb5mjInLcFINXi/Xq9Tl1lNpvdggY1Ae8XjwuCPj2rBjTaAb5SwCyx+QZ0k+sbzVYAsgtyJQk6NNhcgEAM1Af8DoIzmUsAbGeGDJDmnhmgEzkFJ2kBiJA03BAGeLEvoDxs0wTItvcApGb+CECa7omBGqb8LQF/AuD7HoDUBBLAgTg/9fYxMQ78S+jOFy068tPTyf3d3f0C5UUwLJ1CHwZwSNV2CnMTCtiikU7ntaIM0bPzJj4EYAsNnjydrO7vV7NFTDVYE67b98E8YFsnKee/oegkUBcbGEMqhZsX5Oi7PuD3gqgCSsQoarGUatKWtPtgNyedp5aAYy8KS4CTMuBJHeBA1k+6nZy0BaQTuw8C7GgAjs/OzmoAJ6PJpATYQzk9hb+3q9UcphPKgHDy4/IR/nu8u4M/jyR3/Qn0ygcqFXOT8a5GS0e7pPRoAFic79J+pAFIzy408KvT7RTSrVlWr6MT5horSwFDx8sqH4t41e0UAG9qATvdzcv45WXJZf1L7CYMMH6/fGf52orOBEWiP7TqMmb29c+fz5s1+ELiTrEfNgES0XhLIgNMpw1FQFYxtmHAo3GwL+nfJUCPeKWMmZnYVgW8gyfcCXS/h2zSFOecJA9oKAKWXF0T8Jfo0v8oLAocCDBCwL4uINRnxDnX2dlGzPZtGjrsbAlofw3KAOPlYvkidOJsUIE07UytEOfvDXhWo8H2AkUerkzbvjX6kpFkP0CqJSgmCrXAsbmTS1OvdDyTDnV7A4LXdhdLyPf2LLiGHwDIulrnra6EvFy+KK6TDo+GB+6DUKQBLXbnv+bztz1WADUCdRmQLwFH8oT1hMeUk7cF1Va8jbe5dZYVjL+XShr8IMBdQvhLttRD3soJxV8GxIoxTs5xeQDrvkLkntOazD6AtOwAlQcbl2AgFukCYlKQpdU4P59taSFsxhbQVxCFDqVBmaurAN5ko0f3qtt91HAPvjwlBRzB+nhBRsPRsAqwurp1k8oJahD0t93OmE8v4vhFAVTqxQDYFwQ+luckHHBMbumywWRSW7+8EmS22C6qNmOM0xHOHwhTohGf/YqARZFNmoSdJnbD3B1dJrW3gn2Jb/RrGPqagHTxNFIpLuAiz3V3RYsd8ro539gAgLUMw5Ic1WowAg02l1Cus4l8vIk3pbUMwp3TYU7ZqKSG2oy4mQjWlidNjaQaZEVfyUI/EaIH7hMJ/VDqJGqAtMIdEaHQg9Gm2c4s9Kw2VEo7EcrhjbQHtArLLrZ3rGQGHhtpzl1KIkLP2+GyMDhuX36ztiRXjx8Tuhp2ekHDzWRYD3idJv4KWY7dtj7YH436oWyrU3istqJz05UVjpzC9qQxVPlbAYIxnSIg7MPA1XwlwG5XaddNyz4oBcSuSCeMF8YE5aZhLej16vWqZmEbomGvByOKPM7Vm5iOf34KSDOefMN8H8REYRlCUh8cs9VinNL1+9oxcIQy4DPrsgqj6DRdBJwo1KjXNUk127ygC8hOF9t5Pj/38quA4M5Ujamlh5qA0eBiwJ8+1PdiwOsboWBXI7O2GCDYSirkInpVfqY2j7VotwPMa7AE6Hhe5EVZslS3/WHdCnBUsy8nLG2mlGmQr/ZeICGIxNATY2K8EGdDYpYmpg6tACjf9pJt7CluVfPC2qJAlR5TkJiscFWbA0ZQFvf5SPKfSkbN5ORHB+JC+KK2HRV30Hm8nVrAuCtqMD/UVQL2SnKHUs40Qz+qLqvsribUzGoa3MXBekCdAoVvS6S0/6V0oxRwhkX++XymXvoYYZW/eMd4vV7X71uT3YFLNWCLbEZPgw7pkUFZPLFL2aQOcEx3bconeqjB/n6AtuNJPKpvqAH6KhosJQtlQJrb1jQzkEWlUF2D2suxtRrEe3mERxr/9vmWhWJBKgALikBAOi8KHd0K64gODrlOZg8G58IqRr//THx+iJ47lEU4CWAhXjMNNu5Y9oisBDzIAToCMV0ZAA8Id4eMvQCp+J6uFwdFN3XyKs0ptwqwEBwL8WwodtfqX5pUxMGAmMWtIoNnYRDLXKYGsD5QNwBCEA7rNOgqx0Ap4BCS7pycT/JDnZgw9Ws1KAUcF8dtx7YrAKV9MJ22iGFxVH4Eg5che4VYE4FXDnx4rdKgqazBSsBCWKzIZqp7Ho0UXo2T+H8J0IcieKQLOIJuoQzYN4ZHraRyJGEmvq0FNKp+C1PeC9brTcq53l6A9U5ilKdFFRlzKI7FhwXEytZuJGkHuBtZHNvQr58MjZHxTJXvKdwhUQJMdyid85Dl7ZJmtmeh39eyMubEqjooRSgZIFsN4zHVxgDNC3Ce/6xbQoaRxLNtu7k+SN1FKWGNagCJZClPBRAzDhizfc3l2JFUgyHtahlgj44OHNCPbtsDkgPNScZsCpmm6Lhz5DkUi8ves2IVCoffc8fxQ1xvOKc2fK5CPcikKVdTUQSkzuYIrleZLegB+r6XzdEdP5dnhlGI0aavCjjG8thhAeVjSxpQIy0N9vfToNHKxCimknvs4ukO0K8DlIrGz+t7pJCOPFc1iqXrmfauj70AB5Kf//dqAT3tf19gD0AMN3Z+wPcaAGfjWeFfEaj77ZVfIR7ZQ7yqRlH+8q+mw9IyyWHFEZ4ve/VqapIqoaeoOVGDOi275mdL7fTWJV9BzLoj08D6XAmCakJTssH7M8StsKRLprhs/qlwePepVIdMf8Gn98AAdGgmMkALtPvZTkwtCbszyipMYCqnXoH5SB+mikrKIC6kRW7yBQDNKVpSmreZX0CDbgWI+XUAg2ZAM/eSvmbdePee7N7nbCR8StyEkPLVwmkm/5QeVQJs03OqBy1TU4NTFQ26LHMgZvEZSxrE9CLJMJIdK+pj6qaHsssT/Ms16KYfMg02AeK7KdBZEJBMUDn7kolQu0kNAiNA2qQJzbMwZpL0GASvRCjVJnAjOJZA63CTXeO0lWYTmxAqU0AcdVQAeQzFi2iUeAcr8FHTciWALmscX/YAPEoYIDMW/X7qskExcKfMevTo1IVRnF2bsH16JkO1XMSkQ5cL59ATE5MBmoSdFuAtTDw2dU1dE+OeQAZIZcreICB3cGYquISORUyhFsCabMjCy9LuyC7aAeJprBvhIKEcZvIapO9SQNRBwhyHapC7BjsaMEC8octGAuwZVIOp37kuqN3MAPG01NCgEtagQqAWAS24CwdkGjSzvDFJXSgIAmavBC4NTPbB4mM+CwJ4iOwAXYI2Zq7C+yDRBwRdiYCJDJClmWbCDR4IxttFqQKgyWycBgoz22KqAiiGGZf1qRJgAOoyyQ7QZZda8ECYt7HuTy3L2y8AYnP4nZveMcFMWlmDPEQFme5FQNFJCBEszPfbmtxJkoBdVAAkZsKfrOAkeiY2iRwwAHGZz7npzZEWZj678GQF04B9kACmUcJk97agQdSsnomx4QonwRuyQMayccL70e4QO60EyKJ6cMS/0gzUicUAA64WiwNaqQatrOMF+CW9JGCjAw6pFrsSxxIr7Z70A3s8ei4DSPCxsEmLu3Gin82YrafcCKGbzrRIt8xyTpXLB3MZZC7Dck1pJpZrptjg386ozf/DlP+rA5qmdFaX8DDw+fPiQD7txIhMPr2yYPJhSU5uJZ9vYszj3aqaw9HnVgeJxYc/+czR+hL1waCmgul+PqJVcpD/AcrLQOWLSrPAAAAAAElFTkSuQmCC"><em>psinteractive.tech</em></span></a></div>
+<div class="menuBg" id="oldSave" hidden><section class="menu panel oldsave" role="alertdialog" aria-modal="true" aria-labelledby="oldT">
+  <h2 id="oldT">Duże zmiany w grze</h2><p class="sub">Od wersji 4.0 rozgrywka mocno się zmieniła: kamienie milowe, nowe usługi i transport. Zapis z poprzedniej wersji nie jest zgodny, więc trzeba zacząć nowe miasto.</p>
+  <p class="sub">Stary zapis zostaje zachowany w pamięci urządzenia jako kopia.</p>
+  <button class="btn panel mbtn primary" id="oldOk">Zacznij nowe miasto</button></section></div>
 <div class="err panel" id="err"><b>Wczytywanie miasta…</b>Przygotowuję scenę 3D.</div>
 </main>
 
@@ -707,13 +749,28 @@ function medFor(i){const ts=tilesOf(i);let best=-1,room=0;for(let j=0;j<N*N;j++)
 function die(i,c,k){const q=c.pp[k];if(q.s===2&&grid[q.hi]&&grid[q.hi].pat)grid[q.hi].pat--;c.pp.splice(k,1);c.dead=(c.dead||0)+1;cur.deaths=(cur.deaths||0)+1}
 /* the first day of a new city is safe: no crime, no illness, no deaths */
 const firstDay=()=>gameT<1440;
+/* ---------- milestones: the number of people living in the city unlocks buildings, services and hazards (no money, just an order) ---------- */
+const MS=[{name:'Osada',pop:0},{name:'Wioska',pop:15},{name:'Mała wieś',pop:100},{name:'Miasteczko',pop:250},{name:'Małe miasto',pop:500},{name:'Miasto',pop:900},{name:'Duże miasto',pop:1500},{name:'Aglomeracja',pop:2500},{name:'Metropolia',pop:4000}];
+const MS_OF={};[
+ 'road house pole poleline poleDel transformer wind pipe pipeDel pump tower outlet shop smallfac smallwh farmveg farmgrain landfill park1',
+ 'tenement bakery farmdairy mine factory warehouse restaurant park2 bridge',
+ 'road2 clinic cemS schoolS policeS fireS hvpole coal recycler shop1',
+ 'block supermarket hotelS cinema hydro treatment school incS taxi',
+ 'road3 roundabout factoryB warehouseB bank theater crem park3 rail trainSt freightSt',
+ 'modern highway hosp mineB policeB fireB lyceum techn incinerator',
+ 'gallery cemB casino prison','hotelB hydrogen','hospC bankG'].forEach((l,k)=>l.split(' ').forEach(t=>MS_OF[t]=k));
+/* hazards and their menu tab start once the first building of the service is unlocked */
+const HAZ={med:{tools:['clinic','hosp','hospC'],name:'choroby'},pol:{tools:['policeS','policeB'],name:'kradzieże i napady'},fire:{tools:['fireS','fireB'],name:'pożary'}};
+let msLevel=window.__testUnlock?99:0,cityName='Moje miasto';
+const unlocked=t=>t==='view'||t==='bulldoze'||(MS_OF[t]??0)<=msLevel;
+const hazAt=k=>Math.min(...HAZ[k].tools.map(t=>MS_OF[t]??99)),hazOn=k=>hazAt(k)<=msLevel;
 function lifeHour(i,c,six){if(!c.pp||c.aband)return;const cap=residents(c),h=c.happy??3,safe=firstDay();
   for(let k=c.pp.length-1;k>=0;k--){const q=c.pp[k];q.a+=AGE_H;
     let pd=q.a>=65?0.004*(1+(q.a-65)/8):0.0002;if(q.s===1)pd+=0.006*(1+q.si*0.3);if(q.s===2)pd+=0.001;if(!safe&&Math.random()<pd){die(i,c,k);continue}
     if(q.s===1){q.sk++;if(q.sk>=24){q.s=0;q.sk=0}}else if(q.s===2){q.h--;if(q.h<=0){q.s=0;const m=grid[q.hi];if(m&&m.pat)m.pat--;q.hi=-1}}}
   if(c.lastBuy==null)c.lastBuy=gameT;if(safe)c.lastBuy=gameT;if(gameT-c.lastBuy>4320&&c.pp.length){c.starveT=(c.starveT||0)+60;if(c.starveT>=1440){c.starveT=0;die(i,c,(Math.random()*c.pp.length)|0);float(i,'mieszkaniec zmarł: brak zakupów od 3 dni','warn')}}else c.starveT=0;
   const healthy=()=>c.pp.filter(q=>q.s===0);
-  if(!safe&&c.pp.length&&Math.random()<sickChance(i)){const hs=healthy();if(hs.length){const q=hs[(Math.random()*hs.length)|0];q.s=1;q.si++;q.sk=0}}
+  if(!safe&&hazOn('med')&&c.pp.length&&Math.random()<sickChance(i)){const hs=healthy();if(hs.length){const q=hs[(Math.random()*hs.length)|0];q.s=1;q.si++;q.sk=0}}
   if(six&&!safe){const sick=c.pp.filter(q=>q.s===1).length;for(let k=0;k<sick;k++)if(Math.random()<0.4){const hs=healthy();if(hs.length){const q=hs[(Math.random()*hs.length)|0];q.s=1;q.si++;q.sk=0}}}
   for(const q of c.pp)if(q.s===1){const m=medFor(i);if(m<0)break;q.s=2;q.h=8;q.hi=m;grid[m].pat=(grid[m].pat||0)+1}
   const adults=c.pp.filter(q=>q.a>=19&&q.a<65).length;
@@ -1375,7 +1432,8 @@ function constructTick(dt){for(let k=constructs.length-1;k>=0;k--){const C=const
     else if(u<0.85){C.sc.scale.y=1;C.cr.scale.y=1;C.m.visible=true;C.m.scale.set(C.s0.x,C.s0.y*Math.max(0.02,(u-0.3)/0.55),C.s0.z)}
     else{C.m.scale.copy(C.s0);const f=1-(u-0.85)/0.15;C.sc.scale.y=Math.max(0.001,f);C.cr.scale.y=Math.max(0.001,f)}}}
 const DIFF={easy:{name:'Łatwy',m:2},std:{name:'Standard',m:1.5},hard:{name:'Ciężki',m:0.95},old:{name:'Standard',m:1}};let diff='std',diffPick='std';
-const baseCash=()=>Math.round(BASE_MONEY*DIFF[diff].m)+200;const moneyCap=()=>baseCash()+(pw.bankCap||0);
+const START_CASH={easy:8500,std:6500,hard:2500,old:4200},startCash=()=>START_CASH[diff]||6500;
+const baseCash=()=>Math.round(BASE_MONEY*DIFF[diff].m)+200+(diff==='hard'||diff==='old'?0:300);const moneyCap=()=>baseCash()+(pw.bankCap||0);
 const matCap=()=>pw.matCap;
 function addMoney(x){const cap=moneyCap();if(money>=cap)return 0;const n=Math.min(cap,money+x)-money;money+=n;return n}
 function addMat(x){const n=Math.max(0,Math.min(x,matCap()-stored()));matl+=n;return n}
@@ -1789,8 +1847,8 @@ function deliverInmates(c){const pr=grid[c.dest];if(pr&&pr.t==='prison'){pr.inbo
 function policeTick(dt,night){if(!dt)return;polFlash+=dt;jailTick(dt);
   for(const st of stations()){const g=grid[st];const pc=polCars(st).filter(c=>c.role==='patrol').length;if(pc<POL[g.t].patrol&&cars.length<MAX_CARS&&(g.spawnT=(g.spawnT||0)-dt)<=0){g.spawnT=1.5;spawnPatrol(st,'patrol')}}
   for(const c of cars)if(!c.dead&&c.kind==='police'&&c.mesh.userData.bar){const on=!!c.task,f=Math.floor(polFlash*6)%2;const[r,b]=c.mesh.userData.bar;r.visible=!on||f===0;b.visible=!on||f===1}
-  if(crimeRate(night)&&!firstDay()){crimeT-=dt;if(crimeT<=0){crimeT=60/crimeRate(night)*rnd(0.6,1.4);const pool=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&(HLV[c.t]||isShop(c.t))&&!c.off&&entryOf(i)>=0)pool.push(i)}if(pool.length){const ci=pool[(Math.random()*pool.length)|0];if(!policed(ci)||Math.random()<0.5)newCrime(ci,false)}}}
-  if(counts.bank+counts.bankG&&!firstDay()){heistT-=dt;if(heistT<=0){heistT=rnd(150,330);if(Math.random()<Math.min(0.85,0.3*(counts.bank+counts.bankG))*0.5){const bs=[];for(let i=0;i<N*N;i++)if(grid[i]&&(grid[i].t==='bank'||grid[i].t==='bankG')&&entryOf(i)>=0)bs.push(i);if(bs.length){const bi=bs[(Math.random()*bs.length)|0];if(!policed(bi)||Math.random()<0.5)newCrime(bi,true)}}}}
+  if(crimeRate(night)&&!firstDay()&&hazOn('pol')){crimeT-=dt;if(crimeT<=0){crimeT=60/crimeRate(night)*rnd(0.6,1.4);const pool=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&(HLV[c.t]||isShop(c.t))&&!c.off&&entryOf(i)>=0)pool.push(i)}if(pool.length){const ci=pool[(Math.random()*pool.length)|0];if(!policed(ci)||Math.random()<0.5)newCrime(ci,false)}}}
+  if(counts.bank+counts.bankG&&!firstDay()&&hazOn('pol')){heistT-=dt;if(heistT<=0){heistT=rnd(150,330);if(Math.random()<Math.min(0.85,0.3*(counts.bank+counts.bankG))*0.5){const bs=[];for(let i=0;i<N*N;i++)if(grid[i]&&(grid[i].t==='bank'||grid[i].t==='bankG')&&entryOf(i)>=0)bs.push(i);if(bs.length){const bi=bs[(Math.random()*bs.length)|0];if(!policed(bi)||Math.random()<0.5)newCrime(bi,true)}}}}
   for(const cr of [...crimes]){cr.t-=dt;cr.pin.el.classList.toggle('blink',Math.floor(polFlash*3)%2===0);if(cr.sent<cr.need&&Math.random()<dt)dispatch(cr);if(cr.t<=0)endCrime(cr,false)}}
 function visitorRate(){let r=3;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||(c.t!=='hotelS'&&c.t!=='hotelB'))continue;r+=(c.t==='hotelS'?4:10)*(1+0.25*hotelStars(i))}return r}
 function spawnVisitor(i){const b=bfs(i);const list=candidates(b,SERVICES).filter(o=>{const g=grid[o.i];return g.t==='hotelS'||g.t==='hotelB'||entR(g)>0||isShop(g.t)});
@@ -2556,14 +2614,16 @@ toolsEl.append(mkTool('view'),mkTool('bulldoze'));
 const sep=document.createElement('span');sep.className='sep';toolsEl.append(sep);
 CATS.forEach((c,k)=>{const b=document.createElement('button');b.type='button';b.className='cat';b.innerHTML=svgI(CAT_ICO[k],14)+`<span>${c.name}</span>`;b.setAttribute('role','tab');
   b.addEventListener('click',()=>showCat(k));catsEl.append(b);catBtns.push(b);for(const t of c.tools)toolsEl.append(mkTool(t))});
-function showCat(k){curCat=k;catBtns.forEach((b,j)=>b.setAttribute('aria-selected',String(j===k)));
-  CATS.forEach((c,j)=>c.tools.forEach(t=>toolBtns[t].hidden=j!==k));toolsEl.scrollLeft=0}
-function selectTool(t){rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel');pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=false;for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
+function showCat(k){if(catBtns[k]&&catBtns[k].hidden){k=catBtns.findIndex(b=>!b.hidden);if(k<0)k=0}curCat=k;catBtns.forEach((b,j)=>b.setAttribute('aria-selected',String(j===k)));
+  CATS.forEach((c,j)=>c.tools.forEach(t=>toolBtns[t].hidden=j!==k||!unlocked(t)));toolsEl.scrollLeft=0}
+/* a category tab exists only once something in it is unlocked */
+function refreshLocks(){CATS.forEach((c,k)=>{catBtns[k].hidden=!c.tools.some(unlocked)});showCat(curCat)}
+function selectTool(t){if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel');pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=false;for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
   const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);setHint(toolHint());hl.visible=false}
 showCat(0);
 const statsEl=document.getElementById('stats'),statsBtn=document.getElementById('statsBtn');
 document.getElementById('upkCtl').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.ucat)upkCat=b.dataset.ucat;if(b.dataset.usort)upkSort=b.dataset.usort;renderStats()});
-function toggleStats(open){statsEl.hidden=!open;statsBtn.setAttribute('aria-expanded',String(open));if(open)renderStats()}
+function toggleStats(open){statsEl.hidden=!open;statsBtn.setAttribute('aria-expanded',String(open));if(open){document.getElementById('stTitle').textContent='Gospodarka: '+cityName;renderStats()}}
 statsBtn.addEventListener('click',()=>toggleStats(statsEl.hidden));
 document.getElementById('browse').addEventListener('click',()=>{const l=houses();if(!l.length){toggleStats(false);setHint('Nie masz jeszcze żadnego domu.',true,true);return}toggleStats(false);selectTool('view');openHouse(l[0])});
 document.getElementById('statsClose').addEventListener('click',()=>toggleStats(false));
@@ -2648,34 +2708,44 @@ function barChart(f,unit){
     if(d.h%6===0)g+=`<text x="${x+cw/2}" y="${H-4}" text-anchor="middle">${pad2(d.h%24)}:00</text>`});
   if(!hist.length)g+=`<text x="${(W+L)/2}" y="${T+14}" text-anchor="middle">Pierwsza pełna godzina gry za ${60-Math.floor(cur.secs)} s</text>`;
   return g+'</svg>'}
-function newCity(type,d){saveBlocked=false;loan=null;imports={};setTimeout(tutStart,0);gameOver=false;toggleStats(false);closeHouse();clearCity();for(const k of [...deco])clearDeco(k);preset(type,d);seedDeco();save();setHint('Nowe miasto gotowe.',false,true)}
+function newCity(type,d,name){saveBlocked=false;oldSave=false;if(!window.__testUnlock)msLevel=0;if(name)cityName=String(name).trim().slice(0,24)||cityName;closeTitle();loan=null;imports={};setTimeout(tutStart,0);gameOver=false;toggleStats(false);closeHouse();clearCity();for(const k of [...deco])clearDeco(k);preset(type,d);seedDeco();refreshLocks();save();setHint(`Nowe miasto „${esc(cityName)}” gotowe.`,false,true)}
 /* ---------- options: pause, reset, gamma, exit ---------- */
 let paused=false;const menuEl=document.getElementById('menu'),mReset=document.getElementById('mReset'),mGamma=document.getElementById('mGamma');let mArm=null;
 function setGamma(g){g=Math.max(0.6,Math.min(1.6,+g||1));const e=String(1/g);for(const id of['gR','gG','gB'])document.getElementById(id).setAttribute('exponent',e);
   renderer.domElement.style.filter=Math.abs(g-1)<0.01?'':'url(#gammaF)';mGamma.value=g;document.getElementById('mGammaV').textContent=g.toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2});
   try{localStorage.setItem('lt-gamma',String(g))}catch(e){}}
 try{setGamma(localStorage.getItem('lt-gamma')||1)}catch(e){setGamma(1)}
-function openMenu(){if(gameOver||!document.getElementById('maps').hidden)return;paused=true;menuEl.hidden=false;document.getElementById('menuT').textContent='Pauza';document.getElementById('menuSub').textContent='Czas w mieście stoi.';
+function openMenu(opts){if(!opts&&(gameOver||titleOpen||!document.getElementById('maps').hidden))return;paused=true;menuEl.hidden=false;menuEl.classList.toggle('optOnly',!!opts);
+  for(const id of['mResume','mNameRow','mReset','mExit'])document.getElementById(id).hidden=!!opts;document.getElementById('mBack').hidden=!opts;
+  document.getElementById('mName').value=cityName;document.getElementById('menuT').textContent=opts?'Opcje':'Pauza · '+cityName;document.getElementById('menuSub').textContent=opts?'Dźwięk, obraz i aktualizacje.':'Czas w mieście stoi.';if(opts){document.getElementById('mBack').focus();return}
   mReset.classList.remove('armed');mReset.textContent='Zresetuj miasto';document.getElementById('mResume').focus()}
-function closeMenu(){menuEl.hidden=true;if(gameOver||!mapsEl.hidden){paused=true;return}paused=false;prev=performance.now()}
+function closeMenu(){menuEl.hidden=true;if(titleOpen||gameOver||!mapsEl.hidden){paused=true;return}paused=false;prev=performance.now()}
 document.getElementById('optBtn').addEventListener('click',()=>menuEl.hidden?openMenu():closeMenu());
 document.getElementById('mResume').addEventListener('click',closeMenu);
+document.getElementById('mBack').addEventListener('click',()=>{menuEl.hidden=true;document.getElementById('tOpt').focus()});
+function renameCity(v){v=String(v||'').trim().slice(0,24);if(!v)return;cityName=v;document.getElementById('menuT').textContent='Pauza · '+cityName;save();setHint(`Miasto nazywa się teraz „${esc(cityName)}”.`,false,true);hintEl.hidden=false;discordTick&&(dcLast='')}
+document.getElementById('mNameOk').addEventListener('click',()=>renameCity(document.getElementById('mName').value));
+document.getElementById('mName').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')renameCity(e.target.value)});
+document.getElementById('cityIn').addEventListener('keydown',e=>e.stopPropagation());
+const CITY_A=['Zielone','Słoneczne','Nowe','Stare','Wesołe','Ciche','Złote','Srebrne','Rzeczne','Wietrzne'],CITY_B=['Wzgórze','Pole','Miasteczko','Dolina','Brzegi','Łąki','Zakole','Grodzisko','Sady','Przystanie'];
+const randomCityName=()=>CITY_A[(Math.random()*CITY_A.length)|0]+' '+CITY_B[(Math.random()*CITY_B.length)|0];
+
 mGamma.addEventListener('input',()=>setGamma(mGamma.value));
 mReset.addEventListener('click',()=>{if(!mReset.classList.contains('armed')){mReset.classList.add('armed');mReset.textContent='Na pewno? Stuknij ponownie';clearTimeout(mArm);
     mArm=setTimeout(()=>{mReset.classList.remove('armed');mReset.textContent='Zresetuj miasto'},3500);return}
   clearTimeout(mArm);menuEl.hidden=true;openMaps(true)});
 /* ---------- bankruptcy below −1000 T¢, and choosing the map for a new city ---------- */
 let gameOver=false;const overEl=document.getElementById('over'),mapsEl=document.getElementById('maps');
-function openMaps(cancel){paused=true;mapsEl.hidden=false;document.getElementById('mapsNo').hidden=!cancel;mapsEl.querySelector('.mapb').focus()}
+function openMaps(cancel){paused=true;mapsEl.hidden=false;document.getElementById('mapsNo').hidden=!cancel;const ci=document.getElementById('cityIn');ci.value=randomCityName();
+  document.getElementById('mapsSub').textContent=hasSave()?'Nazwij miasto, wybierz trudność i teren. Obecne miasto zostanie zastąpione.':'Nazwij miasto, wybierz trudność i ukształtowanie terenu.';ci.focus();ci.select()}
 const diffBtns=[...mapsEl.querySelectorAll('[data-diff]')];function showDiff(){for(const b of diffBtns)b.setAttribute('aria-checked',String(b.dataset.diff===diffPick))}showDiff();
 for(const b of diffBtns)b.addEventListener('click',()=>{diffPick=b.dataset.diff;showDiff()});
-for(const b of mapsEl.querySelectorAll('.mapb'))b.addEventListener('click',()=>{mapsEl.hidden=true;overEl.hidden=true;newCity(b.dataset.map,diffPick);paused=false;prev=performance.now()});
-document.getElementById('mapsNo').addEventListener('click',()=>{mapsEl.hidden=true;if(gameOver){overEl.hidden=false;return}openMenu()});
+for(const b of mapsEl.querySelectorAll('.mapb'))b.addEventListener('click',()=>{mapsEl.hidden=true;overEl.hidden=true;newCity(b.dataset.map,diffPick,document.getElementById('cityIn').value);paused=false;prev=performance.now()});
+document.getElementById('mapsNo').addEventListener('click',()=>{mapsEl.hidden=true;if(titleOpen)return;if(gameOver){overEl.hidden=false;return}openMenu()});
 function checkBankrupt(){if(gameOver||money>=-1000)return;gameOver=true;paused=true;closeHouse();menuEl.hidden=true;overEl.hidden=false;
   document.getElementById('overSub').textContent=`Dług miasta przekroczył 1 000 T¢ (stan konta ${fmt(money)} T¢). Bank przejął kasę miejską i gra jest przegrana.`;save()}
 document.getElementById('oNew').addEventListener('click',()=>{overEl.hidden=true;openMaps(true)});
-document.getElementById('oExit').addEventListener('click',()=>{save();if(CapApp&&CapApp.exitApp){CapApp.exitApp();return}try{window.close()}catch(e){}
-  document.getElementById('overT').textContent='Gra zapisana';document.getElementById('overSub').textContent='Możesz zamknąć to okno. Po powrocie wybierzesz nowe miasto.'});
+document.getElementById('oExit').addEventListener('click',()=>{save();overEl.hidden=true;openTitle()});
 /* ---------- radio: each track is its own looping station, joined "live" at the current time ---------- */
 const STATIONS=[{name:'Nature FM',tracks:['nature','nature2','nature3']},{name:'Luxury FM',tracks:['luxury','luxury2','luxury3']},{name:'Lofi Radio',tracks:['lofi','lofi2','lofi3']}];
 /* each track is tried locally first, then from the update repository (a build that got the new game via an update may not have the new files yet) */
@@ -2740,7 +2810,7 @@ document.getElementById('uCheck').addEventListener('click',checkUpdate);
    The application ID lives here, so it can change with an update; outside the .exe there is no bridge and nothing happens. */
 const DISCORD_ID='';const dcStart=Math.floor(Date.now()/1000);let dcLast='';
 function discordTick(){try{if(!window.ltDiscord||!/^\d{15,22}$/.test(DISCORD_ID))return;const pop=popNow(),day=Math.floor(gameT/1440)+1;
-  const a={details:gameOver?'Bankructwo…':`Buduje miasto · ${fmt(pop)} mieszk.`,state:`Dzień ${day} · ${cpt(money)} T¢ · ${MAPS[mapType]||'mapa'}`,
+  const a={details:gameOver?'Bankructwo…':titleOpen?'W menu głównym':`${cityName} · ${fmt(pop)} mieszk.`,state:`Dzień ${day} · ${cpt(money)} T¢ · ${MAPS[mapType]||'mapa'}`,
     timestamps:{start:dcStart},assets:{large_image:'logo',large_text:'Little Townies '+LT_VERSION},
     buttons:[{label:'Little Townies na GitHubie',url:'https://github.com/MrShelo/LittleTowniesUpdates'}]};
   const k=JSON.stringify([a.details,a.state]);if(k===dcLast)return;dcLast=k;window.ltDiscord.set({id:DISCORD_ID,activity:a})}catch(e){}}
@@ -2775,6 +2845,23 @@ for(const b of document.querySelectorAll('[data-ovl]'))b.addEventListener('click
 function taxUI(){document.getElementById('taxR').value=taxRate;document.getElementById('taxV').textContent=taxRate+'%';const h=taxHappy(taxRate);
   document.getElementById('taxN').innerHTML=`Zadowolenie w każdym domu: <b>${h>0?'+':''}${h}</b>. Wpływy: ok. <b>${fmt(taxIncome())} T¢/godz.</b> (${mw(taxRate/100*TAX_BASE)} T¢ od mieszkańca).<br>10%: +2 · 11%: +1 · 12–13%: 0 · 14%: −1 · 15%: −2 · 16%: −3 · 17%: −3 · 18%: −4 · 19%: −5 · 20%: −6 (zadowolenie nie spada poniżej 0)`;loanUI()}
 document.getElementById('taxR').addEventListener('input',e=>{taxRate=+e.target.value;envDirty=true;powerDirty=true;taxUI();save()});
+const msBtn=document.getElementById('msBtn'),mspEl=document.getElementById('msp'),orderEl=document.getElementById('order');
+function medalSVG(n,big){return`<svg viewBox="0 0 100 120" aria-hidden="true"><path d="M30 0h16l10 40H40z" fill="#c8372d"/><path d="M54 0h16L60 40H44z" fill="#2f6fe0"/><circle cx="50" cy="74" r="40" fill="#a8760c"/><circle cx="50" cy="74" r="36" fill="url(#mg${big?'b':''})"/><circle cx="50" cy="74" r="28" fill="none" stroke="#a8760c" stroke-width="2" stroke-dasharray="3 3"/><defs><radialGradient id="mg${big?'b':''}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff2b8"/><stop offset=".55" stop-color="#e8b52a"/><stop offset="1" stop-color="#b8860b"/></radialGradient></defs><text x="50" y="88" text-anchor="middle" font-family="Chakra Petch,Trebuchet MS,sans-serif" font-weight="700" font-size="40" fill="#5a3d00">${n}</text></svg>`}
+const msUnlocks=k=>Object.keys(MS_OF).filter(t=>MS_OF[t]===k&&DEF[t]&&!/Del$/.test(t)).map(t=>DEF[t].name);
+const msHaz=k=>Object.keys(HAZ).filter(h=>hazAt(h)===k&&HAZ[h].tools.some(t=>DEF[t])).map(h=>HAZ[h].name);
+function renderMS(){const p=popNow();mspEl.innerHTML=`<b>Kamienie milowe · ${esc(cityName)}</b><small>${fmt(p)} mieszkańców. Kolejne etapy odblokowują budynki; nagrodą jest order.</small>`+MS.map((m,k)=>{
+    const ok=k<=msLevel,nx=k===msLevel+1,un=msUnlocks(k),hz=msHaz(k);
+    return`<div class="mrow ${ok?'ok':nx?'next':''}"><span class="md">${k}</span><div class="mt">${esc(m.name)}<span>${k?fmt(m.pop)+' mieszk.':'start'}${ok?' · ✓':''}</span></div>
+      <div class="ml">${un.length?un.join(', '):'—'}${hz.length?`<br><i>Od teraz: ${hz.join(', ')}</i>`:''}${nx?`<div class="pb"><i style="width:${Math.min(100,Math.round((p-MS[k-1].pop)/Math.max(1,m.pop-MS[k-1].pop)*100))}%"></i></div>`:''}</div></div>`}).join('')}
+function setRail(which){for(const[id,btn]of[['msp',msBtn],['ovl',document.getElementById('ovlBtn')],['taxp',document.getElementById('taxBtn')]]){const el=document.getElementById(id);const on=id===which&&el.hidden;if(id===which)el.hidden=!on;else el.hidden=true;btn.setAttribute('aria-expanded',String(!el.hidden))}}
+msBtn.addEventListener('click',()=>{setRail('msp');if(!mspEl.hidden)renderMS()});
+let orderT=0;function showOrder(k){const un=msUnlocks(k),hz=msHaz(k);orderEl.innerHTML=`<div class="ob">${medalSVG(k,true)}<span class="k">Kamień milowy ${k}</span><b>${esc(MS[k].name)}</b><small>${fmt(MS[k].pop)} mieszkańców w mieście ${esc(cityName)}.${un.length?'<br>Nowe: '+un.join(', ')+'.':''}${hz.length?'<br>Od teraz: '+hz.join(', ')+'.':''}</small></div>`;
+  orderEl.hidden=false;orderT=8;orderEl.querySelector('.ob').onclick=()=>{orderEl.hidden=true;orderT=0}}
+let msT=0;function msTick(dt){if(orderT>0){orderT-=dt;if(orderT<=0)orderEl.hidden=true}msT-=dt;if(msT>0||titleOpen||saveBlocked)return;msT=1;const p=popNow();let got=-1;
+  while(msLevel<MS.length-1&&p>=MS[msLevel+1].pop){msLevel++;got=msLevel}
+  if(got>=0){refreshLocks();showOrder(got);if(!mspEl.hidden)renderMS();save()}}
+document.getElementById('ovlBtn').addEventListener('click',()=>{mspEl.hidden=true;msBtn.setAttribute('aria-expanded','false')});
+document.getElementById('taxBtn').addEventListener('click',()=>{mspEl.hidden=true;msBtn.setAttribute('aria-expanded','false')});
 document.getElementById('taxBtn').addEventListener('click',()=>{const o=document.getElementById('taxp');o.hidden=!o.hidden;document.getElementById('taxBtn').setAttribute('aria-expanded',String(!o.hidden));if(!o.hidden){document.getElementById('ovl').hidden=true;document.getElementById('ovlBtn').setAttribute('aria-expanded','false');taxUI()}});
 document.getElementById('ovlBtn').addEventListener('click',()=>{const o=document.getElementById('ovl');o.hidden=!o.hidden;if(!o.hidden){document.getElementById('taxp').hidden=true;document.getElementById('taxBtn').setAttribute('aria-expanded','false')}document.getElementById('ovlBtn').setAttribute('aria-expanded',String(!o.hidden))});
 function ovlTick(dt){if(ovlMode==='none')return;ovlT-=dt;if(ovlT<=0){ovlT=0.5;drawOvl()}}
@@ -2784,7 +2871,7 @@ const TUT=[
   ['Przesuń mapę','Przeciągnij jednym palcem albo lewym przyciskiem myszy.',()=>!!(tut&&tut.moved>150)],
   ['Obróć widok','Dwa palce obracają się wokół siebie, na komputerze prawy przycisk myszy.',()=>!!(tut&&tut.turned>120)],
   ['Połącz ulicę z drogą wjazdową','Drogi → Jednojezdniowa. Poprowadź ją od drogi wjazdowej przy krawędzi mapy.',()=>{let n=0;for(const c of grid)if(c&&STREET[c.t]&&!c.edge)n++;return n>=3}],
-  ['Postaw 2 domy przy ulicy','Domy → Dom jednorodzinny albo kamienica.',()=>{let n=0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HLV[c.t]&&entryOf(i)>=0)n++}return n>=2}],
+  ['Postaw 4 domy przy ulicy','Domy → Dom jednorodzinny. 15 mieszkańców to pierwszy kamień milowy: odblokujesz nowe budynki.',()=>{let n=0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HLV[c.t]&&entryOf(i)>=0)n++}return n>=4}],
   ['Postaw wiatrak i transformator obok niego','Energia → Wiatrak, potem Transformator na sąsiednim polu.',()=>grid.some(c=>c&&c.t==='wind'&&c.net>=0)],
   ['Sprawdź wiatrak w podglądzie','Wybierz narzędzie Podgląd (oko) i stuknij wiatrak: zobaczysz, ile prądu daje.',()=>!!(tut&&tut.windSeen)],
   ['Doprowadź prąd słupami','Energia → Słup albo Linia słupów na ulicy od transformatora do domów.',()=>grid.some(c=>c&&HLV[c.t]&&c.powered)],
@@ -2812,8 +2899,7 @@ window.addEventListener('pagehide',saveNow);window.addEventListener('beforeunloa
 const CapApp=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;
 if(CapApp){try{CapApp.addListener('appStateChange',st=>{if(!st.isActive){saveNow();if(menuEl.hidden)openMenu()}});CapApp.addListener('pause',saveNow);
   CapApp.addListener('backButton',()=>{if(!menuEl.hidden)closeMenu();else if(inspI>=0)closeHouse();else if(!statsEl.hidden)toggleStats(false);else openMenu()})}catch(e){}}
-document.getElementById('mExit').addEventListener('click',()=>{save();if(CapApp&&CapApp.exitApp){CapApp.exitApp();return}try{window.close()}catch(e){}
-  document.getElementById('menuT').textContent='Gra zapisana';document.getElementById('menuSub').textContent='Możesz zamknąć tę kartę. Miasto poczeka na Ciebie.'});
+document.getElementById('mExit').addEventListener('click',()=>{save();menuEl.hidden=true;openTitle()});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){if((pendA>=0||moveSrc>=0)&&menuEl.hidden)return cancelFP();if(!menuEl.hidden)closeMenu();else openMenu()}
   if((FP(tool)||moveSrc>=0)&&menuEl.hidden){if(e.key==='r'||e.key==='R')rotateFP();if(e.key==='Enter'&&pendA>=0)placeFP()}
   else if((e.key==='r'||e.key==='R')&&menuEl.hidden&&!(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))){if(inspI>=0&&tool==='view')rotateBuilding(inspI);else if(BUILD[tool]&&!DRIVE[tool])rotate1()}});
@@ -2853,13 +2939,13 @@ function hud(){const mc=moneyCap(),tc=matCap();const v={m:Math.round(money),mc,t
   last=v}
 
 /* ---------- save / preset ---------- */
-const KEY='siatkowo-v4';
+const KEY='siatkowo-v4';let oldSave=false;
 let saveBlocked=false;
 function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,off:c.off?1:0,rot:c.rot,rot1:c.rot1,aband:c.aband?1:undefined,pp:c.pp&&c.pp.length?c.pp.map(q=>[Math.round(q.a*10)/10,q.s,q.si,q.h||0,q.s===2?q.hi:-1]):undefined,dead:c.dead||undefined,lb:c.lastBuy!=null?Math.round(gameT-c.lastBuy):undefined,bodies:c.bodies||undefined,urn:c.urn&&c.urn.length?c.urn.map(t=>Math.round(t-gameT)):undefined,lowT:c.lowT?Math.round(c.lowT*1000)/1000:undefined,jail:c.jail&&c.jail.length?c.jail.map(q=>[Math.round(q.rel),q.w||0]):undefined,lv:c.lv||0,xp:c.xp?Math.round(c.xp*1000)/1000:0,lines:c.lines,owned:c.owned}]}
 function save(){if(saveBlocked)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
   const old=localStorage.getItem(KEY);if(old)localStorage.setItem(KEY+'-prev',old);
-  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,loan,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
-function load(){if(loadKey(KEY))return true;if(loadKey(KEY+'-prev')){setHint('Ostatni zapis był uszkodzony, wczytano poprzedni.',true,true);return true}
+  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,loan,sv:4,ms:msLevel,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
+function load(){if(loadKey(KEY))return true;if(oldSave){try{const r=localStorage.getItem(KEY);if(r&&!localStorage.getItem(KEY+'-pre4'))localStorage.setItem(KEY+'-pre4',r)}catch(e){}saveBlocked=true;return false}if(loadKey(KEY+'-prev')){setHint('Ostatni zapis był uszkodzony, wczytano poprzedni.',true,true);return true}
   let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
   if(raw){saveBlocked=true;try{localStorage.setItem(KEY+'-broken',raw)}catch(e){}setHint('Nie udało się wczytać zapisu. Kopia jest bezpieczna i gra jej nie nadpisze. Tylko „Zresetuj miasto” zaczyna od nowa.',true,true);hintTimer=12}
   return false}
@@ -2876,6 +2962,7 @@ function loadKey(K){try{let s=JSON.parse(localStorage.getItem(K)||'null');
   for(const[key,old]of[['siatkowo-v3',32],['siatkowo-v2',20]]){if(s||K!==KEY)break;const o=JSON.parse(localStorage.getItem(key)||'null');
     if(o&&o.cells&&o.cells.length){const off=(N-old)/2;o.cells=o.cells.map(([i,t,p])=>[idx(i%old+off,((i/old)|0)+off),t,p]);s=o}}
   if(!s||!s.cells||!s.cells.length)return false;
+  if(!(s.sv>=4)){oldSave=true;return false}
   if(Array.isArray(s.water)){water.fill(0);for(const i of s.water)water[i]=1}
   else{const av=new Uint8Array(N*N);for(const[i]of s.cells){const x=i%N,z=(i/N)|0;for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)av[idx(nx,nz)]=1}}genRivers(av)}
   applyWater();
@@ -2884,14 +2971,39 @@ function loadKey(K){try{let s=JSON.parse(localStorage.getItem(K)||'null');
   for(let i=0;i<N*N;i++)rebuildRoad(i);money=s.money||0;mapType=MAPS[s.map]?s.map:'standard';diff=DIFF[s.diff]?s.diff:'old';taxRate=s.tax>=10&&s.tax<=20?s.tax:12;loan=s.loan&&LOANS[s.loan.k]?s.loan:null;imports={};if(s.imports)for(const k in s.imports)imports[k]=(s.gameT||gameT)+s.imports[k];tut=s.tut&&s.tut.on?s.tut:null;matl=s.matl||0;if(s.goods)for(const k in goods)goods[k]=s.goods[k]||0;
   pipe.fill(0);if(Array.isArray(s.pipes))for(const i of s.pipes)pipe[i]=1;
   if(Array.isArray(s.edges))for(const[i,o]of s.edges)if(grid[i]&&DRIVE[grid[i].t]){grid[i].edge=true;if(o)grid[i].edgeOut=true;rebuildRoad(i)}
-  if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(Array.isArray(s.hist))hist=s.hist;return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
+  if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(!window.__testUnlock)msLevel=Math.max(0,Math.min(MS.length-1,s.ms|0));if(typeof s.name==='string'&&s.name.trim())cityName=s.name.trim().slice(0,24);if(Array.isArray(s.hist))hist=s.hist;return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
 function clearCity(){for(const cr of crimes)cr.pin.remove();crimes=[];for(const C of constructs){C.cell.group.remove(C.sc,C.cr)}constructs.length=0;for(const c of cars)scene.remove(c.mesh);cars=[];resMap.clear();for(let i=0;i<N*N;i++)if(grid[i])removeCell(i);
   for(const f of floats)f.el.remove();floats=[]}
-function preset(type,d){if(type&&MAPS[type])mapType=type;if(d&&DIFF[d])diff=d;pipe.fill(0);money=baseCash();matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);applyWater();makeEntries()}
-if(!load()){preset();setTimeout(tutStart,0)}else{makeEntries();recountPatients();setTimeout(tutRender,0)}
-seedDeco();
-selectTool(counts.road?'view':'road');updateCamera();
-if(!counts.road)setHint('<b>Pusta działka</b> · masz 4 000 T¢. Połóż ulice (przez rzekę mostem, skrzyżowania zamień na ronda), dostaw słupy, a obok nich budynki. Prąd da wiatrak z transformatorem. Fabryki dają losowe towary dla sklepu. Gdy kosze się zapełnią, postaw wysypisko.',false,true);if(!counts.road)hintTimer=9;
+function preset(type,d){if(type&&MAPS[type])mapType=type;if(d&&DIFF[d])diff=d;pipe.fill(0);money=startCash();matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);applyWater();makeEntries()}
+/* ---------- main menu: continue / new game / options / exit, with a small town turning slowly behind it ---------- */
+let titleOpen=false;const titleEl=document.getElementById('title');document.getElementById('tVer').textContent=LT_VERSION;
+const hasSave=()=>{if(oldSave||saveBlocked)return false;try{return!!localStorage.getItem(KEY)}catch(e){return true}};
+function openTitle(){titleOpen=true;paused=true;closeHouse();menuEl.hidden=true;document.body.classList.add('intitle');titleEl.hidden=false;const ok=hasSave();const tc=document.getElementById('tCont');tc.hidden=!ok;
+  if(ok)document.getElementById('tContS').textContent=`${cityName} · dzień ${Math.floor(gameT/1440)+1} · ${fmt(popNow())} mieszk.`;(ok?tc:document.getElementById('tNew')).focus();dcLast=''}
+function closeTitle(){if(!titleOpen)return;titleOpen=false;titleEl.hidden=true;document.body.classList.remove('intitle');dcLast=''}
+document.getElementById('tCont').addEventListener('click',()=>{closeTitle();paused=false;prev=performance.now();tutRender()});
+document.getElementById('tNew').addEventListener('click',()=>openMaps(true));
+document.getElementById('tOpt').addEventListener('click',()=>openMenu(true));
+document.getElementById('tExit').addEventListener('click',()=>{try{save()}catch(e){}if(CapApp&&CapApp.exitApp){CapApp.exitApp();return}try{window.close()}catch(e){}
+  setTimeout(()=>{document.querySelector('#title h1 small').textContent='Gra zapisana. Możesz zamknąć to okno.'},150)});
+document.getElementById('oldOk').addEventListener('click',()=>{document.getElementById('oldSave').hidden=true;openMaps(false)});
+/* a small sample town for the menu background when there is no city to continue (never saved) */
+function buildDemo(){saveBlocked=true;clearCity();for(const k of [...deco])clearDeco(k);preset('standard','std');gameT=600;
+  let best=null;for(let z0=6;z0<=N-22;z0+=2)for(let x0=6;x0<=N-22;x0+=2){let ok=true;for(let z=z0;z<z0+16&&ok;z++)for(let x=x0;x<x0+16;x++)if(water[idx(x,z)]){ok=false;break}
+    if(ok){const d=Math.hypot(x0+8-N/2,z0+8-N/2);if(!best||d<best.d)best={x0,z0,d}}}
+  if(best){const{x0,z0}=best,P=(x,z)=>idx(x0+x,z0+z),put=(x,z,t)=>{try{if(!grid[P(x,z)])addCell(P(x,z),t,false)}catch(e){}};
+    for(let k=1;k<15;k++){put(k,5,'road');put(k,10,'road');put(4,k,'road');put(11,k,'road')}
+    const H=['house','house','tenement','house','house','tenement'];let h=0;
+    for(const z of[4,6,9,11])for(let x=1;x<15;x++){if(x===4||x===11)continue;const t=(x===7&&z===6)?'shop':(x===8&&z===9)?'restaurant':(x===13&&z===11)?'park1':(x===2&&z===11)?'park2':H[(h++)%H.length];put(x,z,t)}
+    for(const[x,z]of[[1,1],[2,2],[1,3]])put(x,z,'wind');put(2,1,'transformer');put(13,2,'factory');put(14,3,'smallfac');put(12,1,'warehouse');put(7,13,'house');put(8,13,'house');put(13,13,'tower');
+    for(let x=1;x<15;x++)for(const z of[5,10])if(grid[P(x,z)])grid[P(x,z)].pole=true;for(let i=0;i<N*N;i++)rebuildRoad(i);
+    cam.target.set(cx(P(8,8)),0,cz(P(8,8)))}
+  cam.radius=17;cam.phi=0.95;seedDeco();updateCamera()}
+let booted=load();
+if(booted){makeEntries();recountPatients();seedDeco()}else if(window.__testUnlock){preset();seedDeco();setTimeout(tutStart,0)}else buildDemo();
+refreshLocks();if(!window.__testUnlock){openTitle();if(oldSave)document.getElementById('oldSave').hidden=false}else if(booted)setTimeout(tutRender,0);
+selectTool(counts.road&&booted?'view':'road');updateCamera();
+if(!booted)setHint('<b>Pusta działka</b> · masz '+fmt(money)+' T¢. Połóż ulice (przez rzekę mostem, skrzyżowania zamień na ronda), dostaw słupy, a obok nich budynki. Prąd da wiatrak z transformatorem. Fabryki dają losowe towary dla sklepu. Gdy kosze się zapełnią, postaw wysypisko.',false,true);if(!booted)hintTimer=9;
 computePower(0);
 
 /* ---------- sky: sun/moon follow the game clock; light and shadows follow the camera ---------- */
@@ -2947,7 +3059,8 @@ for(const b of document.querySelectorAll('[data-sp]'))b.addEventListener('click'
 addEventListener('keydown',e=>{if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.code==='Space'&&menuEl.hidden){e.preventDefault();setSpeed(gameSpeed===0?1:0)}});
 let prev=performance.now(),time=0,saveT=0,statsAcc=0,supT=0;
 function frame(now){requestAnimationFrame(frame);
-  const dt=paused?0:Math.max(0,Math.min(0.05,(now-prev)/1000))*gameSpeed;prev=now;time+=dt;const night=isNight();
+  const rdt=Math.max(0,Math.min(0.05,(now-prev)/1000)),dt=paused?0:rdt*gameSpeed;prev=now;time+=titleOpen?rdt:dt;const night=isNight();
+  if(titleOpen&&!reduce){cam.theta+=rdt*0.05;updateCamera()}msTick(rdt);
   supT+=dt;if(supT>0.5){supT=0;bakeTick(0.5);supplyShops();dispatchGarbage();visitorTick(0.5,night)}
   wasteTick(dt,night);shopTick(dt);farmTick(dt,night);
   for(let i=0;i<N*N;i++){const c=grid[i];const H=c&&HOUSING[c.t];if(!H||c.off)continue;xpTick(i,c,dt);abandonTick(i,c,dt);if(c.aband||!popOf(c))continue;c.timer-=dt;
@@ -2968,7 +3081,7 @@ cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();save()}
   for(const g of factories){const b=g.userData.sb||{x:0.3,y:0.85,z:-0.25,spread:0.25};const on=!g.userData.off&&!reduce;const ps=g.userData.puffs||[];
     ps.forEach((p,k)=>{p.visible=on;if(!on)return;const u=(time*0.45+k/ps.length)%1;p.position.set(b.x+u*b.spread,b.y+u*(b.rise||0.9),b.z);
     p.scale.setScalar(0.6+u*1.6);p.material.opacity=(b.op||0.65)*(1-u)})}
-  if(!reduce){for(const r of winds)r.rotation.z-=dt*2.4;for(const b of bolts)if(b.visible)b.rotation.y+=dt*2}
+  if(!reduce){for(const r of winds)r.rotation.z-=(titleOpen?rdt:dt)*2.4;for(const b of bolts)if(b.visible)b.rotation.y+=dt*2}
   updateFloats(dt);updateStatus(Math.max(dt,0.016));
   if(bridgeDirty)rebuildBridges();
   areaB.visible=area.visible;
