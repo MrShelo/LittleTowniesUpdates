@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='4.1.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='4.1.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -414,7 +414,7 @@ const DEF={
   road:{name:'Jednojezdniowa',cost:10,desc:'Łączy budynki. Przeciągnij palcem, by położyć kilka pól naraz.',sw:'#3d4248'},
   house:{name:'Dom jednorodzinny',cost:120,desc:'1 rodzina. Podstawa zadowolenia 3. Musi stać przy ulicy.',sw:'#efcfae'},
   tenement:{name:'Kamienica',cost:300,desc:'3 rodziny: 2× więcej kursów niż dom. Podstawa zadowolenia 3.',sw:'#b9785a'},
-  block:{name:'Tani blok',cost:450,desc:'Zajmuje 2 pola. 6 rodzin, 3× więcej kursów. Ciasno: podstawa zadowolenia 2.',sw:'#c9c6bd',size:2},
+  block:{name:'Tani blok',cost:450,desc:'Zajmuje 2 pola. 18 mieszkańców (po rozbudowie do 54), 3× więcej kursów. Ciasno: podstawa zadowolenia 2.',sw:'#c9c6bd',size:2},
   modern:{name:'Apartamentowiec',cost:1100,desc:'Zajmuje 2 pola. Nowoczesny, 3,5× więcej kursów. Podstawa zadowolenia 4.',sw:'#7fb6cf',size:2},
   road2:{name:'Dwujezdniowa',cost:25,desc:'2 pasy w każdą stronę, auta jadą 1,4× szybciej i same wybierają luźniejszy pas. Postaw na zwykłej ulicy, by ją poszerzyć (płacisz różnicę).',sw:'#383d44'},
   road3:{name:'Trzyjezdniowa',cost:45,desc:'3 pasy w każdą stronę, auta jadą 1,8× szybciej i same wybierają luźniejszy pas.',sw:'#30353b'},
@@ -724,7 +724,7 @@ function buildHouse(){const g=new THREE.Group();const tall=Math.random()<0.3;con
 /* homes grow in stages; each stage adds residents (trips and water use scale with them) */
 const HLV={house:{res:[4,6,8],cost:[150,300],xp:240,name:['Dom jednorodzinny','Dom nowoczesny','Luksusowa willa z basenem']},
   tenement:{res:[8,12,18],cost:[180,260],xp:360,name:['Kamienica: 2 okna, 2 kondygnacje','Kamienica: 3 okna','Kamienica: 3 okna, 3 kondygnacje']},
-  block:{res:[12,18,24,30,36],cost:[200,220,240,260],xp:480,name:['Tani blok: 2 kondygnacje','3 kondygnacje','4 kondygnacje','5 kondygnacji','6 kondygnacji']},
+  block:{res:[18,27,36,45,54],cost:[200,220,240,260],xp:480,name:['Tani blok: 2 kondygnacje','3 kondygnacje','4 kondygnacje','5 kondygnacji','6 kondygnacji']},
   modern:{res:[15,25,35,45,52],cost:[500,600,700,1200],xp:600,name:['Apartamentowiec: 3 piętra','5 pięter','7 pięter','9 pięter','9 pięter + penthouse z basenem']}};
 const hLv=c=>c.lv||0,hMax=c=>HLV[c.t].res.length-1,residents=c=>HLV[c.t]?HLV[c.t].res[hLv(c)]:0,popOf=c=>!c||c.aband?0:c.pp?c.pp.length:residents(c),hMul=c=>c&&HLV[c.t]?popOf(c)/HLV[c.t].res[0]:1;
 function buildHouseL(lv){if(!lv)return buildHouse();const g=new THREE.Group();
@@ -1952,7 +1952,7 @@ function transportTick(dt){if(!dt)return;
     if(c.t==='trainSt'&&c.waiting>0&&entryOf(i)>=0&&requestTaxi({st:i}))c.waiting--}}
 /* ---------- fire service: random fires by building group, spread to one neighbour at a time, trucks put them out, ruins after 6 h ---------- */
 const FIRE={fireS:{r:4,trucks:1,extra:1},fireB:{r:6,trucks:2,extra:2}};const isFireSt=t=>t==='fireS'||t==='fireB';const fireRad=c=>FIRE[c.t].r+(c.up2?2:0);
-const FIRE_P={ind:0.015,svc:0.01,res:0.005,oth:0.0025},FIRE_SPREAD=0.2,FIRE_EXT=30,FIRE_RUIN=360;
+const FIRE_P={ind:0.0075,svc:0.005,res:0.0025,oth:0.00125},FIRE_SPREAD=0.2,FIRE_EXT=30,FIRE_RUIN=360;
 const NOFIRE=new Set(['road','road2','road3','roundabout','highway','bridge','rail','pole','poleline','lpole','transformer','hvpole','wind','hydro','pipe','outlet','park1','park2','park3']);
 function fireGroup(t){if(NOFIRE.has(t))return null;if(t==='coal'||t==='hydrogen')return'ind';const k=TCAT[t];return k==='Domy'?'res':k==='Przemysł'||k==='Odpady'?'ind':k==='Usługi'||k==='Rozrywka'||k==='Turystyka'||k==='Transport'?'svc':'oth'}
 let fires=[];const flameG=new THREE.ConeGeometry(0.09,0.3,6);flameG.userData.keep=true;const flameM=[new THREE.MeshBasicMaterial({color:'#ff7a1a'}),new THREE.MeshBasicMaterial({color:'#ffc42e'})];
@@ -2042,6 +2042,7 @@ function spawnCommuter(h){const e=entryOf(h);if(e<0)return;const b=bfs(e);
   const SH=['shop','shop1','bakery','supermarket','gallery','restaurant'];if((counts.factory+counts.smallfac+counts.factoryB+counts.mine+counts.mineB)&&(low||!(counts.shop||counts.gallery||counts.supermarket)))types=r<0.75?WORK_T:SH;else types=r<0.6?SH:WORK_T;
   if(types===SH&&Math.random()<0.325)return;
   const t=pickWeighted(candidates(b,types))||pickWeighted(candidates(b,['shop','supermarket','gallery',...WORK_T]));if(!t)return;
+  if(grid[t.i]&&grid[t.i].t==='shop1'&&Math.random()<1/3)return;
   cur.trips++;createCar('commuter',pathTo(b,t.e),{home:h,dest:t.i,tier:grid[h].happy??3})}
 /* ---------- waste ---------- */
 const trashEvery=t=>TRASH[t].every*60*(0.85+Math.random()*0.3);
