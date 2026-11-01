@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='4.1.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='4.2.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -231,7 +231,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .st{position:absolute;left:0;top:0;display:flex;gap:3px;padding:3px;border-radius:9px;background:rgba(20,24,26,.78);box-shadow:0 2px 6px rgba(0,0,0,.25);will-change:transform}
 .st i{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;color:#fff}
 .st i svg{width:14px;height:14px}
-.crimeChip{z-index:2}.crimeChip .s-crime{background:#d63b3b}.insp .fr{display:grid;gap:6px;padding:8px 0;border-top:1px solid var(--line)}.insp .fr small{color:var(--muted)}.insp .frr{display:flex;align-items:center;gap:10px}.insp .frr b{min-width:90px;text-align:center}.insp .frr .btn{min-height:34px;padding:4px 12px}.crimeChip .s-fire{background:#e8641c;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;color:#fff;box-shadow:0 0 0 2px #fff3}.crimeChip .s-fire svg{width:16px;height:16px}.crimeChip.big .s-crime{background:#b8860b;width:26px;height:26px}.crimeChip.big .s-crime svg{width:18px;height:18px}.crimeChip.blink{box-shadow:0 0 0 2px #ff3b30,0 2px 6px rgba(0,0,0,.25)}
+.crimeChip{z-index:2}.crimeChip .s-crime{background:#d63b3b}.insp.locked .up,.insp.locked [data-line],.insp.locked [data-spec],.insp.locked [data-buy],.insp.locked [data-cinema],.insp.locked [data-attr],.insp.locked [data-fm],.insp.locked [data-fg],.insp.locked [data-fn]{opacity:.55;pointer-events:none}.insp .catnav{margin-top:6px}.insp .fr{display:grid;gap:6px;padding:8px 0;border-top:1px solid var(--line)}.insp .fr small{color:var(--muted)}.insp .frr{display:flex;align-items:center;gap:10px}.insp .frr b{min-width:90px;text-align:center}.insp .frr .btn{min-height:34px;padding:4px 12px}.crimeChip .s-fire{background:#e8641c;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;color:#fff;box-shadow:0 0 0 2px #fff3}.crimeChip .s-fire svg{width:16px;height:16px}.crimeChip.big .s-crime{background:#b8860b;width:26px;height:26px}.crimeChip.big .s-crime svg{width:18px;height:18px}.crimeChip.blink{box-shadow:0 0 0 2px #ff3b30,0 2px 6px rgba(0,0,0,.25)}
 .st .s-aband{background:#4a4038}.st .s-ill{background:#c43c5a}.st .s-dead{background:#3d3d44}.st .s-crowd{background:#c25a2a}.st .s-off{background:#5a6168}.st .s-water{background:#4a7fb5}.st .s-sick{background:#7a8a2a}.st .s-sewer{background:#6b4a2a}.st .s-road{background:#d4483a}.st .s-pow{background:#e0a21a}.st .s-trash{background:#7a6248}.st .s-stock{background:#3b6fb5}.st .s-in{background:#8a5ab4}
 .fl{position:absolute;left:0;top:0;font:700 13px var(--font-d);white-space:nowrap;padding:2px 6px;border-radius:6px;
   background:rgba(255,255,255,.88);color:#1f2a29;will-change:transform,opacity}
@@ -455,6 +455,7 @@ const DEF={
   taxi:{name:'Baza taxi',cost:700,size:2,desc:'Zajmuje 2 pola. 4 taksówki wożą turystów z drogi wjazdowej i z dworca do hoteli, rozrywki i sklepów. Bez bazy taxi turyści nie przyjeżdżają. Kurs: 8 T¢.',sw:'#e9b81c'},
   trainSt:{name:'Dworzec kolejowy',cost:3500,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Gdy tory łączą go z krawędzią mapy, co 2 godziny przyjeżdża pociąg z turystami (+60% turystów). Taksówki odbierają ich z dworca.',sw:'#3d6fa8'},
   freightSt:{name:'Dworzec towarowy',cost:4000,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Pociąg towarowy co godzinę: stały import do magazynów albo eksport z magazynów wybranego towaru, od 10 t/godz. co 5. Wymaga torów do krawędzi mapy.',sw:'#6b5a3c'},
+  heliB:{name:'Baza helikopterów gaśniczych',cost:6000,size:4,desc:'Zajmuje 2×2 pola. Helikopter gaśniczy leci prosto do pożaru w zasięgu 25 pól (51×51) i gasi go z góry – także tam, gdzie wóz nie dojedzie. Potrzebuje prądu i wody. Ulepszenie: drugi helikopter.',sw:'#b8241c',area:25},
   fireS:{name:'Mała straż pożarna',cost:900,desc:'Zasięg 9×9, 1 wóz strażacki. Gasi pożar w pół godziny od przyjazdu. Ulepszenia: „Drugi garaż” (+1 wóz), „Większy rewir” (zasięg +2).',sw:'#c8372d',area:4},
   fireB:{name:'Komenda straży pożarnej',cost:2800,size:4,desc:'Zajmuje 2×2 pola. Zasięg 13×13, 2 wozy strażackie. Ulepszenia: „Drugi garaż” (+2 wozy), „Większy rewir”.',sw:'#a8241c',area:6},
   policeB:{name:'Duży komisariat',cost:2500,size:4,desc:'Zajmuje 2×2 pola. Zasięg 13×13, cele na 25 osób, 4 radiowozy patrolowe. Ulepszenia: „Drugi garaż”, „Większy rewir”.',sw:'#1f3f7a',area:6},
@@ -488,8 +489,8 @@ const DEF={
   transformer:{name:'Transformator',cost:150,desc:'Łączy elektrownie ze słupami, także po przekątnej.',sw:'#5f7d70'},
   coal:{name:'El. węglowa',cost:800,desc:'Daje 12 MW, spala 1 t materiałów co 8 s. Włącza się, gdy wiatraki nie wystarczają.',sw:'#5a4a44'},
 };
-const DEMAND={taxi:0.5,trainSt:2,freightSt:2.5,fireS:1,fireB:2.5,clinic:1.5,hosp:4,hospC:9,crem:3,schoolS:0.8,school:1.5,lyceum:3,techn:4,bankG:4,shop1:1,prison:3,policeS:1,policeB:2.5,bakery:0.6,factoryB:3.5,mine:1,mineB:3,warehouseB:1,supermarket:2.5,smallfac:1,pump:1,tower:0.5,treatment:2,restaurant:0.8,cinema:1.5,theater:1.5,casino:3,hotelS:1,hotelB:3,gallery:3,tenement:1.2,block:2,modern:2.5,house:0.5,factory:2,warehouse:0.5,smallwh:0.25,shop:1,bank:5,incinerator:1,recycler:1.5};
-const WHCAP={warehouse:90,smallwh:31,warehouseB:225};
+const DEMAND={heliB:2,taxi:0.5,trainSt:2,freightSt:2.5,fireS:1,fireB:2.5,clinic:1.5,hosp:4,hospC:9,crem:3,schoolS:0.8,school:1.5,lyceum:3,techn:4,bankG:4,shop1:1,prison:3,policeS:1,policeB:2.5,bakery:0.6,factoryB:3.5,mine:1,mineB:3,warehouseB:1,supermarket:2.5,smallfac:1,pump:1,tower:0.5,treatment:2,restaurant:0.8,cinema:1.5,theater:1.5,casino:3,hotelS:1,hotelB:3,gallery:3,tenement:1.2,block:2,modern:2.5,house:0.5,factory:2,warehouse:0.5,smallwh:0.25,shop:1,bank:5,incinerator:1,recycler:1.5};
+const WHCAP={warehouse:104,smallwh:36,warehouseB:259};
 const isWH=t=>t==='warehouse'||t==='smallwh'||t==='warehouseB';const WH_T=['warehouse','smallwh','warehouseB'];
 const UTIL_R={pump:2,tower:2,treatment:2};
 const NOROAD={rail:1,lpole:1,hydro:1,hydrogen:1,pump:1,tower:1,outlet:1,treatment:1,farmveg:1,farmdairy:1,farmgrain:1,wind:1,transformer:1,coal:1,park1:1,park2:1,park3:1,hvpole:1};
@@ -527,11 +528,11 @@ const HCOL={0:'#8a2a2a',1:'#d4483a',2:'#e58a3a',3:'#d9b23a',4:'#7dbb4a',5:'#2f9e
 const SHOP_R=5;
 /* road upkeep is per 12 game hours: 1 T¢ per plain road tile, more for bigger roads */
 const ROAD_UPK={road:1,road2:2,road3:3,roundabout:2,highway:4,bridge:5},ROAD_PER=12;
-const UPKEEP={taxi:60,trainSt:150,freightSt:180,fireS:120,fireB:320,clinic:80,hosp:250,hospC:600,cemS:20,cemB:60,crem:150,schoolS:60,school:120,lyceum:260,techn:260,policeS:120,policeB:320,prison:200,hydro:30,hydrogen:280,pump:20,tower:15,outlet:5,treatment:60,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:25,wind:60,coal:150,park1:20,park2:50,park3:90,landfill:20,incinerator:60,recycler:50};
+const UPKEEP={heliB:400,taxi:60,trainSt:150,freightSt:180,fireS:120,fireB:320,clinic:80,hosp:250,hospC:600,cemS:20,cemB:60,crem:150,schoolS:60,school:120,lyceum:260,techn:260,policeS:120,policeB:320,prison:200,hydro:30,hydrogen:280,pump:20,tower:15,outlet:5,treatment:60,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:25,wind:60,coal:150,park1:20,park2:50,park3:90,landfill:20,incinerator:60,recycler:50};
 /* waste: houses and parks fill steadily, factories per truck produced, shops per sale; pickup is due every ~6 h (work) or ~12 h (homes, parks) ±15% */
 const TRASH={supermarket:{cap:50,per:0.15,every:6},smallfac:{cap:24,per:0.3,every:6},house:{cap:18,rate:1,every:12},tenement:{cap:36,rate:2.5,every:12},block:{cap:60,rate:5,every:12},modern:{cap:60,rate:4,every:12},park1:{cap:10,rate:0.5,every:12},park2:{cap:10,rate:0.5,every:12},park3:{cap:10,rate:0.5,every:12},
   bakery:{cap:30,per:0.2,every:6},factory:{cap:40,per:0.6,every:6},factoryB:{cap:60,per:0.8,every:6},mine:{cap:30,per:0.4,every:8},mineB:{cap:60,per:0.8,every:6},farmveg:{cap:20,per:0.5,every:12},farmdairy:{cap:20,per:0.6,every:12},farmgrain:{cap:20,per:0.4,every:12},shop:{cap:30,per:0.2,every:6},gallery:{cap:60,per:0.2,every:6},restaurant:{cap:30,per:0.3,every:6},cinema:{cap:30,per:0.15,every:6},theater:{cap:30,per:0.15,every:6},casino:{cap:30,per:0.2,every:6},hotelS:{cap:30,per:0.4,every:12},hotelB:{cap:60,per:0.5,every:12}};
-const FAC={landfill:{cap:300,trucks:3,rate:0},incinerator:{cap:150,trucks:4,rate:20},recycler:{cap:60,trucks:3,rate:10},coal:{cap:20,trucks:1,rate:4}};
+const FAC={landfill:{cap:330,trucks:3,rate:0},incinerator:{cap:150,trucks:4,rate:20},recycler:{cap:60,trucks:3,rate:10},coal:{cap:20,trucks:1,rate:4}};
 const GT_CAP=25,REC_YIELD=0.5,SOLAR_MW=2;
 const UPG={
   recycler:{name:'Ulepszony taśmociąg',cost:600,upkeep:20,desc:'Przerób 2× szybciej: 20 t odpadów na godz.'},
@@ -548,7 +549,7 @@ const UPG={
   supermarket:{name:'Kasy SCO',cost:350,upkeep:10,desc:'Kasy samoobsługowe: obsługa +50% (75 klientów/godz.), kolejka znika szybciej i rzadziej robi się tłok'},
   prison:{name:'Dodatkowy blok',cost:1800,upkeep:40,desc:'+30 miejsc: 130 więźniów'},
   taxi:{name:'Więcej taksówek',cost:500,upkeep:25,desc:'+4 taksówki (razem 8)'},trainSt:{name:'Drugi peron',cost:2000,upkeep:60,desc:'Więcej pociągów: +100% turystów zamiast +60%'},freightSt:{name:'Druga rampa',cost:1500,upkeep:40,desc:'Drugi towar naraz (osobny import albo eksport)'},
-  fireS:{name:'Drugi garaż',cost:600,upkeep:30,desc:'+1 wóz strażacki'},fireB:{name:'Drugi garaż',cost:900,upkeep:40,desc:'+2 wozy strażackie'},
+  heliB:{name:'Drugi helikopter',cost:3000,upkeep:150,desc:'+1 helikopter gaśniczy'},fireS:{name:'Drugi garaż',cost:600,upkeep:30,desc:'+1 wóz strażacki'},fireB:{name:'Drugi garaż',cost:900,upkeep:40,desc:'+2 wozy strażackie'},
   policeS:{name:'Drugi garaż',cost:600,upkeep:30,desc:'+2 radiowozy do interwencji (stoją w garażu, wyjeżdżają tylko na wezwanie)'},policeB:{name:'Drugi garaż',cost:900,upkeep:40,desc:'+2 radiowozy do interwencji (stoją w garażu, wyjeżdżają tylko na wezwanie)'},
   hydrogen:{name:'Drugi odwiert',cost:2000,upkeep:60,desc:'+15 MW (60 MW z czystą wodą)'},
   shop1:{name:'Dodatkowe piętro',cost:400,upkeep:10,desc:'30 klientów/godz. i 30 miejsc na półkach'},
@@ -571,16 +572,17 @@ const CINEMA_COST=400,ATTR_COST=600;
 const FP0=t=>!DEF[t]?null:DEF[t].size===2?[2,1]:DEF[t].size===4?[2,2]:DEF[t].fw?[DEF[t].fw,DEF[t].fh]:null;
 let rotIdx=0,moveSrc=-1;const FP=t=>{const f=FP0(t);return f&&rotIdx%2?[f[1],f[0]]:f};
 const whCap=c=>WHCAP[c.t]*(c.up?(c.t==='smallwh'?4/3:2):1)*(c.techB?1.05:1);
-const fRate=c=>FAC[c.t].rate*(c.t==='incinerator'?1+(c.up?1:0)+(c.up2?1:0):c.t==='recycler'&&c.up?2:1)*(c.filt?0.9:1);
+const fOn=c=>!!c.filt&&!c.filtOff;
+const fRate=c=>FAC[c.t].rate*(c.t==='incinerator'?1+(c.up?1:0)+(c.up2?1:0):c.t==='recycler'&&c.up?2:1)*(fOn(c)?0.9:1);
 /* pollution reach in tiles (filters take 1 off) */
-function polR(c){if(!c||c.off)return 0;const b=isFactory(c.t)?2:c.t==='mineB'?2:c.t==='mine'?1:c.t==='coal'||c.t==='incinerator'?3:c.t==='landfill'?2:c.t==='recycler'?1:0;return b?Math.max(1,b-(c.filt?1:0)):0}
+function polR(c){if(!c||c.off)return 0;const b=isFactory(c.t)?2:c.t==='mineB'?2:c.t==='mine'?1:c.t==='coal'||c.t==='incinerator'?3:c.t==='landfill'?2:c.t==='recycler'?1:0;return b?Math.max(1,b-(fOn(c)?1:0)):0}
 const noisy=c=>!!c&&!c.off&&(c.t==='wind'||c.t==='transformer');
 const isFac=c=>!!c&&!c.off&&!!FAC[c.t]&&(c.t!=='coal'||!!c.up)&&(c.t!=='landfill'||c.lfHub!==false);
 const facCap=c=>FAC[c.t].cap*(c.t==='landfill'?(c.lfN||1):c.t==='incinerator'&&!c.tiles?0.4:1);
 const facTrucks=c=>c.t==='landfill'?Math.min(8,2+(c.lfN||1)):FAC[c.t].trucks;
 const parkR=c=>DEF[c.t].r+(c.up?1:0);
 const PARKS=['park1','park2','park3'];
-const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge']},{name:'Transport',tools:['rail','taxi','trainSt','freightSt']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','warehouse','smallwh','warehouseB']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain']},{name:'Usługi',tools:['shop','shop1','bakery','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prison']},{name:'Straż',tools:['fireS','fireB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','poleDel','transformer','hvpole','wind','coal','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler']},{name:'Woda',tools:['pipe','pipeDel','tower','pump','treatment','outlet']}];
+const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge']},{name:'Transport',tools:['rail','taxi','trainSt','freightSt']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','warehouse','smallwh','warehouseB']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain']},{name:'Usługi',tools:['shop','shop1','bakery','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','poleDel','transformer','hvpole','wind','coal','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler']},{name:'Woda',tools:['pipe','pipeDel','tower','pump','treatment','outlet']}];
 const WIND_MW=6, COAL_MW=12, COAL_BURN=8;
 const TOOLS=['view','bulldoze','road','pole','poleline','poleDel','house','factory','warehouse','shop','bank','wind','transformer','coal','park1','park2','park3','smallwh'];
 const BASE_MONEY=4000, BANK_CAP=6000, WH_CAP=60, SALE=25, TRUCK_LOAD=4, MAX_CARS=400, PEOPLE_CARS=340;
@@ -771,11 +773,11 @@ const MS_OF={};[
  'tenement bakery farmdairy factory warehouse restaurant park2 bridge',
  'road2 clinic cemS schoolS policeS fireS hvpole coal recycler shop1',
  'block supermarket hotelS cinema hydro treatment school incS taxi',
- 'road3 roundabout factoryB warehouseB bank theater crem park3 rail trainSt freightSt',
+ 'road3 roundabout factoryB warehouseB bank theater crem park3 rail trainSt freightSt heliB',
  'modern highway hosp mineB policeB fireB lyceum techn incinerator',
  'gallery cemB casino prison','hotelB hydrogen','hospC bankG'].forEach((l,k)=>l.split(' ').forEach(t=>MS_OF[t]=k));
 /* hazards and their menu tab start once the first building of the service is unlocked */
-const HAZ={med:{tools:['clinic','hosp','hospC'],name:'choroby'},pol:{tools:['policeS','policeB'],name:'kradzieże i napady'},fire:{tools:['fireS','fireB'],name:'pożary'},dead:{tools:['cemS','cemB','crem'],name:'zgony'},tour:{tools:['taxi'],name:'turyści (gdy postawisz bazę taxi)'}};
+const HAZ={med:{tools:['clinic','hosp','hospC'],name:'choroby'},pol:{tools:['policeS','policeB'],name:'kradzieże i napady'},fire:{tools:['fireS','fireB','heliB'],name:'pożary'},dead:{tools:['cemS','cemB','crem'],name:'zgony'},tour:{tools:['taxi'],name:'turyści (gdy postawisz bazę taxi)'}};
 let msLevel=window.__testUnlock?99:0,cityName='Moje miasto';
 const unlocked=t=>t==='view'||t==='bulldoze'||(MS_OF[t]??0)<=msLevel;
 const hazAt=k=>Math.min(...HAZ[k].tools.map(t=>MS_OF[t]??99)),hazOn=k=>hazAt(k)<=msLevel;
@@ -920,6 +922,13 @@ function buildFreightSt(){const g=new THREE.Group(),bw=M('#8a6a42');g.add(box(2.
   const cc=['#c8372d','#2f6fe0','#3c9a5f','#e0a91c','#7d4ab0'];for(let k=0;k<5;k++)g.add(box(0.4,0.2,0.2,M(cc[k]),0.35+(k%3)*0.42,0.03+(k>2?0.2:0),-0.6+(k>2?0:0.02)));
   for(const x of[0.2,1.35]){g.add(box(0.05,0.85,0.05,M('#e0a91c'),x,0.03,-0.75));g.add(box(0.05,0.85,0.05,M('#e0a91c'),x,0.03,0.8))}g.add(box(1.25,0.06,0.06,M('#e0a91c'),0.78,0.85,-0.75));g.add(box(1.25,0.06,0.06,M('#e0a91c'),0.78,0.85,0.8));g.add(box(0.06,0.06,1.6,M('#e0a91c'),0.78,0.85,0.02));
   for(const x of[-1,0,1]){const t=new THREE.Group();railPiece(t,[[1,0],[-1,0]],0.03);t.position.set(x,0,0.62);g.add(t)}return g}
+function heliMesh(){const g=new THREE.Group(),red=M('#c8372d');g.add(box(0.2,0.16,0.42,red,0,0,0));g.add(box(0.16,0.1,0.14,mat.cabin,0,0.06,0.16));g.add(box(0.06,0.06,0.4,red,0,0.06,-0.38));g.add(box(0.02,0.14,0.08,red,0,0.08,-0.56));
+  for(const x of[-0.09,0.09])g.add(box(0.02,0.02,0.36,mat.steel,x,-0.07,0));const rot=new THREE.Group();rot.add(box(0.9,0.01,0.05,mat.dark,0,0,0));rot.add(box(0.05,0.01,0.9,mat.dark,0,0,0));rot.position.y=0.2;g.add(rot);g.userData.rotor=rot;
+  const bk=new THREE.Group();bk.add(box(0.005,0.3,0.005,mat.steel,0,-0.3,0));bk.add(box(0.12,0.1,0.12,M('#d06a1a'),0,-0.42,0));g.add(bk);g.userData.bucket=bk;return g}
+function buildHeliB(){const g=new THREE.Group();g.add(box(1.96,0.03,1.96,mat.concrete));const pad=new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.62,0.03,24),M('#3b3f46'));pad.position.set(0.35,0.045,0.3);g.add(pad);
+  g.add(box(0.1,0.006,0.6,mat.white,0.13,0.062,0.3));g.add(box(0.1,0.006,0.6,mat.white,0.57,0.062,0.3));g.add(box(0.44,0.006,0.1,mat.white,0.35,0.062,0.3));
+  g.add(box(0.7,0.45,1.5,M('#c8372d'),-0.6,0.03,-0.1));g.add(box(0.74,0.04,1.54,mat.roofD,-0.6,0.48,-0.1));g.add(box(0.02,0.34,0.9,M('#e8e2d6'),-0.24,0.03,-0.1));
+  g.add(box(0.03,0.8,0.03,mat.steel,0.85,0.03,-0.8));g.add(box(0.06,0.18,0.06,M('#f4f6f8'),0.85,0.82,-0.8));const h=heliMesh();h.position.set(0.35,0.17,0.3);g.add(h);g.userData.parked=h;return g}
 function buildFireS(){const g=new THREE.Group(),red=M('#c8372d');g.add(box(0.9,0.03,0.9,mat.concrete));g.add(box(0.7,0.36,0.56,red,-0.06,0.03,-0.1));
   g.add(box(0.72,0.03,0.58,mat.roofD,-0.06,0.39,-0.1));for(const x of[-0.22,0.1])g.add(box(0.24,0.26,0.02,M('#e8e2d6'),x,0.03,0.185));for(const x of[-0.22,0.1])for(let k=1;k<4;k++)g.add(box(0.24,0.008,0.022,mat.steel,x,0.03+k*0.065,0.186));
   g.add(box(0.16,0.62,0.16,red,0.3,0.03,-0.26));g.add(box(0.2,0.04,0.2,mat.roofD,0.3,0.65,-0.26));g.add(box(0.06,0.06,0.01,mat.white,0.3,0.5,-0.175));
@@ -1089,7 +1098,7 @@ const matFlt=M('#e3e7ea'),matFltD=M('#7d868e');
 function chimFilter(m,ch){const k=ch.big?2.3:1.75,r=ch.r*k,h=ch.big?0.16:0.1;const c1=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,14),matFlt);c1.position.set(ch.x,ch.y-h/2-0.01,ch.z);c1.castShadow=true;m.add(c1);
   const c2=new THREE.Mesh(new THREE.CylinderGeometry(r*1.04,r*1.04,0.02,14),matFltD);c2.position.set(ch.x,ch.y-0.005,ch.z);m.add(c2);const c3=new THREE.Mesh(new THREE.CylinderGeometry(r*1.04,r*1.04,0.02,14),matFltD);c3.position.set(ch.x,ch.y-h-0.015,ch.z);m.add(c3);
   if(ch.big)for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])m.add(box(0.03,0.08,0.03,matFltD,ch.x+Math.cos(a)*r*1.05,ch.y-h-0.08,ch.z+Math.sin(a)*r*1.05))}
-function filterVisual(c){const m=c.model;if(!m||m.userData.flt)return;m.userData.flt=true;for(const p of m.userData.puffs||[])p.material.color.set('#f6f7f8');
+function filterVisual(c,re){const m=c.model;if(!m)return;if(re){for(const p of m.userData.puffs||[])p.material.color.set(fOn(c)?'#f6f7f8':'#8e9296');return}if(m.userData.flt)return;m.userData.flt=true;for(const p of m.userData.puffs||[])p.material.color.set(c.filtOff?'#8e9296':'#f6f7f8');
   const sb=m.userData.sb||{x:0.3,y:0.85,z:-0.25};const list=(CHIMS[c.t==='incinerator'&&m.userData.big?'incB':c.t]||[{x:sb.x,y:sb.y-0.03,z:sb.z,r:0.07}]).slice();if(c.t==='incinerator'&&m.userData.big){if(c.up)list.push({x:0.6,y:1.34,z:-0.45,r:0.08});if(c.up2)list.push({x:0.6,y:1.34,z:0.05,r:0.08})}else if(c.t==='incinerator'&&m.userData.upg)list.push({x:0.36,y:0.94,z:0.26,r:0.055});for(const ch of list)chimFilter(m,ch)}
 function addUpgrade2Visual(c){if(c.t==='shop'&&c.model){const m=c.model;m.add(box(0.16,0.09,0.1,M('#e8eef2'),0.22,0.03,0.33));m.add(box(0.07,0.06,0.01,M('#2b2f33'),0.22,0.13,0.33));m.add(box(0.03,0.08,0.03,mat.steel,0.3,0.03,0.4));return}if(c.t==='incinerator'&&c.model&&c.model.userData.big){incChimney(c.model,0.6,0.05);return}if(c.t==='bankG'){c.model.add(box(0.7,0.4,0.6,M('#e9e1c9'),-0.55,0.04,0.55));c.model.add(box(0.74,0.04,0.64,M('#b89a4a'),-0.55,0.44,0.55));return}if(c.t==='shop1'){shopSCO(c);return}if(isFactory(c.t)){c.model.add(box(0.2,0.12,0.2,M('#4a8fd0'),c.t==='factoryB'?-0.3:-0.05,c.t==='factoryB'?0.56:0.48,c.t==='factoryB'?0:-0.1));return}if(c.t==='prison'){c.model.add(box(0.7,0.3,0.5,M('#c9b48a'),0.55,0.03,0.0));c.model.add(box(0.74,0.03,0.54,M('#6b7078'),0.55,0.33,0.0));return}if(isPolice(c.t)){c.model.add(box(0.03,0.6,0.03,mat.steel,isPolice(c.t)&&c.t==='policeB'?-0.9:-0.38,0.03,-0.38));c.model.add(box(0.16,0.04,0.04,mat.steel,c.t==='policeB'?-0.9:-0.38,0.6,-0.38));return}const m=c.model;if(!m||m.userData.upg2)return;m.userData.upg2=true;
   if(c.t==='pump'||c.t==='outlet'){const pp=part(FK.cyl,M('#5a6b78'),c.t==='pump'?0.06:0.1,c.t==='pump'?0.5:0.4,c.t==='pump'?0.06:0.1,0.22,0.1,0.25);pp.rotation.x=Math.PI/2;m.add(pp)}
@@ -1122,6 +1131,7 @@ function addUpgradeVisual(c){const m=c.model;if(!m||m.userData.upg)return;m.user
   else if(c.t==='taxi'){for(const x of[0.2,0.48])m.add(box(0.17,0.07,0.3,M('#f2c230'),x,0.04,-0.3))}
   else if(c.t==='trainSt'){m.add(box(0.8,0.4,0.6,M('#e9e1cf'),-1.1,0.03,-0.55))}
   else if(c.t==='freightSt'){m.add(box(0.5,0.2,0.2,M('#3c9a5f'),0.8,0.43,-0.6))}
+  else if(c.t==='heliB'){const h=heliMesh();h.position.set(-0.6,0.62,-0.4);h.scale.setScalar(0.7);m.add(h)}
   else if(c.t==='fireS'){m.add(box(0.3,0.26,0.3,M('#c8372d'),0.28,0.03,0.24));m.add(box(0.24,0.2,0.02,M('#e8e2d6'),0.28,0.03,0.395))}
   else if(c.t==='fireB'){m.add(box(0.5,0.4,0.5,M('#c8372d'),-0.65,0.03,0.6));m.add(box(0.36,0.3,0.02,M('#e8e2d6'),-0.65,0.03,0.855))}
   else if(c.t==='policeB'){m.add(box(0.5,0.3,0.5,M('#d9dde2'),0.68,0.03,0.15));m.add(box(0.02,0.22,0.36,mat.facDark,0.425,0.03,0.15))}
@@ -1289,20 +1299,22 @@ function buildHydro(){const g=new THREE.Group(),con=M('#c4c1b8'),con2=M('#a9a69c
 function buildSupermarket(){const g=new THREE.Group();g.add(box(1.94,0.04,0.94,mat.concrete));g.add(box(1.5,0.44,0.62,M('#e9eef2'),-0.1,0.04,-0.14));
   g.add(box(1.54,0.06,0.66,M('#3a7fc0'),-0.1,0.48,-0.14));g.add(box(0.8,0.24,0.02,mat.glass,-0.1,0.04,0.175));g.add(box(0.7,0.12,0.03,M('#3a7fc0'),-0.1,0.35,0.19));
   for(let k=0;k<4;k++)g.add(box(0.02,0.005,0.2,mat.dash,0.25+k*0.16,0.045,0.33));for(const x of[0.55,0.75])g.add(box(0.12,0.06,0.1,carCols[(x*10)%8|0],x,0.04,0.33));return g}
-const BUILD={rail:buildRail,taxi:buildTaxi,trainSt:buildTrainSt,freightSt:buildFreightSt,fireS:buildFireS,fireB:buildFireB,incS:buildIncinerator,clinic:buildClinic,hosp:buildHosp,hospC:buildHospC,cemS:buildCemS,cemB:buildCemB,crem:buildCrem,schoolS:buildSchoolS,school:buildSchool,lyceum:buildLyceum,techn:buildTechn,bankG:buildBankG,shop1:buildShop1,prison:buildPrison,policeS:buildPoliceS,policeB:buildPoliceB,bakery:buildBakery,lpole:buildLPole,factoryB:buildFactoryB,warehouseB:buildWarehouseB,mine:buildMine,mineB:buildMineB,supermarket:buildSupermarket,smallfac:()=>{const g=buildFactory();g.scale.setScalar(0.72);return g},hydro:buildHydro,hydrogen:()=>{const g=buildHydrogen();g.scale.set(1.9,1.5,1.9);return g},pump:buildPump,tower:buildTower,outlet:buildOutlet,treatment:buildTreatment,restaurant:buildRestaurant,cinema:buildCinema,theater:buildTheater,casino:buildCasino,hotelS:buildHotelS,hotelB:buildHotelB,gallery:buildGallery,farmveg:()=>buildFarm('veg'),farmdairy:()=>buildFarm('dairy'),farmgrain:()=>buildFarm('grain'),tenement:()=>buildTenementL(0),block:()=>buildBlockL(0),modern:()=>buildModernL(0),landfill:buildLandfill,incinerator:buildIncineratorB,recycler:buildRecycler,hvpole:buildHV,smallwh:buildSmallWh,park1:()=>buildPark(1),park2:()=>buildPark(2),park3:()=>{const g=new THREE.Group(),a=buildPark(3),b=buildPark(2);a.position.x=-0.5;b.position.x=0.5;g.add(a,b);return g},house:()=>buildHouseL(0),factory:buildFactory,shop:buildShop,bank:buildBank,warehouse:buildWarehouse,wind:buildWind,transformer:buildTransformer,coal:buildCoal};
+const BUILD={heliB:buildHeliB,rail:buildRail,taxi:buildTaxi,trainSt:buildTrainSt,freightSt:buildFreightSt,fireS:buildFireS,fireB:buildFireB,incS:buildIncinerator,clinic:buildClinic,hosp:buildHosp,hospC:buildHospC,cemS:buildCemS,cemB:buildCemB,crem:buildCrem,schoolS:buildSchoolS,school:buildSchool,lyceum:buildLyceum,techn:buildTechn,bankG:buildBankG,shop1:buildShop1,prison:buildPrison,policeS:buildPoliceS,policeB:buildPoliceB,bakery:buildBakery,lpole:buildLPole,factoryB:buildFactoryB,warehouseB:buildWarehouseB,mine:buildMine,mineB:buildMineB,supermarket:buildSupermarket,smallfac:()=>{const g=buildFactory();g.scale.setScalar(0.72);return g},hydro:buildHydro,hydrogen:()=>{const g=buildHydrogen();g.scale.set(1.9,1.5,1.9);return g},pump:buildPump,tower:buildTower,outlet:buildOutlet,treatment:buildTreatment,restaurant:buildRestaurant,cinema:buildCinema,theater:buildTheater,casino:buildCasino,hotelS:buildHotelS,hotelB:buildHotelB,gallery:buildGallery,farmveg:()=>buildFarm('veg'),farmdairy:()=>buildFarm('dairy'),farmgrain:()=>buildFarm('grain'),tenement:()=>buildTenementL(0),block:()=>buildBlockL(0),modern:()=>buildModernL(0),landfill:buildLandfill,incinerator:buildIncineratorB,recycler:buildRecycler,hvpole:buildHV,smallwh:buildSmallWh,park1:()=>buildPark(1),park2:()=>buildPark(2),park3:()=>{const g=new THREE.Group(),a=buildPark(3),b=buildPark(2);a.position.x=-0.5;b.position.x=0.5;g.add(a,b);return g},house:()=>buildHouseL(0),factory:buildFactory,shop:buildShop,bank:buildBank,warehouse:buildWarehouse,wind:buildWind,transformer:buildTransformer,coal:buildCoal};
 function boltMesh(){const b=new THREE.Mesh(new THREE.OctahedronGeometry(0.09,0),mat.bolt);b.scale.y=1.7;b.position.set(0.22,1.05,0);b.visible=false;b.layers.set(1);return b}
 function wire(a,b,sag=0.07){const pts=[];for(let k=0;k<=10;k++){const u=k/10;pts.push(new THREE.Vector3(a.x+(b.x-a.x)*u,a.y+(b.y-a.y)*u-Math.sin(u*Math.PI)*sag,a.z+(b.z-a.z)*u))}
   return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),mat.wire)}
 
 /* ---------- state ---------- */
 let grid=new Array(N*N).fill(null);
-let counts={rail:0,taxi:0,trainSt:0,freightSt:0,fireS:0,fireB:0,clinic:0,hosp:0,hospC:0,cemS:0,cemB:0,crem:0,schoolS:0,school:0,lyceum:0,techn:0,bankG:0,shop1:0,prison:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
+let counts={heliB:0,rail:0,taxi:0,trainSt:0,freightSt:0,fireS:0,fireB:0,clinic:0,hosp:0,hospC:0,cemS:0,cemB:0,crem:0,schoolS:0,school:0,lyceum:0,techn:0,bankG:0,shop1:0,prison:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
 const pw={bank:0,matCap:0,dem:0,cap:0,ok:0,happy:0,dist:[0,0,0,0,0,0,0]};
 let envDirty=true;const eduP=new Uint8Array(N*N),eduS=new Uint8Array(N*N),lycCov=new Uint8Array(N*N),techCov=new Uint8Array(N*N),medCov=new Uint8Array(N*N);const crowdCov=new Uint8Array(N*N),noiseCov=new Uint8Array(N*N),entCov=new Uint8Array(N*N),pol=new Uint8Array(N*N),shopCov=new Uint8Array(N*N),parkCov=new Uint8Array(N*N);
 const winds=new Set(),bolts=new Set();
 let money=0, matl=0, roadVer=0;
 const goods={};for(const k in GOODS)if(k!=='mat')goods[k]=0;
-const stored=()=>matl+Object.values(goods).reduce((a,b)=>a+b,0);
+const stored=()=>fin(matl)+Object.values(goods).reduce((a,b)=>a+fin(b),0);
+/* repairs any value that went non-numeric so the HUD and the economy never show NaN */
+function fixNaN(){if(!Number.isFinite(matl))matl=0;if(!Number.isFinite(money))money=0;for(const k in goods)if(!Number.isFinite(goods[k]))goods[k]=0}
 let farmDirty=true,clusters=[];
 /* economy ledger: 1 real second = 1 game minute, so 60 s = 1 game hour */
 const L0=()=>({crimeOk:0,crimeLost:0,crimeLoss:0,heists:0,used:{},tour:0,tourInc:0,entInc:0,made:{},sold:{},gGen:0,gColl:0,gBurn:0,gRec:0,matRec:0,vans:0,work:0,inc:0,refund:0,build:0,upkeep:0,matIn:0,matShop:0,matCoal:0,trips:0,trucks:0,sales:0,noStock:0,powDem:0,powCap:0,secs:0});
@@ -1316,14 +1328,14 @@ function upkeepItems(){const map=new Map(),add=(cat,name,unit,n=1,per=1)=>{const
   for(const c of grid){if(!c||c.t==='part'||c.off)continue;const cat=TCAT[c.t]||(DRIVE[c.t]?'Drogi':'Inne');
     if(UPKEEP[c.t])add(cat,DEF[c.t].name,UPKEEP[c.t]);if(ROAD_UPK[c.t]&&!c.edge)add('Drogi',c.t==='bridge'?'Mosty':DEF[c.t].name,ROAD_UPK[c.t],1,ROAD_PER);
     if(c.up&&UPG[c.t]&&UPG[c.t].upkeep)add(cat,`${UPG[c.t].name} (${DEF[c.t].name.toLowerCase()})`,UPG[c.t].upkeep);if(c.up2&&UPG2[c.t]&&UPG2[c.t].upkeep)add(cat,`${UPG2[c.t].name} (${DEF[c.t].name.toLowerCase()})`,UPG2[c.t].upkeep);
-    if(c.filt&&UPGF[c.t])add(cat,`Filtry (${DEF[c.t].name.toLowerCase()})`,UPGF[c.t].upkeep);if(c.owned&&c.owned.length)add(cat,'Linie produkcyjne (duża fabryka)',LINE_UPK,c.owned.length);
-    if(c.jail&&c.jail.length)add('Policja','Więźniowie i zatrzymani',JAIL_FEE,c.jail.length)}
+    if(fOn(c)&&UPGF[c.t])add(cat,`Filtry (${DEF[c.t].name.toLowerCase()})`,UPGF[c.t].upkeep);if(c.owned&&c.owned.length)add(cat,'Linie produkcyjne (duża fabryka)',LINE_UPK,c.owned.length);
+    if(c.jail&&c.jail.length)add('Policja','Więźniowie i zatrzymani',JAIL_FEE,c.jail.length);if(jailOver(c))add('Policja','Przepełnione cele (dopłata)',OVERJAIL)}
   for(const k of importKinds())add('Import',`Import: ${GOODS[k].name.toLowerCase()}`,IMPORT_FEE);
   return[...map.values()]}
 const opNet=o=>o.inc-o.upkeep-(o.crimeLoss||0);
 const netOf=o=>o.inc+o.refund-o.build-o.upkeep-(o.crimeLoss||0)+(o.loanIn||0)-(o.loanPay||0);
 const upkeepRate=night=>{let s=IMPORT_FEE*importKinds().length;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||c.off)continue;if(UPKEEP[c.t])s+=UPKEEP[c.t]*(night&&PARKS.includes(c.t)?0.5:1);
-  if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t]/ROAD_PER;if(c.jail)s+=JAIL_FEE*c.jail.length;if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(c.filt&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s};
+  if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t]/ROAD_PER;if(c.jail)s+=JAIL_FEE*c.jail.length;if(jailOver(c))s+=OVERJAIL;if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(fOn(c)&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s};
 /* day and night: 1 real minute = 1 game hour; people sleep 22:00–06:00 */
 const hourOf=t=>(t/60)%24;
 const isNight=()=>{const h=hourOf(gameT);return h>=22||h<6};
@@ -1956,7 +1968,8 @@ const FIRE_P={ind:0.0075,svc:0.005,res:0.0025,oth:0.00125},FIRE_SPREAD=0.2,FIRE_
 const NOFIRE=new Set(['road','road2','road3','roundabout','highway','bridge','rail','pole','poleline','lpole','transformer','hvpole','wind','hydro','pipe','outlet','park1','park2','park3']);
 function fireGroup(t){if(NOFIRE.has(t))return null;if(t==='coal'||t==='hydrogen')return'ind';const k=TCAT[t];return k==='Domy'?'res':k==='Przemysł'||k==='Odpady'?'ind':k==='Usługi'||k==='Rozrywka'||k==='Turystyka'||k==='Transport'?'svc':'oth'}
 let fires=[];const flameG=new THREE.ConeGeometry(0.09,0.3,6);flameG.userData.keep=true;const flameM=[new THREE.MeshBasicMaterial({color:'#ff7a1a'}),new THREE.MeshBasicMaterial({color:'#ffc42e'})];
-const fireStations=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isFireSt(c.t)&&!c.off&&c.powered&&entryOf(i)>=0)o.push(i)}return o};
+const hasWater=c=>c.water==='ok'||c.water==='dirty';
+const fireStations=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isFireSt(c.t)&&!c.off&&!c.ruin&&c.powered&&hasWater(c)&&entryOf(i)>=0)o.push(i)}return o};
 const fireCover=(st,i)=>{const c=grid[st];if(!c)return false;const r=fireRad(c);return tilesOf(st).some(t=>Math.abs(t%N-i%N)<=r&&Math.abs(((t/N)|0)-((i/N)|0))<=r)};
 const fireTrucks=st=>cars.filter(c=>!c.dead&&c.kind==='fire'&&c.home===st).length,truckCap=st=>FIRE[grid[st].t].trucks+(grid[st].up?FIRE[grid[st].t].extra:0);
 const canBurn=c=>c&&c.t!=='part'&&!c.edge&&!DRIVE[c.t]&&!c.ruin&&!c.burn&&fireGroup(c.t)&&!constructs.some(C=>C.cell===c);
@@ -1969,6 +1982,7 @@ function startFire(i,age=0){const c=grid[i];if(!canBurn(c))return null;const fx=
   float(i,'POŻAR!','warn');cur.fires=(cur.fires||0)+1;return f}
 function endFire(f,how){fires=fires.filter(q=>q!==f);scene.remove(f.fx);if(f.spray)scene.remove(f.spray);f.pin.remove();if(f.c.burn===f)f.c.burn=null;
   for(const v of cars)if(!v.dead&&v.kind==='fire'&&v.task===f){v.task=null;v.hold=false;fireGoHome(v)}
+  for(const h of helis)if(h.f===f&&h.phase!=='land')h.phase='back';
   if(how==='out'){float(f.i,'pożar ugaszony','neutral');cur.firesOut=(cur.firesOut||0)+1}}
 function fireGoHome(v){const e=grid[v.home]?entryOf(v.home):-1;v.speed=1.6;if(e<0||!sendTo(v,e,'back'))removeCar(v)}
 function makeRuin(i,quiet){const c=grid[i];if(!c)return;c.ruin=true;c.off=true;if(HLV[c.t]){c.aband=true;if(c.pp)c.pp.length=0}if(c.model){const ch=[M('#2b2724'),M('#3a332d'),M('#1d1a18')];let k=0;
@@ -1986,6 +2000,22 @@ const sprayG=new THREE.SphereGeometry(0.035,6,4);sprayG.userData.keep=true;const
 function neighboursToBurn(i){const c=grid[i],o=new Set();for(const t of tilesOf(i))for(const j of nbrs8(t)){const g=grid[j];const m=g&&g.t==='part'?g.main:j;if(m!=null&&grid[m]!==c&&canBurn(grid[m]))o.add(m)}return[...o]}
 function fireHour(){if(firstDay()||!hazOn('fire'))return;for(let i=0;i<N*N;i++){const c=grid[i];if(!canBurn(c)||c.off)continue;if(Math.random()<FIRE_P[fireGroup(c.t)])startFire(i)}}
 let fireFlash=0;
+/* helicopters fly straight to a fire within 25 tiles of their base, drop water from above, and fly back */
+let helis=[];const HELI_R=25,HELI_Y=1.7;
+const heliBases=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.t==='heliB'&&!c.off&&!c.ruin&&c.powered&&hasWater(c))o.push(i)}return o};
+const heliCap=b=>1+(grid[b].up?1:0),heliOut=b=>helis.filter(h=>h.base===b).length;
+function heliDispatch(f){let best=null;for(const b of heliBases()){if(heliOut(b)>=heliCap(b))continue;const d=Math.min(...tilesOf(b).map(t=>cheb(t,f.i)));if(d<=HELI_R&&(!best||d<best.d))best={b,d}}
+  if(!best)return false;const g=grid[best.b],m=heliMesh(),gp=g.group.position;m.position.set(gp.x,0.3,gp.z);scene.add(m);const h={base:best.b,f,m,phase:'up',bucket:m.userData.bucket};helis.push(h);f.heli=h;
+  if(g.model&&g.model.userData.parked&&heliOut(best.b)===1)g.model.userData.parked.visible=false;float(best.b,'helikopter startuje','neutral');return true}
+function heliTick(dt){for(const h of[...helis]){h.m.userData.rotor.rotation.y+=dt*18;const p=h.m.position;
+    const home=grid[h.base]?grid[h.base].group.position:p,tgt=h.phase==='back'||h.phase==='land'?home:h.f.c.group.position;
+    if(h.phase==='up'){p.y=Math.min(HELI_Y,p.y+dt*1.2);if(p.y>=HELI_Y)h.phase='go';continue}
+    if(h.phase==='go'||h.phase==='back'){const dx=tgt.x-p.x,dz=tgt.z-p.z,d=Math.hypot(dx,dz),st=dt*5;h.m.rotation.y=Math.atan2(dx,dz);
+      if(d<=st){p.x=tgt.x;p.z=tgt.z;if(h.phase==='go'){h.phase='drop';const f=h.f;if(fires.includes(f)&&!f.ext){f.ext=true;f.extT=FIRE_EXT;float(f.i,'helikopter gasi z góry','neutral');
+          const sp=new THREE.Group();for(let j=0;j<10;j++)sp.add(new THREE.Mesh(sprayG,sprayM));scene.add(sp);if(f.spray)scene.remove(f.spray);f.spray=sp;f.dropH=h}else h.phase='back'}else h.phase='land'}
+      else{p.x+=dx/d*st;p.z+=dz/d*st}continue}
+    if(h.phase==='drop'){const f=h.f;if(!fires.includes(f)){h.phase='back';continue}p.y=HELI_Y+Math.sin(time*3)*0.05;continue}
+    if(h.phase==='land'){p.y=Math.max(0.3,p.y-dt*1.2);if(p.y<=0.3){scene.remove(h.m);disposeTree(h.m);helis=helis.filter(q=>q!==h);const g=grid[h.base];if(g&&g.model&&g.model.userData.parked&&!heliOut(h.base))g.model.userData.parked.visible=true}}}}
 function fireTick(dt){fireFlash+=dt;
   for(const v of cars)if(!v.dead&&v.kind==='fire'&&v.mesh.userData.bar){const on=!!v.task,f=Math.floor(fireFlash*7)%2;const[r,b]=v.mesh.userData.bar;r.visible=!on||f===0;b.visible=!on||f===1}
   for(const f of[...fires]){if(grid[f.i]!==f.c){endFire(f,'gone');continue}
@@ -1993,17 +2023,20 @@ function fireTick(dt){fireFlash+=dt;
     if(!dt)continue;
     if(f.ext){f.extT-=dt;const v=f.truck,sc=Math.max(0.15,f.extT/FIRE_EXT);f.fx.scale.set(1,sc,1);
       if(v&&!v.dead){if(v.drive){const D=v.drive;D.u=Math.min(1,D.u+dt*1.5);v.mesh.position.set(D.fx+(D.tx-D.fx)*D.u,0.04,D.fz+(D.tz-D.fz)*D.u);if(Math.hypot(D.tx-D.fx,D.tz-D.fz)>1e-3)v.mesh.rotation.y=Math.atan2(D.tx-D.fx,D.tz-D.fz);if(D.u>=1)v.drive=null}
-        if(f.spray){const a=v.mesh.position,b=f.c.group.position;f.spray.children.forEach((d,k)=>{const u=(time*1.6+k/8)%1;d.position.set(a.x+(b.x-a.x)*u,0.22+Math.sin(Math.PI*u)*0.45,a.z+(b.z-a.z)*u);d.scale.setScalar(0.6+u)})}}
+        if(f.spray&&!f.dropH){const a=v.mesh.position,b=f.c.group.position;f.spray.children.forEach((d,k)=>{const u=(time*1.6+k/8)%1;d.position.set(a.x+(b.x-a.x)*u,0.22+Math.sin(Math.PI*u)*0.45,a.z+(b.z-a.z)*u);d.scale.setScalar(0.6+u)})}}
+      if(f.spray&&f.dropH){const a=f.dropH.m.position;f.spray.children.forEach((d,k)=>{const u=(time*1.3+k/10)%1;d.position.set(a.x+Math.sin(k*2.4)*0.18*u,a.y-0.45-u*(a.y-0.5),a.z+Math.cos(k*2.4)*0.18*u);d.scale.setScalar(0.8+u*0.8)})}
       if(f.extT<=0){endFire(f,'out')}continue}
     if(f.truck&&(f.truck.dead||f.truck.task!==f))f.truck=null;
-    if(!f.truck&&(f.dT-=dt)<=0){f.dT=3;fireDispatch(f)}
+    if(f.heli&&!helis.includes(f.heli))f.heli=null;
+    if(!f.truck&&!f.heli&&(f.dT-=dt)<=0){f.dT=3;if(!fireDispatch(f))heliDispatch(f)}
     if(gameT>=f.nextSpread){f.nextSpread+=60;if(Math.random()<FIRE_SPREAD){const nb=neighboursToBurn(f.i);if(nb.length)startFire(nb[(Math.random()*nb.length)|0])}}
     if(gameT-f.t0>=FIRE_RUIN){endFire(f,'ruin');makeRuin(f.i)}}}
 /* the caught go to the nearest station's cells; sentence 2–3 days: longer for a bigger theft and a quick catch */
 const PRISON_CAP=100,JAIL_FEE=5;
 function jailAt(cr,speed){const sts=stations().filter(st=>stCover(st,cr.i));if(!sts.length)return;const lf=cr.heist?cr.loss/1250:cr.loss/75;
-  const n=cr.heist?cr.need:1;for(let k=0;k<n;k++){const st=sts.find(q=>(grid[q].jail||[]).length<POL[grid[q].t].cells);if(!st){float(cr.i,'cele pełne: sprawca wypuszczony','warn');return}
-    const g=grid[st];g.jail=g.jail||[];g.jail.push({rel:gameT+60*(48+24*Math.min(1,0.6*lf+0.4*speed)),w:0})}}
+  const n=cr.heist?cr.need:1;for(let k=0;k<n;k++){const st=sts.find(q=>(grid[q].jail||[]).length<POL[grid[q].t].cells)??sts[0];
+    const g=grid[st];g.jail=g.jail||[];g.jail.push({rel:gameT+60*48,w:0});if(g.jail.length>POL[g.t].cells)float(st,'przepełnione cele!','warn')}}
+const OVERJAIL=20,jailOver=c=>!!c.jail&&isPolice(c.t)&&c.jail.length>POL[c.t].cells;
 const prisonCap=c=>PRISON_CAP+(c.up?30:0);
 function inmates(){let n=0,w=0;for(const c of grid)if(c&&c.jail&&c.t!=='part'){n+=c.jail.length;for(const q of c.jail)w+=q.w||0}return{n,w}}
 function prisonRoom(){let best=-1,room=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='prison'||c.off||!c.powered||entryOf(i)<0)continue;const r=prisonCap(c)-(c.jail||[]).length-(c.inbound||0);if(r>room){room=r;best=i}}return best}
@@ -2031,11 +2064,18 @@ function visitorLeave(c){const s2=entryOf(c.dest);if(s2<0)return removeCar(c);co
 function visitorTick(dt,night){if(cars.length>=PEOPLE_CARS||!counts.taxi)return;
   for(const i of edgeOuts()){const c=grid[i];c.vt=(c.vt==null?rnd(2,8):c.vt)-dt;if(c.vt>0)continue;c.vt=60/visitorRate()*(night?2:1)*(0.7+Math.random()*0.6);requestTaxi({edge:i})}}
 /* entry roads at two opposite map edges, 4 tiles long, with a town sign on the outer tile */
-function makeEntries(){if(grid.some(c=>c&&c.edge))return;const vert=Math.random()<0.5;
+function makeEntries(){if(grid.some(c=>c&&c.edge&&DRIVE[c.t]))return makeRailEntries();const vert=Math.random()<0.5;
   for(const side of[0,1])for(let tries=0;tries<80;tries++){const p=Math.round(N/2+(Math.random()*2-1)*Math.min(26,4+tries/2));if(p<2||p>N-3)continue;
     const tiles=[];for(let d=0;d<4;d++){const a=side?N-1-d:d;tiles.push(vert?idx(p,a):idx(a,p))}
     if(tiles.some(t=>grid[t]||water[t]))continue;
-    tiles.forEach((t,k)=>{addCell(t,'road',false);grid[t].edge=true;if(k===0)grid[t].edgeOut=true;rebuildRoad(t)});break}}
+    tiles.forEach((t,k)=>{addCell(t,'road',false);grid[t].edge=true;if(k===0)grid[t].edgeOut=true;rebuildRoad(t)});break}makeRailEntries()}
+/* entry tracks at two other map edges: a station connected to them gets trains with tourists */
+function makeRailEntries(){if(grid.some(c=>c&&c.edge&&c.t==='rail'))return;const roadSides=new Set();for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!c.edge||!DRIVE[c.t])continue;const x=i%N,z=(i/N)|0;roadSides.add(z===0?0:z===N-1?1:x===0?2:x===N-1?3:-1)}
+  let sides=[0,1,2,3].filter(k=>!roadSides.has(k));if(sides.length<2)sides=[0,1,2,3];sides=sides.sort(()=>Math.random()-0.5).slice(0,2);
+  for(const side of sides)for(let tries=0;tries<80;tries++){const p=Math.round(N/2+(Math.random()*2-1)*Math.min(26,4+tries/2));if(p<2||p>N-3)continue;
+    const tiles=[];for(let d=0;d<4;d++){const a=side===1||side===3?N-1-d:d;tiles.push(side<2?idx(p,a):idx(a,p))}
+    if(tiles.some(t=>grid[t]||water[t]||[...nbrs(t)].some(j=>grid[j]&&grid[j].edge)))continue;
+    for(const t of tiles){addCell(t,'rail',false);grid[t].edge=true}break}}
 function spawnCommuter(h){const e=entryOf(h);if(e<0)return;const b=bfs(e);
   if(Math.random()<0.15){const l=candidates(b,SERVICES).filter(o=>entR(grid[o.i])>0);const t=pickWeighted(l);if(t){cur.trips++;createCar('commuter',pathTo(b,t.e),{home:h,dest:t.i,tier:grid[h].happy??3});return}}
   const low=stored()<matCap()*0.35;let types;const r=Math.random();
@@ -2222,7 +2262,7 @@ function computePower(dt){if(topoDirty)rebuildHV();computeDams();const dm=isNigh
   for(const i of gens){const c=grid[i];c.mw=0;if(c.net<0)continue;if(c.t==='hydro'){c.mw=water[i]?(damSealed[i]?7.5:0):nearWater(i)>=0?15:0;sup[c.net]+=c.mw;cap+=c.mw}
     if(c.t==='hydrogen'){if(c.model)c.model.userData.off=!(c.water==='ok'||c.water==='dirty');c.mw=(c.water==='ok'?45:c.water==='dirty'?22:0)+(c.up&&c.water==='ok'?15:c.up&&c.water==='dirty'?7.5:0);sup[c.net]+=c.mw;cap+=c.mw}}
   for(const i of gens){const c=grid[i];if(c.t!=='coal')continue;c.running=false;c.fuel=c.fuel||0;
-    if(c.net<0)continue;const CMW=COAL_MW*(c.filt?0.9:1);if(c.fuel>0||matl>=1)cap+=CMW;
+    if(c.net<0)continue;const CMW=COAL_MW*(fOn(c)?0.9:1);if(c.fuel>0||matl>=1)cap+=CMW;
     if(sup[c.net]<dem[c.net]-1e-6){
       if(c.fuel<=0&&matl>=1){matl-=1;cur.matCoal++;cur.used.mat=(cur.used.mat||0)+1;c.fuel=COAL_BURN;float(i,'−1 t węgla','mat')}
       if(c.fuel>0){c.fuel-=dt;sup[c.net]+=CMW;c.running=true}else float(i,'brak węgla','warn')}
@@ -2242,7 +2282,7 @@ function computePower(dt){if(topoDirty)rebuildHV();computeDams();const dm=isNigh
    All water used becomes sewage: plants treat it, outlets dump the rest into the river. Night halves use. Units: m³ per game hour. */
 /* water users that return no sewage (the geothermal plant turns its water into steam) */
 const NOSEW={hydrogen:1};
-const WATER={trainSt:1,fireS:2,fireB:4,clinic:2,hosp:6,hospC:15,crem:2,schoolS:1,school:2,lyceum:4,techn:4,bankG:1,shop1:0.8,prison:5,policeS:1,policeB:2,bakery:0.8,factoryB:4,mine:0.5,mineB:1.5,supermarket:2,hydrogen:10,smallfac:1.5,house:1,tenement:2.5,block:5,modern:5,shop:0.5,gallery:1.5,restaurant:1.5,hotelS:2,hotelB:5,factory:3,cinema:1,theater:1,casino:1.5,bank:0.5};
+const WATER={heliB:6,trainSt:1,fireS:2,fireB:4,clinic:2,hosp:6,hospC:15,crem:2,schoolS:1,school:2,lyceum:4,techn:4,bankG:1,shop1:0.8,prison:5,policeS:1,policeB:2,bakery:0.8,factoryB:4,mine:0.5,mineB:1.5,supermarket:2,hydrogen:10,smallfac:1.5,house:1,tenement:2.5,block:5,modern:5,shop:0.5,gallery:1.5,restaurant:1.5,hotelS:2,hotelB:5,factory:3,cinema:1,theater:1,casino:1.5,bank:0.5};
 const PUMP_R=40,TOWER_R=15,TREAT_R=30;
 const pipe=new Uint8Array(N*N),riverDirty=new Uint8Array(N*N),riverDirt=new Float32Array(N*N);let riverSrc=[],riverT=0;
 /* sewage enters at the outlets and drifts downstream about one tile every 3 game minutes; when the outlets stop, the river slowly washes itself clean */
@@ -2399,7 +2439,7 @@ el.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){hl.visible=fa
 el.addEventListener('wheel',e=>{e.preventDefault();cam.radius*=Math.exp(e.deltaY*0.0012);updateCamera()},{passive:false});
 function paintAt(x,y){const i=tileAt(x,y);if(i<0||i===lastPaint)return;lastPaint=i;apply(i,true)}
 function hover(x,y){const i=tileAt(x,y);if(!areaT)area.visible=false;hoverI=i;showGhost1(i);
-  if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
+  if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,grid[i].t==='rail'?'Tory wjazdowe · połącz z nimi dworzec, a pociągi przywiozą turystów':'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
   const ar=DEF[tool]&&(DEF[tool].r||DEF[tool].area);if(ar)showArea(i,ar,false);
   hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;
   const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c||(!!STREET[c.t]&&!c.rail&&!c.edge))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
@@ -2438,7 +2478,7 @@ function updateGhost(){const F=curFP();if(pendA<0||!F){sel.visible=false;placeEl
   document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?'musi stać przy rzece':'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:`${fmt(cost)} T¢`}`;
   document.getElementById('pOk').disabled=!(ok&&afford)}
 function placeFP(){if(pendA<0)return;const T=curT(),t=fpTiles(pendA),cost=fpCost();if(!fpOK(t,T)||money<cost)return updateGhost();
-  const a=pendA;pendA=-1;
+  const a=pendA;pendA=-1;lockBuy();
   if(moveSrc>=0){const src=moveSrc;moveSrc=-1;doMove(src,a,t,cost);updateGhost();hintEl.hidden=false;
     if(entryOf(a)<0&&!NOROAD[T])setHint('Przeniesiono. Budynek nie ma dojazdu: dołóż ulicę obok.',true,true);else setHint(`Przeniesiono za ${fmt(cost)} T¢.`,false,true);return}
   spend(cost);addCell(a,tool,true,t.slice(1));if(grid[a]&&grid[a].tiles){grid[a].rot=rotIdx;refreshBuilding(a)}updateGhost();hintEl.hidden=false;
@@ -2489,7 +2529,7 @@ function apply(i,painting){
     if(money<DEF.rail.cost){setHint(`Brakuje ${fmt(DEF.rail.cost-money)} T¢ na tory.`,true,true);return}spend(DEF.rail.cost);
     if(c){c.rail=true;railVer++;drawCrossing(i);railRefreshNear(i)}else addCell(i,'rail',false);save();return}
   if(FP(tool)){if(painting)return;pendA=i;updateGhost();return}
-  if(tool==='bulldoze'&&c&&c.edge){if(!painting)setHint('To droga wjazdowa do miasta dla przejezdnych. Możesz ją poszerzyć, ale nie wyburzyć.',true,true);return}
+  if(tool==='bulldoze'&&c&&c.edge){if(!painting)setHint(c.t==='rail'?'To tory wjazdowe do miasta. Nie da się ich wyburzyć.':'To droga wjazdowa do miasta dla przejezdnych. Możesz ją poszerzyć, ale nie wyburzyć.',true,true);return}
   if(tool==='bulldoze'){if(!c){if(deco.has(i)){clearDeco(i);save()}return}const refund=Math.floor((DEF[c.t].cost+(c.pole?DEF.pole.cost:0))/2);removeCell(i);
     const n=addMoney(refund);cur.refund+=n;if(n>=0.5)float(i,`+${fmt(n)} T¢`,'money');save();return}
   if(tool==='poleDel'){if(c&&c.t==='lpole'){removeCell(i);const n=addMoney(Math.floor(DEF.pole.cost/2));cur.refund+=n;powerDirty=true;topoDirty=true;save();return}
@@ -2516,12 +2556,12 @@ function apply(i,painting){
   if(tool==='bridge'&&!straightOK(i)){setHint('Most musi iść prosto: bez zakrętów (L) i rozgałęzień (T).',true,true);return}
   const cost=DEF[tool].cost;
   if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢ na: ${DEF[tool].name.toLowerCase()}.`,true,true);return}
-  spend(cost);addCell(i,tool==='incS'?'incinerator':tool);if(rot1!=null&&grid[i]&&!grid[i].tiles){grid[i].rot1=rot1;refreshBuilding(i)}if(DEF[tool].r||DEF[tool].area)showArea(i,DEF[tool].r||DEF[tool].area,true);
+  spend(cost);lockBuy();addCell(i,tool==='incS'?'incinerator':tool);if(rot1!=null&&grid[i]&&!grid[i].tiles){grid[i].rot1=rot1;refreshBuilding(i)}if(DEF[tool].r||DEF[tool].area)showArea(i,DEF[tool].r||DEF[tool].area,true);
   if(!DRIVE[tool]&&!NOROAD[tool]&&entryOf(i)<0)setHint('Budynek nie ma dojazdu. Dołóż ulicę obok, by zaczął działać.',true,true);
   save()}
 function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[i]&&!grid[i]){setHint('<b>Rura</b> · łączy budynki z siecią wodną',false,true);return}const c=grid[i];let s;
   const smog=pol[i]===2?' Silny smog: dom tutaj −2 zadowolenia.':pol[i]===1?' Lekki smog: dom tutaj −1 zadowolenia.':'';
-  if(c&&c.edge)s='<b>Droga wjazdowa</b> · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem. Można ją poszerzyć, nie można wyburzyć.';
+  if(c&&c.edge&&c.t==='rail')s='<b>Tory wjazdowe</b> · połącz z nimi tory od dworca: przyjadą pociągi z turystami. Nie da się ich wyburzyć.';else if(c&&c.edge)s='<b>Droga wjazdowa</b> · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem. Można ją poszerzyć, nie można wyburzyć.';
   else if(!c)s=water[i]?(lowW[i]?'Poziom wody 15% niżej (za tamą). Pompy tu pobierają 20% mniej. ':'')+(riverDirty[i]?'Rzeka zanieczyszczona ściekami. Pompa obok da brudną wodę.':'Rzeka. Przejedziesz ją tylko mostem.'):(deco.has(i)?'Drzewo. Zniknie, gdy coś tu postawisz.':'Trawnik. Wolne pole pod zabudowę.')+smog;
   else{const no=!DRIVE[c.t]&&!NOROAD[c.t]&&entryOf(i)<0?' · <b>brak dojazdu</b>':'';
     const pwr=DEMAND[c.t]?(c.powered?` · zasilany (${mw(DEMAND[c.t])} MW)`:` · <b>bez prądu</b> (${mw(DEMAND[c.t])} MW)`):'';
@@ -2534,7 +2574,7 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
       transformer:`<b>Transformator</b> · łączy elektrownie obok (też po skosie) ze słupami · ${UPKEEP.transformer} T¢/godz.`,
       coal:'<b>El. węglowa</b> · '+(c.net<0?'<b>niepodłączona</b>: postaw obok transformator':c.running?`pracuje, ${COAL_MW} MW`:'czeka: wiatraki wystarczają albo brak węgla')+` · ${UPKEEP.coal} T¢/godz.`,house:'<b>Rezydencja</b>',factory:`<b>Fabryka</b> · zmiany do kolejnej ciężarówki: ${c.work}/2`,
       bakery:`<b>Piekarnia</b> · ${c.shelf?c.shelf.bread||0:0} bochenków`,gallery:'<b>Galeria handlowa</b>',restaurant:'<b>Restauracja</b>',cinema:'<b>Kino</b>',theater:'<b>Teatr</b>',casino:'<b>Kasyno</b>',hotelS:'<b>Mały hotel</b>',hotelB:'<b>Duży hotel</b>',tenement:'<b>Kamienica</b>',block:'<b>Tani blok</b>',modern:'<b>Apartamentowiec</b>',
-      shop:`<b>Sklep</b> · półki ${c.shelf?shelfTotal(c):0}/${SHOP_SLOTS}`,bank:`<b>Bank</b> · +${fmt(BANK_CAP)} T¢ limitu`,warehouse:`<b>Magazyn</b> · +${WH_CAP} t limitu`,smallwh:`<b>Mały magazyn</b> · +${WHCAP.smallwh} t limitu`,
+      shop:`<b>Sklep</b> · półki ${c.shelf?shelfTotal(c):0}/${SHOP_SLOTS}`,bank:`<b>Bank</b> · +${fmt(BANK_CAP)} T¢ limitu`,warehouse:`<b>Magazyn</b> · +${fmt(whCap(c))} t limitu`,smallwh:`<b>Mały magazyn</b> · +${WHCAP.smallwh} t limitu`,
       park1:`<b>Skwer</b> · zasięg 3×3 · ${UPKEEP.park1} T¢/godz.`,park2:`<b>Park</b> · zasięg 5×5 · ${UPKEEP.park2} T¢/godz.`,park3:`<b>Park miejski</b> · zasięg 7×7 · ${UPKEEP.park3} T¢/godz.`}[c.t]+pwr+no;
     if(DEF[c.t].r||DEF[c.t].area)showArea(i,DEF[c.t].r?parkR(c):c.t==='hvpole'?hvR(i):DEF[c.t].area,true);
     if(pol[i]&&!isFactory(c.t)&&c.t!=='coal')s+=pol[i]===2?' · smog (żółte pole)':' · lekki smog'}
@@ -2543,12 +2583,17 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
 /* ---------- building inspector: every building, prev/next walks buildings of the same type ---------- */
 const inspEl=document.getElementById('insp');let inspI=-1,focus=null;
 const sameType=t=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].t===t)o.push(i);return o};
+const NOINSP=new Set(['lpole','rail','part']);
+const catOfT=t=>t==='incinerator'?'Odpady':TCAT[t];
+function catList(cat){const o=[];for(let i=0;i<N*N;i++){const g=grid[i];if(g&&!DRIVE[g.t]&&!NOINSP.has(g.t)&&!g.edge&&catOfT(g.t)===cat)o.push(i)}
+  const ord=t=>{const k=TYPE_ORDER.indexOf(t);return k<0?999:k};return o.sort((a,b)=>ord(grid[a].t)-ord(grid[b].t)||a-b)}
 const houses=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&HOUSING[grid[i].t])o.push(i);return o};
-function openHouse(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;inspI=i;inspEl.hidden=false;hintEl.hidden=true;ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
-  const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold');
+let buyLock=0;const lockBuy=()=>{buyLock=performance.now()+500;inspEl.classList.add('locked');setTimeout(()=>inspEl.classList.remove('locked'),520)};
+function openHouse(i){lockBuy();if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;inspI=i;inspEl.hidden=false;hintEl.hidden=true;ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
+  const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='heliB'?HELI_R:c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold');
   else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');renderInsp()}
 function closeHouse(){if(areaT>1e8){areaT=0;area.visible=false}inspI=-1;inspEl.hidden=true;hintEl.hidden=false;ring.visible=false}
-function stepHouse(d){const c=grid[inspI];if(!c)return closeHouse();const list=sameType(c.t);let k=list.indexOf(inspI);
+function stepHouse(d){const c=grid[inspI];if(!c)return closeHouse();const list=catList(catOfT(c.t));let k=list.indexOf(inspI);
   k=k<0?0:(k+d+list.length)%list.length;openHouse(list[k])}
 const ICON_OFF='<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" style="vertical-align:-2px"><path d="M10 3v6.5"/><path d="M6.2 5.6a6 6 0 1 0 7.6 0"/></svg>',ICON_ON='<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor" style="vertical-align:-2px"><path d="M6 4.5l10 5.5-10 5.5z"/></svg>';
 /* loans: one at a time; each day an instalment of the principal plus interest on what is left; can be paid off early */
@@ -2579,7 +2624,7 @@ function nextType(t){const k=TYPE_ORDER.indexOf(t);for(let j=1;j<=TYPE_ORDER.len
 function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHouse();
   if(c.ruin){const html=`<div class="top"><b>Zgliszcza · ${DEF[c.t].name}</b><small>pole ${i%N+1}, ${((i/N)|0)+1}</small><button class="btn icon panel x" id="inspX" aria-label="Zamknij">×</button></div><div class="eff">Budynek spłonął i nie działa. Wyburz go narzędziem Wyburz, żeby zwolnić miejsce.</div>`;
     if(html!==inspEl.__html){inspEl.__html=html;inspEl.innerHTML=html;document.getElementById('inspX').onclick=closeHouse}return}
-  const list=sameType(c.t),k=list.indexOf(i),rows=[],night=isNight(),nt=nextType(c.t);
+  const ccat=catOfT(c.t),list=catList(ccat),k=list.indexOf(i),rows=[],night=isNight(),nt=nextType(c.t);
   const R=(l,v,cls='')=>rows.push(`<span>${l}</span><span class="${cls}">${v}</span>`);
   let head='',foot='';
   if(HOUSING[c.t]){const p=happyParts(i),h=c.happy??3,T=TIER[h],HM=HOUSING[c.t].trips;
@@ -2599,12 +2644,12 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   let pick='';
   if(isMine(c.t)){R('Produkcja',`${mw(Math.round(MINE_T[c.t]*10)/10)} t materiałów na 2 zmiany`);R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':'pracuje',full||!c.powered?'warnv':'')}
   if(c.t==='factoryB'){const ls=c.lines||['mix'];R('Linie',`${ls.length} / ${LINES_MAX}`+(c.owned&&c.owned.length?` · utrzymanie +${LINE_UPK*c.owned.length} T¢/godz.`:''));
-    for(const k of ls){const L=LINES[k],u=TRUCK_LOAD*(k==='mix'?1:1.5)*(c.up2?1.5:1)*(c.filt?0.9:1)+1;R(`<span class="sw2" style="background:${LMETA(k).col}"></span>${LMETA(k).name}`,`${mw(Math.round(u*10)/10)} t`+(L.in?' · z '+Object.entries(L.in).map(([q,v])=>`${v} t ${GOODS[q].name.toLowerCase()}`).join(', '):''),L.in&&Object.entries(L.in).some(([q,v])=>have(q)<v)?'warnv':'')}
+    for(const k of ls){const L=LINES[k],u=TRUCK_LOAD*(k==='mix'?1:1.5)*(c.up2?1.5:1)*(fOn(c)?0.9:1)+1;R(`<span class="sw2" style="background:${LMETA(k).col}"></span>${LMETA(k).name}`,`${mw(Math.round(u*10)/10)} t`+(L.in?' · z '+Object.entries(L.in).map(([q,v])=>`${v} t ${GOODS[q].name.toLowerCase()}`).join(', '):''),L.in&&Object.entries(L.in).some(([q,v])=>have(q)<v)?'warnv':'')}
     R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':'pracuje',full||!c.powered?'warnv':'');
     pick=`<div class="chips">${Object.keys(LINES).map(k=>{const on=ls.includes(k),own=k==='mix'||(c.owned||[]).includes(k),dis=!on&&(ls.length>=LINES_MAX||(!own&&money<LINE_COST));
       return`<button class="chipb" data-line="${k}" aria-pressed="${on}"${dis?' disabled style="opacity:.5"':''}><i style="background:${LMETA(k).col}"></i>${on?'✓ ':own?'':'+ '}${LMETA(k).name}${!on&&!own?` · ${LINE_COST} T¢`:''}</button>`}).join('')}</div>`}
   if(c.t==='smallfac')c.line='mix';
-  if(isFactory(c.t)&&c.t!=='factoryB'){const L=LINES[c.line]||LINES.mix;R('Produkuje',`<span class="sw2" style="background:${LMETA(c.line).col}"></span>${LMETA(c.line).name}`);R('Partia',`${mw(Math.round((TRUCK_LOAD*(c.up?1.5:1)*(c.up2?1.5:1)*(c.t==='smallfac'?0.5:1)*(c.filt?0.9:1)*(c.techB?1.05:1)+1)*10)/10)} t`);
+  if(isFactory(c.t)&&c.t!=='factoryB'){const L=LINES[c.line]||LINES.mix;R('Produkuje',`<span class="sw2" style="background:${LMETA(c.line).col}"></span>${LMETA(c.line).name}`);R('Partia',`${mw(Math.round((TRUCK_LOAD*(c.up?1.5:1)*(c.up2?1.5:1)*(c.t==='smallfac'?0.5:1)*(fOn(c)?0.9:1)*(c.techB?1.05:1)+1)*10)/10)} t`);
     R('Surowiec',L.in?Object.entries(L.in).map(([k,v])=>`${v} t ${GOODS[k].name.toLowerCase()} (w magazynach ${fmt(have(k))})`).join(', '):'nie potrzebuje',L.in&&Object.entries(L.in).some(([k,v])=>have(k)<v)?'warnv':'');
     R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':'pracuje',full||!c.powered?'warnv':'');
     if(c.t!=='smallfac')pick=`<div class="chips">${Object.keys(LINES).map(k=>{const lock=!FREE_LINES[k]&&!c.up;return`<button class="chipb" data-line="${k}" aria-pressed="${k===c.line}"${lock?' style="opacity:.5"':''}><i style="background:${LMETA(k).col}"></i>${lock?'🔒 ':''}${LMETA(k).name}</button>`}).join('')}</div>`}
@@ -2632,7 +2677,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(c.t==='prison'){const j=c.jail||[],w=j.filter(q=>q.w).length;R('Więźniowie',`${j.length} / ${prisonCap(c)}`+(c.inbound?` (+${c.inbound} w drodze)`:''),j.length>=prisonCap(c)?'warnv':'');R('Koszt',`${JAIL_FEE} T¢/godz. za więźnia: ${fmt(JAIL_FEE*j.length)} T¢/godz.`);
     R('Pracujący',c.up2?`${w} · ${fmt(j.reduce((a,q)=>a+(q.w||0),0))} T¢/godz.`:'dobuduj blok pracy');if(j.length){const nx=Math.min(...j.map(q=>q.rel));R('Najbliższe wyjście',`za ${Math.max(1,Math.round((nx-gameT)/60))} godz. gry`)}}
   if(c.t==='wind'){R('Moc',c.net<0?'niepodłączony: postaw transformator obok':`${mw(Math.round((c.windMW||0)*10)/10)} MW`,c.net<0?'warnv':'');if(c.wake)R('Cień innych wiatraków',`−${c.wake} MW`,'warnv');if(c.up)R('Panele słoneczne',`+${mw(Math.round(SOLAR_MW*dayF*10)/10)} MW teraz`)}
-  if(isPolice(c.t)){const pc=polCars(i);R('Zasięg',`${polRad(c)*2+1}×${polRad(c)*2+1}`);R('Cele',`${(c.jail||[]).length} / ${POL[c.t].cells}`+(counts.prison?'':' · brak więzienia: zatrzymani zostają tutaj'),(c.jail||[]).length>=POL[c.t].cells?'warnv':'');R('Patrole',`${pc.filter(q=>q.role==='patrol').length} / ${POL[c.t].patrol} na ulicach`);R('Do interwencji w garażu',c.up?`${2-pc.filter(q=>q.role==='reserve').length} / 2`:'brak (dobuduj drugi garaż)');R('Interwencje teraz',`${pc.filter(q=>q.task).length}`)}
+  if(isPolice(c.t)){const pc=polCars(i);R('Zasięg',`${polRad(c)*2+1}×${polRad(c)*2+1}`);R('Cele',`${(c.jail||[]).length} / ${POL[c.t].cells}`+(jailOver(c)?` · <b>przepełnione cele</b> (+${OVERJAIL} T¢/godz.)`:'')+(counts.prison?'':' · brak więzienia: zatrzymani zostają tutaj'),(c.jail||[]).length>=POL[c.t].cells?'warnv':'');R('Odsiadka','48 godzin');R('Patrole',`${pc.filter(q=>q.role==='patrol').length} / ${POL[c.t].patrol} na ulicach`);R('Do interwencji w garażu',c.up?`${2-pc.filter(q=>q.role==='reserve').length} / 2`:'brak (dobuduj drugi garaż)');R('Interwencje teraz',`${pc.filter(q=>q.task).length}`)}
   if(c.t==='hotelS'||c.t==='hotelB'){const ts=tilesOf(i),st=hotelStars(i);R('Atrakcyjność',`${'★'.repeat(st)}${'☆'.repeat(3-st)} ${st}/3 · +${st*25}% przyjezdnych`,st?'':'warnv');
     R(ts.some(k=>parkCov[k])?'✓ park w zasięgu':'✗ brak parku w zasięgu','');R((c.t==='hotelB'&&c.attr)||ts.some(k=>entCov[k])?'✓ rozrywka (atrakcja hotelu albo obok)':'✗ brak rozrywki','');R(ts.some(k=>shopCov[k])?'✓ sklep w 5 polach':'✗ brak sklepu w 5 polach','');R('Nocleg',`${PRICE[c.t]} T¢ od przyjezdnego`);R('Przyjezdni',`+${c.t==='hotelS'?4:10} aut/godz. na każdym wjeździe`)}
   if(c.t==='hotelB'){if(c.attr)R('Atrakcja',ATTR[c.attr]+` · ${PRICE[c.attr]} T¢`);else pick=`<div class="chips">${Object.keys(ATTR).map(k=>`<button class="chipb" data-attr="${k}"${money<ATTR_COST?' disabled style="opacity:.5"':''}><i style="background:${ATTR_COL[k]}"></i>+ ${ATTR[k]} · ${ATTR_COST} T¢</button>`).join('')}</div>`}
@@ -2646,6 +2691,8 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(c.t==='wind'){if(c.wake)R('Sąsiednie wiatraki',`${c.wake} · −${c.wake} MW`,'warnv');R('Moc',`${Math.max(0,WIND_MW+(c.up2?3:0)-(c.wake||0))} MW`+(c.up?` + ${mw(Math.round(SOLAR_MW*dayF*10)/10)} MW z paneli`:''));R('Sieć',c.net>=0?'podłączony':'brak transformatora obok',c.net>=0?'':'warnv')}
   if(c.t==='hydro'&&water[i])R('Przepływ',damSealed[i]?'zatamowany, turbiny pracują':'woda omija tamę: zatamuj całą szerokość koryta (a poniżej połączenia rzek każdą rzekę, która tu wpływa)',damSealed[i]?'':'warnv');
   if(c.t==='hydro'){R('Tama',`${c.damN||1} ${(c.damN||1)===1?'segment':'segmenty'} · ${mw((c.damN||1)*7.5)} MW razem`);R('Moc segmentu',c.net<0?'niepodłączona: transformator obok albo słup WN':`${c.mw||0} MW`,c.net<0?'warnv':'')}
+  if(isFireSt(c.t)){R('Wozy w akcji',`${fireTrucks(i)} / ${truckCap(i)}`);R('Stan',!c.powered?'stoi: brak prądu':!hasWater(c)?'stoi: brak wody (doprowadź rury)':'gotowa',!c.powered||!hasWater(c)?'warnv':'')}
+  if(c.t==='heliB'){R('Helikoptery w powietrzu',`${heliOut(i)} / ${heliCap(i)}`);R('Zasięg',`${HELI_R} pól w każdą stronę`);R('Stan',!c.powered?'stoi: brak prądu':!hasWater(c)?'stoi: brak wody (doprowadź rury)':'gotowa',!c.powered||!hasWater(c)?'warnv':'')}
   if(c.t==='taxi'){R('Taksówki w trasie',`${taxiCount(i)} / ${taxiCap(i)}`);R('Kurs',`${TAXI_FARE} T¢ za turystę`);if(!stActive(i))R('Stan','stoi: brak prądu','warnv')}
   if(isStationT(c.t)){const ok=stationRail(i)>=0;R('Kolej',ok?'tory dochodzą do krawędzi mapy':'brak torów do krawędzi mapy',ok?'':'warnv');if(ok&&stActive(i))R('Następny pociąg',trains.some(t=>t.st===i)?'na torach':`za ${Math.max(1,Math.ceil(c.trT??20))} min`);if(!stActive(i))R('Stan','stoi: brak prądu','warnv')}
   if(c.t==='trainSt'){R('Turyści czekają na taxi',String(c.waiting||0),c.waiting&&!counts.taxi?'warnv':'');R('Więcej turystów',c.up?'+100%':'+60%')}
@@ -2671,22 +2718,23 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(TRASH[c.t]){const T=TRASH[c.t];R('Śmieci',`${mw(Math.round(c.trash*10)/10)} / ${T.cap} t`,full?'warnv':'');
     const why={none:'brak wysypiska, spalarni i recyklingu',road:'żadne wysypisko nie ma drogi do tego budynku',full:'wysypiska w zasięgu są pełne',busy:'wszystkie śmieciarki zajęte, czeka w kolejce'};
     R('Odbiór',c.truckOn?'śmieciarka w drodze':c.want?(c.noFac?why[c.noFac]||'czeka':'czeka na śmieciarkę'):`za ok. ${Math.max(1,Math.round(c.pickT/60))} godz.`,c.want&&c.noFac&&c.noFac!=='busy'?'warnv':'')}
-  const up=c.off?0:(UPKEEP[c.t]?UPKEEP[c.t]*(night&&PARKS.includes(c.t)?0.5:1):0)+(c.up&&UPG[c.t]?UPG[c.t].upkeep:0)+(c.up2&&UPG2[c.t]?UPG2[c.t].upkeep:0)+(c.filt&&UPGF[c.t]?UPGF[c.t].upkeep:0);
+  const up=c.off?0:(UPKEEP[c.t]?UPKEEP[c.t]*(night&&PARKS.includes(c.t)?0.5:1):0)+(c.up&&UPG[c.t]?UPG[c.t].upkeep:0)+(c.up2&&UPG2[c.t]?UPG2[c.t].upkeep:0)+(fOn(c)&&UPGF[c.t]?UPGF[c.t].upkeep:0);
   if(up)R('Utrzymanie',`${fmt(up)} T¢/godz.`);
   let upg='';const U=UPG[c.t],U2=c.t==='incinerator'&&!c.tiles?null:UPG2[c.t],UF=UPGF[c.t];
-  if(UF)upg+=c.filt?`<div class="eff">Ulepszenie: ${UF.name} · ${UF.desc}</div>`:`<button class="btn panel up" id="inspUpF"${money<UF.cost?' disabled':''}>${UF.name} · ${fmt(UF.cost)} T¢<br><small style="color:var(--muted);font-weight:500">${UF.desc}, +${UF.upkeep} T¢/godz.</small></button>`;
+  if(UF)upg+=c.filt?`<div class="eff">Ulepszenie: ${UF.name} · ${UF.desc}${c.filtOff?' · <b>wyłączone</b>':''}</div><button class="btn panel up" id="inspFOff">${c.filtOff?'Włącz filtr powietrza':'Wyłącz filtr powietrza'}<br><small style="color:var(--muted);font-weight:500">${c.filtOff?'Mniej smogu, −10% wydajności, +'+UF.upkeep+' T¢/godz.':'Pełna wydajność i brak opłaty, ale wraca smog'}</small></button>`:`<button class="btn panel up" id="inspUpF"${money<UF.cost?' disabled':''}>${UF.name} · ${fmt(UF.cost)} T¢<br><small style="color:var(--muted);font-weight:500">${UF.desc}, +${UF.upkeep} T¢/godz.</small></button>`;
   if(U2)upg+=c.up2?`<div class="eff">Ulepszenie: ${U2.name} · ${U2.desc}</div>`:`<button class="btn panel up" id="inspUp2"${money<U2.cost?' disabled':''}>${U2.name} · ${fmt(U2.cost)} T¢<br><small style="color:var(--muted);font-weight:500">${U2.desc}${U2.upkeep?`, +${U2.upkeep} T¢/godz.`:''}</small></button>`;
   if(U)upg=(c.up?`<div class="eff">Ulepszenie: ${U.name} · ${U.desc}</div>`:`<button class="btn panel up" id="inspUp"${money<U.cost?' disabled':''}>${U.name} · ${fmt(U.cost)} T¢<br><small style="color:var(--muted);font-weight:500">${U.desc}${U.upkeep?`, +${U.upkeep} T¢/godz.`:''}</small></button>`)+upg;
-  const html=`<div class="top"><b>${c.t==='incinerator'&&!c.tiles?'Mała spalarnia':DEF[c.t].name} ${k+1}</b><small>z ${list.length} · pole ${i%N+1}, ${((i/N)|0)+1}</small>
+  const html=`<div class="top"><b>${c.t==='incinerator'&&!c.tiles?'Mała spalarnia':DEF[c.t].name} ${k+1}</b><small>${k+1}. z ${list.length} w kategorii ${ccat} · pole ${i%N+1}, ${((i/N)|0)+1}</small>
       <button class="btn icon panel x" id="inspX" aria-label="Zamknij">×</button></div>
     ${head}${rows.length?`<div class="facts">${rows.join('')}</div>`:''}${foot}${c.off?'':pick}${c.off?'':upg}
     ${HOUSING[c.t]?'':`<button class="btn panel up" id="inspOff">${c.off?ICON_ON+' Włącz budynek':ICON_OFF+' Wyłącz budynek'}<br><small style="color:var(--muted);font-weight:500">${c.off?'Wyłączony: nie produkuje, nie zużywa i nie płaci utrzymania':'Nie produkuje, nie zużywa prądu i wody, nie płaci utrzymania'}</small></button>`}
     ${movable(c)?`<button class="btn panel up" id="inspMv"${money<moveCost(c)?' disabled':''}>✥ Przenieś · ${fmt(moveCost(c))} T¢<br><small style="color:var(--muted);font-weight:500">Połowa ceny samego budynku. Ulepszenia i towar przenoszą się razem z nim</small></button>`:''}
-    <div class="nav"><button class="btn panel" id="inspP">◀ Poprzedni</button>${nt?`<button class="btn panel go" id="inspG"><small>Idź do</small>${DEF[nt].name}</button>`:'<span></span>'}<button class="btn panel" id="inspN">Następny ▶</button></div>`;
+    <div class="nav"><button class="btn panel" id="inspP">◀ Poprzedni</button><span></span><button class="btn panel" id="inspN">Następny ▶</button></div>
+    <div class="chips catnav">${CATS.map(C=>C.name).filter(n=>catList(n).length).map(n=>`<button class="chipb" data-icat="${n}" aria-pressed="${n===ccat}">${n}</button>`).join('')}</div>`;
   if(html===inspEl.__html)return;inspEl.__html=html;inspEl.innerHTML=html;
   document.getElementById('inspX').onclick=closeHouse;document.getElementById('inspP').onclick=()=>stepHouse(-1);document.getElementById('inspN').onclick=()=>stepHouse(1);
   const ub=document.getElementById('inspUp');if(ub)ub.onclick=()=>buyUpgrade(i);
-  const gb=document.getElementById('inspG');if(gb)gb.onclick=()=>{const l=sameType(nt);if(l.length)openHouse(l[0])};
+  for(const b of inspEl.querySelectorAll('[data-icat]'))b.onclick=()=>{const l=catList(b.dataset.icat);if(l.length)openHouse(l[0])};
   for(const b of inspEl.querySelectorAll('[data-line]'))b.onclick=()=>setLine(i,b.dataset.line);
   const frSet=(a,f)=>{const[r,v]=a.split(':');const rs=frRamps(grid[i]);if(!rs[+r])return;f(rs[+r],v);save();renderInsp()};
   for(const b of inspEl.querySelectorAll('[data-fm]'))b.onclick=()=>frSet(b.dataset.fm,(r0,v)=>{r0.m=v});
@@ -2699,16 +2747,19 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   const ub2=document.getElementById('inspUp2');if(ub2)ub2.onclick=()=>buyUpgrade(i,'up2');
   const ubf=document.getElementById('inspUpF');if(ubf)ubf.onclick=()=>buyUpgrade(i,'filt');
   const ob=document.getElementById('inspOff');if(ob)ob.onclick=()=>toggleOff(i);
+  const fo=document.getElementById('inspFOff');if(fo)fo.onclick=()=>{const g=grid[i];if(!g||!g.filt)return;g.filtOff=!g.filtOff;filterVisual(g,true);envDirty=true;powerDirty=true;save();renderInsp()};
   const hu=document.getElementById('inspHU');if(hu)hu.onclick=()=>upgradeHome(i);
   const mvb=document.getElementById('inspMv');if(mvb)mvb.onclick=()=>startMove(i)}
 
 /* ---------- UI ---------- */
-const fmt=n=>Math.round(n).toLocaleString('pl-PL');
+const fin=v=>Number.isFinite(+v)?+v:0;
+const fmt=n=>Math.round(fin(n)).toLocaleString('pl-PL');
 const fmt1=n=>Math.abs(n)<100&&Math.round(n)!==n?(Math.round(n*10)/10).toLocaleString('pl-PL'):fmt(n);
 const toolsEl=document.getElementById('tools'),catsEl=document.getElementById('cats');
 const toolBtns={},catBtns=[];let curCat=0;
 /* line icons for the build menu, 20×20, drawn with currentColor */
 const ICO={
+heliB:'<path d="M3 5h14M10 5v2.5"/><path d="M5.5 10.5c0-1.7 1.6-3 3.5-3h2.2c2.4 0 4.3 1.5 4.3 3.4v.6c0 1.1-.9 2-2 2H8c-1.4 0-2.5-1.1-2.5-2.5z"/><path d="M5.5 10.5H2.5M8 13v3M13 13v3M6.5 16h8"/>',
 rail:'<path d="M6.5 2.5L4.5 17.5M13.5 2.5l2 15M5.6 6h8.8M5.1 10h9.8M4.7 14h10.6"/>',
 taxi:'<path d="M3 13.5V11l1.6-3.8A1.5 1.5 0 0 1 6 6.3h8a1.5 1.5 0 0 1 1.4.9L17 11v2.5"/><path d="M2.5 13.5h15v2.5h-15zM8 6.3V4.5h4v1.8"/><circle cx="6" cy="16" r="1.2"/><circle cx="14" cy="16" r="1.2"/>',
 trainSt:'<rect x="5" y="2.5" width="10" height="11" rx="2"/><path d="M5 8.5h10M7.5 16.5l-2 1.5M12.5 16.5l2 1.5"/><circle cx="7.8" cy="11" r=".6"/><circle cx="12.2" cy="11" r=".6"/>',
@@ -3108,11 +3159,11 @@ const U={clockSub:document.getElementById('clockSub'),clock:document.getElementB
   happy:document.getElementById('happy'),happyBar:document.getElementById('happyBar'),
   pow:document.getElementById('pow'),powCap:document.getElementById('powCap'),powBar:document.getElementById('powBar'),rp:document.getElementById('r-pow')};
 /* short numbers keep the HUD from jumping: 100 000+ as k, millions as M; power switches to GW from 1000 MW */
-const cpt=(n,th=1e4)=>{const a=Math.abs(n),f1=v=>(Math.round(v*10)/10).toLocaleString('pl-PL',{maximumFractionDigits:1});return a>=999950?f1(n/1e6)+'M':a>=th?f1(n/1e3)+'k':fmt(n)};
+const cpt=(n,th=1e4)=>{n=fin(n);const a=Math.abs(n),f1=v=>(Math.round(v*10)/10).toLocaleString('pl-PL',{maximumFractionDigits:1});return a>=999950?f1(n/1e6)+'M':a>=th?f1(n/1e3)+'k':fmt(n)};
 const pwr=(x,gw)=>gw?(x/1000).toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2}):x.toLocaleString('pl-PL',{minimumFractionDigits:1,maximumFractionDigits:1});
 let last={},hudT=0;const segs={};
 for(const k of['mat',...Object.keys(goods)]){const sp=document.createElement('span');sp.style.background=GOODS[k].col;sp.title=GOODS[k].name;document.getElementById('matBar').appendChild(sp);segs[k]=sp}
-function hud(){const mc=moneyCap(),tc=matCap();const v={m:Math.round(money),mc,t:Math.round(stored()),tc};
+function hud(){fixNaN();const mc=moneyCap(),tc=matCap();const v={m:Math.round(money),mc,t:Math.round(stored()),tc};
   {const L=hist[hist.length-1],d=L?Math.round(opNet(L)):null,el=document.getElementById('moneyD');if(d!==last.md){last.md=d;el.textContent=d==null?'':(d>=0?'+':'−')+cpt(Math.abs(d),1e3);el.className='dlt '+(d==null?'':d>=0?'pos':'neg');el.title='Wynik ostatniej pełnej godziny: przychody minus utrzymanie i straty (bez budowy, ulepszeń i pożyczek)'}}
   if(v.m!==last.m||v.mc!==last.mc){U.money.textContent=cpt(v.m);U.moneyCap.textContent=cpt(mc);U.moneyBar.style.width=(mc?v.m/mc*100:0)+'%';U.rm.classList.toggle('full',v.m>=mc);U.rm.classList.toggle('short',v.m<0);
     for(const k in DEF)if(toolBtns[k])toolBtns[k].classList.toggle('poor',money<DEF[k].cost)}
@@ -3137,7 +3188,7 @@ function hud(){const mc=moneyCap(),tc=matCap();const v={m:Math.round(money),mc,t
 /* ---------- save / preset ---------- */
 const KEY='siatkowo-v4';let oldSave=false;
 let saveBlocked=false;
-function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,off:c.off?1:0,rot:c.rot,rot1:c.rot1,aband:c.aband?1:undefined,ruin:c.ruin?1:undefined,fr:c.fr?c.fr.map(r0=>({...r0})):undefined,waiting:c.waiting||undefined,burn:c.burn?Math.round(gameT-c.burn.t0):undefined,pp:c.pp&&c.pp.length?c.pp.map(q=>[Math.round(q.a*10)/10,q.s,q.si,q.h||0,q.s===2?q.hi:-1]):undefined,dead:c.dead||undefined,lb:c.lastBuy!=null?Math.round(gameT-c.lastBuy):undefined,bodies:c.bodies||undefined,urn:c.urn&&c.urn.length?c.urn.map(t=>Math.round(t-gameT)):undefined,lowT:c.lowT?Math.round(c.lowT*1000)/1000:undefined,jail:c.jail&&c.jail.length?c.jail.map(q=>[Math.round(q.rel),q.w||0]):undefined,lv:c.lv||0,xp:c.xp?Math.round(c.xp*1000)/1000:0,lines:c.lines,owned:c.owned}]}
+function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,filtOff:c.filtOff?1:undefined,off:c.off?1:0,rot:c.rot,rot1:c.rot1,aband:c.aband?1:undefined,ruin:c.ruin?1:undefined,fr:c.fr?c.fr.map(r0=>({...r0})):undefined,waiting:c.waiting||undefined,burn:c.burn?Math.round(gameT-c.burn.t0):undefined,pp:c.pp&&c.pp.length?c.pp.map(q=>[Math.round(q.a*10)/10,q.s,q.si,q.h||0,q.s===2?q.hi:-1]):undefined,dead:c.dead||undefined,lb:c.lastBuy!=null?Math.round(gameT-c.lastBuy):undefined,bodies:c.bodies||undefined,urn:c.urn&&c.urn.length?c.urn.map(t=>Math.round(t-gameT)):undefined,lowT:c.lowT?Math.round(c.lowT*1000)/1000:undefined,jail:c.jail&&c.jail.length?c.jail.map(q=>[Math.round(q.rel),q.w||0]):undefined,lv:c.lv||0,xp:c.xp?Math.round(c.xp*1000)/1000:0,lines:c.lines,owned:c.owned}]}
 function save(){if(saveBlocked)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
   const old=localStorage.getItem(KEY);if(old)localStorage.setItem(KEY+'-prev',old);
   localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,loan,sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),ms:msLevel,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
@@ -3148,7 +3199,7 @@ function load(){if(loadKey(KEY))return true;if(oldSave){try{const r=localStorage
 function recountPatients(){for(const c of grid)if(c&&MED[c.t])c.pat=0;for(const c of grid)if(c&&c.pp)for(const q of c.pp)if(q.s===2){const m=grid[q.hi];if(m&&MED[m.t])m.pat++;else{q.s=1;q.hi=-1}}}
 function placeRow(row,anim){let[i,t,p,st,up,tr,gs,sec,x]=row;addCell(i,t,!!anim,Array.isArray(sec)?sec:(sec>=0?sec:-1));const c=grid[i];
     if(x&&t==='gallery'){c.stores=x.stores||[];c.shelf=x.shelf||{};paintStores(c);if(x.cinema){c.cinema=true;cinemaVisual(c)}}
-    if(x&&(t==='restaurant'||t==='bakery'))c.shelf=x.shelf||{};if(x&&t==='hotelB'&&x.attr&&ATTR[x.attr]){c.attr=x.attr;c.model.userData.attrSign.material=M(ATTR_COL[x.attr])}if(x&&x.up2&&UPG2[t]){c.up2=true;addUpgrade2Visual(c)}if(x&&x.filt&&UPGF[t]){c.filt=true;filterVisual(c)}if(x&&x.off)c.off=true;
+    if(x&&(t==='restaurant'||t==='bakery'))c.shelf=x.shelf||{};if(x&&t==='hotelB'&&x.attr&&ATTR[x.attr]){c.attr=x.attr;c.model.userData.attrSign.material=M(ATTR_COL[x.attr])}if(x&&x.up2&&UPG2[t]){c.up2=true;addUpgrade2Visual(c)}if(x&&x.filt&&UPGF[t]){c.filt=true;c.filtOff=!!x.filtOff;filterVisual(c)}if(x&&x.off)c.off=true;
     if(x&&isFactory(t)&&LINES[x.line]&&!FREE_LINES[x.line]&&t!=='smallfac')up=1;if(t==='smallfac'){up=0;if(x)x.line='mix'}
     if(x&&t==='shop1'&&SPECS[x.spec]&&x.spec!=='mall'){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(up&&t==='shop1'){c.up=true;shopFloor(c);up=0}
     if(x&&t==='shop'&&SPECS[x.spec]){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(x&&isFactory(t)&&LINES[x.line]){c.line=x.line;paintModel(c,GM[c.line])}if(x&&isFarm(t))c.acc=x.acc||0;
@@ -3168,9 +3219,9 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
   for(let i=0;i<N*N;i++)rebuildRoad(i);money=s.money||0;mapType=MAPS[s.map]?s.map:'standard';diff=DIFF[s.diff]?s.diff:'old';taxRate=s.tax>=10&&s.tax<=20?s.tax:12;loan=s.loan&&LOANS[s.loan.k]?s.loan:null;imports={};if(s.imports)for(const k in s.imports)imports[k]=(s.gameT||gameT)+s.imports[k];tut=s.tut&&s.tut.on?s.tut:null;matl=s.matl||0;if(s.goods)for(const k in goods)goods[k]=s.goods[k]||0;
   pipe.fill(0);if(Array.isArray(s.pipes))for(const i of s.pipes)pipe[i]=1;
   if(Array.isArray(s.rails))for(const i of s.rails)if(grid[i]&&STREET[grid[i].t])grid[i].rail=true;railVer++;railRefreshAll();
-  if(Array.isArray(s.edges))for(const[i,o]of s.edges)if(grid[i]&&DRIVE[grid[i].t]){grid[i].edge=true;if(o)grid[i].edgeOut=true;rebuildRoad(i)}
+  if(Array.isArray(s.edges))for(const[i,o]of s.edges){if(grid[i]&&grid[i].t==='rail'){grid[i].edge=true;continue}if(grid[i]&&DRIVE[grid[i].t]){grid[i].edge=true;if(o)grid[i].edgeOut=true;rebuildRoad(i)}}
   if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(!window.__testUnlock)msLevel=Math.max(0,Math.min(MS.length-1,s.ms|0));if(typeof s.name==='string'&&s.name.trim())cityName=s.name.trim().slice(0,24);for(const[i,a]of loadFires){if(!grid[i])continue;if(a<0)makeRuin(i,true);else startFire(i,a)}loadFires=[];if(Array.isArray(s.hist))hist=s.hist;return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
-function clearCity(){for(const cr of crimes)cr.pin.remove();crimes=[];for(const f of fires){scene.remove(f.fx);if(f.spray)scene.remove(f.spray);f.pin.remove()}fires=[];for(const tr of trains)scene.remove(tr.g);trains=[];for(const C of constructs){C.cell.group.remove(C.sc,C.cr)}constructs.length=0;for(const c of cars)scene.remove(c.mesh);cars=[];resMap.clear();for(let i=0;i<N*N;i++)if(grid[i])removeCell(i);
+function clearCity(){for(const cr of crimes)cr.pin.remove();crimes=[];for(const f of fires){scene.remove(f.fx);if(f.spray)scene.remove(f.spray);f.pin.remove()}fires=[];for(const h of helis){scene.remove(h.m)}helis=[];for(const tr of trains)scene.remove(tr.g);trains=[];for(const C of constructs){C.cell.group.remove(C.sc,C.cr)}constructs.length=0;for(const c of cars)scene.remove(c.mesh);cars=[];resMap.clear();for(let i=0;i<N*N;i++)if(grid[i])removeCell(i);
   for(const f of floats)f.el.remove();floats=[]}
 function preset(type,d){if(type&&MAPS[type])mapType=type;if(d&&DIFF[d])diff=d;pipe.fill(0);money=startCash();matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);applyWater();makeEntries()}
 /* ---------- main menu: continue / new game / options / exit, with a small town turning slowly behind it ---------- */
@@ -3266,7 +3317,7 @@ function frame(now){requestAnimationFrame(frame);
     if(c.timer<=0){const iv=60/(TIER[c.happy??3].trips*H.trips*hMul(c))*(night?2:1);c.timer+=iv;if(c.timer<=0)c.timer=iv;if(cars.length<PEOPLE_CARS)spawnCommuter(i)}}
   buildOcc();for(const c of cars)if(!c.dead)updateCar(c,dt);
   if(cars.some(c=>c.dead))cars=cars.filter(c=>!c.dead);
-  constructTick(dt);policeTick(dt,night);fireTick(dt);transportTick(dt);riverTick(dt);tutTick(Math.max(dt,0.016));ovlTick(Math.max(dt,0.016));
+  constructTick(dt);policeTick(dt,night);fireTick(dt);heliTick(dt);transportTick(dt);riverTick(dt);tutTick(Math.max(dt,0.016));ovlTick(Math.max(dt,0.016));
   for(let k=popping.length-1;k>=0;k--){const p=popping[k];p.t+=dt*5;const s=p.t>=1?1:0.5+0.5*Math.sin(p.t*Math.PI/2)*1.08;p.g.scale.setScalar(Math.min(s,1.05));if(p.t>=1){p.g.scale.setScalar(1);popping.splice(k,1)}}
   powerAcc+=dt;if(powerAcc>=0.25||powerDirty){computePower(powerAcc);powerAcc=0}
   const hBefore=Math.floor(gameT/60),halfBefore=Math.floor(gameT/30);gameT+=dt;cur.secs+=dt;cur.powDem+=pw.dem*dt;if(pw.cat){cur.powCat=cur.powCat||{};for(const k in pw.cat)cur.powCat[k]=(cur.powCat[k]||0)+pw.cat[k]*dt}cur.powCap+=pw.cap*dt;
