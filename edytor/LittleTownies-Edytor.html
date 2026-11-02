@@ -71,7 +71,7 @@ iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:
       <button id="cmpBtn" aria-pressed="false" title="Pokaż model bez zmian">Oryginał</button>
       <button id="snapBtn" aria-pressed="true" title="Przyciąganie do siatki 0,05 i 15°">Przyciąganie</button>
     </div>
-    <div class="hint" id="hint">Kliknij część modelu, żeby ją zaznaczyć. Lewy przycisk obraca widok, prawy przesuwa, kółko przybliża.</div>
+    <div class="hint" id="hint">Kliknij część, żeby ją zaznaczyć; Shift lub Ctrl + klik dodaje kolejne. Ctrl+A zaznacza wszystko, Ctrl+C / Ctrl+V kopiuje i wkleja, Ctrl+D duplikuje. Lewy przycisk obraca widok, prawy przesuwa, kółko przybliża.</div>
     <div class="load" id="loadBox"><div class="box">
       <b>Wczytaj grę, żeby edytować jej modele</b>
       <span class="muted">„Wczytaj grę z GitHuba” pobiera aktualną wersję z MrShelo/LittleTowniesUpdates. Możesz też wskazać plik gry (index.html albo LittleTownies.html).</span>
@@ -92,10 +92,11 @@ iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:
         <span class="muted">Skala</span><input type="number" step="0.01" id="sx" aria-label="Skala X"><input type="number" step="0.01" id="sy" aria-label="Skala Y"><input type="number" step="0.01" id="sz" aria-label="Skala Z">
       </div>
       <div class="row" style="margin-top:8px"><button id="hideBtn">Ukryj część</button><button id="resetPart">Przywróć część</button><button id="delAdd" hidden>Usuń bryłę</button></div>
+      <div class="row" style="margin-top:6px"><button id="copyBtn" title="Ctrl+C">Kopiuj</button><button id="pasteBtn" title="Ctrl+V" disabled>Wklej</button><button id="dupBtn" title="Ctrl+D">Duplikuj</button><button id="allBtn" title="Ctrl+A">Zaznacz wszystko</button></div>
     </div>
     <div class="sec" id="addSec" hidden>
       <h2>Dodaj bryłę</h2>
-      <div class="row"><button data-add="box">Prostopadłościan</button><button data-add="cyl">Walec</button><button data-add="cone">Stożek</button><button data-add="sphere">Kula</button></div>
+      <div class="row"><button data-add="box">Prostopadłościan</button><button data-add="cyl">Walec</button><button data-add="cone">Stożek</button><button data-add="sphere">Kula</button><button data-add="pyr">Ostrosłup</button></div>
     </div>
     <div class="sec" id="saveSec" hidden>
       <div class="row"><button class="pri" id="saveBtn">Zapisz model</button><button id="discardBtn">Cofnij niezapisane</button><button id="origBtn">Wróć do oryginału gry</button></div>
@@ -123,7 +124,7 @@ const REPO='MrShelo/LittleTowniesUpdates',BRANCH='main',API='https://api.github.
 const LS_DRAFT='lt-model-drafts',LS_TOKEN='lt-editor-token';
 const $=id=>document.getElementById(id);
 const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let api=null,T=null,renderer,scene,camera,orbit,tc,raycaster,root=null,helper=null,models=[],cur=null,work=null,base=null,ms=[],orig=[],added=[],sel=-1,showOrig=false,published={},gameHtml='',checked=new Set();
+let api=null,T=null,renderer,scene,camera,orbit,tc,raycaster,root=null,models=[],cur=null,work=null,base=null,ms=[],orig=[],added=[],sel=[],helpers=[],pivot=null,rels=[],clip=[],clipFrom='',showOrig=false,published={},gameHtml='',checked=new Set();
 let drafts=store.get(LS_DRAFT,{});
 try{$('token').value=localStorage.getItem(LS_TOKEN)||''}catch(e){}
 const status=(t,cls)=>{$('status').textContent=t;$('status').className='st '+(cls||'')};
@@ -156,15 +157,17 @@ function setup3D(){const cv=$('cv');renderer=new T.WebGLRenderer({canvas:cv,anti
   const gr=new T.Mesh(new T.PlaneGeometry(12,12),new T.MeshLambertMaterial({color:0x9fd36b}));gr.rotation.x=-Math.PI/2;gr.receiveShadow=true;scene.add(gr);
   const gh=new T.GridHelper(12,12,0x6f9a4a,0x7fae55);gh.position.y=0.002;scene.add(gh);
   orbit=new T.OrbitControls(camera,cv);orbit.enableDamping=true;orbit.target.set(0,0.3,0);
-  tc=new T.TransformControls(camera,cv);tc.setSize(0.8);tc.addEventListener('dragging-changed',e=>{orbit.enabled=!e.value});tc.addEventListener('objectChange',()=>{recordSel();fillProps()});scene.add(tc);setSnap(true);
+  tc=new T.TransformControls(camera,cv);tc.setSize(0.8);tc.addEventListener('dragging-changed',e=>{orbit.enabled=!e.value});tc.addEventListener('objectChange',()=>{if(pivot)applyPivot();else recordIdx(sel[0]);fillProps()});scene.add(tc);setSnap(true);
   raycaster=new T.Raycaster();let down=null;cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY]});cv.addEventListener('pointerup',e=>{if(!down||tc.dragging)return;if(Math.hypot(e.clientX-down[0],e.clientY-down[1])<4)pick(e);down=null});
   const rs=()=>{const r=cv.parentNode.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix()};new ResizeObserver(rs).observe(cv.parentNode);rs();
-  const loop=()=>{requestAnimationFrame(loop);orbit.update();if(helper)helper.update();renderer.render(scene,camera)};loop()}
+  const loop=()=>{requestAnimationFrame(loop);orbit.update();for(const h of helpers)h.update();renderer.render(scene,camera)};loop()}
 function setSnap(on){if(!tc)return;tc.setTranslationSnap(on?0.05:null);tc.setRotationSnap(on?rad(15):null);tc.setScaleSnap(on?0.05:null);$('snapBtn').setAttribute('aria-pressed',String(on))}
 $('snapBtn').onclick=()=>setSnap($('snapBtn').getAttribute('aria-pressed')!=='true');
 for(const b of document.querySelectorAll('[data-mode]'))b.onclick=()=>setMode(b.dataset.mode);
 function setMode(m){if(!tc)return;tc.setMode(m);for(const b of document.querySelectorAll('[data-mode]'))b.setAttribute('aria-pressed',String(b.dataset.mode===m))}
-addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;const k=e.key.toLowerCase();if(k==='w')setMode('translate');else if(k==='e')setMode('rotate');else if(k==='r')setMode('scale');else if(k==='escape')select(-1);else if((k==='delete'||k==='backspace')&&sel>=ms.length)delAdded()});
+addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;const k=e.key.toLowerCase(),mod=e.ctrlKey||e.metaKey;
+  if(mod){const f={a:selectAll,c:copySel,v:pasteClip,d:dupSel}[k];if(f){e.preventDefault();f()}return}
+  if(k==='w')setMode('translate');else if(k==='e')setMode('rotate');else if(k==='r')setMode('scale');else if(k==='escape')select([]);else if(k==='delete'||k==='backspace')delSel()});
 
 /* ---------- model list ---------- */
 function stateOf(k){return drafts[k]?'s':published[k]?'g':''}
@@ -176,40 +179,92 @@ $('search').oninput=renderList;
 
 /* ---------- open / build a model with an override ---------- */
 function openModel(key){if(cur&&isDirty()&&!confirm('Model ma niezapisane zmiany. Porzucić je?'))return;cur=key;work=clone((drafts[key]&&drafts[key].ovr)||published[key]);base=JSON.stringify(work);showOrig=false;$('cmpBtn').setAttribute('aria-pressed','false');rebuild();renderList();frame()}
-function rebuild(){if(root){scene.remove(root)}tc.detach();if(helper){scene.remove(helper);helper=null}
+function rebuild(){if(root){scene.remove(root)}tc.detach();for(const h of helpers)scene.remove(h);helpers=[];pivot=null;sel=[];
   root=api.build(cur,false);ms=[];if(root.userData.edit){ms=root.userData.edit.slice();root.traverse(m=>{if(m.isMesh&&!ms.includes(m)&&m.material&&m.material.clone){m.material=m.material.clone();m.material.transparent=true;m.material.opacity=0.45;m.material.depthWrite=false}})}else root.traverse(m=>{if(m.isMesh)ms.push(m)});
-  orig=ms.map(m=>({p:m.position.toArray(),r:[m.rotation.x,m.rotation.y,m.rotation.z],s:m.scale.toArray(),c:m.material&&m.material.color?'#'+m.material.color.getHexString():'#cccccc',vis:m.visible}));
+  orig=ms.map(m=>Object.assign({p:m.position.toArray(),r:[m.rotation.x,m.rotation.y,m.rotation.z],s:m.scale.toArray()},rootPose(m),{c:m.material&&m.material.color?'#'+m.material.color.getHexString():'#cccccc',vis:m.visible}));
   for(const m of ms){if(m.material&&m.material.clone)m.material=m.material.clone();m.castShadow=true;m.receiveShadow=true}
   added=[];if(!showOrig){for(const k in work.mods){const m=ms[+k];if(m)applyMod(m,work.mods[k])}for(const a of work.add)added.push(makeAdded(a))}
   scene.add(root);const m=models.find(x=>x.key===cur);$('mName').innerHTML='';const b=document.createElement('b');b.textContent=m?m.name:cur;$('mName').appendChild(b);
   const sm=document.createElement('div');sm.className='muted';sm.textContent=`${cur} · ${ms.length} ${ms.length===1?'część':'części'}${work.add.length?` + ${work.add.length} nowych`:''}`+(root.userData.edit?' · edytujesz tylko części dodane przez ulepszenie; reszta budynku jest półprzezroczysta':'');$('mName').appendChild(sm);
-  for(const id of['partSec','addSec','saveSec'])$(id).hidden=showOrig;fillPartSel();select(-1);updDirty()}
-function applyMod(m,d){if(d.h)m.visible=false;if(d.c&&m.material&&m.material.color)m.material.color.set(d.c);if(d.p)m.position.fromArray(d.p);if(d.r)m.rotation.set(d.r[0],d.r[1],d.r[2]);if(d.s)m.scale.fromArray(d.s)}
-const GEO={};function geo(k){if(!GEO[k])GEO[k]=k==='cyl'?new T.CylinderGeometry(0.5,0.5,1,16):k==='cone'?new T.ConeGeometry(0.5,1,16):k==='sphere'?new T.SphereGeometry(0.5,16,12):new T.BoxGeometry(1,1,1);return GEO[k]}
-function makeAdded(a){const m=new T.Mesh(geo(a.g),new T.MeshLambertMaterial({color:a.c||'#cccccc'}));m.position.fromArray(a.p);m.rotation.set(a.r[0],a.r[1],a.r[2]);m.scale.fromArray(a.s);m.castShadow=m.receiveShadow=true;root.add(m);return m}
+  for(const id of['partSec','addSec','saveSec'])$(id).hidden=showOrig;fillPartSel();select([]);updDirty()}
+function applyMod(m,d){if(d.h)m.visible=false;if(d.c&&m.material&&m.material.color)m.material.color.set(d.c);if(d.rs&&m.parent&&m.parent!==root)setRootPose(m,d);else{if(d.p)m.position.fromArray(d.p);if(d.r)m.rotation.set(d.r[0],d.r[1],d.r[2]);if(d.s)m.scale.fromArray(d.s)}}
+/* parts nested in sub-groups are stored relative to the model root (rs), exactly like the game applies them */
+const nested=m=>m.parent&&m.parent!==root;
+function rootPose(m){if(!nested(m))return{};const P=new T.Vector3(),Q=new T.Quaternion(),S=new T.Vector3();rootLocal(m).decompose(P,Q,S);const e=new T.Euler().setFromQuaternion(Q);return{wp:P.toArray(),wr:[e.x,e.y,e.z],ws:S.toArray()}}
+function setRootPose(m,d){root.updateMatrixWorld(true);const pr=new T.Matrix4().copy(root.matrixWorld).invert().multiply(m.parent.matrixWorld);const P=new T.Vector3(),Q=new T.Quaternion(),S=new T.Vector3();pr.clone().multiply(m.matrix).decompose(P,Q,S);
+  if(d.p)P.fromArray(d.p);if(d.r)Q.setFromEuler(new T.Euler(d.r[0],d.r[1],d.r[2]));if(d.s)S.fromArray(d.s);pr.invert().multiply(new T.Matrix4().compose(P,Q,S)).decompose(m.position,m.quaternion,m.scale)}
+const GEO={};function geo(k){if(!GEO[k])GEO[k]=k==='cyl'?new T.CylinderGeometry(0.5,0.5,1,16):k==='cone'?new T.ConeGeometry(0.5,1,16):k==='sphere'?new T.SphereGeometry(0.5,16,12):k==='pyr'?new T.ConeGeometry(Math.SQRT1_2,1,4).rotateY(Math.PI/4):new T.BoxGeometry(1,1,1);return GEO[k]}
+/* same rules as the game: exact copies keep a three.js geometry type + parameters (gp, offset go) or raw triangles (v) */
+const GT=['BoxGeometry','CylinderGeometry','ConeGeometry','SphereGeometry','PlaneGeometry','CircleGeometry','TorusGeometry','RingGeometry','DodecahedronGeometry','IcosahedronGeometry','OctahedronGeometry','TetrahedronGeometry'];
+function geoOf(a){if(!a.gp&&!a.v&&!a.go)return geo(a.g);let g;try{if(a.v){g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(a.v,3));g.computeVertexNormals()}else if(a.gp&&GT.includes(a.g))g=new T[a.g](...a.gp);else g=geo(a.g).clone();if(a.go)g.translate(a.go[0],a.go[1],a.go[2])}catch(e){g=geo('box')}return g}
+const RAW_MAX=1200;
+function geoSpec(G){const V=()=>new T.Vector3();if(G.parameters&&GT.includes(G.type)){const a={g:G.type,gp:Object.values(G.parameters)};
+    try{const t=geoOf(a);G.computeBoundingBox();t.computeBoundingBox();const s1=G.boundingBox.getSize(V()),s2=t.boundingBox.getSize(V());
+      if(s1.distanceTo(s2)<1e-3){const d=G.boundingBox.getCenter(V()).sub(t.boundingBox.getCenter(V()));if(d.length()>1e-4)a.go=d.toArray().map(r4);return a}}catch(e){}}
+  const g2=G.index?G.toNonIndexed():G,pos=g2.attributes&&g2.attributes.position;if(!pos||pos.count>RAW_MAX)return null;return{g:'raw',v:Array.from(pos.array,r4)}}
+function makeAdded(a){const m=new T.Mesh(geoOf(a),new T.MeshLambertMaterial({color:a.c||'#cccccc'}));m.position.fromArray(a.p);m.rotation.set(a.r[0],a.r[1],a.r[2]);m.scale.fromArray(a.s);m.castShadow=m.receiveShadow=true;root.add(m);return m}
 function frame(){const b=new T.Box3().setFromObject(root),c=b.getCenter(new T.Vector3()),sz=b.getSize(new T.Vector3()).length()||1;orbit.target.copy(c);camera.position.copy(c).add(new T.Vector3(0.9,0.75,1.05).multiplyScalar(sz*1.2));orbit.update()}
 
-/* ---------- selection & editing ---------- */
+/* ---------- selection & editing (one or many parts) ---------- */
 const objOf=i=>i<0?null:i<ms.length?ms[i]:added[i-ms.length];
+const isAdd=i=>i>=ms.length;
+function rootLocal(o){root.updateMatrixWorld(true);return new T.Matrix4().copy(root.matrixWorld).invert().multiply(o.matrixWorld)}
+let noteT=0;function note(t){const h=$('hint');if(!h.dataset.base)h.dataset.base=h.textContent;h.textContent=t;clearTimeout(noteT);noteT=setTimeout(()=>{h.textContent=h.dataset.base},4500)}
 function pick(e){if(showOrig||!root)return;const r=$('cv').getBoundingClientRect();const v=new T.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(v,camera);
-  const hit=raycaster.intersectObjects([...ms,...added].filter(o=>o.visible),false)[0];if(!hit)return select(-1);const o=hit.object;const i=ms.indexOf(o);select(i>=0?i:ms.length+added.indexOf(o))}
-function select(i){sel=i;const o=objOf(i);if(helper){scene.remove(helper);helper=null}if(o){tc.attach(o);helper=new T.BoxHelper(o,0xe2552e);scene.add(helper)}else tc.detach();$('partSel').value=String(i);fillProps()}
-function fillPartSel(){const s=$('partSel');s.innerHTML='<option value="-1">— wybierz część —</option>'+ms.map((m,i)=>`<option value="${i}">#${i} · ${(work.mods[i]&&work.mods[i].h)?'ukryta':orig[i].c}${work.mods[i]?' · zmieniona':''}</option>`).join('')+added.map((m,k)=>`<option value="${ms.length+k}">+${k+1} · ${({box:'nowy prostopadłościan',cyl:'nowy walec',cone:'nowy stożek',sphere:'nowa kula'})[work.add[k].g]||'nowa bryła'}</option>`).join('');s.value=String(sel)}
-$('partSel').onchange=e=>select(+e.target.value);
-function fillProps(){const o=objOf(sel),on=!!o;for(const id of['pCol','px','py','pz','rx','ry','rz','sx','sy','sz','hideBtn','resetPart'])$(id).disabled=!on;$('delAdd').hidden=!(on&&sel>=ms.length);$('resetPart').hidden=sel>=ms.length;
-  if(!on){for(const id of['px','py','pz','rx','ry','rz','sx','sy','sz'])$(id).value='';return}$('pCol').value='#'+o.material.color.getHexString();[['px',o.position.x],['py',o.position.y],['pz',o.position.z],['sx',o.scale.x],['sy',o.scale.y],['sz',o.scale.z]].forEach(([k,v])=>$(k).value=r4(v));
-  $('rx').value=deg(o.rotation.x);$('ry').value=deg(o.rotation.y);$('rz').value=deg(o.rotation.z);const hid=sel<ms.length&&work.mods[sel]&&work.mods[sel].h;$('hideBtn').textContent=hid?'Pokaż część':'Ukryj część'}
-function recordSel(){const o=objOf(sel);if(!o)return;const t={p:o.position.toArray().map(r4),r:[o.rotation.x,o.rotation.y,o.rotation.z].map(r4),s:o.scale.toArray().map(r4)};
-  if(sel<ms.length){const d=work.mods[sel]=work.mods[sel]||{},O=orig[sel];const same=(a,b)=>a.every((v,k)=>Math.abs(v-b[k])<1e-4);
-    if(same(t.p,O.p))delete d.p;else d.p=t.p;if(same(t.r,O.r))delete d.r;else d.r=t.r;if(same(t.s,O.s))delete d.s;else d.s=t.s;if(!Object.keys(d).length)delete work.mods[sel]}
-  else Object.assign(work.add[sel-ms.length],t);updDirty()}
-for(const id of['px','py','pz','rx','ry','rz','sx','sy','sz'])$(id).onchange=()=>{const o=objOf(sel);if(!o)return;o.position.set(+$('px').value,+$('py').value,+$('pz').value);o.rotation.set(rad(+$('rx').value),rad(+$('ry').value),rad(+$('rz').value));o.scale.set(+$('sx').value||0.001,+$('sy').value||0.001,+$('sz').value||0.001);recordSel()};
-$('pCol').oninput=()=>{const o=objOf(sel);if(!o)return;const c=$('pCol').value;o.material.color.set(c);if(sel<ms.length){const d=work.mods[sel]=work.mods[sel]||{};if(c.toLowerCase()===orig[sel].c.toLowerCase())delete d.c;else d.c=c;if(!Object.keys(d).length)delete work.mods[sel]}else work.add[sel-ms.length].c=c;updDirty()};
-$('hideBtn').onclick=()=>{if(sel<0)return;if(sel>=ms.length){delAdded();return}const d=work.mods[sel]=work.mods[sel]||{};if(d.h){delete d.h;ms[sel].visible=true}else{d.h=1;ms[sel].visible=false}if(!Object.keys(d).length)delete work.mods[sel];fillPartSel();fillProps();updDirty()};
-$('resetPart').onclick=()=>{if(sel<0||sel>=ms.length)return;delete work.mods[sel];const m=ms[sel],O=orig[sel];m.position.fromArray(O.p);m.rotation.set(O.r[0],O.r[1],O.r[2]);m.scale.fromArray(O.s);m.material.color.set(O.c);m.visible=O.vis;fillPartSel();fillProps();updDirty()};
-function delAdded(){const k=sel-ms.length;if(k<0)return;root.remove(added[k]);added.splice(k,1);work.add.splice(k,1);select(-1);fillPartSel();updDirty()}
+  const many=e.shiftKey||e.ctrlKey||e.metaKey;const hit=raycaster.intersectObjects([...ms,...added].filter(o=>o.visible),false)[0];if(!hit){if(!many)select([]);return}
+  const o=hit.object;let i=ms.indexOf(o);if(i<0)i=ms.length+added.indexOf(o);if(many)select(sel.includes(i)?sel.filter(x=>x!==i):[...sel,i]);else select([i])}
+function select(list){sel=[...new Set(list)].filter(i=>objOf(i));for(const h of helpers)scene.remove(h);helpers=[];tc.detach();if(pivot&&pivot.parent)pivot.parent.remove(pivot);pivot=null;rels=[];
+  for(const i of sel){const h=new T.BoxHelper(objOf(i),0xe2552e);scene.add(h);helpers.push(h)}
+  if(sel.length===1)tc.attach(objOf(sel[0]));
+  else if(sel.length>1){const b=new T.Box3();for(const i of sel)b.expandByObject(objOf(i));pivot=new T.Object3D();root.add(pivot);root.updateMatrixWorld(true);pivot.position.copy(root.worldToLocal(b.getCenter(new T.Vector3())));pivot.updateMatrix();
+    const pinv=pivot.matrix.clone().invert();rels=sel.map(i=>pinv.clone().multiply(rootLocal(objOf(i))));tc.attach(pivot)}
+  syncPartSel();fillProps()}
+/* the pivot carries every selected part: each keeps its pose relative to the pivot */
+function applyPivot(){if(!pivot)return;pivot.updateMatrix();sel.forEach((i,k)=>{const o=objOf(i);const want=pivot.matrix.clone().multiply(rels[k]);const par=o.parent===root?new T.Matrix4():rootLocal(o.parent);par.invert().multiply(want).decompose(o.position,o.quaternion,o.scale);recordIdx(i)})}
+const selectAll=()=>{if(root&&!showOrig)select([...ms.keys(),...added.map((_,k)=>ms.length+k)].filter(i=>objOf(i).visible))};
+const ADD_NAMES={box:'nowy prostopadłościan',cyl:'nowy walec',cone:'nowy stożek',sphere:'nowa kula',pyr:'nowy ostrosłup'};
+function fillPartSel(){const s=$('partSel');s.innerHTML='<option value="-1">— wybierz część —</option><option value="multi" hidden></option>'+ms.map((m,i)=>`<option value="${i}">#${i} · ${(work.mods[i]&&work.mods[i].h)?'ukryta':orig[i].c}${work.mods[i]?' · zmieniona':''}</option>`).join('')+added.map((m,k)=>{const a=work.add[k];return`<option value="${ms.length+k}">+${k+1} · ${a.gp||a.v?'kopia części':ADD_NAMES[a.g]||'nowa bryła'}</option>`}).join('');syncPartSel()}
+function syncPartSel(){const s=$('partSel'),mo=s.querySelector('option[value="multi"]');if(mo){mo.hidden=sel.length<2;mo.textContent=`Zaznaczono ${sel.length} części`}s.value=sel.length===1?String(sel[0]):sel.length?'multi':'-1'}
+$('partSel').onchange=e=>{const v=e.target.value;if(v!=='multi')select(v==='-1'?[]:[+v])};
+function fillProps(){const n=sel.length,o=n===1?objOf(sel[0]):pivot,on=!!o,origs=sel.filter(i=>!isAdd(i)),adds=sel.filter(isAdd);
+  for(const id of['pCol','px','py','pz','rx','ry','rz','sx','sy','sz','copyBtn','dupBtn'])$(id).disabled=!on;
+  $('hideBtn').disabled=!on||(n>1&&!origs.length);$('resetPart').hidden=!origs.length;$('resetPart').textContent=origs.length>1?`Przywróć części (${origs.length})`:'Przywróć część';
+  $('delAdd').hidden=!adds.length;$('delAdd').textContent=adds.length>1?`Usuń bryły (${adds.length})`:'Usuń bryłę';$('pasteBtn').disabled=!clip.length||!root||showOrig;
+  if(!on){for(const id of['px','py','pz','rx','ry','rz','sx','sy','sz'])$(id).value='';$('hideBtn').textContent='Ukryj część';return}
+  $('pCol').value='#'+objOf(sel[0]).material.color.getHexString();[['px',o.position.x],['py',o.position.y],['pz',o.position.z],['sx',o.scale.x],['sy',o.scale.y],['sz',o.scale.z]].forEach(([k,v])=>$(k).value=r4(v));
+  $('rx').value=deg(o.rotation.x);$('ry').value=deg(o.rotation.y);$('rz').value=deg(o.rotation.z);
+  const allHid=origs.length&&origs.every(i=>work.mods[i]&&work.mods[i].h);$('hideBtn').textContent=n===1&&adds.length?'Usuń bryłę':(allHid?'Pokaż':'Ukryj')+(origs.length>1?` części (${origs.length})`:' część')}
+function recordIdx(i){const o=objOf(i);if(!o)return;let t={p:o.position.toArray().map(r4),r:[o.rotation.x,o.rotation.y,o.rotation.z].map(r4),s:o.scale.toArray().map(r4)};
+  if(!isAdd(i)){const d=work.mods[i]=work.mods[i]||{},O=orig[i],ne=nested(o);const same=(a,b)=>a.every((v,k)=>Math.abs(v-b[k])<1e-4);
+    let op=O.p,or=O.r,os=O.s;if(ne){const w=rootPose(o);t={p:w.wp.map(r4),r:w.wr.map(r4),s:w.ws.map(r4)};op=O.wp;or=O.wr;os=O.ws}
+    if(same(t.p,op))delete d.p;else d.p=t.p;if(same(t.r,or))delete d.r;else d.r=t.r;if(same(t.s,os))delete d.s;else d.s=t.s;if(ne&&(d.p||d.r||d.s))d.rs=1;else delete d.rs;if(!Object.keys(d).length)delete work.mods[i];
+    /* nested parts stored relative to the root must follow when their parent moves */
+    o.traverse(c=>{if(c===o||!c.isMesh)return;const j=ms.indexOf(c);if(j>=0&&work.mods[j]&&work.mods[j].rs)recordIdx(j)})}
+  else Object.assign(work.add[i-ms.length],t);updDirty()}
+for(const id of['px','py','pz','rx','ry','rz','sx','sy','sz'])$(id).onchange=()=>{const o=sel.length===1?objOf(sel[0]):pivot;if(!o)return;o.position.set(+$('px').value,+$('py').value,+$('pz').value);o.rotation.set(rad(+$('rx').value),rad(+$('ry').value),rad(+$('rz').value));o.scale.set(+$('sx').value||0.001,+$('sy').value||0.001,+$('sz').value||0.001);if(pivot)applyPivot();else recordIdx(sel[0])};
+$('pCol').oninput=()=>{const c=$('pCol').value;for(const i of sel){const o=objOf(i);o.material.color.set(c);if(!isAdd(i)){const d=work.mods[i]=work.mods[i]||{};if(c.toLowerCase()===orig[i].c.toLowerCase())delete d.c;else d.c=c;if(!Object.keys(d).length)delete work.mods[i]}else work.add[i-ms.length].c=c}updDirty()};
+function setHidden(list,h){for(const i of list){const d=work.mods[i]=work.mods[i]||{};if(h){d.h=1;ms[i].visible=false}else{delete d.h;ms[i].visible=true}if(!Object.keys(d).length)delete work.mods[i]}}
+$('hideBtn').onclick=()=>{const origs=sel.filter(i=>!isAdd(i));if(!origs.length){delAdded();return}const allHid=origs.every(i=>work.mods[i]&&work.mods[i].h);setHidden(origs,!allHid);const keep=sel.slice();fillPartSel();select(keep);updDirty()};
+$('resetPart').onclick=()=>{const keep=sel.slice();for(const i of sel){if(isAdd(i))continue;delete work.mods[i];const m=ms[i],O=orig[i];m.position.fromArray(O.p);m.rotation.set(O.r[0],O.r[1],O.r[2]);m.scale.fromArray(O.s);m.material.color.set(O.c);m.visible=O.vis}fillPartSel();select(keep);updDirty()};
+function delAdded(){const ks=sel.filter(isAdd).map(i=>i-ms.length).sort((a,b)=>b-a);if(!ks.length)return;for(const k of ks){root.remove(added[k]);added.splice(k,1);work.add.splice(k,1)}select([]);fillPartSel();updDirty()}
+/* Delete key: removes added solids; original parts can only be hidden */
+function delSel(){const origs=sel.filter(i=>!isAdd(i));if(origs.length)setHidden(origs,true);if(sel.some(isAdd))delAdded();else{select([]);fillPartSel();updDirty()}}
 $('delAdd').onclick=delAdded;
-for(const b of document.querySelectorAll('[data-add]'))b.onclick=()=>{if(!root||showOrig)return;const a={g:b.dataset.add,c:'#d9d2c3',p:[orbit.target.x,0.15,orbit.target.z].map(r4),r:[0,0,0],s:[0.25,0.25,0.25]};work.add.push(a);added.push(makeAdded(a));fillPartSel();select(ms.length+added.length-1);updDirty()};
+/* ---------- copy / paste / duplicate ---------- */
+function entryOf(i){const o=objOf(i);if(!o)return null;let a;
+  if(isAdd(i)){a=JSON.parse(JSON.stringify(work.add[i-ms.length]))}
+  else{const spec=geoSpec(o.geometry);if(!spec)return null;const p=new T.Vector3(),q=new T.Quaternion(),sc=new T.Vector3();rootLocal(o).decompose(p,q,sc);const e=new T.Euler().setFromQuaternion(q);
+    a=Object.assign(spec,{c:'#'+(o.material&&o.material.color?o.material.color.getHexString():'cccccc'),p:p.toArray().map(r4),r:[e.x,e.y,e.z].map(r4),s:sc.toArray().map(r4)})}
+  return a}
+function entries(){const l=sel.map(entryOf),bad=l.filter(x=>!x).length;if(bad)note(`${bad} ${bad===1?'części nie da się skopiować':'części nie da się skopiować'} (zbyt złożony kształt).`);return l.filter(Boolean)}
+function addEntries(list,off){if(!root||showOrig||!list.length)return;const start=ms.length+added.length;
+  for(const a0 of list){const a=JSON.parse(JSON.stringify(a0));a.p=[a.p[0]+off,a.p[1],a.p[2]+off].map(r4);work.add.push(a);added.push(makeAdded(a))}
+  fillPartSel();select(list.map((_,k)=>start+k));updDirty()}
+function copySel(){if(!sel.length)return;const l=entries();if(!l.length)return;clip=l;clipFrom=cur;$('pasteBtn').disabled=false;note(`Skopiowano ${l.length} ${l.length===1?'część':'części'}. Wklej (Ctrl+V) w tym albo innym modelu.`)}
+function pasteClip(){if(clip.length)addEntries(clip,clipFrom===cur?0.1:0)}
+function dupSel(){if(sel.length)addEntries(entries(),0.1)}
+$('copyBtn').onclick=copySel;$('pasteBtn').onclick=pasteClip;$('dupBtn').onclick=dupSel;$('allBtn').onclick=selectAll;
+for(const b of document.querySelectorAll('[data-add]'))b.onclick=()=>{if(!root||showOrig)return;const a={g:b.dataset.add,c:'#d9d2c3',p:[orbit.target.x,0.15,orbit.target.z].map(r4),r:[0,0,0],s:[0.25,0.25,0.25]};work.add.push(a);added.push(makeAdded(a));fillPartSel();select([ms.length+added.length-1]);updDirty()};
 $('cmpBtn').onclick=()=>{if(!cur)return;showOrig=!showOrig;$('cmpBtn').setAttribute('aria-pressed',String(showOrig));rebuild()};
 
 /* ---------- save / discard ---------- */

@@ -20,6 +20,7 @@ Stacje radiowe: Nature FM, Luxury FM, Lofi Radio (`music/`).
 
 ## Edytor modeli
 `edytor/LittleTownies-Edytor.html` – otwórz w przeglądarce (Edge/Chrome). Wczytuje grę z GitHuba, pozwala zmieniać części modeli
-(kolor, położenie, obrót, skala, ukrycie) i dodawać bryły. Zapisane modele zostają na komputerze; zaznaczone można wysłać razem
+(kolor, położenie, obrót, skala, ukrycie) i dodawać bryły (także ostrosłupy). Można zaznaczyć kilka części naraz (Shift/Ctrl + klik, Ctrl+A)
+i edytować je razem, a części kopiować, wklejać (także do innego modelu) i duplikować. Zapisane modele zostają na komputerze; zaznaczone można wysłać razem
 jako jedną aktualizację (potrzebny token GitHuba z uprawnieniem *Contents: Read and write* do tego repozytorium).
 Przy wydawaniu nowej wersji gry ręcznie użyj `python3 zachowaj_modele.py nowa.html` (po `git pull`), żeby nie skasować wysłanych modeli.

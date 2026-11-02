@@ -1,0 +1,30 @@
+LITTLE TOWNIES – EDYTOR MODELI
+
+1. Uruchom EDYTOR.cmd (albo otwórz LittleTownies-Edytor.html w Edge/Chrome). Potrzebny internet.
+2. Kliknij „Wczytaj grę z GitHuba”. Edytor pobiera aktualną grę z MrShelo/LittleTowniesUpdates.
+3. Wybierz model z listy po lewej. Wygląd ulepszeń (dodatkowe piętra, kominy, filtry, garaże, panele…)
+   jest w kategoriach „Ulepszenia: …” – tam edytujesz tylko części dodawane przez ulepszenie,
+   a reszta budynku jest półprzezroczysta.
+   - Kliknij część modelu, żeby ją zaznaczyć (albo wybierz ją z listy „Część”).
+   - W / E / R: przesuwanie, obracanie, skalowanie strzałkami w widoku. Wartości można też wpisać w polach.
+   - Shift albo Ctrl + klik dodaje kolejne części do zaznaczenia; Ctrl+A (albo „Zaznacz wszystko”) zaznacza cały model.
+     Zaznaczone części przesuwasz, obracasz i skalujesz razem (wokół ich wspólnego środka),
+     a kolor, ukrywanie, przywracanie i usuwanie działa na wszystkie naraz. Esc czyści zaznaczenie.
+   - Kopiuj (Ctrl+C) i Wklej (Ctrl+V) – także do innego modelu. Duplikuj (Ctrl+D) robi kopię obok.
+     Kopia części z gry ma dokładnie ten sam kształt co oryginał.
+   - Kolor, „Ukryj część”, „Przywróć część”, „Dodaj bryłę” (prostopadłościan, walec, stożek, kula, ostrosłup).
+   - Delete usuwa dodane bryły, a części z gry ukrywa.
+   - „Oryginał” pokazuje model bez Twoich zmian.
+4. „Zapisz model” – zapis zostaje na tym komputerze (nic nie jest wysyłane).
+   Zapisane modele możesz eksportować do pliku i importować na innym komputerze.
+5. Wysyłanie: zaznacz zapisane modele (np. 6 naraz) i kliknij „Wyślij zaznaczone”.
+   Edytor podbija wersję gry (np. 5.3.2 → 5.3.3) i wysyła ją na GitHuba – gra pobierze ją jak zwykłą aktualizację.
+
+TOKEN GITHUBA (potrzebny tylko do wysyłania):
+   github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token
+   Repository access: Only select repositories → LittleTowniesUpdates
+   Permissions → Repository permissions → Contents: Read and write
+   Skopiuj token i wklej w polu „Token GitHuba”. Edytor pamięta go tylko na tym komputerze.
+
+Uwaga: zmiany są przypisane do kolejności części w modelu. Jeśli w nowej wersji gry model zostanie przebudowany,
+sprawdź go w edytorze i zapisz ponownie.
