@@ -143,7 +143,7 @@ async function boot(html,src){if(!/__ltModelAPI|LT-MODELS/.test(html)){status('T
   const t0=Date.now();while(Date.now()-t0<90000){await new Promise(r=>setTimeout(r,300));try{if(fr.contentWindow&&fr.contentWindow.__ltModelAPI){api=fr.contentWindow.__ltModelAPI;break}}catch(e){}}
   if(!api){status('Nie udało się uruchomić gry w tle (sprawdź internet: gra pobiera three.js).','err');return}
   T=api.THREE;window.THREE=T;await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.js');
-  setup3D();models=api.list();renderList();$('loadBox').hidden=true;$('tools').hidden=false;status(`Gra ${api.version} wczytana (${src}) · ${models.length} modeli`,'okc');renderSaved()}
+  setup3D();models=api.list().concat(api.upgrades?api.upgrades():[]);renderList();$('loadBox').hidden=true;$('tools').hidden=false;status(`Gra ${api.version} wczytana (${src}) · ${models.length} modeli`,'okc');renderSaved()}
 const loadScript=u=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>rej(new Error('Nie wczytano '+u));document.head.appendChild(s)});
 $('srcGh').onclick=async()=>{try{status('Pobieram grę z GitHuba…');await boot(await fetchGameText(),'GitHub')}catch(e){status(e.message,'err')}};
 $('srcFile').onchange=async e=>{const f=e.target.files[0];if(f)await boot(await f.text(),f.name)};
@@ -177,12 +177,12 @@ $('search').oninput=renderList;
 /* ---------- open / build a model with an override ---------- */
 function openModel(key){if(cur&&isDirty()&&!confirm('Model ma niezapisane zmiany. Porzucić je?'))return;cur=key;work=clone((drafts[key]&&drafts[key].ovr)||published[key]);base=JSON.stringify(work);showOrig=false;$('cmpBtn').setAttribute('aria-pressed','false');rebuild();renderList();frame()}
 function rebuild(){if(root){scene.remove(root)}tc.detach();if(helper){scene.remove(helper);helper=null}
-  root=api.build(cur,false);ms=[];root.traverse(m=>{if(m.isMesh)ms.push(m)});
+  root=api.build(cur,false);ms=[];if(root.userData.edit){ms=root.userData.edit.slice();root.traverse(m=>{if(m.isMesh&&!ms.includes(m)&&m.material&&m.material.clone){m.material=m.material.clone();m.material.transparent=true;m.material.opacity=0.45;m.material.depthWrite=false}})}else root.traverse(m=>{if(m.isMesh)ms.push(m)});
   orig=ms.map(m=>({p:m.position.toArray(),r:[m.rotation.x,m.rotation.y,m.rotation.z],s:m.scale.toArray(),c:m.material&&m.material.color?'#'+m.material.color.getHexString():'#cccccc',vis:m.visible}));
   for(const m of ms){if(m.material&&m.material.clone)m.material=m.material.clone();m.castShadow=true;m.receiveShadow=true}
   added=[];if(!showOrig){for(const k in work.mods){const m=ms[+k];if(m)applyMod(m,work.mods[k])}for(const a of work.add)added.push(makeAdded(a))}
   scene.add(root);const m=models.find(x=>x.key===cur);$('mName').innerHTML='';const b=document.createElement('b');b.textContent=m?m.name:cur;$('mName').appendChild(b);
-  const sm=document.createElement('div');sm.className='muted';sm.textContent=`${cur} · ${ms.length} części${work.add.length?` + ${work.add.length} nowych`:''}`;$('mName').appendChild(sm);
+  const sm=document.createElement('div');sm.className='muted';sm.textContent=`${cur} · ${ms.length} ${ms.length===1?'część':'części'}${work.add.length?` + ${work.add.length} nowych`:''}`+(root.userData.edit?' · edytujesz tylko części dodane przez ulepszenie; reszta budynku jest półprzezroczysta':'');$('mName').appendChild(sm);
   for(const id of['partSec','addSec','saveSec'])$(id).hidden=showOrig;fillPartSel();select(-1);updDirty()}
 function applyMod(m,d){if(d.h)m.visible=false;if(d.c&&m.material&&m.material.color)m.material.color.set(d.c);if(d.p)m.position.fromArray(d.p);if(d.r)m.rotation.set(d.r[0],d.r[1],d.r[2]);if(d.s)m.scale.fromArray(d.s)}
 const GEO={};function geo(k){if(!GEO[k])GEO[k]=k==='cyl'?new T.CylinderGeometry(0.5,0.5,1,16):k==='cone'?new T.ConeGeometry(0.5,1,16):k==='sphere'?new T.SphereGeometry(0.5,16,12):new T.BoxGeometry(1,1,1);return GEO[k]}

@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='5.3.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='5.3.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -784,7 +784,11 @@ const HBUILD={house:buildHouseL,tenement:buildTenementL,block:buildBlockL,modern
 const MODEL_OVR=/*LT-MODELS*/{}/*LT-MODELS-END*/;
 const OVR_GEO={};const ovrGeo=k=>{if(!OVR_GEO[k]){const g=k==='cyl'?new THREE.CylinderGeometry(0.5,0.5,1,16):k==='cone'?new THREE.ConeGeometry(0.5,1,16):k==='sphere'?new THREE.SphereGeometry(0.5,16,12):new THREE.BoxGeometry(1,1,1);g.userData.keep=true;OVR_GEO[k]=g}return OVR_GEO[k]};
 const ovrMats=new Map();
-function applyOvr(key,g){const o=MODEL_OVR[key];if(!o||!g)return g;try{const ms=[];g.traverse(m=>{if(m.isMesh)ms.push(m)});
+const upgKey=(c,slot)=>(c.t==='incinerator'&&!(c.model&&c.model.userData.big)?'incS':c.t)+'#'+slot;
+function ovrUpg(c,slot,fn){const m=c&&c.model;if(!m||!MODEL_OVR[upgKey(c,slot)])return fn();const before=new Set();m.traverse(o=>{if(o.isMesh)before.add(o)});fn();
+  const nw=[];m.traverse(o=>{if(o.isMesh&&!before.has(o))nw.push(o)});applyOvrList(upgKey(c,slot),nw,m)}
+function applyOvr(key,g){if(!MODEL_OVR[key]||!g)return g;const ms=[];g.traverse(m=>{if(m.isMesh)ms.push(m)});return applyOvrList(key,ms,g)}
+function applyOvrList(key,ms,g){const o=MODEL_OVR[key];if(!o||!g)return g;try{
     for(const k in o.mods||{}){const m=ms[+k],d=o.mods[k];if(!m)continue;if(d.h)m.visible=false;
       if(d.c&&m.material&&m.material.color){const ck=m.material.uuid+d.c;let mt=ovrMats.get(ck);if(!mt){mt=m.material.clone();mt.color.set(d.c);ovrMats.set(ck,mt)}m.material=mt}
       if(d.p)m.position.fromArray(d.p);if(d.r)m.rotation.fromArray(d.r);if(d.s)m.scale.fromArray(d.s)}
@@ -1164,12 +1168,15 @@ const matFlt=M('#e3e7ea'),matFltD=M('#7d868e');
 function chimFilter(m,ch){const k=ch.big?2.3:1.75,r=ch.r*k,h=ch.big?0.16:0.1;const c1=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,14),matFlt);c1.position.set(ch.x,ch.y-h/2-0.01,ch.z);c1.castShadow=true;m.add(c1);
   const c2=new THREE.Mesh(new THREE.CylinderGeometry(r*1.04,r*1.04,0.02,14),matFltD);c2.position.set(ch.x,ch.y-0.005,ch.z);m.add(c2);const c3=new THREE.Mesh(new THREE.CylinderGeometry(r*1.04,r*1.04,0.02,14),matFltD);c3.position.set(ch.x,ch.y-h-0.015,ch.z);m.add(c3);
   if(ch.big)for(const a of[0,Math.PI/2,Math.PI,Math.PI*1.5])m.add(box(0.03,0.08,0.03,matFltD,ch.x+Math.cos(a)*r*1.05,ch.y-h-0.08,ch.z+Math.sin(a)*r*1.05))}
-function filterVisual(c,re){const m=c.model;if(!m)return;if(re){for(const p of m.userData.puffs||[])p.material.color.set(fOn(c)?'#f6f7f8':'#8e9296');return}if(m.userData.flt)return;m.userData.flt=true;for(const p of m.userData.puffs||[])p.material.color.set(c.filtOff?'#8e9296':'#f6f7f8');
+function filterVisual(c,re){if(re)return filterVisual0(c,re);ovrUpg(c,'filt',()=>filterVisual0(c))}
+function filterVisual0(c,re){const m=c.model;if(!m)return;if(re){for(const p of m.userData.puffs||[])p.material.color.set(fOn(c)?'#f6f7f8':'#8e9296');return}if(m.userData.flt)return;m.userData.flt=true;for(const p of m.userData.puffs||[])p.material.color.set(c.filtOff?'#8e9296':'#f6f7f8');
   const sb=m.userData.sb||{x:0.3,y:0.85,z:-0.25};const list=(CHIMS[c.t==='incinerator'&&m.userData.big?'incB':c.t]||[{x:sb.x,y:sb.y-0.03,z:sb.z,r:0.07}]).slice();if(c.t==='incinerator'&&m.userData.big){if(c.up)list.push({x:0.6,y:1.34,z:-0.45,r:0.08});if(c.up2)list.push({x:0.6,y:1.34,z:0.05,r:0.08})}else if(c.t==='incinerator'&&m.userData.upg)list.push({x:0.36,y:0.94,z:0.26,r:0.055});for(const ch of list)chimFilter(m,ch)}
-function addUpgrade2Visual(c){if(c.t==='shop'&&c.model){const m=c.model;m.add(box(0.16,0.09,0.1,M('#e8eef2'),0.22,0.03,0.33));m.add(box(0.07,0.06,0.01,M('#2b2f33'),0.22,0.13,0.33));m.add(box(0.03,0.08,0.03,mat.steel,0.3,0.03,0.4));return}if(c.t==='incinerator'&&c.model&&c.model.userData.big){incChimney(c.model,0.6,0.05);return}if(c.t==='bankG'){c.model.add(box(0.7,0.4,0.6,M('#e9e1c9'),-0.55,0.04,0.55));c.model.add(box(0.74,0.04,0.64,M('#b89a4a'),-0.55,0.44,0.55));return}if(c.t==='shop1'){shopSCO(c);return}if(isFactory(c.t)){c.model.add(box(0.2,0.12,0.2,M('#4a8fd0'),c.t==='factoryB'?-0.3:-0.05,c.t==='factoryB'?0.56:0.48,c.t==='factoryB'?0:-0.1));return}if(c.t==='prison'){c.model.add(box(0.7,0.3,0.5,M('#c9b48a'),0.55,0.03,0.0));c.model.add(box(0.74,0.03,0.54,M('#6b7078'),0.55,0.33,0.0));return}if(isPolice(c.t)){c.model.add(box(0.03,0.6,0.03,mat.steel,isPolice(c.t)&&c.t==='policeB'?-0.9:-0.38,0.03,-0.38));c.model.add(box(0.16,0.04,0.04,mat.steel,c.t==='policeB'?-0.9:-0.38,0.6,-0.38));return}const m=c.model;if(!m||m.userData.upg2)return;m.userData.upg2=true;
+function addUpgrade2Visual(c){ovrUpg(c,'up2',()=>addUpgrade2Visual0(c))}
+function addUpgrade2Visual0(c){if(c.t==='shop'&&c.model){const m=c.model;m.add(box(0.16,0.09,0.1,M('#e8eef2'),0.22,0.03,0.33));m.add(box(0.07,0.06,0.01,M('#2b2f33'),0.22,0.13,0.33));m.add(box(0.03,0.08,0.03,mat.steel,0.3,0.03,0.4));return}if(c.t==='incinerator'&&c.model&&c.model.userData.big){incChimney(c.model,0.6,0.05);return}if(c.t==='bankG'){c.model.add(box(0.7,0.4,0.6,M('#e9e1c9'),-0.55,0.04,0.55));c.model.add(box(0.74,0.04,0.64,M('#b89a4a'),-0.55,0.44,0.55));return}if(c.t==='shop1'){shopSCO(c);return}if(isFactory(c.t)){c.model.add(box(0.2,0.12,0.2,M('#4a8fd0'),c.t==='factoryB'?-0.3:-0.05,c.t==='factoryB'?0.56:0.48,c.t==='factoryB'?0:-0.1));return}if(c.t==='prison'){c.model.add(box(0.7,0.3,0.5,M('#c9b48a'),0.55,0.03,0.0));c.model.add(box(0.74,0.03,0.54,M('#6b7078'),0.55,0.33,0.0));return}if(isPolice(c.t)){c.model.add(box(0.03,0.6,0.03,mat.steel,isPolice(c.t)&&c.t==='policeB'?-0.9:-0.38,0.03,-0.38));c.model.add(box(0.16,0.04,0.04,mat.steel,c.t==='policeB'?-0.9:-0.38,0.6,-0.38));return}const m=c.model;if(!m||m.userData.upg2)return;m.userData.upg2=true;
   if(c.t==='pump'||c.t==='outlet'){const pp=part(FK.cyl,M('#5a6b78'),c.t==='pump'?0.06:0.1,c.t==='pump'?0.5:0.4,c.t==='pump'?0.06:0.1,0.22,0.1,0.25);pp.rotation.x=Math.PI/2;m.add(pp)}
   if(c.t==='wind'){m.userData.rotor.scale.setScalar(1.3);m.userData.nac.scale.set(1.35,1.35,1.3);m.add(box(0.1,0.04,0.1,mat.chim,0,1.48,0.06))}}
-function addUpgradeVisual(c){const m=c.model;if(!m||m.userData.upg)return;m.userData.upg=true;
+function addUpgradeVisual(c){ovrUpg(c,'up',()=>addUpgradeVisual0(c))}
+function addUpgradeVisual0(c){const m=c.model;if(!m||m.userData.upg)return;m.userData.upg=true;
   if(c.t==='transformer'){m.add(box(0.36,0.22,0.3,M('#5f7d70'),0,0.42,0));for(const x of[-0.12,0,0.12])m.add(box(0.04,0.12,0.04,mat.insul,x,0.64,0));powerDirty=true}
   if(c.t==='recycler'){m.add(box(0.7,0.05,0.14,M('#2b2f33'),0,0.18,0.3));for(let k=0;k<4;k++)m.add(box(0.03,0.15,0.03,mat.steel,-0.3+k*0.2,0.03,0.3));for(let k=0;k<3;k++)m.add(box(0.08,0.06,0.08,M(['#3c9a5f','#2f6fe0','#e0a91c'][k]),-0.2+k*0.2,0.23,0.3))}
   if(c.t==='hvpole'){const V=(x,y,z)=>new THREE.Vector3(x,y,z);for(const[sx,sz]of[[-1,-1],[1,-1],[1,1],[-1,1]])lat(m,V(sx*0.04,1.38,sz*0.04),V(sx*0.03,1.7,sz*0.03),0.012);
@@ -3513,7 +3520,7 @@ function placeRow(row,anim){let[i,t,p,st,up,tr,gs,sec,x]=row;addCell(i,t,!!anim,
     if(x&&t==='gallery'){c.stores=x.stores||[];c.shelf=x.shelf||{};paintStores(c);if(x.cinema){c.cinema=true;cinemaVisual(c)}}
     if(x&&(t==='restaurant'||t==='bakery'))c.shelf=x.shelf||{};if(x&&t==='hotelB'&&x.attr&&ATTR[x.attr]){c.attr=x.attr;c.model.userData.attrSign.material=M(ATTR_COL[x.attr])}if(x&&x.up2&&UPG2[t]){c.up2=true;if(!isWH(t))addUpgrade2Visual(c)}if(x&&x.up3&&UPG3[t])c.up3=true;if(x&&Array.isArray(x.whf))c.whf=x.whf;if(x&&x.shipM)c.shipM=x.shipM;if(x&&x.shipN)c.shipN=x.shipN;if(x&&x.filt&&UPGF[t]){c.filt=true;c.filtOff=!!x.filtOff;filterVisual(c)}if(x&&x.off)c.off=true;
     if(x&&isFactory(t)&&LINES[x.line]&&!FREE_LINES[x.line]&&t!=='smallfac')up=1;if(t==='smallfac'){up=0;if(x)x.line='mix'}
-    if(x&&t==='shop1'&&SPECS[x.spec]&&x.spec!=='mall'){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(up&&t==='shop1'){c.up=true;shopFloor(c);up=0}
+    if(x&&t==='shop1'&&SPECS[x.spec]&&x.spec!=='mall'){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(up&&t==='shop1'){c.up=true;addUpgradeVisual(c);up=0}
     if(x&&t==='shop'&&SPECS[x.spec]){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(x&&isFactory(t)&&LINES[x.line]){c.line=x.line;paintModel(c,GM[c.line])}if(x&&isFarm(t))c.acc=x.acc||0;
     if(up&&UPG[t]){c.up=true;addUpgradeVisual(c);if(t==='coal'){c.gstock=0;c.gin=0;c.gtrucks=0}}if(TRASH[t])c.trash=tr||0;if(isFac(c))c.gstock=gs||0;if(x&&x.rot!=null&&c.tiles){c.rot=x.rot;refreshBuilding(i)}if(x&&x.rot1!=null&&!c.tiles){c.rot1=x.rot1;refreshBuilding(i)}if(x&&HLV[t]){if(x.aband){c.aband=true;abandVisual(c)}c.lowT=x.lowT||0;if(Array.isArray(x.pp)){c.pp=x.pp.map(([a,s,si,h,hi])=>({a,s,si,sk:0,h:h||0,hi:hi??-1}))}else if(!x.aband)seedPeople(c,1);if(x.aband)c.pp=[];c.dead=x.dead||0;c.lastBuy=x.lb!=null?gameT-x.lb:gameT}
     if(x&&DCARE[t]){c.bodies=x.bodies||0;c.urn=Array.isArray(x.urn)?x.urn.map(v=>gameT+v):[]}if(HOUSING[t])c.off=false;if(x&&Array.isArray(x.jail))c.jail=x.jail.map(([rel,w])=>({rel,w}));if(x&&HLV[t]){c.xp=x.xp||0;if(x.lv){c.lv=Math.min(x.lv,HLV[t].res.length-1);setHousingModel(i)}}if(x&&Array.isArray(x.fr))c.fr=x.fr.filter(r0=>r0&&FR_GOODS.includes(r0.k)).map(r0=>({k:r0.k,m:['off','imp','exp'].includes(r0.m)?r0.m:'off',n:Math.max(FR_MIN,Math.min(FR_MAX,r0.n|0))}));if(x&&x.waiting)c.waiting=x.waiting|0;if(x&&x.dirt)c.dirt=+x.dirt||0;if(x&&Array.isArray(x.ship))c.ship=x.ship.filter(k=>SHIP_GOODS.includes(k));if(x&&x.shipAuto)c.shipAuto=true;if(x&&x.shipAt!=null)loadShip.push([i,x.shipAt]);if(x&&x.need&&typeof x.need==='object')c.need={...x.need};if(x&&x.ruin)loadFires.push([i,-1]);else if(x&&x.burn!=null)loadFires.push([i,x.burn]);if(x&&t==='factoryB'){c.owned=(x.owned||[]).filter(k=>LINES[k]&&k!=='mix');c.lines=(x.lines||['mix']).filter(k=>k==='mix'||c.owned.includes(k)).slice(0,LINES_MAX);if(!c.lines.length)c.lines=['mix'];paintLines(c)}}
@@ -3673,7 +3680,16 @@ if(!ED)requestAnimationFrame(frame);
 window.__ltModelAPI={THREE,version:LT_VERSION,ovr:MODEL_OVR,
   list(){const o=[];for(const t of Object.keys(BUILD)){if(!DEF[t]||HBUILD[t])continue;o.push({key:t,name:DEF[t].name,cat:TCAT[t]||'Inne'})}
     for(const t in HBUILD)HLV[t].res.forEach((r,lv)=>o.push({key:t+'@'+lv,name:`${DEF[t].name} · poziom ${lv+1}`,cat:'Domy'}));return o},
-  build(key,withOvr){const[t,lv]=key.split('@');const g=lv!=null&&HBUILD[t]?HBUILD[t](+lv):BUILD[t]();return withOvr?applyOvr(key,g):g}};
+  build(key,withOvr){if(key.includes('#'))return upgModel(key,withOvr);const[t,lv]=key.split('@');const g=lv!=null&&HBUILD[t]?HBUILD[t](+lv):BUILD[t]();return withOvr?applyOvr(key,g):g},
+  upgrades(){const o=[];const SL=[['up',UPG,'ulepszenie'],['up2',UPG2,'ulepszenie'],['filt',UPGF,'filtry']];
+    for(const t of Object.keys(BUILD)){if(!DEF[t]||HBUILD[t])continue;for(const[sl,src]of SL){if(!src[t])continue;for(const k of t==='incinerator'?['incinerator','incS']:[t]){const key=k+'#'+sl;
+      try{const g=upgModel(key,false);if(g.userData.edit.length)o.push({key,name:`${k==='incS'?DEF.incS.name:DEF[t].name} · ${src[t].name}`,cat:'Ulepszenia: '+(TCAT[t]||'Inne')})}catch(e){}}}}return o}};
+/* a building with an upgrade on, for the editor: the base model (as in the game) plus the meshes this upgrade adds, which are the editable ones */
+function upgModel(key,withOvr){const[k,sl]=key.split('#'),t=k==='incS'?'incinerator':k;const g=k==='incS'?applyOvr('incS',buildIncinerator()):applyOvr(t,BUILD[t]());
+  const c={t,model:g,tiles:k==='incinerator'?[0,1,2,3,4,5]:null,stores:[],shelf:{},spec:'mall',up:sl!=='up',filt:sl==='filt',filtOff:false,vert:false};
+  if(sl==='up2'&&UPG[t])addUpgradeVisual(c);const before=new Set();g.traverse(o=>{if(o.isMesh)before.add(o)});
+  (sl==='up'?addUpgradeVisual0:sl==='up2'?addUpgrade2Visual0:filterVisual0)(c);const nw=[];g.traverse(o=>{if(o.isMesh&&!before.has(o))nw.push(o)});
+  if(withOvr)applyOvrList(key,nw,g);g.userData.edit=nw;return g}
 window.__started=true;
 }
 </script>
