@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Little Townies – Edytor modeli</title>
+<style>
+:root{--bg:#eef3ee;--panel:#ffffff;--ink:#1f2a24;--muted:#66756c;--line:#d8e2db;--accent:#e2552e;--accent2:#2f6fe0;--ok:#2f9e5a;--warn:#c8372d;--chip:#f1f5f2;
+  --font:system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151a17;--panel:#1f2622;--ink:#e6efe9;--muted:#93a39a;--line:#2f3a34;--chip:#28312c}}
+:root[data-theme="dark"]{--bg:#151a17;--panel:#1f2622;--ink:#e6efe9;--muted:#93a39a;--line:#2f3a34;--chip:#28312c}
+*{box-sizing:border-box}html,body{margin:0;height:100%}[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:14px/1.4 var(--font);display:grid;grid-template-rows:auto 1fr;overflow:hidden}
+header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+header h1{font-size:16px;margin:0 8px 0 0;letter-spacing:-.01em}
+header .st{color:var(--muted);font-size:12.5px;margin-left:auto}
+button,.btn{font:inherit;color:inherit;background:var(--chip);border:1px solid var(--line);border-radius:9px;padding:6px 11px;cursor:pointer;min-height:32px}
+button:hover{border-color:var(--muted)}button:disabled{opacity:.45;cursor:not-allowed}
+button.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.blue{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:600}
+button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+input,select,textarea{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px 8px;min-width:0}
+.app{display:grid;grid-template-columns:250px 1fr 330px;min-height:0}
+aside{background:var(--panel);overflow:auto;min-height:0}
+#left{border-right:1px solid var(--line);padding:10px}
+#right{border-left:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:14px}
+#left input{width:100%;margin-bottom:8px}
+.cat{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px;font-weight:600}
+.item{display:flex;justify-content:space-between;align-items:center;gap:6px;width:100%;text-align:left;border:0;background:none;border-radius:8px;padding:5px 8px;min-height:28px}
+.item:hover{background:var(--chip)}.item.on{background:var(--ink);color:var(--panel)}
+.tag{font-size:10.5px;padding:1px 6px;border-radius:9px;background:var(--chip);color:var(--muted);white-space:nowrap}
+.item.on .tag{background:rgba(255,255,255,.18);color:inherit}
+.tag.s{background:#fdebd2;color:#8a5a12}.tag.g{background:#dff1e5;color:#226b3c}
+#view{position:relative;min-width:0;min-height:0}
+#cv{width:100%;height:100%;display:block;touch-action:none}
+.tools{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap}
+.tools button{background:var(--panel)}.tools button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.hint{position:absolute;left:12px;bottom:12px;right:12px;color:var(--muted);font-size:12.5px;pointer-events:none;text-shadow:0 1px 0 var(--bg)}
+.load{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px}
+.load .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:440px;display:grid;gap:12px}
+h2{font-size:13px;margin:0 0 8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.grid3{display:grid;grid-template-columns:62px repeat(3,1fr);gap:6px;align-items:center}
+.grid3 input{width:100%}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sec{border-top:1px solid var(--line);padding-top:12px}
+.muted{color:var(--muted);font-size:12.5px}
+.saved{display:grid;gap:4px}.saved label{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:8px;background:var(--chip)}
+.saved label span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.saved small{color:var(--muted)}
+#log{font-size:12px;color:var(--muted);white-space:pre-wrap;max-height:120px;overflow:auto}
+.err{color:var(--warn)}.okc{color:var(--ok)}
+iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:0;border:0;pointer-events:none}
+@media (max-width:900px){.app{grid-template-columns:1fr;grid-template-rows:180px 50vh auto;overflow:auto}body{overflow:auto}aside{overflow:visible}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Little Townies · Edytor modeli</h1>
+  <button id="srcGh" class="blue">Wczytaj grę z GitHuba</button>
+  <label class="btn">Wczytaj plik gry…<input id="srcFile" type="file" accept=".html,text/html" hidden></label>
+  <span class="st" id="status">Gra nie jest wczytana</span>
+</header>
+<div class="app">
+  <aside id="left"><input id="search" placeholder="Szukaj modelu…" aria-label="Szukaj modelu"><div id="models"></div></aside>
+  <section id="view">
+    <canvas id="cv"></canvas>
+    <div class="tools" id="tools" hidden>
+      <button data-mode="translate" aria-pressed="true" title="Klawisz W">Przesuń (W)</button>
+      <button data-mode="rotate" aria-pressed="false" title="Klawisz E">Obróć (E)</button>
+      <button data-mode="scale" aria-pressed="false" title="Klawisz R">Skaluj (R)</button>
+      <button id="cmpBtn" aria-pressed="false" title="Pokaż model bez zmian">Oryginał</button>
+      <button id="snapBtn" aria-pressed="true" title="Przyciąganie do siatki 0,05 i 15°">Przyciąganie</button>
+    </div>
+    <div class="hint" id="hint">Kliknij część modelu, żeby ją zaznaczyć. Lewy przycisk obraca widok, prawy przesuwa, kółko przybliża.</div>
+    <div class="load" id="loadBox"><div class="box">
+      <b>Wczytaj grę, żeby edytować jej modele</b>
+      <span class="muted">„Wczytaj grę z GitHuba” pobiera aktualną wersję z MrShelo/LittleTowniesUpdates. Możesz też wskazać plik gry (index.html albo LittleTownies.html).</span>
+    </div></div>
+  </section>
+  <aside id="right">
+    <div>
+      <h2>Model</h2>
+      <div id="mName" class="muted">Wybierz model z listy.</div>
+    </div>
+    <div class="sec" id="partSec" hidden>
+      <h2>Część</h2>
+      <div class="row" style="margin-bottom:8px"><select id="partSel" style="flex:1" aria-label="Część modelu"></select></div>
+      <div class="grid3">
+        <span class="muted">Kolor</span><input type="color" id="pCol" aria-label="Kolor" style="grid-column:span 3;height:32px;padding:2px">
+        <span class="muted">Pozycja</span><input type="number" step="0.01" id="px" aria-label="Pozycja X"><input type="number" step="0.01" id="py" aria-label="Pozycja Y"><input type="number" step="0.01" id="pz" aria-label="Pozycja Z">
+        <span class="muted">Obrót °</span><input type="number" step="1" id="rx" aria-label="Obrót X"><input type="number" step="1" id="ry" aria-label="Obrót Y"><input type="number" step="1" id="rz" aria-label="Obrót Z">
+        <span class="muted">Skala</span><input type="number" step="0.01" id="sx" aria-label="Skala X"><input type="number" step="0.01" id="sy" aria-label="Skala Y"><input type="number" step="0.01" id="sz" aria-label="Skala Z">
+      </div>
+      <div class="row" style="margin-top:8px"><button id="hideBtn">Ukryj część</button><button id="resetPart">Przywróć część</button><button id="delAdd" hidden>Usuń bryłę</button></div>
+    </div>
+    <div class="sec" id="addSec" hidden>
+      <h2>Dodaj bryłę</h2>
+      <div class="row"><button data-add="box">Prostopadłościan</button><button data-add="cyl">Walec</button><button data-add="cone">Stożek</button><button data-add="sphere">Kula</button></div>
+    </div>
+    <div class="sec" id="saveSec" hidden>
+      <div class="row"><button class="pri" id="saveBtn">Zapisz model</button><button id="discardBtn">Cofnij niezapisane</button><button id="origBtn">Wróć do oryginału gry</button></div>
+      <div class="muted" id="dirty" style="margin-top:6px"></div>
+    </div>
+    <div class="sec">
+      <h2>Zapisane modele</h2>
+      <div class="saved" id="saved"><span class="muted">Brak zapisanych modeli.</span></div>
+      <div class="row" style="margin-top:8px"><button id="expBtn">Eksportuj zapisane</button><label class="btn">Importuj…<input id="impFile" type="file" accept=".json" hidden></label></div>
+    </div>
+    <div class="sec">
+      <h2>Wyślij jako aktualizację</h2>
+      <div class="muted" style="margin-bottom:6px">Zaznacz zapisane modele powyżej. Wysyłka podbija wersję gry, a gracze dostaną zmiany przez aktualizację. Potrzebny token GitHuba z prawem zapisu do repozytorium (fine-grained, uprawnienie „Contents: Read and write”).</div>
+      <input id="token" type="password" placeholder="Token GitHuba (zapamiętany tylko na tym komputerze)" style="width:100%;margin-bottom:6px" autocomplete="off">
+      <input id="notes" placeholder="Opis aktualizacji (opcjonalnie)" style="width:100%;margin-bottom:6px">
+      <button class="blue" id="pubBtn" disabled>Wyślij zaznaczone (0)</button>
+      <div id="log" style="margin-top:8px"></div>
+    </div>
+  </aside>
+</div>
+<iframe id="game" title="Little Townies (ukryta)"></iframe>
+<script>
+(()=>{
+const REPO='MrShelo/LittleTowniesUpdates',BRANCH='main',API='https://api.github.com/repos/'+REPO+'/contents/';
+const LS_DRAFT='lt-model-drafts',LS_TOKEN='lt-editor-token';
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let api=null,T=null,renderer,scene,camera,orbit,tc,raycaster,root=null,helper=null,models=[],cur=null,work=null,base=null,ms=[],orig=[],added=[],sel=-1,showOrig=false,published={},gameHtml='',checked=new Set();
+let drafts=store.get(LS_DRAFT,{});
+try{$('token').value=localStorage.getItem(LS_TOKEN)||''}catch(e){}
+const status=(t,cls)=>{$('status').textContent=t;$('status').className='st '+(cls||'')};
+const log=(t,cls)=>{const d=document.createElement('div');d.textContent=t;if(cls)d.className=cls;$('log').appendChild(d);$('log').scrollTop=1e9};
+const r4=v=>Math.round(v*1e4)/1e4,deg=v=>Math.round(v*180/Math.PI*10)/10,rad=v=>v*Math.PI/180;
+const clone=o=>JSON.parse(JSON.stringify(o||{mods:{},add:[]}));
+const emptyOvr=o=>!o||(!Object.keys(o.mods||{}).length&&!(o.add||[]).length);
+
+/* ---------- loading the game ---------- */
+function b64utf8(s){const b=new TextEncoder().encode(s);let o='';for(let i=0;i<b.length;i+=0x8000)o+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(o)}
+function ghHeaders(json){const h={'Accept':json?'application/vnd.github+json':'application/vnd.github.raw'};const t=$('token').value.trim();if(t)h.Authorization='Bearer '+t;return h}
+async function fetchGameText(){const r=await fetch(API+'index.html?ref='+BRANCH+'&t='+Date.now(),{headers:ghHeaders(false),cache:'no-store'});if(!r.ok)throw new Error('GitHub: '+r.status+' '+r.statusText);return r.text()}
+function parseOvr(html){const m=html.match(/\/\*LT-MODELS\*\/([\s\S]*?)\/\*LT-MODELS-END\*\//);if(!m)return null;try{return JSON.parse(m[1])}catch(e){return null}}
+async function boot(html,src){if(!/__ltModelAPI|LT-MODELS/.test(html)){status('Ta wersja gry nie obsługuje edytora (potrzebna 5.3.0 lub nowsza).','err');return}
+  gameHtml=html;published=parseOvr(html)||{};status('Uruchamiam grę w tle…');
+  const fr=$('game');const inj='<script>window.__LT_EDITOR=true;<\/script>';fr.srcdoc=html.replace(/<head>/i,'<head>'+inj);
+  const t0=Date.now();while(Date.now()-t0<90000){await new Promise(r=>setTimeout(r,300));try{if(fr.contentWindow&&fr.contentWindow.__ltModelAPI){api=fr.contentWindow.__ltModelAPI;break}}catch(e){}}
+  if(!api){status('Nie udało się uruchomić gry w tle (sprawdź internet: gra pobiera three.js).','err');return}
+  T=api.THREE;window.THREE=T;await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.js');
+  setup3D();models=api.list();renderList();$('loadBox').hidden=true;$('tools').hidden=false;status(`Gra ${api.version} wczytana (${src}) · ${models.length} modeli`,'okc');renderSaved()}
+const loadScript=u=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>rej(new Error('Nie wczytano '+u));document.head.appendChild(s)});
+$('srcGh').onclick=async()=>{try{status('Pobieram grę z GitHuba…');await boot(await fetchGameText(),'GitHub')}catch(e){status(e.message,'err')}};
+$('srcFile').onchange=async e=>{const f=e.target.files[0];if(f)await boot(await f.text(),f.name)};
+
+/* ---------- 3D view ---------- */
+function setup3D(){const cv=$('cv');renderer=new T.WebGLRenderer({canvas:cv,antialias:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+  scene=new T.Scene();scene.background=new T.Color(getComputedStyle(document.body).getPropertyValue('--bg').trim()||'#eef3ee');
+  camera=new T.PerspectiveCamera(40,1,0.01,100);camera.position.set(2.4,2.2,2.8);
+  scene.add(new T.HemisphereLight(0xffffff,0x8fa596,0.75));const sun=new T.DirectionalLight(0xffffff,0.75);sun.position.set(3,6,4);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-3,right:3,top:3,bottom:-3});scene.add(sun);
+  const gr=new T.Mesh(new T.PlaneGeometry(12,12),new T.MeshLambertMaterial({color:0x9fd36b}));gr.rotation.x=-Math.PI/2;gr.receiveShadow=true;scene.add(gr);
+  const gh=new T.GridHelper(12,12,0x6f9a4a,0x7fae55);gh.position.y=0.002;scene.add(gh);
+  orbit=new T.OrbitControls(camera,cv);orbit.enableDamping=true;orbit.target.set(0,0.3,0);
+  tc=new T.TransformControls(camera,cv);tc.setSize(0.8);tc.addEventListener('dragging-changed',e=>{orbit.enabled=!e.value});tc.addEventListener('objectChange',()=>{recordSel();fillProps()});scene.add(tc);setSnap(true);
+  raycaster=new T.Raycaster();let down=null;cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY]});cv.addEventListener('pointerup',e=>{if(!down||tc.dragging)return;if(Math.hypot(e.clientX-down[0],e.clientY-down[1])<4)pick(e);down=null});
+  const rs=()=>{const r=cv.parentNode.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix()};new ResizeObserver(rs).observe(cv.parentNode);rs();
+  const loop=()=>{requestAnimationFrame(loop);orbit.update();if(helper)helper.update();renderer.render(scene,camera)};loop()}
+function setSnap(on){if(!tc)return;tc.setTranslationSnap(on?0.05:null);tc.setRotationSnap(on?rad(15):null);tc.setScaleSnap(on?0.05:null);$('snapBtn').setAttribute('aria-pressed',String(on))}
+$('snapBtn').onclick=()=>setSnap($('snapBtn').getAttribute('aria-pressed')!=='true');
+for(const b of document.querySelectorAll('[data-mode]'))b.onclick=()=>setMode(b.dataset.mode);
+function setMode(m){if(!tc)return;tc.setMode(m);for(const b of document.querySelectorAll('[data-mode]'))b.setAttribute('aria-pressed',String(b.dataset.mode===m))}
+addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;const k=e.key.toLowerCase();if(k==='w')setMode('translate');else if(k==='e')setMode('rotate');else if(k==='r')setMode('scale');else if(k==='escape')select(-1);else if((k==='delete'||k==='backspace')&&sel>=ms.length)delAdded()});
+
+/* ---------- model list ---------- */
+function stateOf(k){return drafts[k]?'s':published[k]?'g':''}
+function renderList(){const q=$('search').value.trim().toLowerCase(),box=$('models');box.innerHTML='';const cats={};
+  for(const m of models){if(q&&!m.name.toLowerCase().includes(q)&&!m.key.toLowerCase().includes(q))continue;(cats[m.cat]=cats[m.cat]||[]).push(m)}
+  for(const c of Object.keys(cats)){const h=document.createElement('div');h.className='cat';h.textContent=c;box.appendChild(h);
+    for(const m of cats[c]){const b=document.createElement('button');b.className='item'+(cur===m.key?' on':'');const st=stateOf(m.key);b.innerHTML=`<span></span>${st?`<span class="tag ${st}">${st==='s'?'zapisany':'w grze'}</span>`:''}`;b.firstChild.textContent=m.name;b.onclick=()=>openModel(m.key);box.appendChild(b)}}}
+$('search').oninput=renderList;
+
+/* ---------- open / build a model with an override ---------- */
+function openModel(key){if(cur&&isDirty()&&!confirm('Model ma niezapisane zmiany. Porzucić je?'))return;cur=key;work=clone((drafts[key]&&drafts[key].ovr)||published[key]);base=JSON.stringify(work);showOrig=false;$('cmpBtn').setAttribute('aria-pressed','false');rebuild();renderList();frame()}
+function rebuild(){if(root){scene.remove(root)}tc.detach();if(helper){scene.remove(helper);helper=null}
+  root=api.build(cur,false);ms=[];root.traverse(m=>{if(m.isMesh)ms.push(m)});
+  orig=ms.map(m=>({p:m.position.toArray(),r:[m.rotation.x,m.rotation.y,m.rotation.z],s:m.scale.toArray(),c:m.material&&m.material.color?'#'+m.material.color.getHexString():'#cccccc',vis:m.visible}));
+  for(const m of ms){if(m.material&&m.material.clone)m.material=m.material.clone();m.castShadow=true;m.receiveShadow=true}
+  added=[];if(!showOrig){for(const k in work.mods){const m=ms[+k];if(m)applyMod(m,work.mods[k])}for(const a of work.add)added.push(makeAdded(a))}
+  scene.add(root);const m=models.find(x=>x.key===cur);$('mName').innerHTML='';const b=document.createElement('b');b.textContent=m?m.name:cur;$('mName').appendChild(b);
+  const sm=document.createElement('div');sm.className='muted';sm.textContent=`${cur} · ${ms.length} części${work.add.length?` + ${work.add.length} nowych`:''}`;$('mName').appendChild(sm);
+  for(const id of['partSec','addSec','saveSec'])$(id).hidden=showOrig;fillPartSel();select(-1);updDirty()}
+function applyMod(m,d){if(d.h)m.visible=false;if(d.c&&m.material&&m.material.color)m.material.color.set(d.c);if(d.p)m.position.fromArray(d.p);if(d.r)m.rotation.set(d.r[0],d.r[1],d.r[2]);if(d.s)m.scale.fromArray(d.s)}
+const GEO={};function geo(k){if(!GEO[k])GEO[k]=k==='cyl'?new T.CylinderGeometry(0.5,0.5,1,16):k==='cone'?new T.ConeGeometry(0.5,1,16):k==='sphere'?new T.SphereGeometry(0.5,16,12):new T.BoxGeometry(1,1,1);return GEO[k]}
+function makeAdded(a){const m=new T.Mesh(geo(a.g),new T.MeshLambertMaterial({color:a.c||'#cccccc'}));m.position.fromArray(a.p);m.rotation.set(a.r[0],a.r[1],a.r[2]);m.scale.fromArray(a.s);m.castShadow=m.receiveShadow=true;root.add(m);return m}
+function frame(){const b=new T.Box3().setFromObject(root),c=b.getCenter(new T.Vector3()),sz=b.getSize(new T.Vector3()).length()||1;orbit.target.copy(c);camera.position.copy(c).add(new T.Vector3(0.9,0.75,1.05).multiplyScalar(sz*1.2));orbit.update()}
+
+/* ---------- selection & editing ---------- */
+const objOf=i=>i<0?null:i<ms.length?ms[i]:added[i-ms.length];
+function pick(e){if(showOrig||!root)return;const r=$('cv').getBoundingClientRect();const v=new T.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(v,camera);
+  const hit=raycaster.intersectObjects([...ms,...added].filter(o=>o.visible),false)[0];if(!hit)return select(-1);const o=hit.object;const i=ms.indexOf(o);select(i>=0?i:ms.length+added.indexOf(o))}
+function select(i){sel=i;const o=objOf(i);if(helper){scene.remove(helper);helper=null}if(o){tc.attach(o);helper=new T.BoxHelper(o,0xe2552e);scene.add(helper)}else tc.detach();$('partSel').value=String(i);fillProps()}
+function fillPartSel(){const s=$('partSel');s.innerHTML='<option value="-1">— wybierz część —</option>'+ms.map((m,i)=>`<option value="${i}">#${i} · ${(work.mods[i]&&work.mods[i].h)?'ukryta':orig[i].c}${work.mods[i]?' · zmieniona':''}</option>`).join('')+added.map((m,k)=>`<option value="${ms.length+k}">+${k+1} · ${({box:'nowy prostopadłościan',cyl:'nowy walec',cone:'nowy stożek',sphere:'nowa kula'})[work.add[k].g]||'nowa bryła'}</option>`).join('');s.value=String(sel)}
+$('partSel').onchange=e=>select(+e.target.value);
+function fillProps(){const o=objOf(sel),on=!!o;for(const id of['pCol','px','py','pz','rx','ry','rz','sx','sy','sz','hideBtn','resetPart'])$(id).disabled=!on;$('delAdd').hidden=!(on&&sel>=ms.length);$('resetPart').hidden=sel>=ms.length;
+  if(!on){for(const id of['px','py','pz','rx','ry','rz','sx','sy','sz'])$(id).value='';return}$('pCol').value='#'+o.material.color.getHexString();[['px',o.position.x],['py',o.position.y],['pz',o.position.z],['sx',o.scale.x],['sy',o.scale.y],['sz',o.scale.z]].forEach(([k,v])=>$(k).value=r4(v));
+  $('rx').value=deg(o.rotation.x);$('ry').value=deg(o.rotation.y);$('rz').value=deg(o.rotation.z);const hid=sel<ms.length&&work.mods[sel]&&work.mods[sel].h;$('hideBtn').textContent=hid?'Pokaż część':'Ukryj część'}
+function recordSel(){const o=objOf(sel);if(!o)return;const t={p:o.position.toArray().map(r4),r:[o.rotation.x,o.rotation.y,o.rotation.z].map(r4),s:o.scale.toArray().map(r4)};
+  if(sel<ms.length){const d=work.mods[sel]=work.mods[sel]||{},O=orig[sel];const same=(a,b)=>a.every((v,k)=>Math.abs(v-b[k])<1e-4);
+    if(same(t.p,O.p))delete d.p;else d.p=t.p;if(same(t.r,O.r))delete d.r;else d.r=t.r;if(same(t.s,O.s))delete d.s;else d.s=t.s;if(!Object.keys(d).length)delete work.mods[sel]}
+  else Object.assign(work.add[sel-ms.length],t);updDirty()}
+for(const id of['px','py','pz','rx','ry','rz','sx','sy','sz'])$(id).onchange=()=>{const o=objOf(sel);if(!o)return;o.position.set(+$('px').value,+$('py').value,+$('pz').value);o.rotation.set(rad(+$('rx').value),rad(+$('ry').value),rad(+$('rz').value));o.scale.set(+$('sx').value||0.001,+$('sy').value||0.001,+$('sz').value||0.001);recordSel()};
+$('pCol').oninput=()=>{const o=objOf(sel);if(!o)return;const c=$('pCol').value;o.material.color.set(c);if(sel<ms.length){const d=work.mods[sel]=work.mods[sel]||{};if(c.toLowerCase()===orig[sel].c.toLowerCase())delete d.c;else d.c=c;if(!Object.keys(d).length)delete work.mods[sel]}else work.add[sel-ms.length].c=c;updDirty()};
+$('hideBtn').onclick=()=>{if(sel<0)return;if(sel>=ms.length){delAdded();return}const d=work.mods[sel]=work.mods[sel]||{};if(d.h){delete d.h;ms[sel].visible=true}else{d.h=1;ms[sel].visible=false}if(!Object.keys(d).length)delete work.mods[sel];fillPartSel();fillProps();updDirty()};
+$('resetPart').onclick=()=>{if(sel<0||sel>=ms.length)return;delete work.mods[sel];const m=ms[sel],O=orig[sel];m.position.fromArray(O.p);m.rotation.set(O.r[0],O.r[1],O.r[2]);m.scale.fromArray(O.s);m.material.color.set(O.c);m.visible=O.vis;fillPartSel();fillProps();updDirty()};
+function delAdded(){const k=sel-ms.length;if(k<0)return;root.remove(added[k]);added.splice(k,1);work.add.splice(k,1);select(-1);fillPartSel();updDirty()}
+$('delAdd').onclick=delAdded;
+for(const b of document.querySelectorAll('[data-add]'))b.onclick=()=>{if(!root||showOrig)return;const a={g:b.dataset.add,c:'#d9d2c3',p:[orbit.target.x,0.15,orbit.target.z].map(r4),r:[0,0,0],s:[0.25,0.25,0.25]};work.add.push(a);added.push(makeAdded(a));fillPartSel();select(ms.length+added.length-1);updDirty()};
+$('cmpBtn').onclick=()=>{if(!cur)return;showOrig=!showOrig;$('cmpBtn').setAttribute('aria-pressed',String(showOrig));rebuild()};
+
+/* ---------- save / discard ---------- */
+const isDirty=()=>!!work&&JSON.stringify(work)!==base;
+function updDirty(){$('dirty').textContent=isDirty()?'Masz niezapisane zmiany.':drafts[cur]?'Zapisany (jeszcze nie wysłany).':published[cur]?'Ten model jest już zmieniony w grze.':'Model bez zmian.'}
+$('saveBtn').onclick=()=>{if(!cur)return;const m=models.find(x=>x.key===cur);drafts[cur]={name:m?m.name:cur,ovr:clone(work),at:Date.now(),n:ms.length};store.set(LS_DRAFT,drafts);base=JSON.stringify(work);checked.add(cur);updDirty();renderSaved();renderList()};
+$('discardBtn').onclick=()=>{if(!cur)return;work=JSON.parse(base);rebuild()};
+$('origBtn').onclick=()=>{if(!cur)return;work={mods:{},add:[]};rebuild()};
+function renderSaved(){const box=$('saved'),keys=Object.keys(drafts);box.innerHTML='';if(!keys.length){box.innerHTML='<span class="muted">Brak zapisanych modeli.</span>'}
+  for(const k of keys){const d=drafts[k],l=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';cb.checked=checked.has(k);cb.onchange=()=>{cb.checked?checked.add(k):checked.delete(k);updPub()};
+    const sp=document.createElement('span');sp.textContent=d.name+(emptyOvr(d.ovr)?' · przywrócenie oryginału':'');const sm=document.createElement('small');sm.textContent=new Date(d.at).toLocaleDateString('pl-PL');
+    const ed=document.createElement('button');ed.textContent='Edytuj';ed.onclick=e=>{e.preventDefault();if(api)openModel(k)};const del=document.createElement('button');del.textContent='Usuń';del.onclick=e=>{e.preventDefault();if(!confirm(`Usunąć zapis „${d.name}”?`))return;delete drafts[k];checked.delete(k);store.set(LS_DRAFT,drafts);renderSaved();renderList();if(cur===k)updDirty()};
+    l.append(cb,sp,sm,ed,del);box.appendChild(l)}updPub()}
+function updPub(){for(const k of[...checked])if(!drafts[k])checked.delete(k);$('pubBtn').textContent=`Wyślij zaznaczone (${checked.size})`;$('pubBtn').disabled=!checked.size}
+$('expBtn').onclick=()=>{const b=new Blob([JSON.stringify(drafts,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='little-townies-modele.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+$('impFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());let n=0;for(const k in d)if(d[k]&&d[k].ovr){drafts[k]=d[k];n++}store.set(LS_DRAFT,drafts);renderSaved();renderList();log(`Zaimportowano ${n} zapisów.`,'okc')}catch(err){log('Plik nie jest zapisem modeli.','err')}};
+
+/* ---------- publishing ---------- */
+$('token').onchange=()=>{try{localStorage.setItem(LS_TOKEN,$('token').value.trim())}catch(e){}};
+async function ghGet(path){const r=await fetch(API+path+'?ref='+BRANCH+'&t='+Date.now(),{headers:ghHeaders(true),cache:'no-store'});if(!r.ok)throw new Error(`${path}: ${r.status} ${r.statusText}`);return r.json()}
+async function ghPut(path,text,sha,msg){const r=await fetch(API+path,{method:'PUT',headers:Object.assign(ghHeaders(true),{'Content-Type':'application/json'}),body:JSON.stringify({message:msg,content:b64utf8(text),sha,branch:BRANCH})});
+  if(!r.ok){let m='';try{m=(await r.json()).message}catch(e){}throw new Error(`${path}: ${r.status} ${m||r.statusText}`)}return r.json()}
+$('pubBtn').onclick=async()=>{const keys=[...checked].filter(k=>drafts[k]);if(!keys.length)return;if(!$('token').value.trim()){log('Wpisz token GitHuba.','err');return}
+  if(!confirm(`Wysłać ${keys.length} ${keys.length===1?'model':'modele'} jako nową aktualizację gry?`))return;$('pubBtn').disabled=true;$('log').innerHTML='';
+  try{log('Pobieram aktualną wersję gry…');const meta=await ghGet('index.html');let html=await fetchGameText();
+    const ovr=parseOvr(html);if(!ovr){throw new Error('W grze na GitHubie brak miejsca na modele (potrzebna wersja 5.3.0+).')}
+    for(const k of keys){if(emptyOvr(drafts[k].ovr))delete ovr[k];else ovr[k]=drafts[k].ovr}
+    const vm=html.match(/window\.LT_VERSION='(\d+)\.(\d+)\.(\d+)'/);if(!vm)throw new Error('Nie znaleziono wersji gry.');const nv=`${vm[1]}.${vm[2]}.${+vm[3]+1}`;
+    html=html.replace(/\/\*LT-MODELS\*\/[\s\S]*?\/\*LT-MODELS-END\*\//,()=>'/*LT-MODELS*/'+JSON.stringify(ovr)+'/*LT-MODELS-END*/').replace(/window\.LT_VERSION='[\d.]+'/,`window.LT_VERSION='${nv}'`);
+    const names=keys.map(k=>drafts[k].name).join(', ');const notes=$('notes').value.trim()||`Nowe modele: ${names}`;
+    log(`Wysyłam wersję ${nv}…`);await ghPut('index.html',html,meta.sha,`${nv}: modele (${names})`);
+    const um=await ghGet('update.js');await ghPut('update.js','window.__ltUpdate('+JSON.stringify({v:nv,notes,html})+');\n',um.sha,`${nv}: update.js`);
+    const vmeta=await ghGet('version.json');await ghPut('version.json',JSON.stringify({v:nv,notes}),vmeta.sha,`${nv}: version.json`);
+    for(const k of keys){published[k]=drafts[k].ovr;if(emptyOvr(published[k]))delete published[k];delete drafts[k];checked.delete(k)}store.set(LS_DRAFT,drafts);gameHtml=html;
+    log(`Gotowe: wersja ${nv} jest na GitHubie. Gra pobierze ją przy następnym sprawdzeniu aktualizacji.`,'okc');renderSaved();renderList();if(cur)updDirty()}
+  catch(e){log('Błąd: '+e.message+(String(e.message).includes('401')?' (sprawdź token)':String(e.message).includes('409')?' (ktoś wysłał zmianę w międzyczasie, spróbuj ponownie)':''),'err')}
+  finally{updPub()}};
+addEventListener('beforeunload',e=>{if(isDirty()){e.preventDefault();e.returnValue=''}});
+renderSaved();
+})();
+</script>
+</body>
+</html>
