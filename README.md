@@ -19,8 +19,9 @@ Gdyby nowa wersja się nie uruchomiła, po 20 s gra sama wraca do wersji wbudowa
 Stacje radiowe: Nature FM, Luxury FM, Lofi Radio (`music/`).
 
 ## Edytor modeli
-`edytor/LittleTownies-Edytor.html` – otwórz w przeglądarce (Edge/Chrome). Wczytuje grę z GitHuba, pozwala zmieniać części modeli
-(kolor, położenie, obrót, skala, ukrycie) i dodawać bryły (także ostrosłupy). Można zaznaczyć kilka części naraz (Shift/Ctrl + klik, Ctrl+A)
-i edytować je razem, a części kopiować, wklejać (także do innego modelu) i duplikować. Zapisane modele zostają na komputerze; zaznaczone można wysłać razem
-jako jedną aktualizację (potrzebny token GitHuba z uprawnieniem *Contents: Read and write* do tego repozytorium).
+`edytor/LittleTownies-Edytor.html` – otwórz w przeglądarce (Edge/Chrome). Wczytuje grę z GitHuba i pokazuje modele w folderach
+(kategoria → budynek → wygląd, poziomy, ulepszenia; do tego pojazdy i piesi). Pozwala zmieniać części (kolor, położenie, obrót, skala,
+ukrycie), dodawać bryły i efekty (dym, para, ogień), ustawiać zachowanie części (świecenie, losowy kolor, kolor z ustawień budynku,
+animacje z gry) oraz tworzyć warianty wyglądu, które gra losuje dla każdego budynku i pojazdu. Zapisane modele zostają na komputerze;
+zaznaczone można wysłać razem jako jedną aktualizację (potrzebny token GitHuba z uprawnieniem *Contents: Read and write*).
 Przy wydawaniu nowej wersji gry ręcznie użyj `python3 zachowaj_modele.py nowa.html` (po `git pull`), żeby nie skasować wysłanych modeli.

@@ -1,24 +1,44 @@
-LITTLE TOWNIES – EDYTOR MODELI
+LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.0 lub nowsza)
 
 1. Uruchom EDYTOR.cmd (albo otwórz LittleTownies-Edytor.html w Edge/Chrome). Potrzebny internet.
 2. Kliknij „Wczytaj grę z GitHuba”. Edytor pobiera aktualną grę z MrShelo/LittleTowniesUpdates.
-3. Wybierz model z listy po lewej. Wygląd ulepszeń (dodatkowe piętra, kominy, filtry, garaże, panele…)
-   jest w kategoriach „Ulepszenia: …” – tam edytujesz tylko części dodawane przez ulepszenie,
-   a reszta budynku jest półprzezroczysta.
-   - Kliknij część modelu, żeby ją zaznaczyć (albo wybierz ją z listy „Część”).
-   - W / E / R: przesuwanie, obracanie, skalowanie strzałkami w widoku. Wartości można też wpisać w polach.
-   - Shift albo Ctrl + klik dodaje kolejne części do zaznaczenia; Ctrl+A (albo „Zaznacz wszystko”) zaznacza cały model.
-     Zaznaczone części przesuwasz, obracasz i skalujesz razem (wokół ich wspólnego środka),
-     a kolor, ukrywanie, przywracanie i usuwanie działa na wszystkie naraz. Esc czyści zaznaczenie.
-   - Kopiuj (Ctrl+C) i Wklej (Ctrl+V) – także do innego modelu. Duplikuj (Ctrl+D) robi kopię obok.
-     Kopia części z gry ma dokładnie ten sam kształt co oryginał.
-   - Kolor, „Ukryj część”, „Przywróć część”, „Dodaj bryłę” (prostopadłościan, walec, stożek, kula, ostrosłup).
-   - Delete usuwa dodane bryły, a części z gry ukrywa.
-   - „Oryginał” pokazuje model bez Twoich zmian.
-4. „Zapisz model” – zapis zostaje na tym komputerze (nic nie jest wysyłane).
-   Zapisane modele możesz eksportować do pliku i importować na innym komputerze.
-5. Wysyłanie: zaznacz zapisane modele (np. 6 naraz) i kliknij „Wyślij zaznaczone”.
-   Edytor podbija wersję gry (np. 5.3.2 → 5.3.3) i wysyła ją na GitHuba – gra pobierze ją jak zwykłą aktualizację.
+
+3. MODELE są w folderach: kategoria → budynek → jego wygląd, poziomy i ulepszenia
+   (np. Policja → Duży komisariat → Budynek / Ulepszenie: Drugi garaż).
+   Na dole są też „Pojazdy” (samochody, dostawy, służby, helikopter, kolej) i „Piesi”.
+   Kropka przy folderze: pomarańczowa = coś zapisane, zielona = zmienione w grze.
+
+4. EDYCJA
+   - Klik zaznacza część, Shift/Ctrl + klik dodaje kolejne, Ctrl+A zaznacza wszystko, Esc czyści.
+   - W / E / R: przesuwanie, obracanie, skalowanie. Q przełącza osie: „części” (obrócone razem z częścią)
+     albo „świata”. Domyślnie osie części – wtedy przesuwanie, obrót i skala zawsze się zgadzają.
+   - SHIFT przy przeciąganiu strzałek: część rusza się 10× wolniej i co 0,001.
+     SHIFT + strzałka w polu liczby: zmiana o 0,001 (obrót o 0,1°). Sama strzałka: 0,01 (obrót 1°).
+   - Kilka części naraz: obracają się i skalują wokół wspólnego środka i się nie zniekształcają.
+     W polach obrót i skala są wtedy względne (po zmianie wracają do 0° i 1).
+   - Kopiuj (Ctrl+C), Wklej (Ctrl+V – także do innego modelu), Duplikuj (Ctrl+D).
+   - Dodaj bryłę: prostopadłościan, walec, stożek, kula, ostrosłup. Delete usuwa dodane, części z gry ukrywa.
+
+5. ZACHOWANIE CZĘŚCI (panel po prawej, dla zaznaczonych części)
+   - Świeci: zawsze albo tylko nocą (jak okna). Przycisk „Noc” pokazuje podgląd nocny.
+   - Losowy kolor: każdy budynek / pojazd dostaje inny kolor z listy (można wpisać własne kolory).
+   - Kolor budynku: część bierze kolor z ustawień budynku (branża sklepu, linia fabryki).
+     W dostawczaku – kolor sklepu, do którego jedzie; w ciężarówce – kolor fabryki.
+   - Animacja (biblioteka z gry): obrót jak turbina, śmigło, kołysanie, unoszenie, pulsowanie,
+     miganie jak koguty radiowozu, migotanie płomienia. Oś, prędkość, zakres i faza do ustawienia.
+     „▶ Animacje” odtwarza je w podglądzie.
+
+6. EFEKTY (cząsteczki z gry): Dym, Ciemny dym, Para, Ogień. Pojawiają się jako znacznik,
+   który przesuwasz i skalujesz jak część. Można ustawić kolor, liczbę cząsteczek, prędkość
+   i „tylko gdy budynek pracuje”.
+
+7. WARIANTY WYGLĄDU: „+ Wariant” tworzy kolejny wygląd (kopię obecnego, który potem zmieniasz).
+   W grze każdy nowy budynek losuje jeden z wyglądów (główny też się liczy) i zachowuje go w zapisie.
+   Pojazdy i piesi losują wygląd przy każdym wyjeździe.
+
+8. „Zapisz model” – zapis zostaje na tym komputerze. Eksport / import przenosi zapisy na inny komputer.
+9. Wysyłanie: zaznacz zapisane modele i kliknij „Wyślij zaznaczone”. Edytor podbija wersję gry
+   (np. 5.4.0 → 5.4.1) i wysyła ją na GitHuba – gra pobierze ją jak zwykłą aktualizację.
 
 TOKEN GITHUBA (potrzebny tylko do wysyłania):
    github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token

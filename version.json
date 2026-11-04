@@ -1,1 +1,1 @@
-{"v":"5.3.4","notes":"Update Modeli Usługowych"}
+{"v": "5.4.0", "notes": "Edytor modeli: modele w folderach (kategoria → budynek → wygląd i ulepszenia), pojazdy i piesi, warianty wyglądu losowane dla każdego budynku i pojazdu, efekty (dym, para, ogień), animacje z gry, świecące części, losowe kolory i kolor z ustawień budynku. Precyzyjne przesuwanie z Shiftem (0,001), osie części/świata i poprawione skalowanie wielu części."}
