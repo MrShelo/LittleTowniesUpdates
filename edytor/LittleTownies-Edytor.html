@@ -122,6 +122,7 @@ iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:
       <h2>Zachowanie części</h2>
       <div class="grid2">
         <span class="muted">Świeci</span><select id="rGl"><option value="0">nie</option><option value="1">zawsze</option><option value="2">tylko nocą (jak okna)</option></select>
+        <span class="muted" id="rGcL">Kolor nocą</span><span class="row" id="rGcBox" style="gap:6px;flex-wrap:nowrap"><label class="row" style="gap:6px;flex:none"><input type="checkbox" id="rGcOn"> <span class="muted">zmienia na</span></label><input type="color" id="rGc" style="height:30px;padding:2px;flex:1;min-width:40px" value="#ffd36b"></span>
         <span class="muted">Losowy kolor</span><label class="row" style="gap:6px"><input type="checkbox" id="rRc"> <span class="muted">każdy budynek / pojazd inny</span></label>
         <span class="muted" id="rPalL">Kolory</span><input id="rPal" placeholder="#e25b45, #2f6fb5, …" title="Kolory do losowania, oddzielone przecinkami">
         <span class="muted">Kolor budynku</span><select id="rPt"><option value="">jak w grze</option><option value="1">bierze kolor z ustawień budynku</option><option value="-1">nie bierze</option></select>
@@ -297,7 +298,8 @@ function applyMod(m,d){if(d.h)m.visible=false;if(d.c&&m.material&&m.material.col
 /* colour roles as the game shows them: random colour, glow (always, or at night when the Noc preview is on) */
 function look(m,d,baseCol){if(!m||!m.material||!m.material.color)return;let col=baseCol;
   if(d&&d.rc){const pal=Array.isArray(d.rc)&&d.rc.length?d.rc:(api.rcDef||['#e25b45']);const key=JSON.stringify(pal);if(m.userData.rcKey!==key){m.userData.rcKey=key;m.userData.rcCol=pal[(Math.random()*pal.length)|0]}col=m.userData.rcCol}else m.userData.rcKey=null;
-  m.material.color.set(col);if(m.material.emissive){const g=d&&d.gl;m.material.emissive.copy(m.material.color).multiplyScalar(g===1?0.6:g===2&&night?0.95:0)}}
+  const g=d&&d.gl,gc=g===2&&d.gc;if(gc&&night)col=gc;
+  m.material.color.set(col);if(m.material.emissive){m.material.emissive.copy(m.material.color).multiplyScalar(g===1?0.6:g===2&&night?0.95:0)}}
 function applyLooks(){if(showOrig)return;ms.forEach((m,i)=>{const d=work.mods[i];look(m,d,d&&d.c||orig[i].c)});added.forEach((m,k)=>look(m,work.add[k],work.add[k].c||'#cccccc'))}
 /* parts nested in sub-groups are stored relative to the model root (rs), exactly like the game applies them */
 const nested=m=>m.parent&&m.parent!==root;
@@ -352,7 +354,7 @@ function applyPivot(){if(!pivot||!pv)return;const P=pivot.position,Q=pivot.quate
     setPoseRoot(o,pos,q,s);recordIdx(it.i)}}
 const selectAll=()=>{if(root&&!showOrig)select(allIdx().filter(i=>isFx(i)||objOf(i).visible))};
 const ADD_NAMES={box:'nowy prostopadłościan',cyl:'nowy walec',cone:'nowy stożek',sphere:'nowa kula',pyr:'nowy ostrosłup'};
-function roleTags(d,i){const t=[];if(!d)d={};if(d.gl)t.push(d.gl===1?'świeci':'świeci nocą');if(d.rc)t.push('losowy kolor');const pt=d.pt===1||(d.pt!==-1&&i!=null&&orig[i]&&orig[i].pt0);if(pt)t.push('kolor budynku');if(d.an&&api.animLib&&api.animLib[d.an.k])t.push('animacja');return t.length?' · '+t.join(', '):''}
+function roleTags(d,i){const t=[];if(!d)d={};if(d.gl)t.push(d.gl===1?'świeci':d.gc?'nocą świeci na '+d.gc:'świeci nocą');if(d.rc)t.push('losowy kolor');const pt=d.pt===1||(d.pt!==-1&&i!=null&&orig[i]&&orig[i].pt0);if(pt)t.push('kolor budynku');if(d.an&&api.animLib&&api.animLib[d.an.k])t.push('animacja');return t.length?' · '+t.join(', '):''}
 function fillPartSel(){const s=$('partSel'),fxn=k=>api.fxLib&&api.fxLib[k]?api.fxLib[k].name.replace(/ \(.*\)$/,''):'efekt';
   s.innerHTML='<option value="-1">— wybierz część —</option><option value="multi" hidden></option>'+ms.map((m,i)=>{const d=work.mods[i];return`<option value="${i}">#${i} · ${(d&&d.h)?'ukryta':orig[i].c}${d&&(d.p||d.r||d.s||d.c)?' · zmieniona':''}${roleTags(d,i)}</option>`}).join('')
    +added.map((m,k)=>{const a=work.add[k];return`<option value="${ms.length+k}">+${k+1} · ${a.gp||a.v?'kopia części':ADD_NAMES[a.g]||'nowa bryła'}${roleTags(a)}</option>`}).join('')
@@ -403,12 +405,14 @@ $('delAdd').onclick=delAdded;
 function roleData(i,make){if(isOrig(i)){if(make)work.mods[i]=work.mods[i]||{};return work.mods[i]}return work.add[i-ms.length]}
 function setRole(key,val){for(const i of sel){if(isFx(i))continue;const d=roleData(i,true);if(val===undefined||val===null||val==='')delete d[key];else d[key]=val;if(isOrig(i)&&!Object.keys(d).length)delete work.mods[i]}applyLooks();fillPartSel();fillRoles(sel.filter(i=>!isFx(i)));updDirty()}
 function fillRoles(parts){const show=!!parts.length&&!showOrig;$('roleSec').hidden=!show;if(!show)return;const d=roleData(parts[0])||{};
-  $('rGl').value=String(d.gl||0);$('rRc').checked=!!d.rc;$('rPal').hidden=$('rPalL').hidden=!d.rc;$('rPal').value=Array.isArray(d.rc)?d.rc.join(', '):(api.rcDef||[]).join(', ');
+  $('rGl').value=String(d.gl||0);$('rGcL').hidden=$('rGcBox').hidden=d.gl!==2;$('rGcOn').checked=!!d.gc;$('rGc').value=d.gc||'#ffd36b';$('rGc').disabled=!d.gc;$('rRc').checked=!!d.rc;$('rPal').hidden=$('rPalL').hidden=!d.rc;$('rPal').value=Array.isArray(d.rc)?d.rc.join(', '):(api.rcDef||[]).join(', ');
   $('rPt').value=d.pt===1?'1':d.pt===-1?'-1':'';$('rAn').value=d.an&&d.an.k||'';const L=d.an&&api.animLib&&api.animLib[d.an.k];$('anParams').hidden=!L;
   if(L){$('anAx').value=d.an.ax||L.ax;$('anSp').value=d.an.sp??L.sp;$('anAm').value=d.an.am??L.am;$('anPh').value=d.an.ph||0;$('anAm').disabled=d.an.k==='spin'||d.an.k==='rotor'||d.an.k==='blink'}
   const m=curModel(),pt0=isOrig(parts[0])&&orig[parts[0]].pt0;
   $('rInfo').textContent=(pt0?'Ta część w grze bierze kolor z ustawień budynku (branża sklepu, linia fabryki). ':'')+(m&&m.pt?'':'„Kolor budynku” działa w sklepach i fabrykach, a w dostawczakach i ciężarówkach bierze kolor sklepu lub fabryki, do której jadą. ')+(parts.length>1?`Zmiany dotyczą ${parts.length} zaznaczonych części.`:'')}
-$('rGl').onchange=()=>setRole('gl',+$('rGl').value||undefined);
+$('rGl').onchange=()=>{const v=+$('rGl').value||undefined;if(v!==2)for(const i of sel){const d=!isFx(i)&&roleData(i);if(d)delete d.gc}setRole('gl',v)};
+$('rGcOn').onchange=()=>{setRole('gc',$('rGcOn').checked?$('rGc').value:undefined);if($('rGcOn').checked&&!night)note('Włącz „Noc”, żeby zobaczyć kolor nocny.')};
+$('rGc').oninput=()=>{if($('rGcOn').checked)setRole('gc',$('rGc').value)};
 const parsePal=()=>{const l=$('rPal').value.split(/[,;\s]+/).map(x=>x.trim()).filter(x=>/^#?[0-9a-f]{6}$/i.test(x)).map(x=>(x[0]==='#'?x:'#'+x).toLowerCase());const def=(api.rcDef||[]).join(',');return!l.length||l.join(',')===def?1:l};
 $('rRc').onchange=()=>setRole('rc',$('rRc').checked?parsePal():undefined);
 $('rPal').onchange=()=>{if($('rRc').checked){for(const i of sel){const d=!isFx(i)&&roleData(i);if(d&&d.rc){const m=objOf(i);if(m)m.userData.rcKey=null}}setRole('rc',parsePal())}};
@@ -440,7 +444,7 @@ function entryOf(i){const o=objOf(i);if(!o)return null;
   if(isFx(i))return{t:'f',d:jcopy(work.fx[i-ms.length-added.length])};
   if(isAdd(i))return{t:'a',d:jcopy(work.add[i-ms.length])};
   const spec=geoSpec(o.geometry);if(!spec)return null;const p=new T.Vector3(),q=new T.Quaternion(),sc=new T.Vector3();rootLocal(o).decompose(p,q,sc);const e=new T.Euler().setFromQuaternion(q);const d=work.mods[i]||{};
-  const a=Object.assign(spec,{c:d.c||orig[i].c,p:p.toArray().map(r4),r:[e.x,e.y,e.z].map(r4),s:sc.toArray().map(r4)});for(const k of['gl','rc','an'])if(d[k])a[k]=jcopy(d[k]);if(d.pt===1||(d.pt!==-1&&orig[i].pt0))a.pt=1;return{t:'a',d:a}}
+  const a=Object.assign(spec,{c:d.c||orig[i].c,p:p.toArray().map(r4),r:[e.x,e.y,e.z].map(r4),s:sc.toArray().map(r4)});for(const k of['gl','gc','rc','an'])if(d[k])a[k]=jcopy(d[k]);if(d.pt===1||(d.pt!==-1&&orig[i].pt0))a.pt=1;return{t:'a',d:a}}
 function entries(){const l=sel.map(entryOf),bad=l.filter(x=>!x).length;if(bad)note(`${bad} ${bad===1?'części':'części'} nie da się skopiować (zbyt złożony kształt).`);return l.filter(Boolean)}
 function addEntries(list,off){if(!root||showOrig||!list.length)return;const objs=[];
   for(const e of list){const d=jcopy(e.d);d.p=[d.p[0]+off,d.p[1],d.p[2]+off].map(r4);if(e.t==='f'){if(!api.makeFx)continue;work.fx.push(d);const g=makeFxE(d);fxs.push(g);objs.push(g)}else{work.add.push(d);const m=makeAdded(d);added.push(m);objs.push(m)}}
@@ -476,7 +480,7 @@ $('pubBtn').onclick=async()=>{const keys=[...checked].filter(k=>drafts[k]);if(!k
   if(!confirm(`Wysłać ${keys.length} ${keys.length===1?'model':'modele'} jako nową aktualizację gry?`))return;$('pubBtn').disabled=true;$('log').innerHTML='';
   try{log('Pobieram aktualną wersję gry…');const meta=await ghGet('index.html');let html=await fetchGameText();
     const ovr=parseOvr(html);if(!ovr){throw new Error('W grze na GitHubie brak miejsca na modele (potrzebna wersja 5.3.0+).')}
-    const needs=keys.some(k=>{const o=drafts[k].ovr;return(o.alt&&o.alt.length)||(o.fx&&o.fx.length)||k.startsWith('veh:')||JSON.stringify(o).match(/"(gl|rc|pt|an)":/)});
+    const needs=keys.some(k=>{const o=drafts[k].ovr;return(o.alt&&o.alt.length)||(o.fx&&o.fx.length)||k.startsWith('veh:')||JSON.stringify(o).match(/"(gl|gc|rc|pt|an)":/)});
     if(needs&&!/ANIM_LIB/.test(html))throw new Error('Gra na GitHubie jest starsza niż 5.4.0 i nie obsłuży wariantów, efektów, animacji ani pojazdów. Najpierw zaktualizuj grę.');
     for(const k of keys){if(emptyOvr(drafts[k].ovr))delete ovr[k];else ovr[k]=compact(drafts[k].ovr)}
     const vm=html.match(/window\.LT_VERSION='(\d+)\.(\d+)\.(\d+)'/);if(!vm)throw new Error('Nie znaleziono wersji gry.');const nv=`${vm[1]}.${vm[2]}.${+vm[3]+1}`;

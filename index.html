@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='5.4.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='5.4.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -802,12 +802,15 @@ function ovrRootPose(m,d,g){g.updateMatrixWorld(true);const pr=new THREE.Matrix4
 function ovrMat(m,key,mk){const ck=m.material.uuid+key;let mt=ovrMats.get(ck);if(!mt){mt=m.material.clone();mk(mt);ovrMats.set(ck,mt)}m.material=mt}
 /* part roles from the editor: gl = glows (1 always, 2 at night), rc = random colour per building/vehicle, pt = takes the building's colour setting (shop branch, factory line), an = animation */
 const RC_DEF=['#e25b45','#2f6fb5','#f2c14e','#f4f1ea','#4a9d6c','#7b5ea7','#2b2f36','#e98a3a'];
-const GLOWS=new Map(),ANIMS=new Set(),FXS=new Set();const nightK=()=>{try{return 1-dayF}catch(e){return 0}};
+const GLOWS=new Map(),ANIMS=new Set(),FXS=new Set();
+function glowSet(mt,G,k){if(G.n){mt.color.copy(G.d).lerp(G.n,k);mt.emissive.copy(G.n).multiplyScalar(k*0.95)}else mt.emissive.copy(mt.color).multiplyScalar(G.m===1?0.6:k*0.95)}const nightK=()=>{try{return 1-dayF}catch(e){return 0}};
 function ovrRoles(m,d,g,ctx){if(m.material&&m.material.color){
     if(d.rc){const pal=Array.isArray(d.rc)&&d.rc.length?d.rc:RC_DEF,c=pal[(Math.random()*pal.length)|0];ovrMat(m,'rc'+c,mt=>mt.color.set(c))}
     if(d.pt===1){if(ctx&&ctx.paint)m.material=ctx.paint;else{const P=g.userData.paint=g.userData.paint||[];if(!P.includes(m))P.push(m)}}
     else if(d.pt===-1&&g.userData.paint){const k=g.userData.paint.indexOf(m);if(k>=0)g.userData.paint.splice(k,1)}
-    if(d.gl&&m.material.emissive){ovrMat(m,'gl'+d.gl,()=>{});GLOWS.set(m.material,d.gl);m.material.emissive.copy(m.material.color).multiplyScalar(d.gl===1?0.6:nightK()*0.95)}}
+    if(d.gl&&m.material.emissive){const gc=d.gl===2&&typeof d.gc==='string'?d.gc:null;ovrMat(m,'gl'+d.gl+(gc||''),()=>{});
+      /* night glow can also switch the part to another colour (gc), e.g. a dark window that lights up yellow */
+      const G={m:d.gl,d:gc?m.material.color.clone():null,n:gc?new THREE.Color(gc):null};GLOWS.set(m.material,G);glowSet(m.material,G,nightK())}}
   if(d.an&&ANIM_LIB[d.an.k]){m.userData.an=d.an;m.userData.an0=[m.position.clone(),m.rotation.clone(),m.scale.clone(),m.visible];ANIMS.add(m)}}
 function applyOvrObj(o,ms,g,ctx){if(!o||!g)return g;try{
     for(const k in o.mods||{}){const m=ms[+k],d=o.mods[k];if(!m)continue;if(d.h)m.visible=false;
@@ -3646,7 +3649,7 @@ function updateSky(){const h=hourOf(gameT),ang=(h-6)/24*Math.PI*2,el=Math.sin(an
   const ext=Math.max(10,Math.min(46,cam.radius*0.8));if(Math.abs(ext-shadowExt)>1){shadowExt=ext;Object.assign(sun.shadow.camera,{left:-ext,right:ext,top:ext,bottom:-ext,far:90});sun.shadow.camera.updateProjectionMatrix()}
   dayF=day;const glow=1-day;mat.glass2.emissive.copy(GLOW).multiplyScalar(glow*0.4);mat.glass.emissive.copy(GLOW).multiplyScalar(glow*0.85);mat.lamp.emissive.copy(GLOW).multiplyScalar(glow*1.1);
   mat.head.emissive.setRGB(1,0.93,0.72).multiplyScalar(glow*1.1);mat.tail.emissive.setRGB(1,0.12,0.08).multiplyScalar(glow*0.95);mat.beam.opacity=glow*0.32;mat.beam.visible=glow>0.05;
-  for(const[mt,mode]of GLOWS)mt.emissive.copy(mt.color).multiplyScalar(mode===1?0.6:glow*0.95)}
+  for(const[mt,G]of GLOWS)glowSet(mt,G,glow)}
 
 /* ---------- 2D status icons: only when zoomed in; one chip per building listing what is wrong ---------- */
 const statEl=document.getElementById('stat'),statPool=[],sv3=new THREE.Vector3();let statT=0;const STAT_ZOOM=26;

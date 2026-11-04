@@ -1,4 +1,4 @@
-LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.0 lub nowsza)
+LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza)
 
 1. Uruchom EDYTOR.cmd (albo otwórz LittleTownies-Edytor.html w Edge/Chrome). Potrzebny internet.
 2. Kliknij „Wczytaj grę z GitHuba”. Edytor pobiera aktualną grę z MrShelo/LittleTowniesUpdates.
@@ -21,6 +21,8 @@ LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.0 lub nowsza)
 
 5. ZACHOWANIE CZĘŚCI (panel po prawej, dla zaznaczonych części)
    - Świeci: zawsze albo tylko nocą (jak okna). Przycisk „Noc” pokazuje podgląd nocny.
+     Przy „tylko nocą” możesz zaznaczyć „Kolor nocą” i wybrać kolor, na który część zmienia się w nocy
+     (np. ciemne okno, które wieczorem robi się żółte). W dzień ma swój zwykły kolor.
    - Losowy kolor: każdy budynek / pojazd dostaje inny kolor z listy (można wpisać własne kolory).
    - Kolor budynku: część bierze kolor z ustawień budynku (branża sklepu, linia fabryki).
      W dostawczaku – kolor sklepu, do którego jedzie; w ciężarówce – kolor fabryki.
