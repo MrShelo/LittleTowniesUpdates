@@ -56,6 +56,16 @@ h2{font-size:13px;margin:0 0 8px;letter-spacing:.06em;text-transform:uppercase;c
 .grid2 select,.grid2 input:not([type=checkbox]){width:100%}
 .anp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.anp label{display:grid;gap:2px;font-size:11.5px;color:var(--muted)}.anp input,.anp select{width:100%}
 .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+/* palette of random colours */
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:8px;padding:8px;background:var(--chip);border:1px solid var(--line);border-radius:12px}
+.sw{position:relative;aspect-ratio:1;border-radius:9px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);overflow:visible}
+.sw input[type=color]{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:9px;background:none;cursor:pointer;opacity:0}
+.sw .x{position:absolute;top:-7px;right:-7px;width:19px;height:19px;min-height:0;padding:0;border-radius:50%;font-size:12px;line-height:17px;text-align:center;background:var(--panel);border:1px solid var(--line);color:var(--muted);opacity:0;transition:opacity .12s;z-index:1}
+.sw:hover .x,.sw:focus-within .x{opacity:1}.sw .x:hover{color:var(--warn);border-color:var(--warn)}
+@media (hover:none){.sw .x{opacity:1}}
+.sw.add{display:grid;place-items:center;background:var(--panel);box-shadow:none;border:1.5px dashed var(--muted);color:var(--muted);font-size:20px;line-height:1}
+.sw.add:hover{border-color:var(--ink);color:var(--ink)}
+button.mini{min-height:26px;padding:2px 9px;font-size:12px}
 .vars{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}.vars button{min-height:28px;padding:3px 9px;font-size:12.5px}
 .sec{border-top:1px solid var(--line);padding-top:12px}
 .muted{color:var(--muted);font-size:12.5px}
@@ -124,7 +134,9 @@ iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:
         <span class="muted">Świeci</span><select id="rGl"><option value="0">nie</option><option value="1">zawsze</option><option value="2">tylko nocą (jak okna)</option></select>
         <span class="muted" id="rGcL">Kolor nocą</span><span class="row" id="rGcBox" style="gap:6px;flex-wrap:nowrap"><label class="row" style="gap:6px;flex:none"><input type="checkbox" id="rGcOn"> <span class="muted">zmienia na</span></label><input type="color" id="rGc" style="height:30px;padding:2px;flex:1;min-width:40px" value="#ffd36b"></span>
         <span class="muted">Losowy kolor</span><label class="row" style="gap:6px"><input type="checkbox" id="rRc"> <span class="muted">każdy budynek / pojazd inny</span></label>
-        <span class="muted" id="rPalL">Kolory</span><input id="rPal" placeholder="#e25b45, #2f6fb5, …" title="Kolory do losowania, oddzielone przecinkami">
+        <span class="muted" id="rPalL" style="align-self:start;padding-top:8px">Kolory</span>
+        <div id="rPalBox"><div class="pal" id="rPal" role="list" aria-label="Kolory do losowania"></div>
+          <div class="row" style="margin-top:8px;gap:4px"><button class="mini" id="palRoll" title="Wylosuj kolory w podglądzie jeszcze raz">🎲 Losuj podgląd</button><button class="mini" id="palDef">Domyślne</button></div></div>
         <span class="muted">Kolor budynku</span><select id="rPt"><option value="">jak w grze</option><option value="1">bierze kolor z ustawień budynku</option><option value="-1">nie bierze</option></select>
         <span class="muted">Animacja</span><select id="rAn"><option value="">brak</option></select>
       </div>
@@ -405,7 +417,7 @@ $('delAdd').onclick=delAdded;
 function roleData(i,make){if(isOrig(i)){if(make)work.mods[i]=work.mods[i]||{};return work.mods[i]}return work.add[i-ms.length]}
 function setRole(key,val){for(const i of sel){if(isFx(i))continue;const d=roleData(i,true);if(val===undefined||val===null||val==='')delete d[key];else d[key]=val;if(isOrig(i)&&!Object.keys(d).length)delete work.mods[i]}applyLooks();fillPartSel();fillRoles(sel.filter(i=>!isFx(i)));updDirty()}
 function fillRoles(parts){const show=!!parts.length&&!showOrig;$('roleSec').hidden=!show;if(!show)return;const d=roleData(parts[0])||{};
-  $('rGl').value=String(d.gl||0);$('rGcL').hidden=$('rGcBox').hidden=d.gl!==2;$('rGcOn').checked=!!d.gc;$('rGc').value=d.gc||'#ffd36b';$('rGc').disabled=!d.gc;$('rRc').checked=!!d.rc;$('rPal').hidden=$('rPalL').hidden=!d.rc;$('rPal').value=Array.isArray(d.rc)?d.rc.join(', '):(api.rcDef||[]).join(', ');
+  $('rGl').value=String(d.gl||0);$('rGcL').hidden=$('rGcBox').hidden=d.gl!==2;$('rGcOn').checked=!!d.gc;$('rGc').value=d.gc||'#ffd36b';$('rGc').disabled=!d.gc;$('rRc').checked=!!d.rc;$('rPalBox').hidden=$('rPalL').hidden=!d.rc;if(d.rc)renderPal(curPal(d));
   $('rPt').value=d.pt===1?'1':d.pt===-1?'-1':'';$('rAn').value=d.an&&d.an.k||'';const L=d.an&&api.animLib&&api.animLib[d.an.k];$('anParams').hidden=!L;
   if(L){$('anAx').value=d.an.ax||L.ax;$('anSp').value=d.an.sp??L.sp;$('anAm').value=d.an.am??L.am;$('anPh').value=d.an.ph||0;$('anAm').disabled=d.an.k==='spin'||d.an.k==='rotor'||d.an.k==='blink'}
   const m=curModel(),pt0=isOrig(parts[0])&&orig[parts[0]].pt0;
@@ -413,9 +425,22 @@ function fillRoles(parts){const show=!!parts.length&&!showOrig;$('roleSec').hidd
 $('rGl').onchange=()=>{const v=+$('rGl').value||undefined;if(v!==2)for(const i of sel){const d=!isFx(i)&&roleData(i);if(d)delete d.gc}setRole('gl',v)};
 $('rGcOn').onchange=()=>{setRole('gc',$('rGcOn').checked?$('rGc').value:undefined);if($('rGcOn').checked&&!night)note('Włącz „Noc”, żeby zobaczyć kolor nocny.')};
 $('rGc').oninput=()=>{if($('rGcOn').checked)setRole('gc',$('rGc').value)};
-const parsePal=()=>{const l=$('rPal').value.split(/[,;\s]+/).map(x=>x.trim()).filter(x=>/^#?[0-9a-f]{6}$/i.test(x)).map(x=>(x[0]==='#'?x:'#'+x).toLowerCase());const def=(api.rcDef||[]).join(',');return!l.length||l.join(',')===def?1:l};
-$('rRc').onchange=()=>setRole('rc',$('rRc').checked?parsePal():undefined);
-$('rPal').onchange=()=>{if($('rRc').checked){for(const i of sel){const d=!isFx(i)&&roleData(i);if(d&&d.rc){const m=objOf(i);if(m)m.userData.rcKey=null}}setRole('rc',parsePal())}};
+/* random-colour palette: swatches you can recolour (click), remove (×) and add (+) */
+const curPal=d=>(Array.isArray(d.rc)&&d.rc.length?d.rc:(api.rcDef||['#e25b45'])).map(c=>c.toLowerCase());
+const palVal=pal=>pal.join(',')===(api.rcDef||[]).map(c=>c.toLowerCase()).join(',')?1:pal;
+function commitPal(pal){for(const i of sel){if(isFx(i))continue;const m=objOf(i);if(m)m.userData.rcKey=null}setRole('rc',palVal(pal))}
+function renderPal(pal){const box=$('rPal');box.innerHTML='';
+  pal.forEach((c,k)=>{const sw=document.createElement('div');sw.className='sw';sw.setAttribute('role','listitem');sw.style.background=c;sw.title=c;
+    const inp=document.createElement('input');inp.type='color';inp.value=c;inp.setAttribute('aria-label','Kolor '+(k+1)+': '+c);
+    inp.oninput=()=>{sw.style.background=inp.value;sw.title=inp.value};inp.onchange=()=>{const p=pal.slice();p[k]=inp.value.toLowerCase();commitPal(p)};
+    const x=document.createElement('button');x.className='x';x.textContent='×';x.title='Usuń kolor';x.setAttribute('aria-label','Usuń kolor '+c);x.disabled=pal.length<2;
+    x.onclick=e=>{e.stopPropagation();if(pal.length<2)return;const p=pal.slice();p.splice(k,1);commitPal(p)};sw.append(inp,x);box.appendChild(sw)});
+  const add=document.createElement('label');add.className='sw add';add.title='Dodaj kolor';add.textContent='+';const ai=document.createElement('input');ai.type='color';ai.setAttribute('aria-label','Dodaj kolor');
+  ai.value='#'+((Math.random()*0xffffff)|0).toString(16).padStart(6,'0');ai.onchange=()=>commitPal(pal.concat(ai.value.toLowerCase()));add.appendChild(ai);box.appendChild(add);
+  $('rPalL').textContent=`Kolory (${pal.length})`}
+$('palRoll').onclick=()=>{for(const i of sel){const m=!isFx(i)&&objOf(i);if(m)m.userData.rcKey=null}applyLooks()};
+$('palDef').onclick=()=>commitPal((api.rcDef||[]).slice());
+$('rRc').onchange=()=>setRole('rc',$('rRc').checked?1:undefined);
 $('rPt').onchange=()=>setRole('pt',$('rPt').value?+$('rPt').value:undefined);
 $('rAn').onchange=()=>{const k=$('rAn').value;setRole('an',k?{k}:undefined)};
 for(const id of['anAx','anSp','anAm','anPh'])$(id).onchange=()=>{const k=$('rAn').value;if(!k)return;const L=api.animLib[k],an={k};const ax=$('anAx').value,sp=+$('anSp').value,am=+$('anAm').value,ph=+$('anPh').value;

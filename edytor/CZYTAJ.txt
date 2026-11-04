@@ -23,7 +23,8 @@ LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza)
    - Świeci: zawsze albo tylko nocą (jak okna). Przycisk „Noc” pokazuje podgląd nocny.
      Przy „tylko nocą” możesz zaznaczyć „Kolor nocą” i wybrać kolor, na który część zmienia się w nocy
      (np. ciemne okno, które wieczorem robi się żółte). W dzień ma swój zwykły kolor.
-   - Losowy kolor: każdy budynek / pojazd dostaje inny kolor z listy (można wpisać własne kolory).
+   - Losowy kolor: każdy budynek / pojazd dostaje inny kolor z palety. Kliknij kolor, żeby go zmienić,
+     × usuwa kolor, + dodaje nowy. „Losuj podgląd” losuje jeszcze raz, „Domyślne” przywraca kolory z gry.
    - Kolor budynku: część bierze kolor z ustawień budynku (branża sklepu, linia fabryki).
      W dostawczaku – kolor sklepu, do którego jedzie; w ciężarówce – kolor fabryki.
    - Animacja (biblioteka z gry): obrót jak turbina, śmigło, kołysanie, unoszenie, pulsowanie,
