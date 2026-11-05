@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='5.5.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='5.5.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -144,7 +144,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .radio.on #rName{color:var(--accent)}
 .vol{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:4px}
 .mOpts{display:grid;gap:8px}.mOpts[hidden]{display:none}
-.tgl{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin-top:4px;cursor:pointer}.tgl input{width:20px;height:20px;accent-color:var(--accent)}
+.tgl{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin-top:4px}.tgl span{display:grid;gap:1px}.tgl small{font-size:11.5px;opacity:.8}
+.tglB{min-height:36px;min-width:104px;font-weight:650}.tglB[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
 .danger{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;padding:10px;border-radius:12px;border:2px solid #d93025;background:color-mix(in srgb,#d93025 10%,transparent)}
 .danger[hidden]{display:none}.danger>div{display:grid;gap:2px}.danger b{color:#d93025;font-size:14px}.danger small{color:var(--muted);font-size:12px;line-height:1.35}
 .danger .dangerB{grid-column:1/-1;border-color:#d93025;color:#d93025;font-weight:700}.danger .dangerB.armed{background:#d93025;color:#fff}.vol b{color:var(--fg);font-variant-numeric:tabular-nums}
@@ -467,7 +468,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <input type="range" id="mGamma" min="0.6" max="1.6" step="0.05" value="1">
   <label class="vol" for="mVol"><span>Głośność muzyki i radia</span><b id="mVolV">60%</b></label>
   <input type="range" id="mVol" min="0" max="100" step="5" value="60">
-  <label class="tgl" for="mMenuMus"><span>Muzyka w menu głównym</span><input type="checkbox" id="mMenuMus" checked></label>
+  <div class="tgl"><span>Muzyka w menu głównym<small>gra niezależnie od radia</small></span><button class="btn panel tglB" id="mMenuMus" aria-pressed="true">Włączona</button></div>
   <div class="upd"><b>Aktualizacje z GitHuba</b><span class="st">Wersja gry <span id="uVer"></span></span>
     <button class="btn panel mbtn" id="uCheck">Sprawdź aktualizacje</button>
     <span class="st" id="uSt"></span>
@@ -3549,16 +3550,18 @@ function setVol(v){radio.vol=Math.max(0,Math.min(1,v));if(radio.el)radio.el.volu
 /* main menu music: loops on the title screen, fades in and out */
 const menuMus={el:null,on:false,fading:null};let menuMusOn=true;try{menuMusOn=localStorage.getItem('lt-menumus')!=='0'}catch(e){}
 function fadeTo(a,v,ms,done){clearInterval(menuMus.fading);const v0=a.volume,t0=Date.now();menuMus.fading=setInterval(()=>{const k=Math.min(1,(Date.now()-t0)/ms);try{a.volume=Math.max(0,Math.min(1,v0+(v-v0)*k))}catch(e){}if(k>=1){clearInterval(menuMus.fading);menuMus.fading=null;if(done)done()}},40)}
-function menuMusicSync(){let ti=false;try{ti=titleOpen}catch(e){}const want=ti&&menuMusOn&&audioOK&&!document.hidden;
+function menuMusicSync(){let ti=false;try{ti=titleOpen}catch(e){}const want=ti&&menuMusOn&&(audioOK||!menuMus.blocked)&&!document.hidden;
   if(want&&!menuMus.on){if(!menuMus.el){const a=new Audio(),urls=MUSIC_SRC('menu');let k=0;a.loop=true;a.preload='auto';a.src=urls[0];a.addEventListener('error',()=>{if(++k<urls.length){a.src=urls[k];if(menuMus.on)a.play().catch(()=>{})}});menuMus.el=a}
-    const a=menuMus.el;menuMus.on=true;a.volume=0;const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{menuMus.on=false});fadeTo(a,radio.vol,1500)}
+    const a=menuMus.el;menuMus.on=true;a.volume=0;const pr=a.play();if(pr&&pr.catch)pr.catch(e=>{menuMus.on=false;if(e&&e.name==='NotAllowedError')menuMus.blocked=true});fadeTo(a,radio.vol,1500)}
   else if(!want&&menuMus.on){menuMus.on=false;const a=menuMus.el;fadeTo(a,0,700,()=>{if(!menuMus.on)a.pause()})}
-  const t=document.getElementById('mMenuMus');if(t)t.checked=menuMusOn}
-document.getElementById('mMenuMus').addEventListener('change',e=>{menuMusOn=e.target.checked;try{localStorage.setItem('lt-menumus',menuMusOn?'1':'0')}catch(e2){}audioOK=true;menuMusicSync()});
+  const t=document.getElementById('mMenuMus');if(t){t.setAttribute('aria-pressed',String(menuMusOn));t.textContent=menuMusOn?'Włączona':'Wyłączona'}}
+document.getElementById('mMenuMus').addEventListener('click',()=>{menuMusOn=!menuMusOn;try{localStorage.setItem('lt-menumus',menuMusOn?'1':'0')}catch(e2){}audioOK=true;menuMus.blocked=false;menuMusicSync()});
 document.getElementById('rPlay').addEventListener('click',radioToggle);document.getElementById('rNext').addEventListener('click',radioNext);document.getElementById('rSt').addEventListener('click',radioNext);
 document.getElementById('mVol').addEventListener('input',e=>setVol(e.target.value/100));radioUI();
 /* browsers only start sound after a tap: the first one starts the menu music (title screen) or the radio (in the city, if it was on) */
-{const go=e=>{if(audioOK)return;audioOK=true;menuMusicSync();if(!(e&&e.target&&e.target.closest&&e.target.closest('#radio')))radioSync()};addEventListener('pointerdown',go,true);addEventListener('keydown',go,true)}
+{const go=e=>{const first=!audioOK;audioOK=true;menuMus.blocked=false;if(!menuMus.on)menuMusicSync();if(first&&!(e&&e.target&&e.target.closest&&e.target.closest('#radio')))radioSync()};addEventListener('pointerdown',go,true);addEventListener('keydown',go,true)}
+/* the title screen may open before this part of the game has loaded: try the menu music once everything is ready */
+setTimeout(()=>{try{menuMusicSync()}catch(e){}},0);addEventListener('load',()=>{try{menuMusicSync()}catch(e){}});
 document.addEventListener('visibilitychange',()=>{menuMusicSync();if(!radio.el||!radio.on){if(!document.hidden)radioSync();return}if(document.hidden)radio.el.pause();else radio.el.play().catch(()=>{})});
 /* ---------- updates from GitHub ---------- */
 const UREPO=Object.freeze('MrShelo/LittleTowniesUpdates');const uSt=document.getElementById('uSt');try{localStorage.removeItem('lt-repo')}catch(e){}
