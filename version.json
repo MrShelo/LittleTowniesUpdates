@@ -1,1 +1,1 @@
-{"v": "5.5.2", "notes": "Gospodarka: zakładka Woda w stylu Prądu (kafelki, zużycie według kategorii, źródła wody, kanalizacja, średnia i bilans dnia), kafelki w Finansach. Inspektor mniejszy i bardziej zwarty, zwijanie sekcji trójkątem jak przycisk play."}
+{"v": "5.5.3", "notes": "Kafelki Finansów: kwoty od 10 000 skracane do tysięcy (np. 14,5k T¢), bez przeskakiwania do nowej linii. Przyciski po lewej mają okienka z opisem jak HUD. Okienko Magazynów pokazuje, ile jest każdego towaru."}
