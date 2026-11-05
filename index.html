@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='5.4.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='5.5.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -142,11 +142,16 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .radio .btn{background:none;border:0;min-height:34px}.radio .icon{width:34px;font-size:13px}
 #rSt{display:grid;line-height:1.1;text-align:left;padding:2px 6px}#rSt small{font-size:10px;color:var(--muted)}#rSt b{font-family:var(--font-d);font-size:13px;white-space:nowrap}
 .radio.on #rName{color:var(--accent)}
-.vol{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:4px}.vol b{color:var(--fg);font-variant-numeric:tabular-nums}
+.vol{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:4px}
+.mOpts{display:grid;gap:8px}.mOpts[hidden]{display:none}
+.tgl{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin-top:4px;cursor:pointer}.tgl input{width:20px;height:20px;accent-color:var(--accent)}
+.danger{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;padding:10px;border-radius:12px;border:2px solid #d93025;background:color-mix(in srgb,#d93025 10%,transparent)}
+.danger[hidden]{display:none}.danger>div{display:grid;gap:2px}.danger b{color:#d93025;font-size:14px}.danger small{color:var(--muted);font-size:12px;line-height:1.35}
+.danger .dangerB{grid-column:1/-1;border-color:#d93025;color:#d93025;font-weight:700}.danger .dangerB.armed{background:#d93025;color:#fff}.vol b{color:var(--fg);font-variant-numeric:tabular-nums}
 #mVol{width:100%;accent-color:var(--accent)}
 .upd{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;display:grid;gap:6px;font-size:13px}
 .upd input{font:inherit;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--fg);min-width:0}
-.upd .st{color:var(--muted);font-size:12.5px;line-height:1.35}
+.upd .st{color:var(--muted);font-size:12.5px;line-height:1.35;position:static;display:block;background:none;box-shadow:none;padding:0;border-radius:0;will-change:auto}
 @media (max-width:640px){#rSt small{display:none}#rSt b{font-size:12px}}
 @media (max-width:420px){#rSt{display:none}}
 .speed{display:flex;gap:1px;padding:2px}.speed .btn{background:none;border:0;min-height:34px;width:34px;font-size:11px;letter-spacing:-2px}
@@ -226,6 +231,35 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .sw2{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0}
 .insp .up[disabled]{opacity:.55;cursor:default}
 .insp .facts .warnv{color:var(--warn)}
+.insp .isec{border-radius:14px;background:color-mix(in srgb,var(--fg) 7%,transparent);padding:8px 10px 10px}
+.insp .isech{position:relative;display:flex;align-items:center;justify-content:center;min-height:30px;cursor:pointer;user-select:none;border-radius:10px}
+.insp .isech:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.insp .isech h4{margin:0;font:650 16px var(--font-d);color:color-mix(in srgb,var(--fg) 82%,transparent);text-align:center;padding:0 34px}
+.insp .ifold{position:absolute;right:0;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--fg);color:var(--panel2,#222);display:grid;place-items:center}
+.insp .isec.closed{padding-bottom:8px}.insp .isecb{margin-top:8px;display:grid;gap:8px}
+.insp .tiles{display:grid;gap:8px}.insp .tiles.t4{grid-template-columns:repeat(4,1fr)}.insp .tiles.t3{grid-template-columns:repeat(auto-fit,minmax(88px,1fr))}
+.insp .tile{border-radius:10px;background:color-mix(in srgb,var(--fg) 7%,transparent);padding:8px 5px;display:grid;justify-items:center;align-content:center;gap:2px;text-align:center;min-width:0}
+.insp .tile .big{font:750 32px/1.05 var(--font-d);color:#38c6e0;font-variant-numeric:tabular-nums}
+.insp .tile small{font-size:11.5px;color:var(--muted);font-weight:650;line-height:1.2}
+.insp .svcT .lab{font:700 12.5px var(--font-b)}.insp .svcT .v{font:700 12.5px var(--font-b);font-variant-numeric:tabular-nums}.insp .svcT small{color:inherit;opacity:.85;font-weight:600}
+.insp .hap{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.insp .hapF{width:108px;padding:10px 6px}.insp .hapF b{font:700 12.5px var(--font-b)}.insp .hapF small{color:inherit;opacity:.8}
+.insp .mods{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start}
+.insp .mod{display:flex;gap:8px;align-items:baseline;font:650 11.5px var(--font-b);padding:5px 8px;border-radius:7px;background:color-mix(in srgb,var(--money) 15%,transparent);color:var(--money)}
+.insp .mod.neg{background:color-mix(in srgb,var(--warn) 15%,transparent);color:var(--warn)}
+.insp .pfacts{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;color:var(--muted)}.insp .pfacts span:nth-child(2n){text-align:right;color:var(--fg)}.insp .pfacts .neg{color:var(--warn)}
+.insp .nbars{display:flex;justify-content:center;gap:clamp(10px,4vw,18px);padding:12px 10px 8px;border-radius:10px;background:color-mix(in srgb,var(--fg) 7%,transparent)}
+.insp .nbar{display:grid;justify-items:center;gap:5px}.insp .nbar .tr{width:24px;height:86px;border-radius:10px;background:rgba(127,127,127,.32);display:flex;align-items:flex-end;overflow:hidden}
+.insp .nbar .tr i{display:block;width:100%;border-radius:10px;transition:height .5s}.insp .nbar small{font:650 11px var(--font-b);color:var(--muted);font-variant-numeric:tabular-nums}
+.insp .nbar.low .tr i{animation:nbl 1.2s ease-in-out infinite}
+.insp .upc{display:grid;gap:4px}.insp .upb{font-weight:650}.insp .upd2{font-size:12px;color:var(--muted);text-align:center;line-height:1.35}
+.insp .upc.done .upn{text-align:center;font:650 13px var(--font-b);color:var(--money);padding:8px;border-radius:10px;background:color-mix(in srgb,var(--money) 12%,transparent)}
+.insp .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.insp .act{display:grid;justify-items:center;gap:2px;padding:9px 6px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--fg) 7%,transparent);cursor:pointer;font:inherit;min-height:96px}
+.insp .act b{font:700 13.5px var(--font-b)}.insp .act small{font:700 11.5px var(--font-b)}.insp .act[disabled]{opacity:.5;cursor:default}
+.insp .act.mv{color:#e9c93a}.insp .act.del{color:var(--warn)}.insp .act.del.armed{background:var(--warn);color:#fff;border-color:var(--warn)}
+.insp.locked .act{opacity:.55;pointer-events:none}
+@media (max-width:760px){body.inspOn .rail{display:none!important}}
 .tools::-webkit-scrollbar{display:none}
 .tool{flex:0 0 auto;display:grid;grid-template-columns:28px auto;grid-template-rows:auto auto;column-gap:8px;align-items:center;
   text-align:left;background:transparent;border:1px solid transparent;border-radius:9px;padding:7px 10px 7px 8px;color:var(--fg);cursor:pointer;font-family:var(--font-b)}
@@ -242,6 +276,22 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .st i{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;color:#fff}
 .st i svg{width:14px;height:14px}
 .crimeChip{z-index:2}.crimeChip .s-crime{background:#d63b3b}.ordp .ordc{border-top:1px solid var(--line);padding:8px 0;display:grid;gap:4px}.ordp .ordc.on b{color:var(--money)}.ordp ul{margin:0;padding-left:18px;font-size:12px;color:var(--muted)}.ordp .btn{min-height:34px}.stTabs{position:sticky;top:0;z-index:2;background:var(--panel2);padding:4px 0}.stats [data-tab][hidden]{display:none!important}
+.stTabs{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:thin}.stTabs .chipb{flex:none}
+.tnote{margin:6px 0 0;font-size:11.5px;color:var(--muted);line-height:1.4}
+.scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.sc{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:9px;align-items:center;padding:10px 11px;border-radius:12px;background:var(--chip)}
+.sc .sci{grid-row:1/3;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,currentColor 14%,transparent)}
+.sc b{font:650 19px/1.1 var(--font-d);font-variant-numeric:tabular-nums}.sc span:not(.sci){font-size:11.5px;color:var(--muted);line-height:1.25}
+.sc small{grid-column:1/-1;font-size:11px;color:var(--muted);margin-top:4px;line-height:1.3}
+.pbars{display:grid;gap:9px}.pb{display:grid;gap:4px}.pbh{display:flex;justify-content:space-between;gap:10px;font-size:12.5px}.pbh b{font-variant-numeric:tabular-nums;font-weight:650}
+.pb .bar2{height:9px;border-radius:5px;background:rgba(127,127,127,.22);overflow:hidden}.pb .bar2 i{display:block;height:100%;border-radius:5px;transition:width .4s}
+.pb small{font-size:11px;color:var(--muted)}
+.upkL{display:grid;gap:4px}
+.ucath{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:10px;border:0;background:var(--chip);color:var(--fg);font:650 13px var(--font-b);cursor:pointer;text-align:left}
+.ucath::before{content:"";border-left:5px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;opacity:.6;transition:transform .15s}
+.ucath[aria-expanded="true"]::before{transform:rotate(90deg)}.ucath .n{color:var(--muted);font-weight:500;font-size:12px}.ucath .v{margin-left:auto;font-variant-numeric:tabular-nums}
+.ucatb{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:12.5px;padding:2px 10px 8px 25px;font-variant-numeric:tabular-nums}.ucatb span:nth-child(2n){text-align:right}
+.upkTot{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:13px;margin-top:6px;font-variant-numeric:tabular-nums}.upkTot span:nth-child(2n){text-align:right}
 .needs{display:flex;flex-direction:column;gap:8px}.needs .nd{display:flex;flex-direction:column;gap:5px;padding:9px 11px;border-radius:10px;background:var(--chip)}.needs .ndh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.needs .ndh em{font-style:normal;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-left:6px}.needs .ndv{font:600 15px var(--font-d)}.needs .ndf{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px}.needs .ndf span{white-space:nowrap}.needs .ndf b{font-weight:600}.needs .nnote{font-size:12px;color:var(--muted);line-height:1.45}.needs .nd b{font-size:13px}.needs .bar2{height:8px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden}.needs .bar2 i{display:block;height:100%}.needs small{color:var(--muted);font-size:11.5px}#taxBox{display:grid;gap:3px}#taxBox small{color:var(--muted);font-size:11.5px;margin-bottom:4px}#taxBox input{width:100%}.taxp{max-height:calc(100% - 150px);overflow:auto}.insp.locked .up,.insp.locked [data-line],.insp.locked [data-spec],.insp.locked [data-buy],.insp.locked [data-cinema],.insp.locked [data-attr],.insp.locked [data-fm],.insp.locked [data-fg],.insp.locked [data-fn]{opacity:.55;pointer-events:none}.insp .catnav{margin-top:6px}.insp .fr{display:grid;gap:6px;padding:8px 0;border-top:1px solid var(--line)}.insp .fr small{color:var(--muted)}.insp .frr{display:flex;align-items:center;gap:10px}.insp .frr b{min-width:90px;text-align:center}.insp .frr .btn{min-height:34px;padding:4px 12px}.crimeChip .s-fire{background:#e8641c;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;color:#fff;box-shadow:0 0 0 2px #fff3}.crimeChip .s-fire svg{width:16px;height:16px}.crimeChip.big .s-crime{background:#b8860b;width:26px;height:26px}.crimeChip.big .s-crime svg{width:18px;height:18px}.crimeChip.blink{box-shadow:0 0 0 2px #ff3b30,0 2px 6px rgba(0,0,0,.25)}
 .st .s-aband{background:#4a4038}.st .s-ill{background:#c43c5a}.st .s-dead{background:#3d3d44}.st .s-crowd{background:#c25a2a}.st .s-off{background:#5a6168}
 .st .s-dirty{background:#6f5a3a}
@@ -360,19 +410,36 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div id="stat"></div>
 <section class="stats panel" id="stats" hidden aria-label="Gospodarka">
   <header><div><h2 id="stTitle">Gospodarka miasta</h2><p class="sub" id="stClock"></p></div><button class="btn icon panel" id="statsClose" aria-label="Zamknij">×</button></header>
-  <div class="chips stTabs" role="tablist"><button class="chipb" data-st="fin" aria-pressed="true">Finanse</button><button class="chipb" data-st="prod" aria-pressed="false">Produkcja i potrzeby</button><button class="chipb" data-st="ppl" aria-pressed="false">Mieszkańcy</button><button class="chipb" data-st="svc" aria-pressed="false">Usługi miejskie</button></div>
-  <div data-tab="fin"><h3>Bilans na godzinę gry</h3><div style="overflow-x:auto"><table class="tbl" id="stTbl"></table></div></div>
+  <div class="chips stTabs" role="tablist"><button class="chipb" data-st="fin" aria-pressed="true">Finanse</button><button class="chipb" data-st="prod" aria-pressed="false">Produkcja i potrzeby</button><button class="chipb" data-st="ppl" aria-pressed="false">Mieszkańcy</button><button class="chipb" data-st="waste" aria-pressed="false">Odpady</button><button class="chipb" data-st="traf" aria-pressed="false">Ruch</button><button class="chipb" data-st="pow" aria-pressed="false">Prąd</button><button class="chipb" data-st="wat" aria-pressed="false">Woda</button><button class="chipb" data-st="safe" aria-pressed="false">Bezpieczeństwo</button><button class="chipb" data-st="health" aria-pressed="false">Zdrowie</button><button class="chipb" data-st="edu" aria-pressed="false">Edukacja</button></div>
+  <div data-tab="fin"><h3>Gotówka (T¢)</h3><div style="overflow-x:auto"><table class="tbl" id="stTbl"></table></div><p class="tnote" id="dayNote"></p></div>
   <div class="chart" data-tab="fin"><h3>Saldo gotówki · ostatnie 24 godz.</h3><div id="chMoney"></div></div>
-  <div data-tab="fin"><h3>Utrzymanie miasta</h3><div class="upkCtl" id="upkCtl"></div><div class="upk" id="stUpk"></div></div>
+  <div data-tab="fin"><h3>Utrzymanie miasta</h3><div class="upkL" id="stUpk"></div></div>
   <div data-tab="prod"><h3>Potrzeby mieszkańców</h3><div class="needs" id="stNeeds"></div></div>
   <div data-tab="prod"><h3>Produkty</h3><div style="overflow-x:auto"><table class="tbl" id="stGoods"></table></div></div>
+  <div data-tab="prod"><h3>Magazyny (kg)</h3><div style="overflow-x:auto"><table class="tbl" id="stMatT"></table></div></div>
   <div class="chart" data-tab="prod"><h3>Saldo magazynów · ostatnie 24 godz.</h3><div id="chMat"></div></div>
-  <div data-tab="ppl"><h3>Mieszkańcy, zdrowie i edukacja</h3><div class="upk" id="stLife"></div></div>
+  <div data-tab="ppl"><h3>Mieszkańcy</h3><div class="scards" id="stLife"></div></div>
   <div data-tab="ppl"><h3>Zadowolenie mieszkańców</h3><div class="dist" id="stHappy"></div></div>
   <div data-tab="ppl"><h3>Poziomy zadowolenia</h3><div style="overflow-x:auto"><table class="tbl" id="stTier"></table></div></div>
-  <div data-tab="svc"><h3>Woda i kanalizacja</h3><div class="upk" id="stWater"></div></div>
-  <div data-tab="svc"><h3>Bezpieczeństwo</h3><div class="upk" id="stSafe"></div></div>
-  <div data-tab="svc"><h3>Odpady teraz</h3><div class="upk" id="stWaste"></div></div>
+  <div data-tab="waste"><h3>Odpady teraz</h3><div class="scards" id="wCards"></div></div>
+  <div data-tab="waste"><h3>Odpady (kg)</h3><div style="overflow-x:auto"><table class="tbl" id="wTbl"></table></div></div>
+  <div data-tab="waste"><h3>Wysypiska, spalarnie i recykling</h3><div class="upk" id="stWaste"></div></div>
+  <div data-tab="traf"><h3>Ruch</h3><div class="scards" id="tCards"></div></div>
+  <div data-tab="traf"><h3>Kursy i klienci</h3><div style="overflow-x:auto"><table class="tbl" id="tTbl"></table></div></div>
+  <div data-tab="traf"><h3>Teraz na ulicach</h3><div class="upk" id="tNow"></div></div>
+  <div data-tab="pow"><h3>Prąd teraz</h3><div class="scards" id="pCards"></div></div>
+  <div data-tab="pow"><h3>Pobór według kategorii (MW)</h3><div class="pbars" id="pDem"></div></div>
+  <div data-tab="pow"><h3>Generowanie według źródła (MW)</h3><div class="pbars" id="pGen"></div></div>
+  <div data-tab="pow"><h3>Energia</h3><div style="overflow-x:auto"><table class="tbl" id="pTbl"></table></div></div>
+  <div data-tab="wat"><h3>Woda i kanalizacja</h3><div class="upk" id="stWater"></div></div>
+  <div data-tab="safe"><h3>Służby bezpieczeństwa</h3><div class="scards" id="sCards"></div></div>
+  <div data-tab="safe"><h3>Skuteczność i zasięg</h3><div class="pbars" id="sBars"></div></div>
+  <div data-tab="safe"><h3>Zdarzenia</h3><div style="overflow-x:auto"><table class="tbl" id="sTbl"></table></div></div>
+  <div data-tab="health"><h3>Zdrowie</h3><div class="scards" id="hCards"></div></div>
+  <div data-tab="health"><h3>Opieka i miejsca</h3><div class="pbars" id="hBars"></div></div>
+  <div data-tab="health"><h3>Narodziny i zgony</h3><div style="overflow-x:auto"><table class="tbl" id="hTbl"></table></div></div>
+  <div data-tab="edu"><h3>Szkoły</h3><div class="scards" id="eCards"></div></div>
+  <div data-tab="edu"><h3>Uczniowie i zasięg szkół</h3><div class="pbars" id="eBars"></div></div>
   <div class="foot"><button class="btn panel" id="browse">Przeglądaj domy</button></div>
 </section>
 <div class="menuBg" id="over" hidden><section class="menu panel" role="alertdialog" aria-modal="true" aria-labelledby="overT">
@@ -394,15 +461,22 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <h2 id="menuT">Pauza</h2><p class="sub" id="menuSub">Czas w mieście stoi.</p>
   <button class="btn panel mbtn primary" id="mResume">Wznów grę</button>
   <div class="cityName" id="mNameRow"><input id="mName" maxlength="24" aria-label="Nazwa miasta" autocomplete="off" spellcheck="false"><button class="btn panel" id="mNameOk">Zmień nazwę</button></div>
+  <button class="btn panel mbtn" id="mOpt">Opcje</button>
+  <div class="mOpts" id="mOpts" hidden>
   <label class="gam" for="mGamma"><span>Gamma</span><b id="mGammaV">1,00</b></label>
   <input type="range" id="mGamma" min="0.6" max="1.6" step="0.05" value="1">
-  <label class="vol" for="mVol"><span>Głośność radia</span><b id="mVolV">60%</b></label>
+  <label class="vol" for="mVol"><span>Głośność muzyki i radia</span><b id="mVolV">60%</b></label>
   <input type="range" id="mVol" min="0" max="100" step="5" value="60">
-  <button class="btn panel mbtn" id="mReset">Zresetuj miasto</button>
-  <button class="btn panel mbtn" id="mExit">Zapisz i wróć do menu</button><button class="btn panel mbtn" id="mBack" hidden>Wróć</button>
+  <label class="tgl" for="mMenuMus"><span>Muzyka w menu głównym</span><input type="checkbox" id="mMenuMus" checked></label>
   <div class="upd"><b>Aktualizacje z GitHuba</b><span class="st">Wersja gry <span id="uVer"></span></span>
     <button class="btn panel mbtn" id="uCheck">Sprawdź aktualizacje</button>
-    <span class="st" id="uSt"></span><button class="btn panel mbtn" id="uOld" hidden>Wróć do wersji wbudowanej</button></div>
+    <span class="st" id="uSt"></span>
+    <div class="danger" id="uOldBox" hidden><svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true"><path d="M24 4.5 45 41.5H3z" fill="#d93025" stroke="#d93025" stroke-width="3" stroke-linejoin="round"/><path d="M24 17v12" stroke="#fff" stroke-width="4.5" stroke-linecap="round"/><circle cx="24" cy="35.5" r="2.7" fill="#fff"/></svg>
+      <div><b>Niebezpieczna opcja</b><small>Usuwa pobrane aktualizacje i nowe modele. Gra wraca do wersji z instalacji.</small></div>
+      <button class="btn panel mbtn dangerB" id="uOld">Wróć do wersji wbudowanej</button></div></div>
+  </div>
+  <button class="btn panel mbtn" id="mReset">Zresetuj miasto</button>
+  <button class="btn panel mbtn" id="mExit">Zapisz i wróć do menu</button><button class="btn panel mbtn" id="mBack" hidden>Wróć</button>
 </section></div>
 <div class="title" id="title" hidden><div class="tbox" role="dialog" aria-labelledby="tT"><h1 id="tT">Little Townies<small>Zbuduj swoje miasteczko</small></h1>
   <button class="btn panel mbtn primary" id="tCont" hidden>Kontynuuj<small id="tContS"></small></button>
@@ -2574,6 +2648,8 @@ function computePower(dt){if(topoDirty||powerSig()!==topoSig)rebuildHV();compute
   for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!DEMAND[c.t])continue;c.bolt.visible=!c.powered&&!c.off;
     if(c.powered){okN++;if(c.t==='bank'){pw.bank++;pw.bankCap+=BANK_CAP*(c.up?2:1)}if(c.t==='bankG'){pw.bank++;pw.bankCap+=12500+(c.up2?5000:0)}if(isWH(c.t))pw.matCap+=whCap(c)}
     if(isFactory(c.t))c.model.userData.off=!c.powered}
+  {const g={};const ad=(k,v)=>{if(v>0)g[k]=(g[k]||0)+v};for(const i of gens){const c=grid[i];if(c.net<0)continue;
+    if(c.t==='wind'){const sol=c.up?SOLAR_MW*dayF:0;ad('Wiatraki',Math.max(0,(c.windMW||0)-sol));ad('Panele słoneczne',sol)}else if(c.t==='hydro')ad('Elektrownie wodne',c.mw);else if(c.t==='hydrogen')ad(DEF.hydrogen.name,c.mw);else if(c.t==='coal'&&c.running)ad('Elektrownie węglowe',COAL_MW*(fOn(c)?0.9:1))}pw.gen=g}
   pw.dem=totDem;pw.cap=cap;pw.ok=okN;powerDirty=false;computeWater();computeHappy()}
 
 /* ---------- water and sewage ----------
@@ -2912,10 +2988,10 @@ function catList(cat){const o=[];for(let i=0;i<N*N;i++){const g=grid[i];if(g&&!D
   const ord=t=>{const k=TYPE_ORDER.indexOf(t);return k<0?999:k};return o.sort((a,b)=>ord(grid[a].t)-ord(grid[b].t)||a-b)}
 const houses=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&HOUSING[grid[i].t])o.push(i);return o};
 let buyLock=0;const lockBuy=()=>{buyLock=performance.now()+500;inspEl.classList.add('locked');setTimeout(()=>inspEl.classList.remove('locked'),520)};
-function openHouse(i){lockBuy();if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;inspI=i;inspEl.hidden=false;hintEl.hidden=true;ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
+function openHouse(i){lockBuy();if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;inspI=i;inspEl.hidden=false;hintEl.hidden=true;document.body&&document.body.classList.add('inspOn');ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
   const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='heliB'?HELI_R:c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold');
   else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');renderInsp()}
-function closeHouse(){if(areaT>1e8){areaT=0;area.visible=false}inspI=-1;inspEl.hidden=true;hintEl.hidden=false;ring.visible=false}
+function closeHouse(){if(areaT>1e8){areaT=0;area.visible=false}inspI=-1;inspEl.hidden=true;document.body&&document.body.classList.remove('inspOn');hintEl.hidden=false;ring.visible=false}
 function stepHouse(d){const c=grid[inspI];if(!c)return closeHouse();const list=catList(catOfT(c.t));let k=list.indexOf(inspI);
   k=k<0?0:(k+d+list.length)%list.length;openHouse(list[k])}
 const ICON_OFF='<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" style="vertical-align:-2px"><path d="M10 3v6.5"/><path d="M6.2 5.6a6 6 0 1 0 7.6 0"/></svg>',ICON_ON='<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor" style="vertical-align:-2px"><path d="M6 4.5l10 5.5-10 5.5z"/></svg>';
@@ -2946,21 +3022,47 @@ const areaOf=(i,c)=>DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fi
 /* the next building type (in build-menu order) that exists on the map */
 const TYPE_ORDER=CATS.flatMap(c=>c.tools).filter(t=>!DRIVE[t]&&t!=='pole'&&t!=='poleline'&&t!=='pipe'&&t!=='pipeDel');
 function nextType(t){const k=TYPE_ORDER.indexOf(t);for(let j=1;j<=TYPE_ORDER.length;j++){const u=TYPE_ORDER[(k+j)%TYPE_ORDER.length];if(u!==t&&counts[u]>0)return u}return null}
+/* ---------- inspector pieces: collapsible sections, service tiles, happiness face ---------- */
+let inspFold;try{inspFold=new Set(JSON.parse(localStorage.getItem('lt-insp-fold')||'[]'))}catch(e){inspFold=new Set()}
+let delArm=null;
+const ARR_UP='<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M10 4.5 4.5 10.5h3.5V16h4v-5.5h3.5z" fill="currentColor"/></svg>',ARR_DN='<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M10 15.5l5.5-6h-3.5V4h-4v5.5H4.5z" fill="currentColor"/></svg>';
+const isec=(k,title,body)=>{if(!body)return'';const cl=inspFold.has(k);return`<section class="isec${cl?' closed':''}"><div class="isech" data-fold="${k}" role="button" tabindex="0" aria-expanded="${!cl}"><h4>${title}</h4><span class="ifold" aria-hidden="true">${cl?ARR_DN:ARR_UP}</span></div>${cl?'':`<div class="isecb">${body}</div>`}</section>`};
+const ICO_BOLT='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M13.6 2 5 13.4h6.2L9.8 22 19 10.2h-6.3z" fill="currentColor"/></svg>',
+  ICO_DROP='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M12 2.5C8.2 7.6 5.6 11.2 5.6 14.6a6.4 6.4 0 0 0 12.8 0c0-3.4-2.6-7-6.4-12.1z" fill="currentColor"/></svg>',
+  ICO_BIN='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M3.8 6.2h16.4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M9.3 6V3.6h5.4V6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.8 8.3h12.4l-1.3 13H7.1z" fill="currentColor"/></svg>',
+  ICO_MOVE='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true"><path d="M6 17.5h18V8l18 16-18 16v-9.5H6z" fill="currentColor"/></svg>',
+  ICO_DOZER='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M9 14h11l3 9h7v8H9z"/><path d="M12 14V8h7l2 6"/><path d="M30 23l7-7 5 2"/><path d="M42 18v15h-5"/><rect x="7" y="31" width="27" height="9" rx="4.5"/><circle cx="12" cy="35.5" r="1.6"/><circle cx="20.5" cy="35.5" r="1.6"/><circle cx="29" cy="35.5" r="1.6"/></svg>';
+const sTile=(col,ico,label,val,sub)=>`<div class="tile svcT" style="color:${col}"><span class="lab">${label}</span>${ico}<span class="v">${val}</span>${sub?`<small>${sub}</small>`:''}</div>`;
+function faceSvg(h){const m=h>=6?'M14.5 27.5q9.5 9 19 0':h>=4?'M15.5 29q8.5 5 17 0':h>=3?'M16 30.5h16':h>=2?'M16 33q8-4.5 16 0':'M14.5 34.5q9.5-8 19 0';
+  return`<svg viewBox="0 0 48 48" width="56" height="56" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="24" cy="24" r="20"/><circle cx="17.5" cy="19" r="2" fill="currentColor" stroke="none"/><circle cx="30.5" cy="19" r="2" fill="currentColor" stroke="none"/><path d="${m}"/></svg>`}
+const NEED_SVG=['<path d="M10 6.5c-3.6-2-6 .8-5.5 4.2.5 3.3 3 6 5.5 5 2.5 1 5-1.7 5.5-5 .5-3.4-1.9-6.2-5.5-4.2z"/><path d="M10 6.5c0-1.6.8-3 2.4-3.7"/>','<path d="M5.5 4.5h9l-1.3 12h-6.4z"/><path d="M6 8.5h8"/>',
+  '<path d="M7.5 3.5L3.5 6l2 3 1.5-1v9h6v-9l1.5 1 2-3-4-2.5c-.3 1.2-1.3 2-2.5 2s-2.2-.8-2.5-2z"/>','<path d="M6 3.5v8M6 11.5h8v5M6 11.5v5M6 7.5h7"/><path d="M13 7.5v4"/>',
+  '<path d="M5.5 7h9a3 3 0 0 1 3 3.2l-.4 3.2a1.8 1.8 0 0 1-3.1.9L12.5 13h-5L6 14.3a1.8 1.8 0 0 1-3.1-.9l-.4-3.2A3 3 0 0 1 5.5 7z"/><path d="M6.5 9v2.5M5.2 10.2h2.6"/>'].map(d=>`<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`);
+/* demolish from the inspector: the same rules and refund as the bulldozer */
+function demolishAt(i){const sv=tool,sd=delMode;tool='bulldoze';delMode='all';try{apply(i,false)}finally{tool=sv;delMode=sd}if(!grid[i])closeHouse();else{inspEl.__html=null;renderInsp()}}
 function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHouse();
   if(c.ruin){const html=`<div class="top"><b>Zgliszcza · ${DEF[c.t].name}</b><small>pole ${i%N+1}, ${((i/N)|0)+1}</small><button class="btn icon panel x" id="inspX" aria-label="Zamknij">×</button></div><div class="eff">Budynek spłonął i nie działa. Wyburz go narzędziem Wyburz, żeby zwolnić miejsce.</div>`;
     if(html!==inspEl.__html){inspEl.__html=html;inspEl.innerHTML=html;document.getElementById('inspX').onclick=closeHouse}return}
   const ccat=catOfT(c.t),list=catList(ccat),k=list.indexOf(i),rows=[],night=isNight(),nt=nextType(c.t);
-  const R=(l,v,cls='')=>rows.push(`<span>${l}</span><span class="${cls}">${v}</span>`);
-  let head='',foot='';
-  if(HOUSING[c.t]){const p=happyParts(i),h=c.happy??3,T=TIER[h],HM=HOUSING[c.t].trips;
-    const row=(label,v,on)=>v?`<span>${label}</span><span class="${v>0?'pos':'neg'}">${(v>0?'+':'')+mw(v)}</span>`:'';
-    head=`<div class="dots">${[1,2,3,4,5,6,7,8].map(n=>`<i class="${n<=h?'on':''}" style="${n<=h?'background:'+HCOL[h]:''}"></i>`).join('')}<span class="lvl">${h}/${HMAX} · ${T.name}</span></div>
-    <div class="facts">${row('Podstawa',p.base,1)}${row(p.shop?'Sklep w zasięgu 5 pól':'Brak sklepu w zasięgu 5 pól',p.shop,p.shop)}${row(p.park?'Park w zasięgu':'Brak parku w zasięgu',p.park,p.park)}${row(p.ent?'Rozrywka w zasięgu':'Brak rozrywki w zasięgu',p.ent,p.ent)}
-      ${row(p.pol===-2?'Silny smog (żółte pole)':p.pol===-1?'Lekki smog (żółto-zielone pole)':'Czyste powietrze',p.pol,p.pol)}${row('Uchwały urzędu (konsumpcjonizm, miasto policyjne)',p.ord,p.ord)}${row(p.needs?'Niezaspokojone potrzeby (żywność, napoje, średnia)':'Potrzeby zaspokojone',p.needs,p.needs)}${row('Śmieci na ulicy',p.litter,p.litter)}${row(p.pow?'Brak prądu':'Prąd jest',p.pow,p.pow)}${row(p.trash?'Pełny kosz na śmieci':'Śmieci odbierane',p.trash,p.trash)}${row(p.water===-3?'Brudna woda: mieszkańcy chorują':p.water?'Brak wody z wodociągu':'Czysta woda',p.water,p.water)}${row(p.sewer?'Ścieki się cofają (brak odpływu)':'Kanalizacja działa',p.sewer,p.sewer)}${row(p.noise?'Hałas wiatraków lub transformatora':'Cisza',p.noise,p.noise)}${row(p.crowd?'Tłok w sklepie w okolicy':'Sklepy bez tłoku',p.crowd,p.crowd)}${row(`Podatki ${taxRate}%`,p.tax,p.tax)}${row(p.edu===1?'Podstawówka i szkoła średnia w zasięgu':p.edu?'Szkoła podstawowa w zasięgu':'Brak szkoły w zasięgu',p.edu,p.edu)}${row(p.ill?'Chorzy bez leczenia':'Brak nieleczonych chorych',p.ill,p.ill)}${row(p.dead?'Zmarli czekają na pochówek':'Brak zmarłych do pochowania',p.dead,p.dead)}</div>`+peopleBox(i,c);
-    const HMx=HM*hMul(c);foot=`<div class="eff">${night?`${mw(T.trips*HMx/2)} kursów na godz. (noc, połowa z ${mw(T.trips*HMx)})`:`${mw(T.trips*HMx)} kursów na godz. gry`} · ${mw(T.work)} zmiany w fabryce na wizytę</div>`;
-    if(c.aband)foot+=`<div class="eff" style="color:var(--warn)"><b>Pustostan.</b> Mieszkańcy wrócą po 6 godz. przy zadowoleniu 4+${c.backT?` (${Math.round(c.backT/360*100)}%)`:''}.</div>`;else if(h<=2)foot+=`<div class="eff" style="color:var(--warn)">Ryzyko pustostanu: ${Math.round((c.lowT||0)*100)}% (przy ${h} szansa co ${ABAND_T[h]/60} godz.)</div>`;
-    {const L=HLV[c.t],lv=hLv(c),mx=hMax(c),xp=c.xp||0;foot+=`<div class="eff"><b>${L.name[lv]}</b> · ${residents(c)} mieszkańców · poziom ${lv+1}/${mx+1}</div>`+(lv>=mx?'<div class="eff">Najwyższy poziom rozbudowy.</div>':xp>=1?
-      `<button class="btn panel up" id="inspHU"${money<L.cost[lv]?' disabled':''}>Rozbuduj: ${L.name[lv+1]} · ${fmt(L.cost[lv])} T¢<br><small style="color:var(--muted);font-weight:500">+${L.res[lv+1]-L.res[lv]} mieszkańców, więcej kursów i wody</small></button>`:
+  const R=(l,v,cls='')=>rows.push({l,v,cls});
+  let pplS='',hapS='',needS='',houseOpt='';
+  if(HOUSING[c.t]){const p=happyParts(i),h=c.happy??3,T=TIER[h],HMx=HOUSING[c.t].trips*hMul(c);
+    const mods=[['Bazowe szczęście budynku',p.base],[p.shop?'Sklep w zasięgu 5 pól':'Brak sklepu w zasięgu 5 pól',p.shop],[p.park?'Park w zasięgu':'Brak parku w zasięgu',p.park],[p.ent?'Rozrywka w zasięgu':'Brak rozrywki w zasięgu',p.ent],
+      [p.pol===-2?'Silny smog':p.pol===-1?'Lekki smog':'Czyste powietrze',p.pol],['Uchwały urzędu',p.ord],['Niezaspokojone potrzeby',p.needs],['Śmieci na ulicy',p.litter],['Brak prądu',p.pow],['Pełny kosz na śmieci',p.trash],
+      [p.water===-3?'Brudna woda: choroby':'Brak wody z wodociągu',p.water],['Ścieki się cofają',p.sewer],['Hałas wiatraków lub transformatora',p.noise],['Tłok w sklepach',p.crowd],[`Podatki ${taxRate}%`,p.tax],
+      [p.edu===1?'Podstawówka i szkoła średnia':p.edu?'Szkoła podstawowa w zasięgu':'Brak szkoły w zasięgu',p.edu],['Chorzy bez leczenia',p.ill],['Zmarli czekają na pochówek',p.dead]];
+    const chips=mods.filter(m=>m[1]).map(([l,v])=>`<span class="mod${v<0?' neg':''}"><span>${l}</span><b>${v>0?'+':''}${mw(v)}</b></span>`).join('');
+    hapS=`<div class="hap"><div class="tile hapF" style="color:${HCOL[h]}">${faceSvg(h)}<b>Szczęście ${h}/${HMAX}</b><small>${T.name}</small></div><div class="mods">${chips||'<small class="muted">Nic nie wpływa na szczęście.</small>'}</div></div>`;
+    if(c.aband)hapS+=`<div class="eff" style="color:var(--warn)"><b>Pustostan.</b> Mieszkańcy wrócą po 6 godz. przy zadowoleniu 4+${c.backT?` (${Math.round(c.backT/360*100)}%)`:''}.</div>`;else if(h<=2)hapS+=`<div class="eff" style="color:var(--warn)">Ryzyko pustostanu: ${Math.round((c.lowT||0)*100)}% (przy ${h} szansa co ${ABAND_T[h]/60} godz.)</div>`;
+    const st=[0,0,0,0,0];for(const q of c.pp||[])st[stageOf(q.a)]++;const ts=tilesOf(i),ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]),pupils=st[1]+st[2],inSch=(st[1]&&ep?st[1]:0)+(st[2]&&es?st[2]:0);
+    const sick=(c.pp||[]).filter(q=>q.s===1).length,hosp=(c.pp||[]).filter(q=>q.s===2).length;
+    pplS=`<div class="tiles t4">${[['Dzieci',st[0]],['Uczniowie',pupils],['Dorośli',st[3]],['Seniorzy',st[4]]].map(([l,v])=>`<div class="tile"><b class="big">${v}</b><small>${l}</small></div>`).join('')}</div>`+
+      `<div class="pfacts">${pupils?`<span>Uczniowie w szkole</span><span class="${pupils-inSch?'neg':''}">${inSch} / ${pupils}</span>`:''}${sick||hosp?`<span>Chorzy</span><span class="${sick?'neg':''}">${sick} bez leczenia · ${hosp} w szpitalu</span>`:''}${c.dead?`<span>Zmarli w domu</span><span class="neg">${c.dead} · czekają na karawan</span>`:''}${gameT-(c.lastBuy??gameT)>2880?`<span>Ostatnie zakupy</span><span class="neg">${Math.floor((gameT-c.lastBuy)/60)} godz. temu</span>`:''}
+        <span>Kursy</span><span>${night?`${mw(T.trips*HMx/2)} na godz. (noc)`:`${mw(T.trips*HMx)} na godz.`} · ${mw(T.work)} zmiany w fabryce</span></div>`;
+    if(c.pp){const H=needs(c);needS=`<div class="nbars">${NEEDS.map((n,k)=>{const v=Math.round(H[n.k]*100);return`<div class="nbar${H[n.k]<NEED_MIN?' low':''}" title="${n.name}: ${v}%"><div class="tr"><i style="height:${v}%;background:${NEED_COL[n.k]}"></i></div><span style="color:${NEED_COL[n.k]}">${NEED_SVG[k]}</span><small>${v}%</small></div>`}).join('')}</div>`+
+      `<div class="eff" style="text-align:center">Średnia potrzeb <b class="${needAvg(c)<NEED_MIN?'neg':''}">${Math.round(needAvg(c)*100)}%</b>${basicOK(c)?'':' · liczą się tylko żywność i napoje'}</div>`}
+    {const L=HLV[c.t],lv=hLv(c),mx=hMax(c),xp=c.xp||0;houseOpt=`<div class="eff" style="text-align:center"><b>${L.name[lv]}</b> · ${residents(c)} mieszkańców · poziom ${lv+1}/${mx+1}</div>`+(lv>=mx?'<div class="upc done"><div class="upn">✓ Najwyższy poziom rozbudowy</div></div>':xp>=1?
+      `<div class="upc"><button class="btn panel up upb" id="inspHU"${money<L.cost[lv]?' disabled':''}>Rozbuduj: ${L.name[lv+1]} · ${fmt(L.cost[lv])} T¢</button><div class="upd2">+${L.res[lv+1]-L.res[lv]} mieszkańców, więcej kursów i wody</div></div>`:
       `<div class="xp"><span>Doświadczenie do rozbudowy</span><b>${Math.floor(xp*100)}%</b><div class="bar"><i style="width:${xp*100}%;background:var(--accent)"></i></div><small>${h>0?`ok. ${Math.ceil((1-xp)*L.xp/(h/6)/60)} min przy zadowoleniu ${h}/${HMAX} (im wyższe, tym szybciej)`:'zadowolenie 0: brak postępu'}</small></div>`)}}
   if(c.off)R('Stan','wyłączony','warnv');
   if(DEMAND[c.t]&&!c.off)R('Prąd',c.powered?`zasilany · ${mw(DEMAND[c.t]*(night?0.5:1))} MW`:c.net>=0?'za mało mocy w sieci':UTIL_R[c.t]?'brak słupa lub transformatora w promieniu 2 pól':'brak słupa lub transformatora obok',c.powered?'':'warnv');
@@ -3053,16 +3155,27 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
     const why={none:'brak wysypiska, spalarni i recyklingu',road:'żadne wysypisko nie ma drogi do tego budynku',full:'wysypiska w zasięgu są pełne',busy:'wszystkie śmieciarki zajęte, czeka w kolejce'};
     R('Odbiór',c.truckOn?'śmieciarka w drodze':c.want?(c.noFac?why[c.noFac]||'czeka':'czeka na śmieciarkę'):`za ok. ${Math.max(1,Math.round(c.pickT/60))} godz.`,c.want&&c.noFac&&c.noFac!=='busy'?'warnv':'')}
   const up=c.off?0:(UPKEEP[c.t]?UPKEEP[c.t]*(night&&PARKS.includes(c.t)?0.5:1):0)+(c.up&&UPG[c.t]?UPG[c.t].upkeep:0)+(c.up2&&UPG2[c.t]?UPG2[c.t].upkeep:0)+(c.up3&&UPG3[c.t]?UPG3[c.t].upkeep:0)+(fOn(c)&&UPGF[c.t]?UPGF[c.t].upkeep:0);   if(up)R('Utrzymanie',`${fmt(up)} T¢/godz.`);
-  let upg='';const U=UPG[c.t],U2=c.t==='incinerator'&&!c.tiles?null:UPG2[c.t],UF=UPGF[c.t];
-  if(UF)upg+=c.filt?`<div class="eff">Ulepszenie: ${UF.name} · ${UF.desc}${c.filtOff?' · <b>wyłączone</b>':''}</div><button class="btn panel up" id="inspFOff">${c.filtOff?'Włącz filtr powietrza':'Wyłącz filtr powietrza'}<br><small style="color:var(--muted);font-weight:500">${c.filtOff?'Mniej smogu, −10% wydajności, +'+UF.upkeep+' T¢/godz.':'Pełna wydajność i brak opłaty, ale wraca smog'}</small></button>`:`<button class="btn panel up" id="inspUpF"${money<UF.cost?' disabled':''}>${UF.name} · ${fmt(UF.cost)} T¢<br><small style="color:var(--muted);font-weight:500">${UF.desc}, +${UF.upkeep} T¢/godz.</small></button>`;
-  {const U3=UPG3[c.t];if(U3)upg+=c.up3?`<div class="eff">Ulepszenie: ${U3.name} · ${U3.desc}</div>`:`<button class="btn panel up" id="inspUp3"${money<U3.cost?' disabled':''}>${U3.name} · ${fmt(U3.cost)} T¢<br><small style="color:var(--muted);font-weight:500">${U3.desc}, +${U3.upkeep} T¢/godz.</small></button>`}
-  if(U2)upg+=c.up2?`<div class="eff">Ulepszenie: ${U2.name} · ${U2.desc}</div>`:`<button class="btn panel up" id="inspUp2"${money<U2.cost?' disabled':''}>${U2.name} · ${fmt(U2.cost)} T¢<br><small style="color:var(--muted);font-weight:500">${U2.desc}${U2.upkeep?`, +${U2.upkeep} T¢/godz.`:''}</small></button>`;
-  if(U)upg=(c.up?`<div class="eff">Ulepszenie: ${U.name} · ${U.desc}</div>`:`<button class="btn panel up" id="inspUp"${money<U.cost?' disabled':''}>${U.name} · ${fmt(U.cost)} T¢<br><small style="color:var(--muted);font-weight:500">${U.desc}${U.upkeep?`, +${U.upkeep} T¢/godz.`:''}</small></button>`)+upg;
+  let upg='';const U=UPG[c.t],U2=c.t==='incinerator'&&!c.tiles?null:UPG2[c.t],UF=UPGF[c.t],U3=UPG3[c.t];
+  /* an upgrade: its name and price on the button, the description under it until it is bought */
+  const upCard=(id,Q,bought,extra)=>bought?`<div class="upc done"><div class="upn">✓ ${Q.name}</div>${extra||''}</div>`:`<div class="upc"><button class="btn panel up upb" id="${id}"${money<Q.cost?' disabled':''}>${Q.name} · ${fmt(Q.cost)} T¢</button><div class="upd2">${Q.desc}${Q.upkeep?` · +${Q.upkeep} T¢/godz.`:''}</div></div>`;
+  if(U)upg+=upCard('inspUp',U,c.up);if(U2)upg+=upCard('inspUp2',U2,c.up2);if(U3)upg+=upCard('inspUp3',U3,c.up3);
+  if(UF)upg+=upCard('inspUpF',UF,c.filt,`<div class="upd2">${UF.desc}${c.filtOff?' · <b>wyłączone</b>':''}</div><button class="btn panel up" id="inspFOff">${c.filtOff?'Włącz filtr powietrza':'Wyłącz filtr powietrza'}<br><small style="color:var(--muted);font-weight:500">${c.filtOff?'Mniej smogu, −10% wydajności, +'+UF.upkeep+' T¢/godz.':'Pełna wydajność i brak opłaty, ale wraca smog'}</small></button>`);
+  /* service tiles: power, water, rubbish; the icon takes the colour of its label, red when something is wrong */
+  const tiles=[],TW='var(--warn)';
+  if(DEMAND[c.t]){const bad=!c.off&&!c.powered;tiles.push(sTile(bad?TW:'#f2c230',ICO_BOLT,'Prąd',c.off?'wyłączony':bad?'brak prądu':`${mw(DEMAND[c.t]*(night?0.5:1))} MW`,bad?(c.net>=0?'za mało mocy w sieci':UTIL_R[c.t]?'brak słupa w promieniu 2 pól':'brak słupa obok'):''))}
+  if(WATER[c.t]){const w=c.water,bad=w!=='ok'||c.sewer;tiles.push(sTile(bad?TW:'#4aa3d8',ICO_DROP,HLV[c.t]?'Kanalizacja':'Woda',w==='ok'?`${mw(Math.round(waterOf(c)*(night?0.5:1)*10)/10)} m³/godz.`:w==='dirty'?'brudna woda':'brak wody',c.sewer?'ścieki się cofają':w==='dirty'?'z rzeki: mieszkańcy chorują':w!=='ok'?(c.wnet>=0?'za mało wody w sieci':'brak rury'):''))}
+  if(TRASH[c.t]){const T=TRASH[c.t],fullT=c.trash>=T.cap;tiles.push(sTile(fullT?TW:'#e98a3a',ICO_BIN,'Śmieci',`${mw(Math.round(c.trash*10)/10)}/${T.cap} kg`,fullT?'pełny kosz':c.truckOn?'śmieciarka jedzie':c.want?'czeka na odbiór':''))}
+  const hide=new Set(tiles.length?['Prąd','Woda','Ścieki','Śmieci']:[]);const facts=rows.filter(r=>!hide.has(r.l)).map(r=>`<span>${r.l}</span><span class="${r.cls}">${r.v}</span>`).join('');
+  const svcS=(tiles.length?`<div class="tiles t3">${tiles.join('')}</div>`:'')+(HOUSING[c.t]&&facts?`<div class="facts">${facts}</div>`:'');
+  const refund=Math.floor((DEF[c.t].cost+(c.pole?DEF.pole.cost:0))/2),armed=delArm&&delArm.i===i&&performance.now()-delArm.t<4000;
+  const acts=`<div class="acts">${movable(c)?`<button class="act mv" id="inspMv"${money<moveCost(c)?' disabled':''}><b>Przenieś</b>${ICO_MOVE}<small>${fmt(moveCost(c))} T¢</small></button>`:''}${c.edge?'':`<button class="act del${armed?' armed':''}" id="inspDel"><b>${armed?'Na pewno?':'Wyburz'}</b>${ICO_DOZER}<small>${armed?'Stuknij ponownie':`Otrzymasz: ${fmt(refund)} T¢`}</small></button>`}</div>`;
+  const offB=HOUSING[c.t]?'':`<button class="btn panel up" id="inspOff">${c.off?ICON_ON+' Włącz budynek':ICON_OFF+' Wyłącz budynek'}<br><small style="color:var(--muted);font-weight:500">${c.off?'Wyłączony: nie produkuje, nie zużywa i nie płaci utrzymania':'Nie produkuje, nie zużywa prądu i wody, nie płaci utrzymania'}</small></button>`;
+  const optS=houseOpt+(c.off?'':upg)+offB+acts;
+  const body=HOUSING[c.t]?isec('ppl','Mieszkańcy',pplS)+isec('hap','Szczęście',hapS)+isec('svc','Usługi',svcS)+isec('need','Zaspokojone potrzeby',needS)+isec('opt','Opcje i ulepszenia',optS)
+    :isec('info','Informacje',facts?`<div class="facts">${facts}</div>`:'')+isec('svc','Usługi',svcS)+isec('set','Ustawienia',c.off?'':pick)+isec('opt','Opcje i ulepszenia',optS);
   const html=`<div class="top"><b>${c.t==='incinerator'&&!c.tiles?'Mała spalarnia':DEF[c.t].name} ${k+1}</b><small>${k+1}. z ${list.length} w kategorii ${ccat} · pole ${i%N+1}, ${((i/N)|0)+1}</small>
       <button class="btn icon panel x" id="inspX" aria-label="Zamknij">×</button></div>
-    ${head}${rows.length?`<div class="facts">${rows.join('')}</div>`:''}${foot}${c.off?'':pick}${c.off?'':upg}
-    ${HOUSING[c.t]?'':`<button class="btn panel up" id="inspOff">${c.off?ICON_ON+' Włącz budynek':ICON_OFF+' Wyłącz budynek'}<br><small style="color:var(--muted);font-weight:500">${c.off?'Wyłączony: nie produkuje, nie zużywa i nie płaci utrzymania':'Nie produkuje, nie zużywa prądu i wody, nie płaci utrzymania'}</small></button>`}
-    ${movable(c)?`<button class="btn panel up" id="inspMv"${money<moveCost(c)?' disabled':''}>✥ Przenieś · ${fmt(moveCost(c))} T¢<br><small style="color:var(--muted);font-weight:500">Połowa ceny samego budynku. Ulepszenia i towar przenoszą się razem z nim</small></button>`:''}
+    ${body}
     <div class="nav"><button class="btn panel" id="inspP">◀ Poprzedni</button><span></span><button class="btn panel" id="inspN">Następny ▶</button></div>
     <div class="chips catnav">${CATS.map(C=>C.name).filter(n=>catList(n).length).map(n=>`<button class="chipb" data-icat="${n}" aria-pressed="${n===ccat}">${n}</button>`).join('')}</div>`;
   if(html===inspEl.__html)return;inspEl.__html=html;inspEl.innerHTML=html;
@@ -3089,7 +3202,9 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   const ob=document.getElementById('inspOff');if(ob)ob.onclick=()=>toggleOff(i);
   const fo=document.getElementById('inspFOff');if(fo)fo.onclick=()=>{const g=grid[i];if(!g||!g.filt)return;g.filtOff=!g.filtOff;filterVisual(g,true);envDirty=true;powerDirty=true;save();renderInsp()};
   const hu=document.getElementById('inspHU');if(hu)hu.onclick=()=>upgradeHome(i);
-  const mvb=document.getElementById('inspMv');if(mvb)mvb.onclick=()=>startMove(i)}
+  const mvb=document.getElementById('inspMv');if(mvb)mvb.onclick=()=>startMove(i);
+  const db=document.getElementById('inspDel');if(db)db.onclick=()=>{if(!(delArm&&delArm.i===i&&performance.now()-delArm.t<4000)){delArm={i,t:performance.now()};inspEl.__html=null;renderInsp();setTimeout(()=>{if(delArm&&delArm.i===i){delArm=null;inspEl.__html=null;if(inspI===i)renderInsp()}},4100);return}delArm=null;demolishAt(i)};
+  for(const h of inspEl.querySelectorAll('[data-fold]')){const go=()=>{const k=h.dataset.fold;inspFold.has(k)?inspFold.delete(k):inspFold.add(k);try{localStorage.setItem('lt-insp-fold',JSON.stringify([...inspFold]))}catch(e){}inspEl.__html=null;renderInsp()};h.onclick=go;h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}}}
 
 /* ---------- UI ---------- */
 const fin=v=>Number.isFinite(+v)?+v:0;
@@ -3223,7 +3338,7 @@ function selectTool(t){if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujes
   const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);if(t==='bulldoze'&&delMode==='pipe')setXray(true);setHint(toolHint());hl.visible=false;renderModes()}
 showCat(0);
 const statsEl=document.getElementById('stats'),statsBtn=document.getElementById('statsBtn');
-document.getElementById('upkCtl').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.ucat)upkCat=b.dataset.ucat;if(b.dataset.usort)upkSort=b.dataset.usort;renderStats()});
+
 function toggleStats(open){statsEl.hidden=!open;statsBtn.setAttribute('aria-expanded',String(open));if(open){document.getElementById('stTitle').textContent='Gospodarka: '+cityName;renderStats()}}
 statsBtn.addEventListener('click',()=>toggleStats(statsEl.hidden));
 document.getElementById('browse').addEventListener('click',()=>{const l=houses();if(!l.length){toggleStats(false);setHint('Nie masz jeszcze żadnego domu.',true,true);return}toggleStats(false);selectTool('view');openHouse(l[0])});
@@ -3240,67 +3355,110 @@ function renderNeeds(){const el=document.getElementById('stNeeds');if(!el)return
   let basicFail=0;for(const c of grid){if(!c||!HLV[c.t]||c.aband||!popOf(c))continue;if(!basicOK(c))basicFail++}
   el.innerHTML=homes?NEEDS.map(n=>{const v=pop?sum[n.k]/pop:0,col=v>=0.66?'#3c9a5f':v>=0.35?'#e0a91c':'#c8372d';const sold=n.goods.reduce((a,g)=>a+((ref.sold||{})[g]||0),0),made=n.goods.reduce((a,g)=>a+((ref.made||{})[g]||0),0),st=n.goods.reduce((a,g)=>a+(goods[g]||0),0);
     return`<div class="nd"><div class="ndh"><b>${n.name}${BASIC.includes(n.k)?'<em>podstawowa</em>':''}</b><span class="ndv" style="color:${col}">${Math.round(v*100)}%</span></div><div class="bar2"><i style="width:${Math.round(v*100)}%;background:${col}"></i></div><div class="ndf"><span>Produkcja <b>${fmt(made)} kg/godz.</b></span><span>Sprzedaż <b>${fmt(sold)} szt./godz.</b></span><span>Magazyn <b>${fmt(st)} kg</b></span></div><small>${n.goods.map(g=>GOODS[g].name).join(', ')}</small></div>`}).join('')+`<div class="nnote">Najważniejsze są <b>żywność i napoje</b>: każda z nich poniżej 35% to −1 zadowolenia. Dopiero gdy obie są zaspokojone, reszta potrzeb podnosi średnią; średnia poniżej 35% to kolejne −1. Mieszkańcy kupują najpierw żywność i napoje.${basicFail?` <b class="neg">Domy bez zaspokojonej żywności lub napojów: ${basicFail}.</b>`:''}</div>`:'<small>Brak mieszkańców.</small>'}
-function renderStats(){for(const b of document.querySelectorAll('[data-st]'))b.setAttribute('aria-pressed',String(b.dataset.st===stTab));for(const d of document.querySelectorAll('#stats [data-tab]'))d.hidden=d.dataset.tab!==stTab;renderNeeds();
-  const last=hist[hist.length-1],six=hist.slice(-6);
-  document.getElementById('stClock').textContent=`${clockText(gameT)} · bieżąca godzina: ${Math.floor(cur.secs)} z 60 min`;
-  const cols=[{h:'Ta godz.',o:cur,partial:true},{h:'Ostatnia',o:last},{h:'Śr. 6 godz.',o:six.length?null:undefined,avg:true}];
-  const val=(c,f)=>{if(c.avg)return six.length?avg(six,f):null;return c.o?f(c.o):null};
-  const rows=[
-    ['g','Gotówka (T¢)'],
-    ['Przychody razem',o=>o.inc],['  Sklepy, piekarnie, galerie',o=>o.shopInc!=null?o.shopInc:Math.max(0,o.inc-(o.entInc||0)),1],['  Rozrywka (kino, teatr, kasyno, restauracje)',o=>o.entInc||0,1],['  Hotele (noclegi)',o=>o.hotelInc||0,1],['  Podatki od mieszkańców',o=>o.taxInc||0,1],['  Praca więźniów',o=>o.prisonInc||0,1],['  w tym od przyjezdnych',o=>o.tourInc||0,1],['Zwroty z wyburzeń',o=>o.refund],['Budowa',o=>-o.build],['Utrzymanie',o=>-o.upkeep],
-    ['Pożyczki (wypłata)',o=>o.loanIn||0],['Spłata pożyczki',o=>-(o.loanPay||0)],['Straty z przestępstw',o=>-(o.crimeLoss||0)],
-    ['s','Saldo gotówki',netOf],
-    ['g','Magazyny (kg)'],
-    ['Dostarczone do magazynów',o=>o.matIn],['Wysłane do sklepów',o=>-o.matShop],['Spalone w elektrowniach',o=>-o.matCoal],
-    ['Z recyklingu',o=>o.matRec||0],
-    ['s','Saldo magazynów',o=>o.matIn-o.matShop-o.matCoal+(o.matRec||0)],
-    ['g','Odpady (kg)'],
-    ['Wytworzone',o=>o.gGen||0,1],['Zebrane śmieciarkami',o=>o.gColl||0,1],['Spalone',o=>o.gBurn||0,1],['Przerobione',o=>o.gRec||0,1],
-    ['g','Ruch'],
-    ['Kursy mieszkańców',o=>o.trips,1],['Przyjezdni',o=>o.tour||0,1],['Zmiany w fabrykach',o=>o.work||0,1],['Kursy ciężarówek',o=>o.trucks,1],['Kursy furgonetek',o=>o.vans||0,1],['Klienci odesłani przez tłok',o=>o.crowd||0,1],['Klienci obsłużeni',o=>o.sales,1],['Klienci bez towaru',o=>o.noStock,1],
-    ['g','Prąd (MW, średnio)'],
-    ['Pobór razem',o=>o.secs?o.powDem/o.secs:0,1],...PCATS.map(k=>['  '+k,o=>o.secs&&o.powCat?(o.powCat[k]||0)/o.secs:0,1]),['Dostępna moc',o=>o.secs?o.powCap/o.secs:0,1]];
+/* the last 24 full hours give the averages; the day balance sums the 24 hours of the last finished day (made at midnight) */
+const dayOf=o=>Math.floor(o.hour/24);
+function dayRows(){const d=Math.floor(gameT/1440)-1;return{d,rows:d>=0?hist.filter(o=>dayOf(o)===d):[]}}
+function dayReport(){const{d,rows}=dayRows();if(!rows.length)return;const v=rows.reduce((a,o)=>a+netOf(o),0);setHint(`Bilans dnia ${d+1}: ${v>=0?'+':'−'}${fmt(Math.abs(v))} T¢ (szczegóły w Gospodarce)`,v<0,true);hintEl.hidden=false}
+/* a table with “average per hour” and “day balance” columns; rows: ['g',group] | [label,f,plain] | ['s',label,f]; day:'sum'|'mwh'|'avg' */
+function flowTable(rows,opt={}){const last=hist.slice(-24),{d,rows:dr}=dayRows(),part=dr.length&&dr.length<24;
+  const cols=[{h:'Średnio / godz.',v:f=>last.length?avg(last,f):null},{h:dr.length?`${opt.mwh?'Energia':'Bilans'} dnia ${d+1}${part?'*':''}`:`${opt.mwh?'Energia':'Bilans'} dnia`,v:f=>dr.length?dr.reduce((a,o)=>a+f(o),0):null}];
   let h='<tr><th></th>'+cols.map(c=>`<th>${c.h}</th>`).join('')+'</tr>';
-  for(const r of rows){
-    if(r[0]==='g'){h+=`<tr><td colspan="4" style="padding-top:9px;color:var(--muted);font-size:11.5px;font-weight:600;border-top:0">${r[1]}</td></tr>`;continue}
+  for(const r of rows){if(r[0]==='g'){h+=`<tr><td colspan="3" style="padding-top:9px;color:var(--muted);font-size:11.5px;font-weight:600;border-top:0">${r[1]}</td></tr>`;continue}
     const sum=r[0]==='s',label=sum?r[1]:r[0],f=sum?r[2]:r[1],plain=!sum&&r[2];
-    h+=`<tr${sum?' class="sum"':''}><td>${label}</td>`+cols.map(c=>{const v=val(c,f);return`<td>${v==null?'–':plain?mw(Math.abs(v)>=10?Math.round(v):Math.round(v*10)/10):sgn(v)}</td>`}).join('')+'</tr>'}
-  document.getElementById('stTbl').innerHTML=h;
-  document.getElementById('chMoney').innerHTML=barChart(netOf,'T¢');
-  const gl=Object.keys(GOODS);
-  document.getElementById('stGoods').innerHTML='<tr><th>Produkt</th><th>Cena</th><th>Magazyn</th><th>Półki</th><th>Produkcja</th><th>Zużycie</th><th>Sprzedaż</th></tr>'+gl.map(k=>{let sh=0;
-      for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isShop(c.t))sh+=c.shelf[k]||0}const ref=last||cur;
-      return`<tr><td><span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}</td><td>${GOODS[k].raw?'–':GOODS[k].price}</td><td>${fmt(have(k))}</td><td>${GOODS[k].raw?'–':sh}</td><td>${r1(((ref.made&&ref.made[k])||0)+(k==='mat'?(ref.matRec||0):0))}</td><td>${r1((ref.used&&ref.used[k])||0)}</td><td>${GOODS[k].raw?'–':r1((ref.sold&&ref.sold[k])||0)}</td></tr>`}).join('')+
-    `<tr><td colspan="7" style="color:var(--muted);font-size:11.5px">Na godzinę gry (${last?'ostatnia pełna':'bieżąca'}). Zużycie: surowce w fabrykach i materiały spalane w elektrowniach. Materiały powstają tylko w wytwórniach materiałów i recyklingu; fabryki zużywają je na każdą partię.</td></tr>`;
-  document.getElementById('chMat').innerHTML=barChart(o=>o.matIn-o.matShop-o.matCoal+(o.matRec||0),'t');
-  const items=upkeepItems(),cats=[...new Set(items.map(q=>q.cat))].sort((x,y)=>PCATS.indexOf(x)-PCATS.indexOf(y));
-  document.getElementById('upkCtl').innerHTML=`<div class="chips">${['Wszystko',...cats].map(k=>`<button class="chipb" data-ucat="${k}" aria-pressed="${upkCat===k}">${k}</button>`).join('')}</div>`+
-    `<div class="chips">Sortuj: ${[['cat','kategorie'],['sum','kwota'],['name','nazwa']].map(([k,n])=>`<button class="chipb" data-usort="${k}" aria-pressed="${upkSort===k}">${n}</button>`).join('')}</div>`;
-  const shown=items.filter(q=>upkCat==='Wszystko'||q.cat===upkCat).sort(upkSort==='sum'?(x,y)=>y.sum-x.sum:upkSort==='name'?(x,y)=>x.name.localeCompare(y.name,'pl'):(x,y)=>PCATS.indexOf(x.cat)-PCATS.indexOf(y.cat)||y.sum-x.sum);
-  let rows2='',lastCat='';for(const q of shown){if(upkSort==='cat'&&q.cat!==lastCat){lastCat=q.cat;const tot=shown.filter(z=>z.cat===q.cat).reduce((a,z)=>a+z.sum,0);rows2+=`<span class="ucat">${q.cat}</span><span class="ucat">${fmt1(tot)} T¢/godz.</span>`}
-    rows2+=`<span>${q.name}${q.n>1||q.unit?`: ${q.n} × ${q.unit} T¢${q.per>1?' / '+q.per+' godz.':''}`:''}</span><span>${fmt1(q.sum)} T¢/godz.</span>`}
-  if(upkCat!=='Wszystko')rows2+=`<span><b>Razem: ${upkCat}</b></span><span><b>${fmt(shown.reduce((a,z)=>a+z.sum,0))} T¢/godz.</b></span>`;
-  const nextBill=30-Math.floor(gameT%30);
-  {const ref=last||cur;document.getElementById('stSafe').innerHTML=`<span>Straż pożarna</span><span>${(counts.fireS||0)+(counts.fireB||0)}</span><span>Pożary teraz</span><span class="${fires.length?'neg':''}">${fires.length}</span><span>Pożary / ugaszone / zgliszcza (godz.)</span><span>${ref.fires||0} / ${ref.firesOut||0} / ${ref.ruins||0}</span><span>Komisariaty</span><span>${(counts.policeS||0)+(counts.policeB||0)}</span><span>Przestępstwa udaremnione (godz.)</span><span>${ref.crimeOk||0}</span><span>Nieudaremnione (godz.)</span><span class="${ref.crimeLost?'neg':''}">${ref.crimeLost||0}</span><span>Straty (godz.)</span><span class="${ref.crimeLoss?'neg':''}">${fmt(ref.crimeLoss||0)} T¢</span><span>Trwające zdarzenia</span><span>${crimes.length}</span>`+(()=>{const m=inmates();return m.n?`<span>Zatrzymani i więźniowie</span><span>${m.n} · ${fmt(m.n*JAIL_FEE)} T¢/godz.</span>`+(m.w?`<span>Praca więźniów</span><span class="pos">+${fmt(m.w)} T¢/godz.</span>`:''):''})()+(counts.bank?`<span>Ryzyko napadu na bank</span><span>${Math.round(Math.min(0.85,0.3*(counts.bank+counts.bankG))*50)}% co kilka godzin (o połowę mniej w zasięgu policji)</span>`:'')}
-  {const st=[0,0,0,0,0];let sick=0,hos=0,dead=0,pupP=0,pupS=0,schP=0,schS=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!c.pp)continue;const ts=tilesOf(i),ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]);dead+=c.dead||0;
-    for(const q of c.pp){const s=stageOf(q.a);st[s]++;if(q.s===1)sick++;if(q.s===2)hos++;if(s===1){pupP++;if(ep)schP++}if(s===2){pupS++;if(es)schS++}}}
-    let beds=0,bedsU=0,pl=0,plU=0;for(const c of grid){if(c&&MED[c.t]){beds+=medCap(c);bedsU+=c.pat||0}if(c&&DCARE[c.t]){pl+=dCap(c);plU+=(c.bodies||0)+(c.urn?c.urn.length:0)}}const ref=last||cur;
-    document.getElementById('stLife').innerHTML=STAGES.map((S,k)=>`<span>${S[1]}</span><span>${st[k]}</span>`).join('')+`<span>Uczniowie w szkołach</span><span>${schP}/${pupP} podst. · ${schS}/${pupS} średnie</span><span>Chorzy bez leczenia</span><span class="${sick?'neg':''}">${sick}</span><span>W szpitalach</span><span>${hos} · łóżka ${bedsU}/${beds}</span><span>Narodziny / zgony (godz.)</span><span>${ref.births||0} / ${ref.deaths||0}</span><span>Zmarli czekający na pochówek</span><span class="${dead?'neg':''}">${dead}</span><span>Miejsca na cmentarzach i w krematoriach</span><span>${plU}/${pl}</span>`}
-  document.getElementById('stUpk').innerHTML=rows2+`<span><b>Razem w dzień</b></span><span><b>${fmt(upkeepRate(false))} T¢/godz.</b></span>`+
-    `<span>W nocy (parki ×0,5)</span><span>${fmt(upkeepRate(true))} T¢/godz.</span>`+
-    `<span>Rachunek co 30 min gry (o :00 i :30)</span><span>${fmt(upkeepRate(isNight())/2)} T¢</span><span>Następny za</span><span>${nextBill} min</span>`;
-  const m3=v=>`${mw(Math.round(v*10)/10)} m³/godz.`;
-  document.getElementById('stWater').innerHTML=`<span>Czysta woda w sieci</span><span>${m3(wtr.clean)}</span><span>Brudna woda z rzeki</span><span class="${wtr.dirty?'neg':''}">${m3(wtr.dirty)}</span><span>Zużycie</span><span>${m3(wtr.dem)}</span><span>Oczyszczone ścieki</span><span>${m3(wtr.treated)}</span><span>Zrzut do rzeki</span><span>${m3(wtr.out)} z ${m3(wtr.outCap)} przepustowości</span><span>Ścieki bez odpływu</span><span class="${wtr.over>0.01?'neg':''}">${m3(wtr.over)}</span><span>Domy bez wody</span><span class="${wtr.none?'neg':''}">${wtr.none}</span><span>Domy z brudną wodą (chorzy)</span><span class="${wtr.sick?'neg':''}">${wtr.sick}</span>`;
-  let inB=0,fullB=0,gen=0;const fs={landfill:[0,0,0],incinerator:[0,0,0],recycler:[0,0,0],coal:[0,0,0]};
-  for(let i=0;i<N*N;i++){const c=grid[i];if(!c)continue;if(TRASH[c.t]){gen++;inB+=c.trash;if(c.trash>=TRASH[c.t].cap)fullB++}if(isFac(c)){const a=fs[c.t];a[0]++;a[1]+=c.gstock;a[2]+=facCap(c)}}
-  document.getElementById('stWaste').innerHTML=`<span>W budynkach</span><span>${fmt(inB)} kg</span><span>Pełne kosze</span><span class="${fullB?'neg':''}">${fullB} z ${gen}</span>`+
-    [['Wysypiska','landfill'],['Spalarnie','incinerator'],['Recykling','recycler'],['El. węglowe (odpady)','coal']].map(([n,t])=>fs[t][0]?`<span>${n} (${fs[t][0]})</span><span>${fmt(fs[t][1])} / ${fmt(fs[t][2])} kg</span>`:'').join('')+
-    (fs.landfill[0]+fs.incinerator[0]+fs.recycler[0]+fs.coal[0]?'':'<span>Brak wysypiska, spalarni ani recyklingu</span><span class="neg">śmieci rosną</span>');
-  const nh=pw.dist.reduce((a,b)=>a+b,0);
-  document.getElementById('stHappy').innerHTML=(nh?`<span>Średnio</span><span></span><span><b>${mw(Math.round(pw.happy*10)/10)} / 6</b></span>`:'<span>Brak domów</span><span></span><span></span>')+
-    [8,7,6,5,4,3,2,1,0].map(l=>`<span>${l} · ${TIER[l].name}</span><span class="b"><i style="width:${nh?pw.dist[l]/nh*100:0}%;background:${HCOL[l]}"></i></span><span>${pw.dist[l]}</span>`).join('');
-  document.getElementById('stTier').innerHTML='<tr><th>Poziom</th><th>Kursy/godz. (noc ×½)</th><th>Zmiany/wizytę</th><th>Domów</th></tr>'+
-    [8,7,6,5,4,3,2,1,0].map(l=>`<tr><td>${l} · ${TIER[l].name}</td><td>${TIER[l].trips}</td><td>${mw(TIER[l].work)}</td><td>${pw.dist[l]}</td></tr>`).join('')}
+    h+=`<tr${sum?' class="sum"':''}><td>${label}</td>`+cols.map((c,k)=>{const v=c.v(f);if(v==null)return'<td>–</td>';const u=opt.mwh&&k===1?' MWh':'';return`<td>${plain?mw(Math.abs(v)>=10?Math.round(v):Math.round(v*10)/10)+u:sgn(v)}</td>`}).join('')+'</tr>'}
+  return h}
+function dayNote(){const{d,rows:dr}=dayRows();const left=60-Math.floor(cur.secs);
+  return(hist.length?`Średnia z ostatnich ${Math.min(24,hist.length)} pełnych godzin gry.`:`Pierwsza pełna godzina gry za ${left} s.`)+' '+(dr.length?`Bilans dnia ${d+1} zrobiony o północy (suma 24 godzin${dr.length<24?`, *niepełny: ${dr.length} godz.`:''}).`:'Pierwszy bilans dnia powstanie o północy.')}
+const scard=(ico,col,label,val,sub)=>`<div class="sc" style="color:${col}"><span class="sci">${svgI(ico,19)}</span><b>${val}</b><span>${label}</span>${sub?`<small>${sub}</small>`:''}</div>`;
+const pbar=(label,v,max,col,txt,sub)=>{const p=max>0?Math.max(0,Math.min(1,v/max)):0;return`<div class="pb"><div class="pbh"><span>${label}</span><b>${txt!=null?txt:`${fmt(v)} / ${fmt(max)}`}</b></div><div class="bar2"><i style="width:${Math.round(p*1000)/10}%;background:${col}"></i></div>${sub?`<small>${sub}</small>`:''}</div>`};
+const pct=(a,b)=>b?Math.round(a/b*100)+'%':'–';
+const upkOpen=new Set();
+document.getElementById('stUpk').addEventListener('click',e=>{const b=e.target.closest('[data-uc]');if(!b)return;const k=b.dataset.uc;upkOpen.has(k)?upkOpen.delete(k):upkOpen.add(k);renderStats()});
+/* homes covered: by a police station, a fire station (or helicopter base), a school, a clinic */
+function covStats(){let homes=0,pol=0,fire=0,med=0,ep=0,es=0;const st=[],fs=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part')continue;if(isPolice(c.t)&&!c.off)st.push(i);if((isFireSt(c.t)||c.t==='heliB')&&!c.off)fs.push(i)}
+  const fr=(f,i)=>{const c=grid[f],r=c.t==='heliB'?HELI_R:fireRad(c);return tilesOf(f).some(t=>Math.abs(t%N-i%N)<=r&&Math.abs(((t/N)|0)-((i/N)|0))<=r)};
+  for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!HLV[c.t]||c.aband)continue;homes++;const ts=tilesOf(i);if(st.some(k=>stCover(k,i)))pol++;if(fs.some(k=>fr(k,i)))fire++;if(ts.some(k=>medCov[k]))med++;if(ts.some(k=>eduP[k]))ep++;if(ts.some(k=>eduS[k]))es++}
+  return{homes,pol,fire,med,ep,es}}
+function renderStats(){for(const b of document.querySelectorAll('[data-st]'))b.setAttribute('aria-pressed',String(b.dataset.st===stTab));for(const d of document.querySelectorAll('#stats [data-tab]'))d.hidden=d.dataset.tab!==stTab;
+  const last=hist[hist.length-1],ref=last||cur,L24=hist.slice(-24),H24=f=>L24.reduce((a,o)=>a+f(o),0);
+  document.getElementById('stClock').textContent=`${clockText(gameT)} · bieżąca godzina: ${Math.floor(cur.secs)} z 60 min`;
+  const note=dayNote();
+  if(stTab==='fin'){
+    document.getElementById('stTbl').innerHTML=flowTable([['Przychody razem',o=>o.inc],['  Sklepy, piekarnie, galerie',o=>o.shopInc!=null?o.shopInc:Math.max(0,o.inc-(o.entInc||0)),1],['  Rozrywka (kino, teatr, kasyno, restauracje)',o=>o.entInc||0,1],['  Hotele (noclegi)',o=>o.hotelInc||0,1],['  Podatki od mieszkańców',o=>o.taxInc||0,1],['  Praca więźniów',o=>o.prisonInc||0,1],['  w tym od przyjezdnych',o=>o.tourInc||0,1],
+      ['Zwroty z wyburzeń',o=>o.refund],['Budowa',o=>-o.build],['Utrzymanie',o=>-o.upkeep],['Pożyczki (wypłata)',o=>o.loanIn||0],['Spłata pożyczki',o=>-(o.loanPay||0)],['Straty z przestępstw',o=>-(o.crimeLoss||0)],['s','Saldo gotówki',netOf]]);
+    document.getElementById('dayNote').textContent=note;
+    document.getElementById('chMoney').innerHTML=barChart(netOf,'T¢');
+    const items=upkeepItems(),cats=[...new Set(items.map(q=>q.cat))].sort((x,y)=>PCATS.indexOf(x)-PCATS.indexOf(y));let u='';
+    for(const k of cats){const l=items.filter(q=>q.cat===k).sort((x,y)=>y.sum-x.sum),tot=l.reduce((a,z)=>a+z.sum,0),n=l.reduce((a,z)=>a+z.n,0),open=upkOpen.has(k);
+      u+=`<button class="ucath" data-uc="${k}" aria-expanded="${open}">${k} <span class="n">${n} ${n===1?'pozycja':n<5?'pozycje':'pozycji'}</span><span class="v">${fmt1(tot)} T¢/godz.</span></button>`;
+      if(open)u+=`<div class="ucatb">${l.map(q=>`<span>${q.name}${q.n>1||q.unit?`: ${q.n} × ${q.unit} T¢${q.per>1?' / '+q.per+' godz.':''}`:''}</span><span>${fmt1(q.sum)} T¢/godz.</span>`).join('')}</div>`}
+    const nextBill=30-Math.floor(gameT%30);
+    document.getElementById('stUpk').innerHTML=(u||'<small class="tnote">Brak budynków z utrzymaniem.</small>')+`<div class="upkTot"><span><b>Razem w dzień</b></span><span><b>${fmt(upkeepRate(false))} T¢/godz.</b></span><span>W nocy (parki ×0,5)</span><span>${fmt(upkeepRate(true))} T¢/godz.</span><span>Rachunek co 30 min gry (o :00 i :30)</span><span>${fmt(upkeepRate(isNight())/2)} T¢</span><span>Następny za</span><span>${nextBill} min</span></div>`}
+  if(stTab==='prod'){renderNeeds();const gl=Object.keys(GOODS);
+    document.getElementById('stGoods').innerHTML='<tr><th>Produkt</th><th>Cena</th><th>Magazyn</th><th>Półki</th><th>Produkcja</th><th>Zużycie</th><th>Sprzedaż</th></tr>'+gl.map(k=>{let sh=0;
+        for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isShop(c.t))sh+=c.shelf[k]||0}
+        return`<tr><td><span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}</td><td>${GOODS[k].raw?'–':GOODS[k].price}</td><td>${fmt(have(k))}</td><td>${GOODS[k].raw?'–':sh}</td><td>${r1(((ref.made&&ref.made[k])||0)+(k==='mat'?(ref.matRec||0):0))}</td><td>${r1((ref.used&&ref.used[k])||0)}</td><td>${GOODS[k].raw?'–':r1((ref.sold&&ref.sold[k])||0)}</td></tr>`}).join('')+
+      `<tr><td colspan="7" style="color:var(--muted);font-size:11.5px">Na godzinę gry (${last?'ostatnia pełna':'bieżąca'}). Zużycie: surowce w fabrykach i materiały spalane w elektrowniach. Materiały powstają tylko w wytwórniach materiałów i recyklingu; fabryki zużywają je na każdą partię.</td></tr>`;
+    document.getElementById('stMatT').innerHTML=flowTable([['Dostarczone do magazynów',o=>o.matIn],['Wysłane do sklepów',o=>-o.matShop],['Spalone w elektrowniach',o=>-o.matCoal],['Z recyklingu',o=>o.matRec||0],['s','Saldo magazynów',o=>o.matIn-o.matShop-o.matCoal+(o.matRec||0)]]);
+    document.getElementById('chMat').innerHTML=barChart(o=>o.matIn-o.matShop-o.matCoal+(o.matRec||0),'t')}
+  if(stTab==='ppl'){const st=[0,0,0,0,0];for(const c of grid)if(c&&c.pp)for(const q of c.pp)st[stageOf(q.a)]++;const pop=st.reduce((a,b)=>a+b,0);
+    const IC=['house','book','book','factory','park1'],CC=['#38c6e0','#38c6e0','#38c6e0','#38c6e0','#38c6e0'];
+    document.getElementById('stLife').innerHTML=scard('house','#38c6e0','Mieszkańcy razem',fmt(pop))+STAGES.map((S,k)=>scard(IC[k],CC[k],S[1],fmt(st[k]),pop?Math.round(st[k]/pop*100)+'% miasta':'')).join('');
+    const nh=pw.dist.reduce((a,b)=>a+b,0);
+    document.getElementById('stHappy').innerHTML=(nh?`<span>Średnio</span><span></span><span><b>${mw(Math.round(pw.happy*10)/10)} / 6</b></span>`:'<span>Brak domów</span><span></span><span></span>')+
+      [8,7,6,5,4,3,2,1,0].map(l=>`<span>${l} · ${TIER[l].name}</span><span class="b"><i style="width:${nh?pw.dist[l]/nh*100:0}%;background:${HCOL[l]}"></i></span><span>${pw.dist[l]}</span>`).join('');
+    document.getElementById('stTier').innerHTML='<tr><th>Poziom</th><th>Kursy/godz. (noc ×½)</th><th>Zmiany/wizytę</th><th>Domów</th></tr>'+
+      [8,7,6,5,4,3,2,1,0].map(l=>`<tr><td>${l} · ${TIER[l].name}</td><td>${TIER[l].trips}</td><td>${mw(TIER[l].work)}</td><td>${pw.dist[l]}</td></tr>`).join('')}
+  if(stTab==='waste'){let inB=0,fullB=0,gen=0,inF=0,capF=0,rate=0;const fs={landfill:[0,0,0],incinerator:[0,0,0],recycler:[0,0,0],coal:[0,0,0]};
+    for(let i=0;i<N*N;i++){const c=grid[i];if(!c)continue;if(TRASH[c.t]){gen++;inB+=c.trash;if(c.trash>=TRASH[c.t].cap)fullB++}if(isFac(c)){const a=fs[c.t];a[0]++;a[1]+=c.gstock;a[2]+=facCap(c);inF+=c.gstock;capF+=facCap(c);if(FAC[c.t].rate&&!c.off&&(!DEMAND[c.t]||c.powered))rate+=fRate(c)}}
+    const avgH=f=>L24.length?avg(L24,f):(cur.secs>1?f(cur)*60/cur.secs:0);
+    const genH=avgH(o=>o.gGen||0),burnH=avgH(o=>o.gBurn||0),recH=avgH(o=>o.gRec||0),matH=avgH(o=>o.matRec||0);
+    document.getElementById('wCards').innerHTML=scard('waste','#e98a3a','Generowane / godz.',`${fmt1(genH)} kg`)+scard('landfill','#c27b3a','Posiadane odpady',`${fmt(inB+inF)} kg`,`${fmt(inB)} kg w koszach · ${fmt(inF)} / ${fmt(capF)} kg w zakładach`)+
+      scard('recycler',rate>=genH?'#2f9e5a':'#d4483a','Przetwarzanie',`${fmt1(rate)} kg/godz.`,rate>=genH?'nadąża za odpadami':'za mało: odpady rosną')+scard('incinerator','#7d8790','Spalone / godz.',`${fmt1(burnH)} kg`)+scard('recycler','#3c9a5f','Przerobione na materiały',`${fmt1(recH)} kg`,`→ ${fmt1(matH)} kg materiałów / godz.`)+
+      scard('waste',fullB?'#d4483a':'#7d8790','Pełne kosze',`${fullB} z ${gen}`);
+    document.getElementById('wTbl').innerHTML=flowTable([['Wytworzone',o=>o.gGen||0,1],['Zebrane śmieciarkami',o=>o.gColl||0,1],['Spalone',o=>o.gBurn||0,1],['Przerobione',o=>o.gRec||0,1],['Materiały z recyklingu',o=>o.matRec||0,1]]);
+    document.getElementById('stWaste').innerHTML=[['Wysypiska','landfill'],['Spalarnie','incinerator'],['Recykling','recycler'],['El. węglowe (odpady)','coal']].map(([n,t])=>fs[t][0]?`<span>${n} (${fs[t][0]})</span><span>${fmt(fs[t][1])} / ${fmt(fs[t][2])} kg</span>`:'').join('')+
+      (fs.landfill[0]+fs.incinerator[0]+fs.recycler[0]+fs.coal[0]?'':'<span>Brak wysypiska, spalarni i recyklingu</span><span class="neg">śmieci rosną</span>')}
+  if(stTab==='traf'){const avgH=f=>L24.length?avg(L24,f):(cur.secs>1?f(cur)*60/cur.secs:0);
+    const car=o=>Math.max(0,(o.trips||0)-(o.walks||0));
+    document.getElementById('tCards').innerHTML=scard('taxi','#2f6fe0','Mieszkańcy autem / godz.',fmt1(avgH(car)))+scard('house','#3c9a5f','Mieszkańcy pieszo / godz.',fmt1(avgH(o=>o.walks||0)))+scard('suitcase','#7d4ab0','Przejezdni / godz.',fmt1(avgH(o=>o.tour||0)))+
+      scard('factory','#e0a91c','Zmiany w fabrykach / godz.',fmt1(avgH(o=>o.work||0)))+scard('freightSt','#7d8790','Ciężarówki / godz.',fmt1(avgH(o=>o.trucks||0)))+scard('shop','#e98aa8','Klienci obsłużeni / godz.',fmt1(avgH(o=>o.sales||0)));
+    document.getElementById('tTbl').innerHTML=flowTable([['g','Mieszkańcy'],['Kursy autem',car,1],['Kursy pieszo',o=>o.walks||0,1],['g','Przyjezdni i praca'],['Przyjezdni',o=>o.tour||0,1],['Zmiany w fabrykach',o=>o.work||0,1],
+      ['g','Dostawy'],['Kursy ciężarówek',o=>o.trucks,1],['Kursy furgonetek',o=>o.vans||0,1],['g','Klienci'],['Obsłużeni',o=>o.sales,1],['Odesłani przez tłok',o=>o.crowd||0,1],['Bez towaru',o=>o.noStock,1]]);
+    const K={};let w=0;for(const v of cars){if(v.dead)continue;if(v.walk){w++;continue}K[v.kind]=(K[v.kind]||0)+1}
+    const KN={commuter:'Auta mieszkańców',visitor:'Auta turystów',tourist:'Auta turystów',truck:'Ciężarówki',export:'Ciężarówki eksportowe',van:'Furgonetki',garbage:'Śmieciarki',police:'Radiowozy',fire:'Wozy strażackie',hearse:'Karawany',taxi:'Taksówki',sweeper:'Zamiatarki'};
+    document.getElementById('tNow').innerHTML=`<span>Piesi</span><span>${w}</span>`+Object.entries(K).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<span>${KN[k]||'Inne pojazdy'}</span><span>${n}</span>`).join('')+`<span><b>Pojazdy razem</b></span><span><b>${Object.values(K).reduce((a,b)=>a+b,0)}</b></span><span>Pociągi</span><span>${trains.length}</span>`}
+  if(stTab==='pow'){const dem=pw.dem||0,cap=pw.cap||0,gen=pw.gen||{},gt=Object.values(gen).reduce((a,b)=>a+b,0),r=v=>mw(Math.round(v*10)/10);
+    document.getElementById('pCards').innerHTML=scard('energy','#f2c230','Pobór teraz',`${r(dem)} MW`)+scard('wind','#3c9a5f','Generowanie teraz',`${r(gt)} MW`,`dostępna moc ${r(cap)} MW`)+scard('energy',cap>=dem?'#2f9e5a':'#d4483a','Zapas mocy',`${r(cap-dem)} MW`,cap>=dem?'sieć wystarcza':'za mało mocy');
+    const cats=Object.entries(pw.cat||{}).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]),mx=Math.max(1,...cats.map(e=>e[1]));
+    document.getElementById('pDem').innerHTML=cats.length?cats.map(([k,v])=>pbar(k,v,mx,'#f2c230',`${r(v)} MW · ${pct(v,dem)}`)).join(''):'<small class="tnote">Nic nie pobiera prądu.</small>';
+    const gs=Object.entries(gen).sort((a,b)=>b[1]-a[1]),gm=Math.max(1,...gs.map(e=>e[1]));const GC={'Wiatraki':'#4aa3d8','Panele słoneczne':'#f2c230','Elektrownie wodne':'#2f6fe0','Elektrownie węglowe':'#5b5f66'};
+    document.getElementById('pGen').innerHTML=gs.length?gs.map(([k,v])=>pbar(k,v,gm,GC[k]||'#3c9a5f',`${r(v)} MW · ${pct(v,gt)}`)).join(''):'<small class="tnote">Brak podłączonych elektrowni.</small>';
+    const allC=[...new Set(hist.flatMap(o=>Object.keys(o.powCat||{})).concat(Object.keys(pw.cat||{})))].sort((x,y)=>PCATS.indexOf(x)-PCATS.indexOf(y)),allG=[...new Set(hist.flatMap(o=>Object.keys(o.genCat||{})).concat(Object.keys(gen)))];
+    const avgMW=(o,m)=>o.secs?(m||0)/o.secs:0;
+    document.getElementById('pTbl').innerHTML=flowTable([['g','Pobór'],['Razem',o=>avgMW(o,o.powDem),1],...allC.map(k=>['  '+k,o=>avgMW(o,o.powCat&&o.powCat[k]),1]),['g','Generowanie'],['Razem',o=>avgMW(o,Object.values(o.genCat||{}).reduce((a,b)=>a+b,0)),1],...allG.map(k=>['  '+k,o=>avgMW(o,o.genCat&&o.genCat[k]),1]),['g','Sieć'],['Dostępna moc',o=>avgMW(o,o.powCap),1]],{mwh:true})+`<tr><td colspan="3" class="tnote" style="border-top:0">Średnio w MW; „Energia dnia” to MWh zużyte lub wytworzone przez cały dzień.</td></tr>`}
+  if(stTab==='wat'){const m3=v=>`${mw(Math.round(v*10)/10)} m³/godz.`;
+    document.getElementById('stWater').innerHTML=`<span>Czysta woda w sieci</span><span>${m3(wtr.clean)}</span><span>Brudna woda z rzeki</span><span class="${wtr.dirty?'neg':''}">${m3(wtr.dirty)}</span><span>Zużycie</span><span>${m3(wtr.dem)}</span><span>Oczyszczone ścieki</span><span>${m3(wtr.treated)}</span><span>Zrzut do rzeki</span><span>${m3(wtr.out)} z ${m3(wtr.outCap)} przepustowości</span><span>Ścieki bez odpływu</span><span class="${wtr.over>0.01?'neg':''}">${m3(wtr.over)}</span><span>Domy bez wody</span><span class="${wtr.none?'neg':''}">${wtr.none}</span><span>Domy z brudną wodą (chorzy)</span><span class="${wtr.sick?'neg':''}">${wtr.sick}</span>`}
+  if(stTab==='safe'){const cv=covStats(),m=inmates();let cells=0;for(const c of grid){if(c&&isPolice(c.t))cells+=POL[c.t].cells;if(c&&c.t==='prison')cells+=prisonCap(c)}
+    const pol=(counts.policeS||0)+(counts.policeB||0),fst=(counts.fireS||0)+(counts.fireB||0);
+    document.getElementById('sCards').innerHTML=scard('policeS','#2f6fe0','Komisariaty',pol)+scard('fireS','#d4483a','Straże pożarne',fst,counts.heliB?`+ ${counts.heliB} baza helikopterów`:'')+scard('prison','#7d8790','Zatrzymani i więźniowie',m.n,m.n?`${fmt(m.n*JAIL_FEE)} T¢/godz.`:'')+
+      scard('shield',crimes.length?'#d4483a':'#2f9e5a','Trwające przestępstwa',crimes.length)+scard('fireB',fires.length?'#d4483a':'#2f9e5a','Pożary teraz',fires.length);
+    const ok=H24(o=>o.crimeOk||0),lost=H24(o=>o.crimeLost||0),fi=H24(o=>o.fires||0),fo=H24(o=>o.firesOut||0),ru=H24(o=>o.ruins||0);
+    document.getElementById('sBars').innerHTML=pbar('Domy w zasięgu policji',cv.pol,cv.homes,'#2f6fe0',`${cv.pol} / ${cv.homes} · ${pct(cv.pol,cv.homes)}`)+
+      pbar('Przestępstwa udaremnione (24 godz.)',ok,ok+lost,'#2f9e5a',ok+lost?`${ok} / ${ok+lost} · ${pct(ok,ok+lost)}`:'brak przestępstw')+
+      pbar('Domy w zasięgu straży',cv.fire,cv.homes,'#d4483a',`${cv.fire} / ${cv.homes} · ${pct(cv.fire,cv.homes)}`)+
+      pbar('Pożary ugaszone (24 godz.)',fo,fi,'#e98a3a',fi?`${fo} / ${fi} · ${pct(fo,fi)}`:'brak pożarów',ru?`${ru} ${ru===1?'budynek spłonął':'budynki spłonęły'}`:'')+
+      pbar('Miejsca w celach i więzieniach',m.n,cells,m.n>=cells&&cells?'#d4483a':'#7d8790',cells?`${m.n} / ${cells}`:'brak cel');
+    document.getElementById('sTbl').innerHTML=flowTable([['g','Przestępstwa'],['Udaremnione',o=>o.crimeOk||0,1],['Nieudaremnione',o=>o.crimeLost||0,1],['Straty (T¢)',o=>o.crimeLoss||0,1],['g','Pożary'],['Wybuchły',o=>o.fires||0,1],['Ugaszone',o=>o.firesOut||0,1],['Zgliszcza',o=>o.ruins||0,1]])}
+  if(stTab==='health'){const cv=covStats();let sick=0,hos=0,dead=0,beds=0,bedsU=0,pl=0,plU=0,nMed=0,nDc=0;for(const c of grid){if(!c||c.t==='part')continue;if(c.pp)for(const q of c.pp){if(q.s===1)sick++;if(q.s===2)hos++}dead+=c.dead||0;
+      if(MED[c.t]){nMed++;beds+=medCap(c);bedsU+=c.pat||0}if(DCARE[c.t]){nDc++;pl+=dCap(c);plU+=(c.bodies||0)+(c.urn?c.urn.length:0)}}
+    document.getElementById('hCards').innerHTML=scard('cross','#d4483a','Kliniki i szpitale',nMed)+scard('cross',sick?'#d4483a':'#2f9e5a','Chorzy bez leczenia',sick)+scard('hosp','#2f6fe0','W szpitalach',hos)+scard('cemS',dead?'#d4483a':'#7d8790','Zmarli czekający na pochówek',dead)+scard('cemB','#7d8790','Cmentarze i krematoria',nDc);
+    document.getElementById('hBars').innerHTML=pbar('Domy w zasięgu opieki medycznej',cv.med,cv.homes,'#2f9e5a',`${cv.med} / ${cv.homes} · ${pct(cv.med,cv.homes)}`)+pbar('Zajęte łóżka',bedsU,beds,bedsU>=beds&&beds?'#d4483a':'#2f6fe0',beds?`${bedsU} / ${beds}`:'brak szpitali')+pbar('Miejsca pochówku',plU,pl,plU>=pl&&pl?'#d4483a':'#7d8790',pl?`${plU} / ${pl}`:'brak cmentarzy');
+    document.getElementById('hTbl').innerHTML=flowTable([['Narodziny',o=>o.births||0,1],['Zgony',o=>o.deaths||0,1],['s','Przyrost',o=>(o.births||0)-(o.deaths||0)]])}
+  if(stTab==='edu'){const cv=covStats();let pupP=0,pupS=0,schP=0,schS=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!c.pp)continue;const ts=tilesOf(i),ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]);for(const q of c.pp){const s2=stageOf(q.a);if(s2===1){pupP++;if(ep)schP++}if(s2===2){pupS++;if(es)schS++}}}
+    document.getElementById('eCards').innerHTML=scard('schoolS','#e0a91c','Szkoły podstawowe',(counts.schoolS||0)+(counts.school||0))+scard('lyceum','#7d4ab0','Licea',counts.lyceum||0)+scard('techn','#2f6fe0','Technika',counts.techn||0)+scard('book','#38c6e0','Uczniowie',pupP+pupS,`${pupP} podst. · ${pupS} średnie`);
+    document.getElementById('eBars').innerHTML=pbar('Uczniowie podstawówek w szkole',schP,pupP,'#e0a91c',pupP?`${schP} / ${pupP} · ${pct(schP,pupP)}`:'brak uczniów')+pbar('Uczniowie szkół średnich w szkole',schS,pupS,'#7d4ab0',pupS?`${schS} / ${pupS} · ${pct(schS,pupS)}`:'brak uczniów')+
+      pbar('Domy w zasięgu podstawówki',cv.ep,cv.homes,'#e0a91c',`${cv.ep} / ${cv.homes}`)+pbar('Domy w zasięgu szkoły średniej',cv.es,cv.homes,'#7d4ab0',`${cv.es} / ${cv.homes}`,'Liceum: zarobki w zasięgu +5% · technikum: fabryki i magazyny +5%')}}
 /* bar chart: completed hours plus the running hour (lighter), symmetric scale around zero */
 function barChart(f,unit){
   const data=hist.slice(-23).map(o=>({v:f(o),h:o.hour,p:false}));data.push({v:f(cur),h:Math.floor(gameT/60),p:true});
@@ -3316,21 +3474,25 @@ function barChart(f,unit){
     if(d.h%6===0)g+=`<text x="${x+cw/2}" y="${H-4}" text-anchor="middle">${pad2(d.h%24)}:00</text>`});
   if(!hist.length)g+=`<text x="${(W+L)/2}" y="${T+14}" text-anchor="middle">Pierwsza pełna godzina gry za ${60-Math.floor(cur.secs)} s</text>`;
   return g+'</svg>'}
-function newCity(type,d,name){TAX={...TAX0};ORD={};saveBlocked=false;oldSave=false;if(!window.__testUnlock)msLevel=0;if(name)cityName=String(name).trim().slice(0,24)||cityName;closeTitle();loan=null;imports={};setTimeout(tutStart,0);gameOver=false;toggleStats(false);closeHouse();clearCity();for(const k of [...deco])clearDeco(k);preset(type,d);seedDeco();refreshLocks();save();setHint(`Nowe miasto „${esc(cityName)}” gotowe.`,false,true)}
+function newCity(type,d,name){TAX={...TAX0};ORD={};saveBlocked=false;oldSave=false;if(!window.__testUnlock)msLevel=0;if(name)cityName=String(name).trim().slice(0,24)||cityName;closeTitle();loan=null;imports={};setTimeout(tutStart,0);gameOver=false;toggleStats(false);closeHouse();clearCity();for(const k of [...deco])clearDeco(k);preset(type,d);seedDeco();refreshLocks();save();setHint(`Nowe miasto „${esc(cityName)}” gotowe.`,false,true);
+  /* a new city always starts with the radio on */
+  try{radio.want=true;audioOK=true;radioSave();radioSync()}catch(e){}}
 /* ---------- options: pause, reset, gamma, exit ---------- */
 let paused=false;const menuEl=document.getElementById('menu'),mReset=document.getElementById('mReset'),mGamma=document.getElementById('mGamma');let mArm=null;
 function setGamma(g){g=Math.max(0.6,Math.min(1.6,+g||1));const e=String(1/g);for(const id of['gR','gG','gB'])document.getElementById(id).setAttribute('exponent',e);
   renderer.domElement.style.filter=Math.abs(g-1)<0.01?'':'url(#gammaF)';mGamma.value=g;document.getElementById('mGammaV').textContent=g.toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2});
   try{localStorage.setItem('lt-gamma',String(g))}catch(e){}}
 try{setGamma(localStorage.getItem('lt-gamma')||1)}catch(e){setGamma(1)}
-function openMenu(opts){if(!opts&&(gameOver||titleOpen||!document.getElementById('maps').hidden))return;paused=true;menuEl.hidden=false;menuEl.classList.toggle('optOnly',!!opts);
-  for(const id of['mResume','mNameRow','mReset','mExit'])document.getElementById(id).hidden=!!opts;document.getElementById('mBack').hidden=!opts;
-  document.getElementById('mName').value=cityName;document.getElementById('menuT').textContent=opts?'Opcje':'Pauza · '+cityName;document.getElementById('menuSub').textContent=opts?'Dźwięk, obraz i aktualizacje.':'Czas w mieście stoi.';if(opts){document.getElementById('mBack').focus();return}
+let menuFrom='title';
+function openMenu(opts){if(!opts&&(gameOver||titleOpen||!document.getElementById('maps').hidden))return;paused=true;menuEl.hidden=false;menuEl.classList.toggle('optOnly',!!opts);if(opts)menuFrom=titleOpen?'title':'pause';
+  for(const id of['mResume','mNameRow','mReset','mExit','mOpt'])document.getElementById(id).hidden=!!opts;document.getElementById('mBack').hidden=!opts;document.getElementById('mOpts').hidden=!opts;
+  document.getElementById('mName').value=cityName;document.getElementById('menuT').textContent=opts?'Opcje':'Pauza · '+cityName;document.getElementById('menuSub').textContent=opts?'Dźwięk, obraz i aktualizacje.':'Czas w mieście stoi.';{const u=document.getElementById('uOld');u.classList.remove('armed');u.textContent='Wróć do wersji wbudowanej'}if(opts){document.getElementById('mBack').focus();return}
   mReset.classList.remove('armed');mReset.textContent='Zresetuj miasto';document.getElementById('mResume').focus()}
 function closeMenu(){menuEl.hidden=true;if(titleOpen||gameOver||!mapsEl.hidden){paused=true;return}paused=false;prev=performance.now()}
 document.getElementById('optBtn').addEventListener('click',()=>menuEl.hidden?openMenu():closeMenu());
 document.getElementById('mResume').addEventListener('click',closeMenu);
-document.getElementById('mBack').addEventListener('click',()=>{menuEl.hidden=true;document.getElementById('tOpt').focus()});
+document.getElementById('mBack').addEventListener('click',()=>{if(menuFrom==='pause'&&!titleOpen){openMenu();document.getElementById('mOpt').focus();return}menuEl.hidden=true;document.getElementById('tOpt').focus()});
+document.getElementById('mOpt').addEventListener('click',()=>openMenu(true));
 function renameCity(v){v=String(v||'').trim().slice(0,24);if(!v)return;cityName=v;document.getElementById('menuT').textContent='Pauza · '+cityName;save();setHint(`Miasto nazywa się teraz „${esc(cityName)}”.`,false,true);hintEl.hidden=false;discordTick&&(dcLast='')}
 document.getElementById('mNameOk').addEventListener('click',()=>renameCity(document.getElementById('mName').value));
 document.getElementById('mName').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')renameCity(e.target.value)});
@@ -3360,9 +3522,9 @@ const STATIONS=[{name:'Nature FM',tracks:['nature','nature2','nature3']},{name:'
 const MUSIC_SRC=f=>[`music/${f}.mp3`,`https://media.githubusercontent.com/media/MrShelo/LittleTowniesUpdates/main/music/${f}.mp3`,`https://raw.githubusercontent.com/MrShelo/LittleTowniesUpdates/main/music/${f}.mp3`];
 const radio={el:null,st:0,on:false,vol:0.6};
 try{const r=JSON.parse(localStorage.getItem('lt-radio')||'null');if(r){radio.st=Math.min(STATIONS.length-1,Math.max(0,r.st|0));radio.vol=r.vol??0.6;radio.want=!!r.on}}catch(e){}
-const radioSave=()=>{try{localStorage.setItem('lt-radio',JSON.stringify({st:radio.st,vol:radio.vol,on:radio.on}))}catch(e){}};
-function radioUI(){const rp=document.getElementById('rPlay');rp.innerHTML=radio.on?'<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><rect x="5" y="4.5" width="3.2" height="11" rx=".8"/><rect x="11.8" y="4.5" width="3.2" height="11" rx=".8"/></svg>':'<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><path d="M6 4.5l10 5.5-10 5.5z"/></svg>';rp.setAttribute('aria-label',radio.on?'Wycisz radio':'Włącz radio');
-  document.getElementById('rName').textContent=STATIONS[radio.st].name;document.getElementById('radio').classList.toggle('on',radio.on);
+const radioSave=()=>{try{localStorage.setItem('lt-radio',JSON.stringify({st:radio.st,vol:radio.vol,on:!!radio.want}))}catch(e){}};
+function radioUI(){const rp=document.getElementById('rPlay'),on=!!radio.want;rp.innerHTML=on?'<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><rect x="5" y="4.5" width="3.2" height="11" rx=".8"/><rect x="11.8" y="4.5" width="3.2" height="11" rx=".8"/></svg>':'<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><path d="M6 4.5l10 5.5-10 5.5z"/></svg>';rp.setAttribute('aria-label',on?'Wycisz radio':'Włącz radio');
+  document.getElementById('rName').textContent=STATIONS[radio.st].name;document.getElementById('radio').classList.toggle('on',on);
   document.getElementById('mVol').value=Math.round(radio.vol*100);document.getElementById('mVolV').textContent=Math.round(radio.vol*100)+'%'}
 function staticBurst(){try{const A=radio.ac||(radio.ac=new (window.AudioContext||window.webkitAudioContext)());const n=A.sampleRate*0.35,b=A.createBuffer(1,n,A.sampleRate),d=b.getChannelData(0);
   for(let k=0;k<n;k++)d[k]=(Math.random()*2-1)*(1-k/n);const src=A.createBufferSource(),g=A.createGain();g.gain.value=0.12*radio.vol;src.buffer=b;src.connect(g);g.connect(A.destination);src.start()}catch(e){}}
@@ -3371,24 +3533,37 @@ function shuffleOrder(n,avoid){const o=[...Array(n).keys()];for(let k=n-1;k>0;k-
 function playTrack(live){const S=STATIONS[radio.st],a=radio.el,f=S.tracks[radio.order[radio.pos]],urls=MUSIC_SRC(f);radio.try=radio.try||0;
   a.src=urls[Math.min(radio.try,urls.length-1)];a.volume=radio.vol;
   a.onloadedmetadata=()=>{if(live&&isFinite(a.duration)&&a.duration>0)try{a.currentTime=Math.random()*a.duration*0.8}catch(e){}};
-  if(radio.on){const pr=a.play();if(pr&&pr.catch)pr.catch(e=>{if(e&&e.name==='NotAllowedError'){radio.on=false;radioUI()}})}}
+  if(radio.on){const pr=a.play();if(pr&&pr.catch)pr.catch(e=>{if(e&&e.name==='NotAllowedError'){radio.on=false;audioOK=false;radioUI()}})}}
 function nextTrack(){const n=STATIONS[radio.st].tracks.length;radio.try=0;radio.pos++;if(radio.pos>=n){const last=radio.order[n-1];radio.order=shuffleOrder(n,last);radio.pos=0}playTrack(false)}
 function tune(){if(!radio.el){radio.el=new Audio();radio.el.preload='none';radio.el.addEventListener('ended',nextTrack);radio.el.addEventListener('playing',()=>{radio.fails=0});
     radio.el.addEventListener('error',()=>{if(!radio.on)return;const urls=MUSIC_SRC(STATIONS[radio.st].tracks[radio.order[radio.pos]]);
       if(radio.try<urls.length-1){radio.try++;playTrack(true);return}radio.fails=(radio.fails||0)+1;if(radio.fails<STATIONS[radio.st].tracks.length)nextTrack()})}
   const n=STATIONS[radio.st].tracks.length;radio.order=shuffleOrder(n,-1);radio.pos=0;radio.try=0;radio.fails=0;playTrack(true)}
-function radioToggle(){radio.on=!radio.on;if(radio.on){staticBurst();tune()}else if(radio.el)radio.el.pause();radioUI();radioSave()}
+/* the radio plays only in the city: radio.want is the player's choice (kept when leaving to the menu), radio.on is what actually plays */
+let audioOK=false;
+function radioSync(){let ti=false;try{ti=titleOpen}catch(e){}const play=!!radio.want&&!ti&&audioOK&&!document.hidden;
+  if(play&&!radio.on){radio.on=true;staticBurst();tune()}else if(!play&&radio.on){radio.on=false;if(radio.el)radio.el.pause()}radioUI()}
+function radioToggle(){audioOK=true;radio.want=!radio.want;radioSync();radioSave()}
 function radioNext(){radio.st=((radio.st|0)+1)%STATIONS.length;if(radio.el){try{radio.el.pause()}catch(e){}}if(radio.on){staticBurst();tune()}radioUI();radioSave()}
-function setVol(v){radio.vol=Math.max(0,Math.min(1,v));if(radio.el)radio.el.volume=radio.vol;radioUI();radioSave()}
+function setVol(v){radio.vol=Math.max(0,Math.min(1,v));if(radio.el)radio.el.volume=radio.vol;if(menuMus.el&&menuMus.on&&!menuMus.fading)menuMus.el.volume=radio.vol;radioUI();radioSave()}
+/* main menu music: loops on the title screen, fades in and out */
+const menuMus={el:null,on:false,fading:null};let menuMusOn=true;try{menuMusOn=localStorage.getItem('lt-menumus')!=='0'}catch(e){}
+function fadeTo(a,v,ms,done){clearInterval(menuMus.fading);const v0=a.volume,t0=Date.now();menuMus.fading=setInterval(()=>{const k=Math.min(1,(Date.now()-t0)/ms);try{a.volume=Math.max(0,Math.min(1,v0+(v-v0)*k))}catch(e){}if(k>=1){clearInterval(menuMus.fading);menuMus.fading=null;if(done)done()}},40)}
+function menuMusicSync(){let ti=false;try{ti=titleOpen}catch(e){}const want=ti&&menuMusOn&&audioOK&&!document.hidden;
+  if(want&&!menuMus.on){if(!menuMus.el){const a=new Audio(),urls=MUSIC_SRC('menu');let k=0;a.loop=true;a.preload='auto';a.src=urls[0];a.addEventListener('error',()=>{if(++k<urls.length){a.src=urls[k];if(menuMus.on)a.play().catch(()=>{})}});menuMus.el=a}
+    const a=menuMus.el;menuMus.on=true;a.volume=0;const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{menuMus.on=false});fadeTo(a,radio.vol,1500)}
+  else if(!want&&menuMus.on){menuMus.on=false;const a=menuMus.el;fadeTo(a,0,700,()=>{if(!menuMus.on)a.pause()})}
+  const t=document.getElementById('mMenuMus');if(t)t.checked=menuMusOn}
+document.getElementById('mMenuMus').addEventListener('change',e=>{menuMusOn=e.target.checked;try{localStorage.setItem('lt-menumus',menuMusOn?'1':'0')}catch(e2){}audioOK=true;menuMusicSync()});
 document.getElementById('rPlay').addEventListener('click',radioToggle);document.getElementById('rNext').addEventListener('click',radioNext);document.getElementById('rSt').addEventListener('click',radioNext);
 document.getElementById('mVol').addEventListener('input',e=>setVol(e.target.value/100));radioUI();
-/* browsers only start sound after a tap: resume the radio on the first one if it was playing last time */
-if(radio.want){const go=e=>{removeEventListener('pointerdown',go,true);removeEventListener('keydown',go,true);if(e&&e.target&&e.target.closest&&e.target.closest('#radio'))return;if(!radio.on)radioToggle()};addEventListener('pointerdown',go,true);addEventListener('keydown',go,true)}
-document.addEventListener('visibilitychange',()=>{if(!radio.el||!radio.on)return;if(document.hidden)radio.el.pause();else radio.el.play().catch(()=>{})});
+/* browsers only start sound after a tap: the first one starts the menu music (title screen) or the radio (in the city, if it was on) */
+{const go=e=>{if(audioOK)return;audioOK=true;menuMusicSync();if(!(e&&e.target&&e.target.closest&&e.target.closest('#radio')))radioSync()};addEventListener('pointerdown',go,true);addEventListener('keydown',go,true)}
+document.addEventListener('visibilitychange',()=>{menuMusicSync();if(!radio.el||!radio.on){if(!document.hidden)radioSync();return}if(document.hidden)radio.el.pause();else radio.el.play().catch(()=>{})});
 /* ---------- updates from GitHub ---------- */
 const UREPO=Object.freeze('MrShelo/LittleTowniesUpdates');const uSt=document.getElementById('uSt');try{localStorage.removeItem('lt-repo')}catch(e){}
 let running=null;try{const u=JSON.parse(localStorage.getItem('lt-update')||'null');if(u&&window.__ltNew)running=u.v}catch(e){}
-document.getElementById('uVer').textContent=LT_VERSION;document.getElementById('uOld').hidden=!localStorage.getItem('lt-update');
+document.getElementById('uVer').textContent=LT_VERSION;document.getElementById('uOldBox').hidden=!localStorage.getItem('lt-update');
 /* several independent sources are asked at once and the newest version wins, so one stale cache or a rate-limited API can't hide an update */
 async function fetchTxt(u,h){const ac=typeof AbortController!=='undefined'?new AbortController():null;const tm=setTimeout(()=>ac&&ac.abort(),12000);
   try{const r=await fetch(u,{cache:'no-store',headers:h||{},signal:ac?ac.signal:undefined});if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}finally{clearTimeout(tm)}}
@@ -3423,7 +3598,8 @@ function discordTick(){try{if(!window.ltDiscord||!/^\d{15,22}$/.test(DISCORD_ID)
     buttons:[{label:'Little Townies na GitHubie',url:'https://github.com/MrShelo/LittleTowniesUpdates'}]};
   const k=JSON.stringify([a.details,a.state]);if(k===dcLast)return;dcLast=k;window.ltDiscord.set({id:DISCORD_ID,activity:a})}catch(e){}}
 setTimeout(function dcLoop(){discordTick();setTimeout(dcLoop,15000)},3000);
-document.getElementById('uOld').addEventListener('click',()=>{save();try{localStorage.removeItem('lt-update')}catch(e){}location.reload()});
+document.getElementById('uOld').addEventListener('click',()=>{const u=document.getElementById('uOld');if(!u.classList.contains('armed')){u.classList.add('armed');u.textContent='Na pewno? Stuknij ponownie';clearTimeout(u.__t);u.__t=setTimeout(()=>{u.classList.remove('armed');u.textContent='Wróć do wersji wbudowanej'},4000);return}
+  save();try{localStorage.removeItem('lt-update')}catch(e){}location.reload()});
 /* readable tooltips for the HUD tiles (hover with a mouse, tap on touch) and for entry roads */
 const tipEl=document.createElement('div');tipEl.className='tip panel';tipEl.hidden=true;tipEl.setAttribute('role','tooltip');document.getElementById('game').appendChild(tipEl);let tipSrc=null,tipT=0;
 const esc=t=>String(t).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]);
@@ -3604,9 +3780,9 @@ function preset(type,d){if(type&&MAPS[type])mapType=type;if(d&&DIFF[d])diff=d;pi
 /* ---------- main menu: continue / new game / options / exit, with a small town turning slowly behind it ---------- */
 let titleOpen=false;const titleEl=document.getElementById('title');document.getElementById('tVer').textContent=LT_VERSION;
 const hasSave=()=>{if(oldSave||saveBlocked)return false;try{return!!localStorage.getItem(KEY)}catch(e){return true}};
-function openTitle(){titleOpen=true;paused=true;closeHouse();menuEl.hidden=true;document.body.classList.add('intitle');titleEl.hidden=false;const ok=hasSave();const tc=document.getElementById('tCont');tc.hidden=!ok;
+function openTitle(){titleOpen=true;paused=true;closeHouse();menuEl.hidden=true;document.body.classList.add('intitle');titleEl.hidden=false;try{radioSync();menuMusicSync()}catch(e){}const ok=hasSave();const tc=document.getElementById('tCont');tc.hidden=!ok;
   if(ok)document.getElementById('tContS').textContent=`${cityName} · dzień ${Math.floor(gameT/1440)+1} · ${fmt(popNow())} mieszk.`;(ok?tc:document.getElementById('tNew')).focus();dcLast=''}
-function closeTitle(){if(!titleOpen)return;titleOpen=false;titleEl.hidden=true;document.body.classList.remove('intitle');dcLast=''}
+function closeTitle(){if(!titleOpen)return;titleOpen=false;titleEl.hidden=true;document.body.classList.remove('intitle');dcLast='';try{menuMusicSync();radioSync()}catch(e){}}
 document.getElementById('tCont').addEventListener('click',()=>{closeTitle();paused=false;prev=performance.now();tutRender()});
 document.getElementById('tNew').addEventListener('click',()=>openMaps(true));
 document.getElementById('tOpt').addEventListener('click',()=>openMenu(true));
@@ -3700,13 +3876,13 @@ function frame(now){requestAnimationFrame(frame);
   constructTick(paused&&!titleOpen?rdt:dt);shipTick(dt);policeTick(dt,night);svcTick(dt);fireTick(dt);heliTick(dt);transportTick(dt);riverTick(dt);tutTick(Math.max(dt,0.016));ovlTick(Math.max(dt,0.016));
   for(let k=popping.length-1;k>=0;k--){const p=popping[k];p.t+=dt*5;const s=p.t>=1?1:0.5+0.5*Math.sin(p.t*Math.PI/2)*1.08;p.g.scale.setScalar(Math.min(s,1.05));if(p.t>=1){p.g.scale.setScalar(1);popping.splice(k,1)}}
   powerAcc+=dt;if(powerAcc>=0.25||powerDirty){computePower(powerAcc);powerAcc=0}
-  const hBefore=Math.floor(gameT/60),halfBefore=Math.floor(gameT/30);gameT+=dt;cur.secs+=dt;cur.powDem+=pw.dem*dt;if(pw.cat){cur.powCat=cur.powCat||{};for(const k in pw.cat)cur.powCat[k]=(cur.powCat[k]||0)+pw.cat[k]*dt}cur.powCap+=pw.cap*dt;
+  const hBefore=Math.floor(gameT/60),halfBefore=Math.floor(gameT/30);gameT+=dt;cur.secs+=dt;cur.powDem+=pw.dem*dt;if(pw.cat){cur.powCat=cur.powCat||{};for(const k in pw.cat)cur.powCat[k]=(cur.powCat[k]||0)+pw.cat[k]*dt}if(pw.gen){cur.genCat=cur.genCat||{};for(const k in pw.gen)cur.genCat[k]=(cur.genCat[k]||0)+pw.gen[k]*dt}cur.powCap+=pw.cap*dt;
   if(Math.floor(gameT/30)!==halfBefore){const bill=Math.round(upkeepRate(isNight())/2);
     if(bill>0){money-=bill;cur.upkeep+=bill;setHint(`Rachunek za utrzymanie: −${fmt(bill)} T¢ (co 30 min gry)`+(money<0?` · Dług ${fmt(-money)} T¢: poniżej −2 000 T¢ miasto zbankrutuje!`:''),money<0,true)}}
   checkBankrupt();
   if(Math.floor(gameT/1440)!==Math.floor((gameT-dt)/1440))loanDay();
   if(Math.floor(gameT/60)!==hBefore){{const six=Math.floor(gameT/60)%6===0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HLV[c.t])lifeHour(i,c,six)}envDirty=true;powerDirty=true}deathTick();fireHour();needsHour();ordHour();{const tx=taxIncome();if(tx>0){const n=addMoney(tx);cur.inc+=n;cur.taxInc=(cur.taxInc||0)+n}const ut=utilIncome();if(ut>0){const n=addMoney(ut);cur.inc+=n;cur.utilTax=(cur.utilTax||0)+n}litterHour();dirtHour();}{const w=inmates().w;if(w>0){const n=addMoney(w);cur.inc+=n;cur.prisonInc=(cur.prisonInc||0)+n}}
-cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();save()}
+cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();if(Math.floor(gameT/60)%24===0)dayReport();save()}
   statsAcc+=dt;if(!statsEl.hidden&&statsAcc>0.5){statsAcc=0;renderStats()}
   for(const g of factories){const b=g.userData.sb||{x:0.3,y:0.85,z:-0.25,spread:0.25};const on=!g.userData.off&&!reduce;const ps=g.userData.puffs||[];
     ps.forEach((p,k)=>{p.visible=on;if(!on)return;const u=(time*0.45+k/ps.length)%1;p.position.set(b.x+u*b.spread,b.y+u*(b.rise||0.9),b.z);
