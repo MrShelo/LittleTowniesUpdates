@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='5.5.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='5.6.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -143,6 +143,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #rSt{display:grid;line-height:1.1;text-align:left;padding:2px 6px}#rSt small{font-size:10px;color:var(--muted)}#rSt b{font-family:var(--font-d);font-size:13px;white-space:nowrap}
 .radio.on #rName{color:var(--accent)}
 .vol{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:4px}
+.mapsH{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:650;margin-top:6px}
 .mOpts{display:grid;gap:8px}.mOpts[hidden]{display:none}
 .tgl{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin-top:4px}.tgl span{display:grid;gap:1px}.tgl small{font-size:11.5px;opacity:.8}
 .tglB{min-height:36px;min-width:104px;font-weight:650}.tglB[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -467,6 +468,10 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <button class="btn panel mbtn mapb" data-map="big"><b>Dwie duże rzeki</b><small>Szerokie rzeki przecinające mapę, mało miejsca na start</small></button>
   <button class="btn panel mbtn mapb" data-map="lake"><b>Duże jezioro</b><small>Jezioro co najmniej 6×6 i wypływająca z niego rzeka</small></button>
   <button class="btn panel mbtn mapb" data-map="islands"><b>Wyspy</b><small>Duża rzeka rozlewa się w odnogi wokół wysp, jak Odra we Wrocławiu</small></button>
+  <span class="mapsH">Motywy światów</span>
+  <button class="btn panel mbtn mapb" data-map="carib"><b>Karaiby</b><small>3–5 dużych wysp z plażami i palmami, droga startowa wjeżdża mostem</small></button>
+  <button class="btn panel mbtn mapb" data-map="bigriver"><b>Wielka rzeka</b><small>Szeroka rzeka przez całą mapę z piaszczystymi wyspami</small></button>
+  <button class="btn panel mbtn mapb" data-map="tundra"><b>Tundra</b><small>Ciemna trawa, tylko drzewa iglaste i trzy wąskie rzeki</small></button>
   <button class="btn panel mbtn" id="mapsNo">Anuluj</button>
 </section></div>
 <div class="menuBg" id="menu" hidden><section class="menu panel" role="dialog" aria-modal="true" aria-labelledby="menuT">
@@ -736,7 +741,7 @@ g2.fillStyle='#7cc24a';g2.fillRect(0,0,N*32,N*32);
 const gc=document.createElement('canvas');gc.width=gc.height=N*32;g2=gc.getContext('2d');
 const water=new Uint8Array(N*N);
 /* pollution overlay: 1 = yellow-green, 2 = yellow */
-function paintGround(pol){g2.drawImage(gbase,0,0);
+function paintGround(pol){g2.drawImage(gbase,0,0);let bm=null;try{calcBeach();bm=beachMap}catch(e){}if(bm){for(let i=0;i<N*N;i++)if(bm[i]){const x=i%N,z=(i/N)|0;g2.fillStyle='#e9d8a4';g2.fillRect(x*32,z*32,32,32);g2.fillStyle='rgba(255,250,225,.35)';g2.fillRect(x*32+((i*7)%20),z*32+((i*13)%22),5,3)}}
   for(let i=0;i<N*N;i++){if(!water[i])continue;const x=i%N,z=(i/N)|0;g2.fillStyle='#3d82b5';g2.fillRect(x*32,z*32,32,32);
     g2.fillStyle='rgba(224,206,150,.95)';
     for(const[dx,dz]of[[0,1],[1,0],[0,-1],[-1,0]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N||water[nz*N+nx])continue;
@@ -757,7 +762,7 @@ function buildLand(){const P=[],U=[],I=[],BP=[],BI=[];
     if(!water[i]){const b=P.length/3;P.push(x0,0.001,z0, x0,0.001,z0+1, x0+1,0.001,z0+1, x0+1,0.001,z0);
       U.push(x/N,1-z/N, x/N,1-(z+1)/N, (x+1)/N,1-(z+1)/N, (x+1)/N,1-z/N);I.push(b,b+1,b+2,b,b+2,b+3);continue}
     /* vertical bank wall on every edge where water meets land or the map border */
-    for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N&&water[nz*N+nx])continue;
+    for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N||water[nz*N+nx])continue;
       let ax,az,bx,bz;if(dx===1){ax=bx=x0+1;az=z0;bz=z0+1}else if(dx===-1){ax=bx=x0;az=z0;bz=z0+1}else if(dz===1){az=bz=z0+1;ax=x0;bx=x0+1}else{az=bz=z0;ax=x0;bx=x0+1}
       const b=BP.length/3;BP.push(ax,BED_Y,az, bx,BED_Y,bz, bx,0.001,bz, ax,0.001,az);BI.push(b,b+1,b+2,b,b+2,b+3)}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));g.setIndex(I);g.computeVertexNormals();
@@ -772,11 +777,11 @@ const tg=new THREE.PlaneGeometry(320,320,160,160);const tp=tg.attributes.positio
 for(let k=0;k<tp.count;k++){const x=tp.getX(k),y=tp.getY(k);tp.setZ(k,th(x,-y))}
 tg.computeVertexNormals();
 const terrain=new THREE.Mesh(tg,new THREE.MeshLambertMaterial({color:'#7fb35a'}));
-terrain.rotation.x=-Math.PI/2;terrain.position.y=-0.01;terrain.receiveShadow=true;scene.add(terrain);
+terrain.rotation.x=-Math.PI/2;terrain.position.y=-0.01;terrain.receiveShadow=true;
 /* a low grassy rim around the map hides the dip under the town */
 const rimM=new THREE.MeshLambertMaterial({color:'#79ae56'});
 for(const[w,d,x,z]of[[N+4,2,0,-HALF-1],[N+4,2,0,HALF+1],[2,N,-HALF-1,0],[2,N,HALF+1,0]]){
-  const r=new THREE.Mesh(new THREE.BoxGeometry(w,0.72,d),rimM);r.position.set(x,-0.36,z);r.receiveShadow=true;scene.add(r)}
+  const r=new THREE.Mesh(new THREE.BoxGeometry(w,0.72,d),rimM);r.position.set(x,-0.36,z);r.receiveShadow=true}
 
 /* trees: shared geometry, instanced outside the grid */
 const trunkG=new THREE.CylinderGeometry(0.04,0.06,0.3,6);trunkG.translate(0,0.15,0);
@@ -789,7 +794,13 @@ const trunkM=new THREE.MeshLambertMaterial({color:'#7a5536'}),pineM=new THREE.Me
   for(let k=0;k<COUNT;k++){let x,z;do{x=rnd(-100,100);z=rnd(-100,100)}while(Math.max(Math.abs(x),Math.abs(z))<HALF+0.8);
     o.position.set(x,th(x,z),z);o.rotation.y=rnd(0,6.28);o.scale.setScalar(rnd(1.2,2.6));o.updateMatrix();
     tr.setMatrixAt(nt++,o.matrix);if(Math.random()<0.55)pi.setMatrixAt(np++,o.matrix);else bl.setMatrixAt(nb++,o.matrix)}
-  tr.count=nt;pi.count=np;bl.count=nb;for(const m of[tr,pi,bl])m.frustumCulled=false;scene.add(tr,pi,bl)})();
+  tr.count=nt;pi.count=np;bl.count=nb;for(const m of[tr,pi,bl])m.frustumCulled=false})();
+/* outside the map there is no land any more: a mist in the sky colour that thickens a few tiles past the edge */
+const fogRing=(()=>{const S=240,R=256,cv=document.createElement('canvas');cv.width=cv.height=R;const f=cv.getContext('2d'),im=f.createImageData(R,R);
+  for(let y=0;y<R;y++)for(let x=0;x<R;x++){const wx=(x+0.5)/R*S-S/2,wz=(y+0.5)/R*S-S/2,d=Math.max(Math.abs(wx),Math.abs(wz))-HALF,k=Math.max(0,Math.min(1,(d+3)/6.5)),a=k*k*(3-2*k),o=(y*R+x)*4;im.data[o]=im.data[o+1]=im.data[o+2]=255;im.data[o+3]=Math.round(a*255)}
+  f.putImageData(im,0,0);const t=new THREE.CanvasTexture(cv);t.magFilter=THREE.LinearFilter;
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(S,S),new THREE.MeshBasicMaterial({color:'#bfe0ee',map:t,transparent:true,depthWrite:false,fog:false}));
+  m.rotation.x=-Math.PI/2;m.position.y=0.02;m.renderOrder=5;m.frustumCulled=false;scene.add(m);return m})();
 function makeTree(){const g=new THREE.Group();const t=new THREE.Mesh(trunkG,trunkM);t.castShadow=true;g.add(t);
   const c=new THREE.Mesh(Math.random()<0.5?pineG:blobG,Math.random()<0.5?pineM:blobM);c.castShadow=true;g.add(c);
   g.scale.setScalar(rnd(0.75,1.1));g.rotation.y=rnd(0,6.28);return g}
@@ -1557,10 +1568,24 @@ function spend(x){money-=x;cur.build+=x}
 /* decorative trees on free tiles: one instance slot per tile, hidden slots have zero scale */
 const deco=new Set();let decoUpd=false;const ZM=new THREE.Matrix4().makeScale(0,0,0),dObj=new THREE.Object3D();
 const dTr=new THREE.InstancedMesh(trunkG,trunkM,N*N),dPi=new THREE.InstancedMesh(pineG,pineM,N*N),dBl=new THREE.InstancedMesh(blobG,blobM,N*N);
-for(const m of[dTr,dPi,dBl]){m.castShadow=true;m.frustumCulled=false;for(let k=0;k<N*N;k++)m.setMatrixAt(k,ZM);scene.add(m)}
-function setDeco(i){dObj.position.set(cx(i)+rnd(-.18,.18),0,cz(i)+rnd(-.18,.18));dObj.rotation.set(0,rnd(0,6.28),0);dObj.scale.setScalar(rnd(0.75,1.1));dObj.updateMatrix();
-  const pine=Math.random()<0.5;dTr.setMatrixAt(i,dObj.matrix);(pine?dPi:dBl).setMatrixAt(i,dObj.matrix);(pine?dBl:dPi).setMatrixAt(i,ZM);deco.add(i);decoUpd=true}
-function clearDeco(i){if(!deco.has(i))return;dTr.setMatrixAt(i,ZM);dPi.setMatrixAt(i,ZM);dBl.setMatrixAt(i,ZM);deco.delete(i);decoUpd=true}
+/* themed trees: palms (Caribbean), single or stacked pyramids (tundra) */
+function mergeGeos(list){const P=[],Nn=[];for(const g of list){const q=g.index?g.toNonIndexed():g;q.computeVertexNormals();P.push(...q.attributes.position.array);Nn.push(...q.attributes.normal.array)}
+  const o=new THREE.BufferGeometry();o.setAttribute('position',new THREE.Float32BufferAttribute(P,3));o.setAttribute('normal',new THREE.Float32BufferAttribute(Nn,3));o.userData.keep=true;return o}
+const palmTG=new THREE.CylinderGeometry(0.03,0.05,0.8,6).translate(0,0.4,0);palmTG.userData.keep=true;
+const palmCG=mergeGeos([...Array(7).keys()].map(k=>new THREE.BoxGeometry(0.07,0.014,0.4).translate(0,0,0.19).rotateX(0.42).rotateY(k*Math.PI*2/7).translate(0,0.8,0)).concat([new THREE.IcosahedronGeometry(0.05,0).translate(0.03,0.76,0.02)]));
+const pyrG=new THREE.ConeGeometry(0.26,0.72,4).translate(0,0.5,0);pyrG.userData.keep=true;
+const stackG=mergeGeos([new THREE.ConeGeometry(0.3,0.4,4).translate(0,0.42,0),new THREE.ConeGeometry(0.23,0.36,4).rotateY(0.4).translate(0,0.66,0),new THREE.ConeGeometry(0.15,0.3,4).rotateY(0.8).translate(0,0.88,0)]);
+const palmTM=new THREE.MeshLambertMaterial({color:'#a07a4e'}),palmCM=new THREE.MeshLambertMaterial({color:'#3f9a3a'});
+const dPT=new THREE.InstancedMesh(palmTG,palmTM,N*N),dPC=new THREE.InstancedMesh(palmCG,palmCM,N*N),dPy=new THREE.InstancedMesh(pyrG,pineM,N*N),dSt=new THREE.InstancedMesh(stackG,pineM,N*N);
+const DECO_M=[dTr,dPi,dBl,dPT,dPC,dPy,dSt];
+for(const m of DECO_M){m.castShadow=true;m.frustumCulled=false;for(let k=0;k<N*N;k++)m.setMatrixAt(k,ZM);scene.add(m)}
+function setDeco(i){const T=themeOf();dObj.position.set(cx(i)+rnd(-.18,.18),0,cz(i)+rnd(-.18,.18));dObj.rotation.set(0,rnd(0,6.28),0);dObj.scale.setScalar(rnd(0.75,1.1));
+  for(const m of DECO_M)m.setMatrixAt(i,ZM);let use;const r=Math.random();
+  if(T.trees==='palm'&&(beachMap[i]||r<0.7)){dObj.rotation.set(rnd(-0.18,0.18),rnd(0,6.28),rnd(-0.18,0.18));dObj.scale.setScalar(rnd(0.85,1.25));use=[dPT,dPC]}
+  else if(T.trees==='conifer')use=r<0.4?[dTr,dPi]:r<0.7?[dTr,dPy]:[dTr,dSt];
+  else use=[dTr,r<0.5?dPi:dBl];
+  dObj.updateMatrix();for(const m of use)m.setMatrixAt(i,dObj.matrix);deco.add(i);decoUpd=true}
+function clearDeco(i){if(!deco.has(i))return;for(const m of DECO_M)m.setMatrixAt(i,ZM);deco.delete(i);decoUpd=true}
 /* 3D ground detail: 2 grass tufts per free tile, the odd stone and flower; one instance slot set per tile */
 const BL=6;let gdUpd=false;
 const GD={blade:new THREE.ConeGeometry(0.016,0.11,3).translate(0,0.055,0),stone:new THREE.DodecahedronGeometry(0.05,0),stem:new THREE.CylinderGeometry(0.005,0.005,0.08,3).translate(0,0.04,0),head:new THREE.IcosahedronGeometry(0.024,0)};
@@ -1569,16 +1594,16 @@ const gBl=new THREE.InstancedMesh(GD.blade,new THREE.MeshLambertMaterial({color:
 for(const m of[gBl,gSt,gSm,gFh]){m.frustumCulled=false;m.receiveShadow=true;scene.add(m)}gSt.castShadow=true;
 const BLC=['#5ea838','#6cb640','#7dc44c','#4e9a32'].map(c=>new THREE.Color(c)),FLC=['#fbf6e8','#f6d24a','#ef93b0','#b7a6f2','#e8503a'].map(c=>new THREE.Color(c));
 for(let k=0;k<N*N*BL;k++){gBl.setMatrixAt(k,ZM);gBl.setColorAt(k,BLC[k%4])}for(let k=0;k<N*N;k++){gSt.setMatrixAt(k,ZM);gSm.setMatrixAt(k,ZM);gFh.setMatrixAt(k,ZM);gFh.setColorAt(k,FLC[k%5])}
-function groundDeco(i,on){const x0=cx(i),z0=cz(i);
+function groundDeco(i,on){const x0=cx(i),z0=cz(i);if(on&&beachMap[i])on=false;
   for(let t=0;t<2;t++){const tx=x0+rnd(-0.38,0.38),tz=z0+rnd(-0.38,0.38);for(let k=0;k<3;k++){const s2=t*3+k;
     if(on){dObj.position.set(tx+rnd(-0.03,0.03),0,tz+rnd(-0.03,0.03));dObj.rotation.set(rnd(-0.35,0.35),rnd(0,6.28),rnd(-0.35,0.35));dObj.scale.set(1,rnd(0.6,1.4),1);dObj.updateMatrix();gBl.setMatrixAt(i*BL+s2,dObj.matrix);gBl.setColorAt(i*BL+s2,BLC[(Math.random()*4)|0])}
     else gBl.setMatrixAt(i*BL+s2,ZM)}}
   if(on&&Math.random()<0.07){dObj.position.set(x0+rnd(-0.35,0.35),0.01,z0+rnd(-0.35,0.35));dObj.rotation.set(rnd(0,3),rnd(0,6.28),0);const sc=rnd(0.6,1.4);dObj.scale.set(sc,sc*0.55,sc*rnd(0.8,1.2));dObj.updateMatrix();gSt.setMatrixAt(i,dObj.matrix)}else gSt.setMatrixAt(i,ZM);
-  if(on&&Math.random()<0.08){const fx=x0+rnd(-0.35,0.35),fz=z0+rnd(-0.35,0.35);dObj.position.set(fx,0,fz);dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();gSm.setMatrixAt(i,dObj.matrix);
+  if(on&&!themeOf().noFlowers&&Math.random()<0.08){const fx=x0+rnd(-0.35,0.35),fz=z0+rnd(-0.35,0.35);dObj.position.set(fx,0,fz);dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();gSm.setMatrixAt(i,dObj.matrix);
     dObj.position.set(fx,0.085,fz);dObj.updateMatrix();gFh.setMatrixAt(i,dObj.matrix);gFh.setColorAt(i,FLC[(Math.random()*5)|0])}else{gSm.setMatrixAt(i,ZM);gFh.setMatrixAt(i,ZM)}
   gdUpd=true}
 function seedGround(){for(let i=0;i<N*N;i++)groundDeco(i,!grid[i]&&!water[i])}
-function seedDeco(){seedGround();for(let i=0;i<N*N;i++){if(grid[i]||water[i]||deco.has(i)||Math.random()>0.1)continue;setDeco(i)}}
+function seedDeco(){seedGround();const pr=themeOf().trees==='palm'?0.14:themeOf().trees==='conifer'?0.13:0.1;for(let i=0;i<N*N;i++){if(grid[i]||water[i]||deco.has(i)||Math.random()>(beachMap[i]?pr*1.6:pr))continue;setDeco(i)}}
 /* water: shiny instanced slabs over the painted river bed */
 /* flowing water: a tileable streak texture scrolled along each river's direction (one mesh for east-west, one for north-south stretches) */
 const wcv=document.createElement('canvas');wcv.width=wcv.height=128;{const w2=wcv.getContext('2d');w2.fillStyle='#3f88bd';w2.fillRect(0,0,128,128);
@@ -1657,11 +1682,49 @@ function applyWater(){riverDirt.fill(0);riverDirty.fill(0);let nh=0,nv=0;wIdx.cl
   waterMesh.count=nh;waterMeshV.count=nv;riverSig='';lowSig='';waterMesh.instanceMatrix.needsUpdate=true;waterMeshV.instanceMatrix.needsUpdate=true;envDirty=true;buildLand();bridgeDirty=true}
 /* rivers: meandering 2–3 tile wide bands from edge to edge; tiles in avoid stay dry (retry) */
 /* map types: standard (1–3 narrow rivers), big (two wide rivers), islands (a wide river splitting into branches around islands, plus a tributary) */
-const MAPS={standard:'Standard',big:'Dwie duże rzeki',islands:'Wyspy',lake:'Duże jezioro'};let mapType='standard';
+const MAPS={standard:'Standard',big:'Dwie duże rzeki',islands:'Wyspy',lake:'Duże jezioro',carib:'Karaiby',bigriver:'Wielka rzeka',tundra:'Tundra'};let mapType='standard';
+/* world themes: grass and tree colours, beaches, which trees grow */
+const THEMES={std:{grass:'#7cc24a',blades:['#5ea838','#6cb640','#7dc44c','#4e9a32'],pine:'#3d7a3c',blob:'#5d9e43',trees:'mixed'},
+  carib:{grass:'#83c94e',blades:['#6cbf45','#7fcc52','#8fd65d','#62b33f'],pine:'#3d7a3c',blob:'#4fa53f',trees:'palm',beach:true},
+  tundra:{grass:'#2f6233',blades:['#244d29','#2d5a2f','#386636','#20452a'],pine:'#2b5636',blob:'#2b5636',trees:'conifer',noFlowers:true}};
+const themeOf=()=>THEMES[mapType]||THEMES.std;
+let beachMap=new Uint8Array(N*N);
+function calcBeach(){beachMap.fill(0);if(!themeOf().beach)return;for(let i=0;i<N*N;i++){if(water[i])continue;const x=i%N,z=(i/N)|0;
+  for(let dz=-1;dz<=1&&!beachMap[i];dz++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N&&water[nz*N+nx]){beachMap[i]=1;break}}}}
+function applyTheme(){const T=themeOf(),g=gbase.getContext('2d');g.fillStyle=T.grass;g.fillRect(0,0,N*32,N*32);
+  /* a little colour drift so large meadows are not flat */
+  for(let k=0;k<90;k++){const x=Math.random()*N*32,y=Math.random()*N*32,r=40+Math.random()*120;const gr=g.createRadialGradient(x,y,0,x,y,r);const c=Math.random()<0.5?'255,255,230':'0,30,0';gr.addColorStop(0,`rgba(${c},.05)`);gr.addColorStop(1,`rgba(${c},0)`);g.fillStyle=gr;g.fillRect(x-r,y-r,2*r,2*r)}
+  T.blades.forEach((c,k)=>BLC[k].set(c));pineM.color.set(T.pine);blobM.color.set(T.blob);envDirty=true}
 function riverPath(vert,c0,A,f,ph,dmax=5){let drift=0;const cs=[];for(let t=0;t<N;t++){drift=Math.max(-dmax,Math.min(dmax,drift+rnd(-0.4,0.4)));cs.push(Math.round(c0+A*Math.sin(t*f+ph)+drift))}return cs}
 function paintPath(cs,vert,w,from=0,to=N-1,off=0,out=null){let prev=null;for(let t=from;t<=to;t++){const c=cs[t]+off,lo=Math.min(c,prev??c)-Math.floor(w/2),hi=Math.max(c,prev??c)-Math.floor(w/2)+w-1;prev=c;
   for(let u=lo;u<=hi;u++){if(u<0||u>=N)continue;const i=vert?idx(u,t):idx(t,u);if(out)out.push(i);else water[i]=1}}}
 function genRivers(avoid,type=mapType){water.fill(0);
+  /* Caribbean: sea everywhere, 3–5 large islands made of overlapping blobs */
+  if(type==='carib'){let best=null,bestS=-1;for(let a=0;a<60;a++){const n=3+((Math.random()*3)|0),C=[];
+      const sep=n>4?19:n>3?23:27;for(let k=0;k<n;k++){for(let t=0;t<120;t++){const p=[rnd(11,N-11),rnd(11,N-11)];if(C.every(q=>Math.hypot(q[0]-p[0],q[1]-p[1])>sep)){C.push(p);break}}}
+      if(C.length<3)continue;const land=new Int8Array(N*N).fill(-1);
+      C.forEach(([X,Z],k)=>{const base=n>4?rnd(8,10):n>3?rnd(9.5,12):rnd(11.5,14),bl=[];let ang=rnd(0,6.28);const nb=2+((Math.random()*3)|0);
+        for(let b=0;b<nb;b++){const d=b?rnd(2,base*0.8):0;ang+=rnd(-1.1,1.1);bl.push([X+Math.cos(ang)*d,Z+Math.sin(ang)*d,base*rnd(0.65,1),rnd(0.5,1),rnd(0,3.14)])}
+        for(let z=3;z<N-3;z++)for(let x=3;x<N-3;x++){let v=-1;for(const[bx,bz,r,e,th]of bl){const dx=x-bx,dz=z-bz,u=dx*Math.cos(th)+dz*Math.sin(th),w=(-dx*Math.sin(th)+dz*Math.cos(th))/e;v=Math.max(v,1-(u*u+w*w)/(r*r))}
+          v+=0.09*(Math.sin(x*0.71+k*3)+Math.cos(z*0.63-k));if(v>0.12&&land[idx(x,z)]<0)land[idx(x,z)]=k}});
+      for(let i=0;i<N*N;i++)water[i]=land[i]>=0?0:1;
+      /* islands must stay apart: keep the land components, drop specks */
+      const seen=new Int32Array(N*N).fill(-1),comps=[];for(let i=0;i<N*N;i++){if(water[i]||seen[i]>=0)continue;const q=[i];seen[i]=comps.length;for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(!water[j]&&seen[j]<0){seen[j]=comps.length;q.push(j)}comps.push(q)}
+      for(const q of comps)if(q.length<14)for(const i of q)water[i]=1;const big=comps.filter(q=>q.length>=90),tot=big.reduce((a,q)=>a+q.length,0);
+      const sc=(big.length>=3&&big.length<=5?10000:0)+Math.min(tot,1700);if(sc>bestS){bestS=sc;best=water.slice()}
+      if(big.length>=3&&big.length<=5&&tot>=1350)return}
+    if(best)water.set(best);return}
+  /* one wide river (10–17 tiles) across the map with long sandy islands in it */
+  if(type==='bigriver'){const vert=Math.random()<0.5,cs=riverPath(vert,rnd(N/2-6,N/2+6),rnd(1.5,4),rnd(0.03,0.07),rnd(0,6.28),3),wv=[];let w=rnd(12,15);
+    for(let t=0;t<N;t++){w=Math.max(10,Math.min(17,w+rnd(-0.6,0.6)));wv.push(Math.round(w))}
+    for(let t=0;t<N;t++){const lo=cs[t]-Math.floor(wv[t]/2);for(let u=lo;u<lo+wv[t];u++){if(u<0||u>=N)continue;water[vert?idx(u,t):idx(t,u)]=1}}
+    let t=(rnd(2,8))|0;while(t<N-7){const L=(rnd(6,15))|0,hw=rnd(0.8,2.4),lim=wv[t]/2-2.5-hw,off=rnd(-lim,lim);
+      for(let tt=t;tt<Math.min(N-2,t+L);tt++){const k=(tt-t+0.5)/L,wid=hw*Math.sin(Math.PI*k),c=cs[tt]+off;for(let u=Math.round(c-wid);u<=Math.round(c+wid);u++){if(u<0||u>=N)continue;const i=vert?idx(u,tt):idx(tt,u);
+        const lo=cs[tt]-Math.floor(wv[tt]/2);if(u>lo+1&&u<lo+wv[tt]-2)water[i]=0}}t+=L+((rnd(3,9))|0)}
+    return}
+  /* tundra: three narrow rivers running the same way */
+  if(type==='tundra'){const vert=Math.random()<0.5,used=[];for(let k=0;k<3;k++)for(let a=0;a<60;a++){const c0=rnd(7,N-7);if(used.some(u=>Math.abs(u-c0)<13))continue;used.push(c0);paintPath(riverPath(vert,c0,rnd(2,5),rnd(0.05,0.11),rnd(0,6.28),4),vert,2);break}
+    return}
   const one=(w,dmax=5,Amax=7)=>{for(let a=0;a<80;a++){const vert=Math.random()<0.5,cs=riverPath(vert,rnd(8,N-8),rnd(2,Amax),rnd(0.05,0.13),rnd(0,6.28),dmax),cells=[];paintPath(cs,vert,w,0,N-1,0,cells);
       if(avoid&&cells.some(i=>avoid[i]))continue;for(const i of cells)water[i]=1;return vert}};
   if(type==='big'){const v=Math.random()<0.5;for(const vert of[v,!v]){const cs=riverPath(vert,rnd(16,N-16),rnd(2,5),rnd(0.04,0.09),rnd(0,6.28),4);paintPath(cs,vert,Math.random()<0.5?4:5)}return}
@@ -2410,14 +2473,25 @@ function visitorLeave(c){const s2=entryOf(c.dest);if(s2<0)return removeCar(c);co
 function visitorTick(dt,night){if(cars.length>=PEOPLE_CARS||!counts.taxi)return;
   for(const i of edgeOuts()){const c=grid[i];c.vt=(c.vt==null?rnd(2,8):c.vt)-dt;if(c.vt>0)continue;c.vt=60/visitorRate()*(night?2:1)*(0.7+Math.random()*0.6);requestTaxi({edge:i})}}
 /* entry roads at two opposite map edges, 4 tiles long, with a town sign on the outer tile */
+const ENTRY_LEN=7;
+/* from the map edge straight in: over water (a bridge, or track on piers) to the first land, then a few tiles on land */
+function seaEntry(side,vert,kind){const C=[];for(let p=3;p<N-3;p++){const tiles=[];let land=0,ok=true;
+    for(let d=0;d<N;d++){const a=side?N-1-d:d,t=vert?idx(p,a):idx(a,p);if(grid[t]||[...nbrs(t)].some(j=>grid[j]&&grid[j].edge)){ok=false;break}tiles.push(t);if(!water[t])land++;else if(land){ok=false;break}if(land>=3)break}
+    if(ok&&land>=3&&tiles.length<=32)C.push(tiles)}
+  /* one of the shortest crossings, so the bridge reaches the nearest island */
+  C.sort((a,b)=>a.length-b.length);for(const tiles of C.slice(0,4).sort(()=>Math.random()-0.5)){
+    if(tiles.some(t=>grid[t]||[...nbrs(t)].some(j=>grid[j]&&grid[j].edge)))continue;
+    tiles.forEach((t,k)=>{addCell(t,kind==='rail'?'rail':water[t]?'bridge':'road',false);grid[t].edge=true;if(k===0&&kind!=='rail')grid[t].edgeOut=true;if(kind!=='rail')rebuildRoad(t)});return true}return false}
 function makeEntries(){if(grid.some(c=>c&&c.edge&&DRIVE[c.t]))return makeRailEntries();const vert=Math.random()<0.5;
+  if(mapType==='carib'){for(const side of[0,1])seaEntry(side,vert,'road');bridgeDirty=true;return makeRailEntries()}
   for(const side of[0,1])for(let tries=0;tries<80;tries++){const p=Math.round(N/2+(Math.random()*2-1)*Math.min(26,4+tries/2));if(p<2||p>N-3)continue;
-    const tiles=[];for(let d=0;d<4;d++){const a=side?N-1-d:d;tiles.push(vert?idx(p,a):idx(a,p))}
+    const tiles=[];for(let d=0;d<ENTRY_LEN;d++){const a=side?N-1-d:d;tiles.push(vert?idx(p,a):idx(a,p))}
     if(tiles.some(t=>grid[t]||water[t]))continue;
     tiles.forEach((t,k)=>{addCell(t,'road',false);grid[t].edge=true;if(k===0)grid[t].edgeOut=true;rebuildRoad(t)});break}makeRailEntries()}
 /* entry tracks at two other map edges: a station connected to them gets trains with tourists */
 function makeRailEntries(){if(grid.some(c=>c&&c.edge&&c.t==='rail'))return;const roadSides=new Set();for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!c.edge||!DRIVE[c.t])continue;const x=i%N,z=(i/N)|0;roadSides.add(z===0?0:z===N-1?1:x===0?2:x===N-1?3:-1)}
   let sides=[0,1,2,3].filter(k=>!roadSides.has(k));if(sides.length<2)sides=[0,1,2,3];sides=sides.sort(()=>Math.random()-0.5).slice(0,2);
+  if(mapType==='carib'){for(const side of sides)seaEntry(side===1||side===3?1:0,side<2,'rail');railVer++;return}
   for(const side of sides)for(let tries=0;tries<80;tries++){const p=Math.round(N/2+(Math.random()*2-1)*Math.min(26,4+tries/2));if(p<2||p>N-3)continue;
     const tiles=[];for(let d=0;d<4;d++){const a=side===1||side===3?N-1-d:d;tiles.push(side<2?idx(p,a):idx(a,p))}
     if(tiles.some(t=>grid[t]||water[t]||[...nbrs(t)].some(j=>grid[j]&&grid[j].edge)))continue;
@@ -3374,10 +3448,16 @@ function renderNeeds(){const el=document.getElementById('stNeeds');if(!el)return
 /* the last 24 full hours give the averages; the day balance sums the 24 hours of the last finished day (made at midnight) */
 const dayOf=o=>Math.floor(o.hour/24);
 function dayRows(){const d=Math.floor(gameT/1440)-1;return{d,rows:d>=0?hist.filter(o=>dayOf(o)===d):[]}}
+/* the running hour, projected to its end: income so far plus the same pace for the rest, hourly taxes, both upkeep bills, losses so far (as the HUD: no building or loans) */
+function hourForecast(){const sec=Math.min(60,Math.max(0,cur.secs)),rest=60-sec,L=hist[hist.length-1];
+  const run=(cur.inc||0)-(cur.taxInc||0)-(cur.utilTax||0),lastRun=L?(L.inc||0)-(L.taxInc||0)-(L.utilTax||0):run*60/Math.max(1,sec);
+  const pace=sec>=8?run/sec:(L?lastRun/60:run/Math.max(1,sec)),inc=run+pace*rest+taxIncome()+utilIncome();
+  const bills=(sec<30?2:1)-(Math.floor(gameT%60)>=30&&sec<30?1:0),up=(cur.upkeep||0)+Math.max(0,bills)*upkeepRate(isNight())/2;
+  return inc-up-(cur.crimeLoss||0)}
 function dayReport(){const{d,rows}=dayRows();if(!rows.length)return;const v=rows.reduce((a,o)=>a+netOf(o),0);setHint(`Bilans dnia ${d+1}: ${v>=0?'+':'−'}${fmt(Math.abs(v))} T¢ (szczegóły w Gospodarce)`,v<0,true);hintEl.hidden=false}
 /* a table with “average per hour” and “day balance” columns; rows: ['g',group] | [label,f,plain] | ['s',label,f]; day:'sum'|'mwh'|'avg' */
 function flowTable(rows,opt={}){const last=hist.slice(-24),{d,rows:dr}=dayRows(),part=dr.length&&dr.length<24;
-  const cols=[{h:'Średnio / godz.',v:f=>last.length?avg(last,f):null},{h:dr.length?`${opt.mwh?'Energia':'Bilans'} dnia ${d+1}${part?'*':''}`:`${opt.mwh?'Energia':'Bilans'} dnia`,v:f=>dr.length?dr.reduce((a,o)=>a+f(o),0):null}];
+  const cols=[{h:'Śr. 24 godz.',v:f=>last.length?avg(last,f):null},{h:dr.length?`${opt.mwh?'Energia':'Bilans'} dnia ${d+1}${part?'*':''}`:`${opt.mwh?'Energia':'Bilans'} dnia`,v:f=>dr.length?dr.reduce((a,o)=>a+f(o),0):null}];
   let h='<tr><th></th>'+cols.map(c=>`<th>${c.h}</th>`).join('')+'</tr>';
   for(const r of rows){if(r[0]==='g'){h+=`<tr><td colspan="3" style="padding-top:9px;color:var(--muted);font-size:11.5px;font-weight:600;border-top:0">${r[1]}</td></tr>`;continue}
     const sum=r[0]==='s',label=sum?r[1]:r[0],f=sum?r[2]:r[1],plain=!sum&&r[2];
@@ -3399,9 +3479,9 @@ function renderStats(){for(const b of document.querySelectorAll('[data-st]'))b.s
   const last=hist[hist.length-1],ref=last||cur,L24=hist.slice(-24),H24=f=>L24.reduce((a,o)=>a+f(o),0);
   document.getElementById('stClock').textContent=`${clockText(gameT)} · bieżąca godzina: ${Math.floor(cur.secs)} z 60 min`;
   const note=dayNote();
-  if(stTab==='fin'){{const{d,rows:dr}=dayRows(),day=dr.length?dr.reduce((a,o)=>a+netOf(o),0):null,an=L24.length?avg(L24,netOf):null,inc=L24.length?avg(L24,o=>o.inc):null,cap=moneyCap(),T1=v=>(v>=0?'+':'−')+cpt(Math.abs(v));
+  if(stTab==='fin'){{const{d,rows:dr}=dayRows(),day=dr.length?dr.reduce((a,o)=>a+netOf(o),0):null,fc=hourForecast(),lastN=last?opNet(last):null,an=lastN==null?fc:(lastN+fc)/2,inc=L24.length?avg(L24,o=>o.inc):null,cap=moneyCap(),T1=v=>(v>=0?'+':'−')+cpt(Math.abs(v));
     document.getElementById('fCards').innerHTML=scard('bank','#2f9e5a','Gotówka',`${cpt(money)} T¢`,`limit ${cpt(cap)} T¢${money>=cap?' · kasa pełna, dobuduj bank':''}`)+
-      scard('shop',an==null?'#7d8790':an>=0?'#2f9e5a':'#d4483a','Saldo średnio / godz.',an==null?'–':`${T1(an)} T¢`)+
+      scard('shop',an>=0?'#2f9e5a':'#d4483a','Saldo / godz.',`${T1(an)} T¢`,`${lastN==null?'':`ostatnia ${T1(lastN)} · `}ta godz. ${T1(fc)} (prognoza)`)+
       scard('ord',day==null?'#7d8790':day>=0?'#2f9e5a':'#d4483a',dr.length?`Bilans dnia ${d+1}`:'Bilans dnia',day==null?'–':`${T1(day)} T¢`,day==null?'pierwszy o północy':'')+
       scard('suitcase','#3c9a5f','Przychody / godz.',inc==null?'–':`${cpt(inc)} T¢`,`podatki ok. ${cpt(taxIncome())} T¢/godz.`)+
       scard('cityHall','#e98a3a','Utrzymanie / godz.',`${cpt(upkeepRate(isNight()))} T¢`,`rachunek co 30 min: ${cpt(upkeepRate(isNight())/2)} T¢`)+
@@ -3810,6 +3890,7 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
     if(o&&o.cells&&o.cells.length){const off=(N-old)/2;o.cells=o.cells.map(([i,t,p])=>[idx(i%old+off,((i/old)|0)+off),t,p]);s=o}}
   if(!s||!s.cells||!s.cells.length)return false;
   if(!(s.sv>=4)){oldSave=true;return false}
+  mapType=MAPS[s.map]?s.map:'standard';applyTheme();
   if(Array.isArray(s.water)){water.fill(0);for(const i of s.water)water[i]=1}
   else{const av=new Uint8Array(N*N);for(const[i]of s.cells){const x=i%N,z=(i/N)|0;for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)av[idx(nx,nz)]=1}}genRivers(av)}
   applyWater();
@@ -3824,7 +3905,7 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
   if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(!window.__testUnlock)msLevel=Math.max(0,Math.min(MS.length-1,s.ms|0));if(typeof s.name==='string'&&s.name.trim())cityName=s.name.trim().slice(0,24);for(const[i,a]of loadShip)if(grid[i])grid[i].shipAt=gameT+a;loadShip=[];for(const[i,a]of loadFires){if(!grid[i])continue;if(a<0)makeRuin(i,true);else startFire(i,a)}loadFires=[];if(Array.isArray(s.hist))hist=s.hist;return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
 function clearCity(){for(const cr of crimes)cr.pin.remove();crimes=[];for(const f of fires){scene.remove(f.fx);if(f.spray)scene.remove(f.spray);f.pin.remove()}fires=[];for(const h of helis){scene.remove(h.m)}helis=[];for(const tr of trains)scene.remove(tr.g);trains=[];for(const C of constructs){C.cell.group.remove(C.sc,C.cr)}constructs.length=0;for(const c of cars)scene.remove(c.mesh);cars=[];resMap.clear();for(let i=0;i<N*N;i++)if(grid[i])removeCell(i);
   for(const f of floats)f.el.remove();floats=[]}
-function preset(type,d){if(type&&MAPS[type])mapType=type;if(d&&DIFF[d])diff=d;pipe.fill(0);money=startCash();matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);applyWater();makeEntries()}
+function preset(type,d){if(type&&MAPS[type])mapType=type;applyTheme();if(d&&DIFF[d])diff=d;pipe.fill(0);money=startCash();matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);applyWater();makeEntries()}
 /* ---------- main menu: continue / new game / options / exit, with a small town turning slowly behind it ---------- */
 let titleOpen=false;const titleEl=document.getElementById('title');document.getElementById('tVer').textContent=LT_VERSION;
 const hasSave=()=>{if(oldSave||saveBlocked)return false;try{return!!localStorage.getItem(KEY)}catch(e){return true}};
@@ -3865,7 +3946,7 @@ const sstep=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-
 const lightDir=new THREE.Vector3();
 function updateSky(){const h=hourOf(gameT),ang=(h-6)/24*Math.PI*2,el=Math.sin(ang);
   const day=sstep(-0.12,0.28,el),dusk=Math.exp(-Math.pow(el/0.18,2));
-  scene.background.copy(SKY.night).lerp(SKY.day,day).lerp(SKY.dusk,dusk*0.55);scene.fog.color.copy(scene.background);
+  scene.background.copy(SKY.night).lerp(SKY.day,day).lerp(SKY.dusk,dusk*0.55);scene.fog.color.copy(scene.background);fogRing.material.color.copy(scene.background);
   hemi.intensity=0.2+0.6*day;hemi.color.copy(HEMI.night).lerp(HEMI.day,day);
   if(el>-0.05){sun.color.copy(SUNC.low).lerp(SUNC.day,sstep(0,0.45,el));sun.intensity=0.12+0.75*day}else{sun.color.copy(SUNC.moon);sun.intensity=0.16}
   lightDir.set(Math.cos(ang)*0.9,Math.abs(el)+0.3,0.45).normalize();
@@ -3942,7 +4023,7 @@ cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();if(Math.
   areaB.visible=area.visible;
   if(!reduce)tickCurrent(time);
   if(gdUpd){for(const m of[gBl,gSt,gSm,gFh])m.instanceMatrix.needsUpdate=true;for(const m of[gBl,gFh])if(m.instanceColor)m.instanceColor.needsUpdate=true;gdUpd=false}
-  if(decoUpd){for(const m of[dTr,dPi,dBl])m.instanceMatrix.needsUpdate=true;decoUpd=false}
+  if(decoUpd){for(const m of DECO_M)m.instanceMatrix.needsUpdate=true;decoUpd=false}
   updateSky();
   if(areaT>0){areaT-=dt;if(areaT<=0){areaT=0;area.visible=false}}
   if(focus){const k=Math.min(1,dt*6);cam.target.x+=(focus.x-cam.target.x)*k;cam.target.z+=(focus.z-cam.target.z)*k;updateCamera();
