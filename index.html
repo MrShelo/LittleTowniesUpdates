@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='5.5.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='5.5.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2502,7 +2502,9 @@ let needsHudT=0;
 function needsHud(){const now=performance.now();if(now-needsHudT<1000)return;needsHudT=now;const el=document.getElementById('r-needs');if(!el)return;let pop=0;const sum={};for(const n of NEEDS)sum[n.k]=0;
   for(const c of grid){if(!c||!HLV[c.t]||c.aband||!popOf(c))continue;const H=needs(c),p=popOf(c);pop+=p;for(const n of NEEDS)sum[n.k]+=H[n.k]*p}
   const tip=['Potrzeby mieszkańców'];for(const n of NEEDS){const v=pop?sum[n.k]/pop:0,b=document.getElementById('nb-'+n.k);if(b){b.style.height=Math.round(v*100)+'%';b.style.background=NEED_COL[n.k];b.parentNode.classList.toggle('low',!!pop&&v<NEED_MIN)}tip.push(`${n.name}: ${pop?Math.round(v*100)+'%':'–'}`)}
-  const t=tip.join(' · ');if(el.dataset.tip!=null)el.dataset.tip=t;else el.setAttribute('title',t)}
+  const t=tip.join(' · ');if(el.dataset.tip!=null)el.dataset.tip=t;else el.setAttribute('title',t);
+  /* the info box: a coloured dot per need, like the bars */
+  try{setTipHTML(el,`<b>Potrzeby mieszkańców</b><span class="tipl">${NEEDS.map(n=>{const v=pop?sum[n.k]/pop:0;return`<span><i style="background:${NEED_COL[n.k]};border-radius:50%"></i>${n.name}</span><b${pop&&v<NEED_MIN?' style="color:var(--warn)"':''}>${pop?Math.round(v*100)+'%':'–'}</b>`}).join('')}</span>`)}catch(e){}}
 /* food and drinks come first: until both are above 35% the other needs cannot lift the average */
 const basicOK=c=>{const H=needs(c);return BASIC.every(k=>H[k]>=NEED_MIN)};
 const needAvg=c=>{const H=needs(c);if(!basicOK(c))return BASIC.reduce((a,k)=>a+H[k],0)/BASIC.length;return NEEDS.reduce((a,n)=>a+H[n.k],0)/NEEDS.length};
