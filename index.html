@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.0.11';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.0.12';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -924,9 +924,9 @@ function ovrRoles(m,d,g,ctx,RG){if(m.material&&m.material.color){
     if(d.rc){const pal=Array.isArray(d.rc)&&d.rc.length?d.rc:RC_DEF;let c=pal[(Math.random()*pal.length)|0];if(d.rg&&RG){if(RG[d.rg]&&pal.includes(RG[d.rg]))c=RG[d.rg];else RG[d.rg]=c}ovrMat(m,'rc'+c,mt=>mt.color.set(c))}
     if(d.pt===1){if(ctx&&ctx.paint)m.material=ctx.paint;else{const P=g.userData.paint=g.userData.paint||[];if(!P.includes(m))P.push(m)}}
     else if(d.pt===-1&&g.userData.paint){const k=g.userData.paint.indexOf(m);if(k>=0)g.userData.paint.splice(k,1)}
-    if(d.gl&&m.material.emissive){const gc=d.gl===2&&typeof d.gc==='string'?d.gc:null;ovrMat(m,'gl'+d.gl+(gc||''),()=>{});
+    if(d.gl&&m.material.emissive){const gc=d.gl===2&&typeof d.gc==='string'?d.gc:null;ovrMat(m,'gl'+d.gl+(gc||''),mt=>{mt.userData.dayCol=mt.color.getHex()});
       /* night glow can also switch the part to another colour (gc), e.g. a dark window that lights up yellow */
-      const G={m:d.gl,d:gc?m.material.color.clone():null,n:gc?new THREE.Color(gc):null};GLOWS.set(m.material,G);glowSet(m.material,G,nightK())}}
+      const G={m:d.gl,d:gc?(m.material.userData.dayCol!=null?new THREE.Color(m.material.userData.dayCol):m.material.color.clone()):null,n:gc?new THREE.Color(gc):null};GLOWS.set(m.material,G);glowSet(m.material,G,nightK())}}
   /* vt: the part shows only by day (1) or only at night (2) */
   if(d.vt&&!d.h){m.userData.vt=d.vt;DAYVIS.add(m);m.visible=d.vt===1?nightK()<0.5:nightK()>=0.5}
   if(d.an&&ANIM_LIB[d.an.k]){m.userData.an=d.an;m.userData.an0=[m.position.clone(),m.rotation.clone(),m.scale.clone(),m.visible];ANIMS.add(m)}}
@@ -2063,7 +2063,7 @@ function addCell(i,t,anim=true,second=-1){const extra=Array.isArray(second)?seco
   if(extra.length){cell.tiles=[i,...extra];cell.vert=extra.length===1&&Math.abs(extra[0]-i)===N;let sx=cx(i),sz=cz(i);
     for(const e of extra){clearDeco(e);groundDeco(e,false);grid[e]={t:'part',main:i};sx+=cx(e);sz+=cz(e)}g.position.set(sx/(extra.length+1),0,sz/(extra.length+1))}
   if(DRIVE[t]){const[bg,bm]=roadBase(t);const s=new THREE.Mesh(bg,bm);s.receiveShadow=true;s.castShadow=t==='bridge';g.add(s)}
-  else{const model=t==='park3'&&!extra.length?buildPark(3):t==='incinerator'&&!extra.length?applyOvr('incS',buildIncinerator(),cell.mv):applyOvr(t,BUILD[t](),cell.mv);if(cell.vert)model.rotation.y=Math.PI/2;
+  else{const model=t==='park3'&&!extra.length?buildPark(3):t==='incinerator'&&!extra.length?applyOvr('incS',buildIncinerator(),cell.mv):applyOvr(HBUILD[t]&&!MODEL_OVR[t]?t+'@0':t,BUILD[t](),cell.mv);if(cell.vert)model.rotation.y=Math.PI/2;
     if(extra.length>1){const xs=[i,...extra].map(k=>k%N),zs=[i,...extra].map(k=>(k/N)|0);if(Math.max(...zs)-Math.min(...zs)>Math.max(...xs)-Math.min(...xs))model.rotation.y=Math.PI/2}g.add(model);cell.model=model;cell.marker=markerMesh();g.add(cell.marker);
     if(isFactory(t)||t==='coal'||t==='biomass'||t==='incinerator'||t==='hydrogen')factories.add(model);if(t==='wind')winds.add(model.userData.rotor);
     if(DEMAND[t]){cell.bolt=boltMesh();g.add(cell.bolt);bolts.add(cell.bolt)}}
