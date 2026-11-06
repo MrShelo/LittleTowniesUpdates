@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.0.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.0.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2174,7 +2174,7 @@ function carTile(c){const p=c.path,t=c.dist;
 const WALK_MAX=6,SIDE=0.43;
 function placeWalker(c){const p=c.path,n=p.length,a=p[Math.min(c.seg,n-1)],b=p[Math.min(c.seg+1,n-1)],f=c.dist;let dx=cx(b)-cx(a),dz=cz(b)-cz(a);const mv=!!(dx||dz);if(!mv&&n>1){dx=cx(p[n-1])-cx(p[n-2]);dz=cz(p[n-1])-cz(p[n-2])}const L=Math.hypot(dx,dz)||1;
   let sd=c.side||1;if(c.flip>=0){const u=c.seg+f,k=c.flip;sd=u<=k-0.45?sd:u>=k?-sd:sd*(1-2*(u-k+0.45)/0.45)}
-  c.mesh.position.set(cx(a)+(mv?dx*f:0)-dz/L*SIDE*sd,0.04,cz(a)+(mv?dz*f:0)+dx/L*SIDE*sd);if(dx||dz)c.mesh.rotation.y=Math.atan2(dx,dz);const bob=1+Math.sin(time*14+c.id)*0.04;c.mesh.scale.set(1,bob,1)}
+  c.mesh.position.set(cx(a)+(mv?dx*f:0)-dz/L*SIDE*sd,0.04,cz(a)+(mv?dz*f:0)+dx/L*SIDE*sd);if(dx||dz)c.mesh.rotation.y=Math.atan2(dx,dz);const bob=paused?1:1+Math.sin(time*14+c.id)*0.04;c.mesh.scale.set(1,bob,1)}
 function placeCar(c){if(c.walk)return placeWalker(c);const p=c.path;
   if(p.length<2){c.mesh.position.set(cx(p[0]),0.04,cz(p[0]));return}
   const T=carTile(c),oi=edgeOff(T.k,T.prev,T.li),oo=edgeOff(T.k,T.next,T.lo);
@@ -4209,7 +4209,9 @@ for(const b of document.querySelectorAll('[data-sp]'))b.addEventListener('click'
 addEventListener('keydown',e=>{if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.code==='Space'&&menuEl.hidden){e.preventDefault();setSpeed(gameSpeed===0?1:0)}});
 let prev=performance.now(),time=0,saveT=0,statsAcc=0,supT=0,depT=0,wasteAcc=0;
 function frame(now){requestAnimationFrame(frame);
-  const rdt=Math.max(0,Math.min(0.05,(now-prev)/1000)),dt=paused?0:rdt*gameSpeed;prev=now;time+=titleOpen?rdt:dt;const night=isNight();
+  const rdt=Math.max(0,Math.min(0.05,(now-prev)/1000)),dt=paused?0:rdt*gameSpeed;prev=now;
+  /* pause freezes the simulation only: building, its animations and everything decorative keep running on real time */
+  const vdt=paused||titleOpen?rdt:dt;time+=vdt;const night=isNight();
   if(titleOpen&&!reduce){cam.theta+=rdt*0.05;updateCamera()}msTick(rdt);
   supT+=dt;if(supT>0.5){supT=0;bakeTick(0.5);supplyShops();dispatchGarbage();visitorTick(0.5,night);pitTick(0.5)}if((depT=(depT||0)+rdt)>0.5){depT=0;depSync()}
   wasteAcc+=dt;if(wasteAcc>=0.25){wasteTick(wasteAcc,night);wasteAcc=0}shopTick(dt);farmTick(dt,night);
@@ -4218,7 +4220,7 @@ function frame(now){requestAnimationFrame(frame);
   buildOcc();for(const c of cars)if(!c.dead)updateCar(c,dt);
   if(cars.some(c=>c.dead))cars=cars.filter(c=>!c.dead);
   constructTick(paused&&!titleOpen?rdt:dt);shipTick(dt);policeTick(dt,night);svcTick(dt);fireTick(dt);heliTick(dt);transportTick(dt);riverTick(dt);tutTick(Math.max(dt,0.016));ovlTick(Math.max(dt,0.016));
-  for(let k=popping.length-1;k>=0;k--){const p=popping[k];p.t+=dt*5;const s=p.t>=1?1:0.5+0.5*Math.sin(p.t*Math.PI/2)*1.08;p.g.scale.setScalar(Math.min(s,1.05));if(p.t>=1){p.g.scale.setScalar(1);popping.splice(k,1)}}
+  for(let k=popping.length-1;k>=0;k--){const p=popping[k];p.t+=vdt*5;const s=p.t>=1?1:0.5+0.5*Math.sin(p.t*Math.PI/2)*1.08;p.g.scale.setScalar(Math.min(s,1.05));if(p.t>=1){p.g.scale.setScalar(1);popping.splice(k,1)}}
   powerAcc+=dt;if(powerAcc>=0.5||powerDirty){computePower(powerAcc);powerAcc=0}
   const hBefore=Math.floor(gameT/60),halfBefore=Math.floor(gameT/30);gameT+=dt;cur.secs+=dt;cur.powDem+=pw.dem*dt;if(pw.cat){cur.powCat=cur.powCat||{};for(const k in pw.cat)cur.powCat[k]=(cur.powCat[k]||0)+pw.cat[k]*dt}if(pw.gen){cur.genCat=cur.genCat||{};for(const k in pw.gen)cur.genCat[k]=(cur.genCat[k]||0)+pw.gen[k]*dt}cur.wDem=(cur.wDem||0)+wtr.dem*dt;cur.wClean=(cur.wClean||0)+wtr.clean*dt;cur.wDirty=(cur.wDirty||0)+wtr.dirty*dt;cur.wTreat=(cur.wTreat||0)+wtr.treated*dt;cur.wOut=(cur.wOut||0)+wtr.out*dt;cur.wOver=(cur.wOver||0)+wtr.over*dt;cur.powCap+=pw.cap*dt;
   if(Math.floor(gameT/30)!==halfBefore){const bill=Math.round(upkeepRate(isNight())/2);
@@ -4227,25 +4229,25 @@ function frame(now){requestAnimationFrame(frame);
   if(Math.floor(gameT/1440)!==Math.floor((gameT-dt)/1440))loanDay();
   if(Math.floor(gameT/60)!==hBefore){{const six=Math.floor(gameT/60)%6===0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HLV[c.t])lifeHour(i,c,six)}envDirty=true;powerDirty=true}deathTick();fireHour();needsHour();ordHour();{const tx=taxIncome();if(tx>0){const n=addMoney(tx);cur.inc+=n;cur.taxInc=(cur.taxInc||0)+n}const ut=utilIncome();if(ut>0){const n=addMoney(ut);cur.inc+=n;cur.utilTax=(cur.utilTax||0)+n}litterHour();dirtHour();}{const w=inmates().w;if(w>0){const n=addMoney(w);cur.inc+=n;cur.prisonInc=(cur.prisonInc||0)+n}}
 cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();if(Math.floor(gameT/60)%24===0)dayReport();save()}
-  statsAcc+=dt;if(!statsEl.hidden&&statsAcc>0.5){statsAcc=0;renderStats()}
+  statsAcc+=vdt;if(!statsEl.hidden&&statsAcc>0.5){statsAcc=0;renderStats()}
   for(const g of factories){const b=g.userData.sb||{x:0.3,y:0.85,z:-0.25,spread:0.25};const on=!g.userData.off&&!reduce;const ps=g.userData.puffs||[];
     ps.forEach((p,k)=>{p.visible=on;if(!on)return;const u=(time*0.45+k/ps.length)%1;p.position.set(b.x+u*b.spread,b.y+u*(b.rise||0.9),b.z);
     p.scale.setScalar(0.6+u*1.6);p.material.opacity=(b.op||0.65)*(1-u)})}
   if(!reduce)ovrAnimTick(time,rdt);
-  if(!reduce){for(const r of winds)r.rotation.z-=(titleOpen?rdt:dt)*2.4;for(const b of bolts)if(b.visible)b.rotation.y+=dt*2}
-  updateFloats(dt);updateStatus(Math.max(dt,0.016));
+  if(!reduce){for(const r of winds)r.rotation.z-=vdt*2.4;for(const b of bolts)if(b.visible)b.rotation.y+=vdt*2}
+  updateFloats(vdt);updateStatus(Math.max(dt,0.016));
   if(bridgeDirty)rebuildBridges();
   areaB.visible=area.visible;
   if(!reduce)tickCurrent(time);
   if(gdUpd){for(const m of[gBl,gSt,gSm,gFh])m.instanceMatrix.needsUpdate=true;for(const m of[gBl,gFh])if(m.instanceColor)m.instanceColor.needsUpdate=true;gdUpd=false}
   if(decoUpd){for(const m of DECO_M)m.instanceMatrix.needsUpdate=true;decoUpd=false}
   updateSky();
-  if(areaT>0){areaT-=dt;if(areaT<=0){areaT=0;area.visible=false}}
-  if(focus){const k=Math.min(1,dt*6);cam.target.x+=(focus.x-cam.target.x)*k;cam.target.z+=(focus.z-cam.target.z)*k;updateCamera();
+  if(areaT>0){areaT-=vdt;if(areaT<=0){areaT=0;area.visible=false}}
+  if(focus){const k=Math.min(1,vdt*6);cam.target.x+=(focus.x-cam.target.x)*k;cam.target.z+=(focus.z-cam.target.z)*k;updateCamera();
     if(Math.hypot(focus.x-cam.target.x,focus.z-cam.target.z)<0.02)focus=null}
   if(inspI>=0&&statsAcc>0.5&&statsEl.hidden){statsAcc=0;renderInsp()}
   if(ring.visible&&!reduce)ring.material.opacity=0.65+0.35*Math.sin(time*4);
-  if(hintTimer>0){hintTimer-=dt;if(hintTimer<=0)setHint(toolHint())}
+  if(hintTimer>0){hintTimer-=vdt;if(hintTimer<=0)setHint(toolHint())}
   saveRT+=rdt;if((saveReq&&saveRT>2)||(!paused&&saveRT>30))writeSave()
   hud();
   if(!window.__drawn&&app.clientWidth>0&&app.clientHeight>0){

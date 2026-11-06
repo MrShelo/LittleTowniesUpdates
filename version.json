@@ -1,1 +1,1 @@
-{"v": "6.0.2", "notes": "6.0.2: śmieciarki jeżdżą w kursy: jedna zbiera z maksymalnie 15 pobliskich budynków (do 90 kg) i dopiero wtedy wraca; mniej śmieciarek na obiekt (wysypisko 2–4, spalarnia i recykling po 2)"}
+{"v": "6.0.3", "notes": "6.0.3: pauza zatrzymuje tylko symulację: budowanie, animacje stawiania, wiatraki, dym, napisy, kamera i podgląd budynku działają dalej, nowe budynki od razu wyglądają i pokazują stan jak aktywne"}
