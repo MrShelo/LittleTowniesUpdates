@@ -1,1 +1,1 @@
-{"v": "6.0.5", "notes": "6.0.5: fabryki nie importują – bez surowca czekają (ikona Brak surowca); spoza miasta kupują tylko sklepy (70% ceny półkowej za sztukę) oraz elektrownie węglowa i na biomasę (węgiel 24 T¢/kg, drewno 16 T¢/kg), koszt od razu w wydatkach"}
+{"v": "6.0.6", "notes": "6.0.6: słupy i rury mają własny przełącznik: zwykłe stawianie albo wzdłuż drogi (ponowne kliknięcie wyłącza); tryb budynków się nie zmienia"}

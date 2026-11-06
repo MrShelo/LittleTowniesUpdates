@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.0.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.0.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -3068,7 +3068,8 @@ el.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){hl.visible=fa
 el.addEventListener('wheel',e=>{e.preventDefault();cam.radius*=Math.exp(e.deltaY*0.0012);updateCamera()},{passive:false});
 /* line building: dragging draws a see-through draft of the whole line; nothing is built until it is confirmed (✓ Zbuduj) or it is cancelled */
 let lineConf=false;const lineG=new THREE.Group();scene.add(lineG);const lineTpl=new Map();
-const ALONG={pole:1,pipe:1};const roadMode=()=>buildMode==='road'&&!!ALONG[tool];
+/* poles and pipes have their own switch: normal (drag paints tiles) or along the road; it does not touch the building mode */
+const ALONG={pole:1,pipe:1};let alongOn=false;try{alongOn=localStorage.getItem('lt-along')==='1'}catch(e){}const roadMode=()=>alongOn&&!!ALONG[tool];
 const LGB=new THREE.BoxGeometry(0.9,0.06,0.9);LGB.userData.keep=true;
 const lgMat=c=>new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:0.5,depthWrite:false});const LGM={ok:lgMat('#3fbf5a'),bad:lgMat('#e0402b'),pipe:lgMat('#3a8fd8'),pole:lgMat('#a07a52')};
 function lineTplFor(T){let t=lineTpl.get(T);if(t)return t;t=applyOvr(T,BUILD[T]());const mk=x=>{const n=x.clone();n.transparent=true;n.opacity=0.38;n.depthWrite=false;return n};
@@ -3618,14 +3619,14 @@ function mkTool(t){const b=document.createElement('button');b.className='tool';b
   b.setAttribute('aria-pressed','false');b.addEventListener('click',()=>selectTool(t));toolBtns[t]=b;return b}
 document.getElementById('modeRow').append(mkTool('view'),mkTool('bulldoze'));
 /* build modes (one / many / line) and demolish modes (all / pipes / power / crossings) */
-let buildMode='one',delMode='all';try{buildMode=localStorage.getItem('lt-bmode')||'one'}catch(e){}if(!['one','many','line','road'].includes(buildMode))buildMode='one';if(window.__testUnlock)buildMode='many';
+let buildMode='one',delMode='all';try{buildMode=localStorage.getItem('lt-bmode')||'one'}catch(e){}if(!['one','many','line'].includes(buildMode))buildMode='one';if(window.__testUnlock)buildMode='many';
 const MODE_OK=t=>!!t&&!!DEF[t]&&!DRIVE[t]&&!['pipe','pole','poleline','rail','pipeDel','poleDel','crosswalk','lpole'].includes(t);
 const DELT={pipe:'pipeDel',power:'poleDel',cross:'crossDel'};
 const BMODES=[['one','Pojedynczo: po postawieniu wraca do podglądu','<rect x="6" y="6" width="8" height="8" rx="1.2"/>'],['many','Wiele: stawiaj, aż wrócisz do podglądu','<rect x="2.5" y="3" width="6" height="6" rx="1"/><rect x="11.5" y="5" width="6" height="6" rx="1"/><rect x="5" y="11.5" width="6" height="6" rx="1"/>'],['line','Linia: przeciągnij poziomo albo pionowo, zobaczysz szkic i zatwierdzisz','<rect x="2" y="7.5" width="4.6" height="5" rx=".8"/><rect x="7.7" y="7.5" width="4.6" height="5" rx=".8"/><rect x="13.4" y="7.5" width="4.6" height="5" rx=".8"/>'],['road','Zbuduj wzdłuż drogi (słupy i rury): przeciągnij od ulicy do ulicy','<path d="M3 17.5c0-5 3-6 7-7.5s7-3 7-7.5"/><circle cx="4.2" cy="13" r="1.3"/><circle cx="10" cy="10" r="1.3"/><circle cx="15.8" cy="6.5" r="1.3"/>']];
 const DMODES=[['all','Wyburzaj wszystko','<path d="M4.5 4.5l11 11M15.5 4.5l-11 11"/>'],['pipe','Usuwaj tylko rury (zwrot 2 T¢)',null],['power','Usuwaj tylko słupy (zwrot 50%)',null],['cross','Usuwaj tylko przejścia dla pieszych','<path d="M3 5.5h14M3 14.5h14M6 7v6M10 7v6M14 7v6"/>']];
 function renderModes(){const box=document.getElementById('msub');const del=tool==='bulldoze';const L=del?DMODES:BMODES;
-  box.innerHTML=L.map(([k,tt,ic])=>`<button type="button" data-m="${k}" title="${tt}" aria-label="${tt}" aria-pressed="${(del?delMode:buildMode)===k}" ${!del&&tool!=='view'&&!(k==='road'?!!ALONG[tool]:MODE_OK(tool))?'disabled':''}><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ic||ICO[DELT[k]]}</svg></button>`).join('');
-  for(const b of box.querySelectorAll('button'))b.onclick=()=>{if(del){delMode=b.dataset.m;setXray(delMode==='pipe');document.getElementById('hazard').hidden=false;setHint(toolHint())}else{buildMode=b.dataset.m;try{localStorage.setItem('lt-bmode',buildMode)}catch(e){}setHint(toolHint())}renderModes()}}
+  box.innerHTML=L.map(([k,tt,ic])=>`<button type="button" data-m="${k}" title="${tt}" aria-label="${tt}" aria-pressed="${del?delMode===k:ALONG[tool]?(alongOn?k==='road':k==='many'):buildMode===k}" ${!del&&tool!=='view'&&!(k==='road'?!!ALONG[tool]:ALONG[tool]?k==='many':MODE_OK(tool))?'disabled':''}><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ic||ICO[DELT[k]]}</svg></button>`).join('');
+  for(const b of box.querySelectorAll('button'))b.onclick=()=>{if(del){delMode=b.dataset.m;setXray(delMode==='pipe');document.getElementById('hazard').hidden=false;setHint(toolHint())}else if(ALONG[tool]){alongOn=b.dataset.m==='road'?!alongOn:false;if(lineConf||lineA>=0)cancelLine(true);try{localStorage.setItem('lt-along',alongOn?'1':'0')}catch(e){}setHint(toolHint())}else if(b.dataset.m!=='road'){buildMode=b.dataset.m;try{localStorage.setItem('lt-bmode',buildMode)}catch(e){}setHint(toolHint())}renderModes()}}
 CATS.forEach((c,k)=>{const b=document.createElement('button');b.type='button';b.className='cat';b.innerHTML=svgI(CAT_ICO[k],14)+`<span>${c.name}</span>`;b.setAttribute('role','tab');
   b.addEventListener('click',()=>showCat(k));catsEl.append(b);catBtns.push(b);for(const t of c.tools)toolsEl.append(mkTool(t))});
 function showCat(k){if(catBtns[k]&&catBtns[k].hidden){k=catBtns.findIndex(b=>!b.hidden);if(k<0)k=0}curCat=k;catBtns.forEach((b,j)=>b.setAttribute('aria-selected',String(j===k)));
