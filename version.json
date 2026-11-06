@@ -1,1 +1,1 @@
-{"v": "6.0.4", "notes": "6.0.4: linia ogólna fabryk robi z materiałów tylko zabawki i kosmetyki; odzież, meble, elektronikę, narzędzia i napoje tylko z ich surowca leżącego w magazynach (bawełna, drewno, chalkopiryt, warzywa)"}
+{"v": "6.0.5", "notes": "6.0.5: fabryki nie importują – bez surowca czekają (ikona Brak surowca); spoza miasta kupują tylko sklepy (70% ceny półkowej za sztukę) oraz elektrownie węglowa i na biomasę (węgiel 24 T¢/kg, drewno 16 T¢/kg), koszt od razu w wydatkach"}
