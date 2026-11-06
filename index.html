@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.0.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.0.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -543,8 +543,8 @@ const DEF={
   bridge:{name:'Most',cost:60,desc:'Przejazd przez wodę, tylko w linii prostej. Przejmuje pasy i prędkość najlepszej drogi na swoich końcach.',sw:'#b9b7ae'},
   landfill:{name:'Wysypisko',cost:200,desc:'300 kg odpadów na pole. Pola obok siebie łączą się w multiblok z jednym biurem przy ulicy: wspólna pojemność i więcej śmieciarek. Mocno brudzi okolicę.',sw:'#7d6a4f'},
   incS:{name:'Mała spalarnia',cost:900,desc:'1 pole. Spala 40 kg odpadów na godz. (bufor 60 kg). Można dokupić drugi komin: 80 kg/godz. Pobiera 1 MW i dymi.',sw:'#a39890'},
-  incinerator:{name:'Spalarnia',cost:1400,fw:2,fh:3,desc:'Zajmuje 2×3 pola. 1 komin: 40 kg odpadów na godz., dokupisz drugi i trzeci komin (+40 kg każdy). Bufor 150 kg, 4 śmieciarki. Pobiera 1 MW i dymi.',sw:'#9a8f86'},
-  recycler:{name:'Recykling',cost:700,desc:'Przerabia 10 kg odpadów na godz. na 5 kg materiałów (bufor 60 kg), 3 śmieciarki. Pobiera 1,5 MW.',sw:'#4f9a6a'},
+  incinerator:{name:'Spalarnia',cost:1400,fw:2,fh:3,desc:'Zajmuje 2×3 pola. 1 komin: 40 kg odpadów na godz., dokupisz drugi i trzeci komin (+40 kg każdy). Bufor 150 kg, 2 śmieciarki. Pobiera 1 MW i dymi.',sw:'#9a8f86'},
+  recycler:{name:'Recykling',cost:700,desc:'Przerabia 10 kg odpadów na godz. na 5 kg materiałów (bufor 60 kg), 2 śmieciarki. Pobiera 1,5 MW.',sw:'#4f9a6a'},
   hvpole:{name:'Słup WN',cost:120,desc:'Wysokie napięcie: łączy się z innymi słupami WN, transformatorami i el. węglowymi w zasięgu 11×11 (po ulepszeniu 17×17). Nie z wiatrakami.',sw:'#8c959d',area:3},
   gallery:{name:'Galeria handlowa',cost:1500,desc:'Zajmuje 2×2 pola. W karcie galerii wykupujesz lokale (sklep 100 T¢): na parterze 4 (np. 3 sklepy i kino), po dobudowie piętra wszystkie. Galeria ma 60 miejsc na półkach, a każdy lokal dokłada 15. Ceny +25% i więcej klientów.',sw:'#d8c48a',size:4},
   restaurant:{name:'Restauracja',cost:400,desc:'Rozrywka w zasięgu 3×3 (+1 zadowolenia). Zużywa jedzenie z magazynów, posiłek 30 T¢. Najtańsza w utrzymaniu.',sw:'#d9773a'},
@@ -658,7 +658,7 @@ const UPKEEP={biomass:90,pitS:30,pitB:60,cityHall:200,shipC:150,roadSvc:90,heliB
 /* waste: houses and parks fill steadily, factories per truck produced, shops per sale; pickup is due every ~6 h (work) or ~12 h (homes, parks) ±15% */
 const TRASH={supermarket:{cap:50,per:0.15,every:6},smallfac:{cap:24,per:0.3,every:6},house:{cap:18,rate:1,every:12},tenement:{cap:36,rate:2.5,every:12},block:{cap:60,rate:5,every:12},modern:{cap:60,rate:4,every:12},park1:{cap:10,rate:0.5,every:12},park2:{cap:10,rate:0.5,every:12},park3:{cap:10,rate:0.5,every:12},
   bakery:{cap:30,per:0.2,every:6},factory:{cap:40,per:0.6,every:6},factoryB:{cap:60,per:0.8,every:6},mine:{cap:30,per:0.4,every:8},mineB:{cap:60,per:0.8,every:6},farmveg:{cap:20,per:0.5,every:12},farmdairy:{cap:20,per:0.6,every:12},farmgrain:{cap:20,per:0.4,every:12},farmcotton:{cap:20,per:0.4,every:12},farmwood:{cap:20,per:0.5,every:12},pitS:{cap:30,per:0.4,every:8},pitB:{cap:60,per:0.8,every:6},shop:{cap:30,per:0.2,every:6},gallery:{cap:60,per:0.2,every:6},restaurant:{cap:30,per:0.3,every:6},cinema:{cap:30,per:0.15,every:6},theater:{cap:30,per:0.15,every:6},casino:{cap:30,per:0.2,every:6},hotelS:{cap:30,per:0.4,every:12},hotelB:{cap:60,per:0.5,every:12}};
-const FAC={landfill:{cap:330,trucks:3,rate:0},incinerator:{cap:150,trucks:4,rate:40},recycler:{cap:60,trucks:3,rate:10},coal:{cap:20,trucks:1,rate:4}};
+const FAC={landfill:{cap:330,trucks:2,rate:0},incinerator:{cap:150,trucks:2,rate:40},recycler:{cap:60,trucks:2,rate:10},coal:{cap:20,trucks:1,rate:4}};
 const GT_CAP=25,REC_YIELD=0.5,SOLAR_MW=2;
 const UPG={
   transformer:{name:'Wyższy transformator',cost:300,upkeep:20,desc:'Łączy elektrownie i słupy w zasięgu 5×5'},
@@ -707,7 +707,7 @@ function polR(c){if(!c||c.off)return 0;const b=isFactory(c.t)?2:c.t==='mineB'?2:
 const noisy=c=>!!c&&!c.off&&(c.t==='wind'||c.t==='transformer');
 const isFac=c=>!!c&&!c.off&&!!FAC[c.t]&&(c.t!=='coal'||!!c.up)&&(c.t!=='landfill'||c.lfHub!==false);
 const facCap=c=>FAC[c.t].cap*(c.t==='landfill'?(c.lfN||1):c.t==='incinerator'&&!c.tiles?0.4:1);
-const facTrucks=c=>c.t==='landfill'?Math.min(8,2+(c.lfN||1)):FAC[c.t].trucks;
+const facTrucks=c=>c.t==='landfill'?Math.min(4,1+Math.ceil((c.lfN||1)/2)):FAC[c.t].trucks;
 const parkR=c=>DEF[c.t].r+(c.up?1:0);
 const PARKS=['park1','park2','park3'];
 const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','crosswalk']},{name:'Transport',tools:['rail','taxi','trainSt','freightSt','shipC']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','pitS','pitB','warehouse','smallwh','warehouseB']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain','farmcotton','farmwood']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','transformer','hvpole','wind','coal','biomass','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','roadSvc']},{name:'Woda',tools:['pipe','tower','pump','pumpB','treatment','outlet','fill']},{name:'Urzędowe',tools:['cityHall']}];
@@ -2232,9 +2232,16 @@ function arrive(c){
   if(c.phase!=='go'){if(c.kind==='garbage')unloadG(c);return removeCar(c)}
   const d=grid[c.dest];
   if(c.kind==='garbage'){let load=0;
-    if(d&&TRASH[d.t]){load=Math.min(d.trash,GT_CAP);const wasFull=d.trash>=TRASH[d.t].cap;d.trash-=load;d.truckOn=false;d.want=d.trash>=TRASH[d.t].cap*0.5;
+    if(d&&TRASH[d.t]){load=Math.min(d.trash,GT_CAP,Math.max(0,(c.res||GT_CAP)-(c.load||0)));const wasFull=d.trash>=TRASH[d.t].cap;d.trash-=load;d.truckOn=false;d.want=d.trash>=TRASH[d.t].cap*0.5;
       if(wasFull&&PARKS.includes(d.t))envDirty=true}
-    c.load=load;cur.gColl+=load;if(load>=0.5)float(c.dest,`−${fmt(load)} kg śmieci`,'neutral');return goBack(c,c.dest,c.home)}
+    c.load=(c.load||0)+load;cur.gColl+=load;if(load>=0.5)float(c.dest,`−${fmt(load)} kg śmieci`,'neutral');
+    /* next stop of the round: the nearest building still waiting on the list that the truck can reach */
+    while(c.stops&&c.stops.length&&c.load<c.res-0.5){const s0=entryOf(c.dest);let k=-1,bd=1e9;const b=s0>=0?bfs(s0):null;
+      if(b)c.stops.forEach((j,q)=>{const g=grid[j],e=entryOf(j);if(g&&TRASH[g.t]&&e>=0&&b.dist[e]>=0&&b.dist[e]<bd){bd=b.dist[e];k=q}});
+      if(k<0){for(const j of c.stops)if(grid[j]&&TRASH[grid[j].t])grid[j].truckOn=false;c.stops=[];break}
+      const nx=c.stops.splice(k,1)[0],from=c.dest;c.path=pathTo(b,entryOf(nx));c.seg=0;c.dist=0;c.dest=nx;c.rot=c.rot===null?null:c.rot+Math.PI;c.lp=c.ln=c.li;c.lnSeg=-1;placeCar(c);exitFrom(c,from);return}
+    if(c.stops)for(const j of c.stops)if(grid[j]&&TRASH[grid[j].t])grid[j].truckOn=false;c.stops=[];
+    return goBack(c,c.dest,c.home)}
   if(c.kind==='visitor'){if(d&&SERVICES.includes(d.t))serve(c,d,c.dest);return c.walk?removeCar(c):visitorLeave(c)}
   if(c.kind==='commuter'){
     if(d&&SERVICES.includes(d.t))serve(c,d,c.dest);
@@ -2641,14 +2648,27 @@ const trashEvery=t=>TRASH[t].every*60*(0.85+Math.random()*0.3);
 const TRASH_MUL=0.3;function addTrash(c,x){x*=TRASH_MUL;if(ordOn('eco'))x*=0.9;const T=TRASH[c.t];if(!T)return;const before=c.trash;c.trash=Math.min(T.cap,c.trash+x);cur.gGen+=c.trash-before;
   if(c.trash>=T.cap){c.want=true;if(before<T.cap&&PARKS.includes(c.t))envDirty=true}}
 function releaseG(c){if(c.rel)return;c.rel=true;const f=grid[c.home];if(f&&FAC[f.t]){f.gtrucks=Math.max(0,f.gtrucks-1);f.gin=Math.max(0,f.gin-c.res)}
-  if(c.phase==='go'){const b=grid[c.dest];if(b&&TRASH[b.t])b.truckOn=false}}
+  if(c.phase==='go'){for(const j of[c.dest,...(c.stops||[])]){const b=grid[j];if(b&&TRASH[b.t])b.truckOn=false}}}
 function unloadG(c){let f=grid[c.home];if(f&&f.t==='landfill'&&!f.lfHub){const cl=lfClusters.find(o=>o.tiles.includes(c.home));if(cl)f=grid[cl.hub]}if(isFac(f))f.gstock=Math.min(facCap(f),f.gstock+(c.load||0));releaseG(c)}
 /* buildings with a due pickup get the nearest facility with room and a free truck; landfills count as 30 tiles farther */
 const hubOf=j=>{const f=grid[j];if(f&&f.t==='landfill'&&f.lfHub===false){const cl=lfClusters.find(o=>o.tiles.includes(j));if(cl)return cl.hub}return j};
 /* truck and reservation counters are rebuilt from the cars on the road each pass, so a lost truck can never block a facility for good */
 function recountGarbage(){for(let j=0;j<N*N;j++){const g=grid[j];if(!g)continue;if(FAC[g.t]){g.gtrucks=0;g.gin=0}if(TRASH[g.t])g.truckOn=false}
   for(const c of cars){if(c.dead||c.kind!=='garbage')continue;const h=hubOf(c.home);c.home=h;const f=grid[h];if(f&&FAC[f.t]){f.gtrucks++;f.gin+=c.phase==='go'?c.res:(c.load||0)}
-    if(c.phase==='go'){const b=grid[c.dest];if(b&&TRASH[b.t])b.truckOn=true}}}
+    if(c.phase==='go'){for(const j of[c.dest,...(c.stops||[])]){const b=grid[j];if(b&&TRASH[b.t])b.truckOn=true}}}}
+/* a garbage truck drives a round: from the first building it calls at up to 15 nearby ones (8 tiles apart at most)
+   while there is room on the truck and at the facility, then drives home */
+const TOUR_MAX=15,TOUR_CAP=90,TOUR_HOP=8;
+function planTour(first,firstNeed,room,bf){const stops=[first],tot={n:firstNeed};let last=first;const used=new Set([first]);
+  while(stops.length<TOUR_MAX){let best=-1,bd=1e9,bn=0;const lx=last%N,lz=(last/N)|0;
+    for(let dz=-TOUR_HOP;dz<=TOUR_HOP;dz++)for(let dx=-TOUR_HOP;dx<=TOUR_HOP;dx++){const x=lx+dx,z=lz+dz;if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z),c=grid[i];
+      if(!c||!TRASH[c.t]||c.truckOn||used.has(i)||c.trash<1)continue;const d=Math.abs(dx)+Math.abs(dz);if(d>=bd)continue;const e=entryOf(i);if(e<0||bf.dist[e]<0)continue;
+      const need=Math.min(GT_CAP,Math.ceil(c.trash)+1);if(tot.n+need>Math.min(TOUR_CAP,room))continue;best=i;bd=d;bn=need}
+    if(best<0)break;stops.push(best);used.add(best);tot.n+=bn;last=best}
+  return{stops,need:tot.n}}
+function startTour(o,bf,first,need,pathToFirst){const room=facCap(o.f)-o.f.gstock-o.f.gin;const t=planTour(first,need,room,bf);
+  for(const i of t.stops){grid[i].truckOn=true;grid[i].noFac=false}o.f.gtrucks++;o.f.gin+=t.need;
+  const v=createCar('garbage',pathToFirst,{home:o.j,dest:first,res:t.need});v.stops=t.stops.slice(1);v.load=0;return v}
 function dispatchGarbage(){recountGarbage();const facs=[];for(let j=0;j<N*N;j++){const f=grid[j];if(isFac(f)){f.reachN=0;const fe=entryOf(j);if(fe>=0){f.noRoad=false;facs.push({j,fe,f})}else f.noRoad=true}}
   for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!TRASH[c.t]||!c.want||c.truckOn||c.trash<1)continue;
     if(!facs.length){c.noFac='none';continue}const e=entryOf(i);if(e<0){c.noFac='road';continue}const b=bfs(e);const need=Math.min(GT_CAP,Math.ceil(c.trash)+2);let best=null,bd=1e9,reach=0,room=0;
@@ -2656,14 +2676,13 @@ function dispatchGarbage(){recountGarbage();const facs=[];for(let j=0;j<N*N;j++)
       const d=b.dist[o.fe]+(o.f.t==='landfill'?30:0);if(d<bd){bd=d;best=o}}
     if(!best){c.noFac=!reach?'road':!room?'full':'busy';continue}
     if(cars.length>=MAX_CARS){c.noFac='busy';continue}
-    c.noFac=false;best.f.gtrucks++;best.f.gin+=need;c.truckOn=true;
-    createCar('garbage',pathTo(b,best.fe).reverse(),{home:best.j,dest:i,res:need})}
+    c.noFac=false;startTour(best,bfs(best.fe),i,need,pathTo(b,best.fe).reverse())}
   /* idle trucks go out on their own to the nearest unreserved building with a fair amount of rubbish */
   for(const o of facs){let free=facTrucks(o.f)-o.f.gtrucks;if(free<=0)continue;const bf=bfs(o.fe);const cand=[];
     for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!TRASH[c.t]||c.truckOn||c.trash<Math.max(2,TRASH[c.t].cap*0.25))continue;const e=entryOf(i);if(e<0||bf.dist[e]<0)continue;cand.push({i,e,d:bf.dist[e]})}
     cand.sort((a,b)=>a.d-b.d);
     for(const t of cand){if(free<=0||cars.length>=MAX_CARS)break;const c=grid[t.i],need=Math.min(GT_CAP,Math.ceil(c.trash)+2);if(o.f.gstock+o.f.gin+need>facCap(o.f))break;
-      o.f.gtrucks++;o.f.gin+=need;c.truckOn=true;c.noFac=false;free--;createCar('garbage',pathTo(bf,t.e),{home:o.j,dest:t.i,res:need})}}}
+      if(c.truckOn)continue;free--;startTour(o,bf,t.i,need,pathTo(bf,t.e))}}}
 /* per frame: buildings fill, pickup timers run, facilities burn or recycle */
 function wasteTick(dt,night){
   for(let i=0;i<N*N;i++){const c=grid[i];if(!c)continue;const T=TRASH[c.t];
