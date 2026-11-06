@@ -1,4 +1,4 @@
-LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza; wspólne kolory i graniastosłup: gra 6.0.8+)
+LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza; wspólne kolory i graniastosłup: 6.0.8+; przenoszenie do grup i widoczność dzień/noc: 6.0.9+)
 
 1. Uruchom EDYTOR.cmd (albo otwórz LittleTownies-Edytor.html w Edge/Chrome). Potrzebny internet.
 2. Kliknij „Wczytaj grę z GitHuba”. Edytor pobiera aktualną grę z MrShelo/LittleTowniesUpdates.
@@ -15,6 +15,9 @@ LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza; wspólne kolory i grania
    OUTLINER (po lewej, pod modelami): drzewo części modelu – grupy z gry jako foldery,
    potem „Dodane bryły” i „Efekty”. Klik zaznacza, Ctrl + klik dodaje / odejmuje, Shift + klik zaznacza zakres,
    klik w folder zaznacza całą grupę. Oko ukrywa / pokazuje część (albo cały folder).
+   PRZECIĄGANIE: złap część (albo kilka zaznaczonych) i upuść na folder – trafi do tej grupy i w grze będzie się
+   z nią poruszać (np. bryła dodana do śmigła wiatraka kręci się z nim). Upuszczenie na „Model (główny poziom)”
+   wyjmuje ją z grupy. Część zostaje w tym samym miejscu na ekranie.
    Lupka szuka części, „+” dodaje bryłę. Kropka przy nazwie = część zmieniona; ✦ świeci, 🎲 losowy kolor
    (z numerem grupy, jeśli losuje wspólny kolor), ⟳ animacja.
 
@@ -34,6 +37,8 @@ LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza; wspólne kolory i grania
    - Świeci: zawsze albo tylko nocą (jak okna). Przycisk „Noc” pokazuje podgląd nocny.
      Przy „tylko nocą” możesz zaznaczyć „Kolor nocą” i wybrać kolor, na który część zmienia się w nocy
      (np. ciemne okno, które wieczorem robi się żółte). W dzień ma swój zwykły kolor.
+   - Widoczność: zawsze, tylko w dzień albo tylko w nocy (np. neon albo lampion widoczny tylko nocą).
+     W edytorze sprawdzisz to przyciskiem „Noc”.
    - Losowy kolor: każdy budynek / pojazd dostaje inny kolor z palety. Kliknij kolor, żeby go zmienić,
      × usuwa kolor, + dodaje nowy. „Losuj podgląd” losuje jeszcze raz, „Domyślne” przywraca kolory z gry.
    - Wspólny kolor: zaznacz kilka brył i kliknij „Połącz zaznaczone” – w grze wylosują jeden, ten sam kolor

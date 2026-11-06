@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.0.8';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.0.9';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -917,7 +917,7 @@ function ovrRootPose(m,d,g){g.updateMatrixWorld(true);const pr=new THREE.Matrix4
 function ovrMat(m,key,mk){const ck=m.material.uuid+key;let mt=ovrMats.get(ck);if(!mt){mt=m.material.clone();mk(mt);ovrMats.set(ck,mt)}m.material=mt}
 /* part roles from the editor: gl = glows (1 always, 2 at night), rc = random colour per building/vehicle, pt = takes the building's colour setting (shop branch, factory line), an = animation */
 const RC_DEF=['#e25b45','#2f6fb5','#f2c14e','#f4f1ea','#4a9d6c','#7b5ea7','#2b2f36','#e98a3a'];
-const GLOWS=new Map(),ANIMS=new Set(),FXS=new Set();
+const GLOWS=new Map(),ANIMS=new Set(),FXS=new Set(),DAYVIS=new Set();
 function glowSet(mt,G,k){if(G.n){mt.color.copy(G.d).lerp(G.n,k);mt.emissive.copy(G.n).multiplyScalar(k*0.95)}else mt.emissive.copy(mt.color).multiplyScalar(G.m===1?0.6:k*0.95)}const nightK=()=>{try{return 1-dayF}catch(e){return 0}};
 function ovrRoles(m,d,g,ctx,RG){if(m.material&&m.material.color){
     /* rg: parts in one colour group draw a single random colour per building */
@@ -927,12 +927,18 @@ function ovrRoles(m,d,g,ctx,RG){if(m.material&&m.material.color){
     if(d.gl&&m.material.emissive){const gc=d.gl===2&&typeof d.gc==='string'?d.gc:null;ovrMat(m,'gl'+d.gl+(gc||''),()=>{});
       /* night glow can also switch the part to another colour (gc), e.g. a dark window that lights up yellow */
       const G={m:d.gl,d:gc?m.material.color.clone():null,n:gc?new THREE.Color(gc):null};GLOWS.set(m.material,G);glowSet(m.material,G,nightK())}}
+  /* vt: the part shows only by day (1) or only at night (2) */
+  if(d.vt&&!d.h){m.userData.vt=d.vt;DAYVIS.add(m);m.visible=d.vt===1?nightK()<0.5:nightK()>=0.5}
   if(d.an&&ANIM_LIB[d.an.k]){m.userData.an=d.an;m.userData.an0=[m.position.clone(),m.rotation.clone(),m.scale.clone(),m.visible];ANIMS.add(m)}}
 function applyOvrObj(o,ms,g,ctx){if(!o||!g)return g;const RG={};try{
-    for(const k in o.mods||{}){const m=ms[+k],d=o.mods[k];if(!m)continue;if(d.h)m.visible=false;
+    const PATH=p=>{let x=g;for(const k of String(p).split('/')){if(k==='')continue;x=x&&x.children[+k]}return x&&x.isObject3D?x:null},PT=new Map();
+    for(const k in o.mods||{}){const d=o.mods[k];if(d&&d.par!=null)PT.set('m'+k,PATH(d.par))}(o.add||[]).forEach((a,j)=>{if(a.par!=null)PT.set('a'+j,PATH(a.par))});
+    const inside=(t,m)=>{for(let x=t;x;x=x.parent)if(x===m)return true;return false};
+    for(const k in o.mods||{}){const m=ms[+k],d=o.mods[k];if(!m)continue;const T=PT.get('m'+k);if(T&&!inside(T,m))T.add(m);if(d.h)m.visible=false;
       if(d.c&&m.material&&m.material.color)ovrMat(m,d.c,mt=>mt.color.set(d.c));
       if(d.rs&&m.parent&&m.parent!==g)ovrRootPose(m,d,g);else{if(d.p)m.position.fromArray(d.p);if(d.r)m.rotation.fromArray(d.r);if(d.s)m.scale.fromArray(d.s)}ovrRoles(m,d,g,ctx,RG)}
-    for(const a of o.add||[]){const m=new THREE.Mesh(ovrGeoA(a),M(a.c||'#cccccc'));m.position.fromArray(a.p||[0,0.1,0]);m.rotation.fromArray(a.r||[0,0,0]);m.scale.fromArray(a.s||[0.2,0.2,0.2]);m.castShadow=true;m.receiveShadow=true;m.userData.ovrAdd=true;g.add(m);ovrRoles(m,a,g,ctx,RG)}
+    (o.add||[]).forEach((a,j)=>{const m=new THREE.Mesh(ovrGeoA(a),M(a.c||'#cccccc'));m.position.fromArray(a.p||[0,0.1,0]);m.rotation.fromArray(a.r||[0,0,0]);m.scale.fromArray(a.s||[0.2,0.2,0.2]);m.castShadow=true;m.receiveShadow=true;m.userData.ovrAdd=true;if(a.h)m.visible=false;
+      const T=PT.get('a'+j);if(T){T.add(m);ovrRootPose(m,{p:a.p||[0,0.1,0],r:a.r||[0,0,0],s:a.s||[0.2,0.2,0.2]},g)}else g.add(m);ovrRoles(m,a,g,ctx,RG)});
     for(const f of o.fx||[]){if(!FX_LIB[f.k])continue;const x=makeFx(f);g.add(x);FXS.add(x)}}catch(e){}return g}
 /* the animation library (the same movements the game uses: wind turbine, police lights, flames…) */
 const ANIM_LIB={spin:{name:'Obrót (jak turbina wiatrowa)',ax:'z',sp:2.4,am:0},rotor:{name:'Śmigło (szybki obrót)',ax:'y',sp:14,am:0},sway:{name:'Kołysanie',ax:'z',sp:1.6,am:0.2},
@@ -958,7 +964,8 @@ function fxApply(g,t){const f=g.userData.fx,L=FX_LIB[f.k]||FX_LIB.smoke,sp=f.sp|
 const inScene=o=>{while(o){if(o===scene)return true;o=o.parent}return false};
 let ovrClean=0;function ovrAnimTick(t,dt){ovrClean+=dt;const cl=ovrClean>2;if(cl)ovrClean=0;
   for(const m of ANIMS){if(cl&&!inScene(m)){ANIMS.delete(m);continue}animApply(m,t)}
-  for(const g of FXS){if(cl&&!inScene(g)){FXS.delete(g);continue}fxApply(g,t)}}
+  for(const g of FXS){if(cl&&!inScene(g)){FXS.delete(g);continue}fxApply(g,t)}
+  const nt=nightK()>=0.5;for(const m of DAYVIS){if(cl&&!inScene(m)){DAYVIS.delete(m);continue}const v=m.userData.vt===1?!nt:nt;if(m.visible!==v)m.visible=v}}
 /* static parts of a building are merged into one mesh per material when it is placed: a big city draws (and shadows)
    a handful of meshes per building instead of dozens. Anything the game or a model override moves, hides, recolours or
    references later (userData, animations, particles, hidden parts) is left as it was. */
@@ -968,7 +975,7 @@ function bakeModel(model,keepFirst){if(!model||window.__LT_EDITOR||!THREE.Buffer
   for(const k in model.userData){const v=model.userData[k];if(Array.isArray(v))v.forEach(mark);else if(v&&typeof v==='object'){if(v.isObject3D)mark(v);else for(const q in v)mark(v[q])}}
   model.updateMatrixWorld(true);_bkInv.copy(model.matrixWorld).invert();const groups=new Map();
   const walk=o=>{if(o!==model&&(keep.has(o)||o.userData.fx||!o.visible))return;for(const ch of o.children)walk(ch);
-    if(o===model||!o.isMesh||o.isInstancedMesh||Array.isArray(o.material)||o.children.length||o.userData.an||o.userData.fxp||!o.geometry||!o.geometry.attributes.position)return;
+    if(o===model||!o.isMesh||o.isInstancedMesh||Array.isArray(o.material)||o.children.length||o.userData.an||o.userData.vt||o.userData.fxp||!o.geometry||!o.geometry.attributes.position)return;
     const at=o.geometry.attributes;if(Object.values(at).some(a=>a.isInterleavedBufferAttribute))return;
     _bkM.multiplyMatrices(_bkInv,o.matrixWorld);if(_bkM.determinant()<=0)return;
     const names=Object.keys(at).filter(n=>n==='position'||n==='normal'||n==='uv'||n==='color').sort();
