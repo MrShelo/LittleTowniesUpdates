@@ -1,1 +1,1 @@
-{"v": "6.0.7", "notes": "6.0.7: komisariaty i straże mają o 1 pole większy zasięg (mały komisariat i mała straż 11×11, komenda 15×15, duży komisariat 17×17), a Większy rewir daje +3 pola w każdą stronę zamiast +2"}
+{"v": "6.0.8", "notes": "6.0.8: logo w menu głównym; domy jednorodzinne mają zawsze tę samą wielkość; obsługa wspólnych losowych kolorów i graniastosłupa trójkątnego z edytora. Edytor: wygląd jak Blockbench, outliner, składane panele, regulowana szerokość kolumn, biblioteki animacji i efektów, wspólny losowy kolor dla kilku brył, graniastosłup trójkątny"}

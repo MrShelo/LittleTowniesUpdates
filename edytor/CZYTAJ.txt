@@ -1,4 +1,4 @@
-LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza)
+LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza; wspólne kolory i graniastosłup: gra 6.0.8+)
 
 1. Uruchom EDYTOR.cmd (albo otwórz LittleTownies-Edytor.html w Edge/Chrome). Potrzebny internet.
 2. Kliknij „Wczytaj grę z GitHuba”. Edytor pobiera aktualną grę z MrShelo/LittleTowniesUpdates.
@@ -7,6 +7,16 @@ LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza)
    (np. Policja → Duży komisariat → Budynek / Ulepszenie: Drugi garaż).
    Na dole są też „Pojazdy” (samochody, dostawy, służby, helikopter, kolej) i „Piesi”.
    Kropka przy folderze: pomarańczowa = coś zapisane, zielona = zmienione w grze.
+
+   WYGLĄD: ciemny układ jak w Blockbenchu. Panele składasz kliknięciem w ich tytuł.
+   Szerokość kolumn po lewej i prawej zmieniasz, przeciągając ich krawędź (dwuklik: szerokość domyślna).
+   Granicę między „Modele” i „Outliner” też można przeciągać. Edytor pamięta układ.
+
+   OUTLINER (po lewej, pod modelami): drzewo części modelu – grupy z gry jako foldery,
+   potem „Dodane bryły” i „Efekty”. Klik zaznacza, Ctrl + klik dodaje / odejmuje, Shift + klik zaznacza zakres,
+   klik w folder zaznacza całą grupę. Oko ukrywa / pokazuje część (albo cały folder).
+   Lupka szuka części, „+” dodaje bryłę. Kropka przy nazwie = część zmieniona; ✦ świeci, 🎲 losowy kolor
+   (z numerem grupy, jeśli losuje wspólny kolor), ⟳ animacja.
 
 4. EDYCJA
    - Klik zaznacza część, Shift/Ctrl + klik dodaje kolejne, Ctrl+A zaznacza wszystko, Esc czyści.
@@ -17,7 +27,8 @@ LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza)
    - Kilka części naraz: obracają się i skalują wokół wspólnego środka i się nie zniekształcają.
      W polach obrót i skala są wtedy względne (po zmianie wracają do 0° i 1).
    - Kopiuj (Ctrl+C), Wklej (Ctrl+V – także do innego modelu), Duplikuj (Ctrl+D).
-   - Dodaj bryłę: prostopadłościan, walec, stożek, kula, ostrosłup. Delete usuwa dodane, części z gry ukrywa.
+   - Dodaj bryłę: prostopadłościan, graniastosłup trójkątny (jak dach), walec, stożek, kula, ostrosłup.
+     Delete usuwa dodane, części z gry ukrywa.
 
 5. ZACHOWANIE CZĘŚCI (panel po prawej, dla zaznaczonych części)
    - Świeci: zawsze albo tylko nocą (jak okna). Przycisk „Noc” pokazuje podgląd nocny.
@@ -25,11 +36,14 @@ LITTLE TOWNIES – EDYTOR MODELI (gra 5.4.1 lub nowsza)
      (np. ciemne okno, które wieczorem robi się żółte). W dzień ma swój zwykły kolor.
    - Losowy kolor: każdy budynek / pojazd dostaje inny kolor z palety. Kliknij kolor, żeby go zmienić,
      × usuwa kolor, + dodaje nowy. „Losuj podgląd” losuje jeszcze raz, „Domyślne” przywraca kolory z gry.
+   - Wspólny kolor: zaznacz kilka brył i kliknij „Połącz zaznaczone” – w grze wylosują jeden, ten sam kolor
+     (np. ściany i dach jednego koloru). Grupa ma jedną paletę. „Odłącz” wyjmuje bryły z grupy.
    - Kolor budynku: część bierze kolor z ustawień budynku (branża sklepu, linia fabryki).
      W dostawczaku – kolor sklepu, do którego jedzie; w ciężarówce – kolor fabryki.
    - Animacja (biblioteka z gry): obrót jak turbina, śmigło, kołysanie, unoszenie, pulsowanie,
      miganie jak koguty radiowozu, migotanie płomienia. Oś, prędkość, zakres i faza do ustawienia.
-     „▶ Animacje” odtwarza je w podglądzie.
+     „▶ Animacje” odtwarza je w podglądzie. Panel „Biblioteka animacji”: klik nadaje animację
+     zaznaczonym częściom, drugi klik ją zdejmuje. „Biblioteka efektów” dodaje efekty jednym kliknięciem.
 
 6. EFEKTY (cząsteczki z gry): Dym, Ciemny dym, Para, Ogień. Pojawiają się jako znacznik,
    który przesuwasz i skalujesz jak część. Można ustawić kolor, liczbę cząsteczek, prędkość

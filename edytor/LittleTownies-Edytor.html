@@ -5,88 +5,142 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Little Townies – Edytor modeli</title>
 <style>
-:root{--bg:#eef3ee;--panel:#ffffff;--ink:#1f2a24;--muted:#66756c;--line:#d8e2db;--accent:#e2552e;--accent2:#2f6fe0;--ok:#2f9e5a;--warn:#c8372d;--chip:#f1f5f2;
-  --font:system-ui,-apple-system,"Segoe UI",sans-serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151a17;--panel:#1f2622;--ink:#e6efe9;--muted:#93a39a;--line:#2f3a34;--chip:#28312c}}
-:root[data-theme="dark"]{--bg:#151a17;--panel:#1f2622;--ink:#e6efe9;--muted:#93a39a;--line:#2f3a34;--chip:#28312c}
+/* dark workspace in the spirit of Blockbench */
+:root{--bg:#2c313a;--back:#21252b;--ui:#282c34;--dark:#17191d;--border:#181a1f;--btn:#3a3f4b;--hover:#495061;--sel:#474d5d;--acc:#3e90ff;--acc2:#e2552e;
+  --ink:#cacad4;--muted:#848891;--bright:#f4f3ff;--ok:#79c36a;--warn:#ef5a4c;--x:#f14b4b;--y:#58c24c;--z:#3e90ff;--lw:300px;--rw:340px;--font:"Inter","Segoe UI",system-ui,-apple-system,sans-serif}
 *{box-sizing:border-box}html,body{margin:0;height:100%}[hidden]{display:none!important}
-body{background:var(--bg);color:var(--ink);font:14px/1.4 var(--font);display:grid;grid-template-rows:auto 1fr;overflow:hidden}
-header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
-header h1{font-size:16px;margin:0 8px 0 0;letter-spacing:-.01em}
-header .st{color:var(--muted);font-size:12.5px;margin-left:auto}
-button,.btn{font:inherit;color:inherit;background:var(--chip);border:1px solid var(--line);border-radius:9px;padding:6px 11px;cursor:pointer;min-height:32px}
-button:hover{border-color:var(--muted)}button:disabled{opacity:.45;cursor:not-allowed}
-button.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-button.blue{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:600}
-button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
-input,select,textarea{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px 8px;min-width:0}
-.app{display:grid;grid-template-columns:270px 1fr 340px;min-height:0}
-aside{background:var(--panel);overflow:auto;min-height:0}
-#left{border-right:1px solid var(--line);padding:10px}
-#right{border-left:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:14px}
-#left input{width:100%;margin-bottom:8px}
-/* folder tree */
-details.fold{margin:1px 0}
-details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:8px;user-select:none}
+body{background:var(--back);color:var(--ink);font:13px/1.35 var(--font);display:grid;grid-template-rows:34px 1fr;overflow:hidden}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:#3b414d;border-radius:5px;border:2px solid var(--ui)}::-webkit-scrollbar-track{background:transparent}
+/* menu bar */
+header{display:flex;align-items:center;gap:6px;padding:0 8px;background:var(--dark);border-bottom:1px solid var(--border);min-width:0}
+header h1{font-size:13px;margin:0 10px 0 2px;font-weight:600;color:var(--bright);display:flex;align-items:center;gap:8px;white-space:nowrap}
+header h1 i{width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg,#e2552e,#f2c14e);display:inline-block}
+header .st{color:var(--muted);font-size:12px;margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button,.btn{font:inherit;color:var(--ink);background:var(--btn);border:0;border-radius:3px;padding:4px 10px;cursor:pointer;min-height:26px;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+button:hover,.btn:hover{background:var(--hover);color:var(--bright)}button:disabled{opacity:.4;cursor:not-allowed;background:var(--btn);color:var(--ink)}
+button.pri{background:var(--acc2);color:#fff;font-weight:600}button.pri:hover{background:#f0653f}
+button.blue{background:var(--acc);color:#fff;font-weight:600}button.blue:hover{background:#5aa2ff}
+button[aria-pressed="true"]{background:var(--acc);color:#fff}
+header button,header .btn{background:transparent;min-height:24px}header button:hover,header .btn:hover{background:var(--btn)}header button.blue{background:var(--acc)}
+input,select,textarea{font:inherit;color:var(--bright);background:var(--dark);border:1px solid var(--border);border-radius:3px;padding:3px 6px;min-width:0;min-height:24px}
+input:focus,select:focus{outline:1px solid var(--acc);outline-offset:-1px}
+input[type=checkbox]{accent-color:var(--acc);min-height:0}
+input[type=color]{padding:1px 2px;cursor:pointer}
+.app{display:grid;grid-template-columns:var(--lw) 5px minmax(0,1fr) 5px var(--rw);min-height:0}
+aside{background:var(--ui);min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#right{overflow:auto}#right .panel{flex:none}#right .pb{overflow:visible}
+/* drag handles between the columns */
+.rz{background:var(--border);cursor:col-resize;position:relative;touch-action:none}.rz:hover,.rz.on{background:var(--acc)}
+.rzh{height:5px;flex:none;background:var(--border);cursor:row-resize;touch-action:none}.rzh:hover,.rzh.on{background:var(--acc)}
+/* collapsible panels */
+.panel{border-bottom:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+.ph{display:flex;align-items:center;gap:6px;height:28px;padding:0 6px 0 4px;background:var(--ui);color:var(--bright);font-weight:600;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;user-select:none;flex:none;border-bottom:1px solid var(--border)}
+.ph:hover{background:#2e333c}
+.ph .chev{width:14px;height:14px;transition:transform .12s;opacity:.7;flex:none}.panel.closed .ph .chev{transform:rotate(-90deg)}
+.ph .acts{margin-left:auto;display:flex;gap:2px;align-items:center;text-transform:none;letter-spacing:0;font-weight:500}
+.ph .acts button{background:transparent;padding:2px 5px;min-height:22px;color:var(--ink)}.ph .acts button:hover{background:var(--btn)}
+.ph .cnt{color:var(--muted);font-size:11.5px;font-weight:500;letter-spacing:0}
+.pb{padding:8px 10px;overflow:auto;min-height:0}.panel.closed .pb{display:none}.panel.closed{flex:none!important}
+#pModels{flex:1 1 45%}#pOutl{flex:1 1 55%}
+#pModels .pb,#pOutl .pb{padding:4px 0;flex:1}
+.search{display:flex;gap:4px;padding:6px 8px 4px}.search input{flex:1;width:100%}
+/* model library tree */
+details.fold{margin:0}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0 8px;height:24px;user-select:none;white-space:nowrap}
 details.fold>summary::-webkit-details-marker{display:none}
 details.fold>summary::before{content:"";width:0;height:0;border-left:5px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;opacity:.55;transition:transform .12s;flex:none}
 details.fold[open]>summary::before{transform:rotate(90deg)}
-details.fold>summary:hover{background:var(--chip)}
-details.fold.top>summary{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:650}
-details.fold .kids{padding-left:12px;border-left:1px solid var(--line);margin-left:8px}
+details.fold>summary:hover{background:var(--hover)}
+details.fold.top>summary{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:650}
+details.fold .kids{padding-left:10px;margin-left:10px;border-left:1px solid #343944}
 .fold .cnt{margin-left:auto;font-size:11px;color:var(--muted);font-weight:500;letter-spacing:0;text-transform:none}
 .dot{width:7px;height:7px;border-radius:50%;background:#e0a325;flex:none}.dot.g{background:var(--ok)}
-.item{display:flex;justify-content:space-between;align-items:center;gap:6px;width:100%;text-align:left;border:0;background:none;border-radius:8px;padding:5px 8px;min-height:28px}
-.item:hover{background:var(--chip)}.item.on{background:var(--ink);color:var(--panel)}
-.tag{font-size:10.5px;padding:1px 6px;border-radius:9px;background:var(--chip);color:var(--muted);white-space:nowrap}
-.item.on .tag{background:rgba(255,255,255,.18);color:inherit}
-.tag.s{background:#fdebd2;color:#8a5a12}.tag.g{background:#dff1e5;color:#226b3c}
-#view{position:relative;min-width:0;min-height:0}
+.item{display:flex;justify-content:space-between;align-items:center;gap:6px;width:100%;text-align:left;border:0;background:none;border-radius:0;padding:0 8px;min-height:24px;color:var(--ink)}
+.item:hover{background:var(--hover)}.item.on{background:var(--sel);color:var(--bright);box-shadow:inset 2px 0 var(--acc)}
+.item span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{font-size:10px;padding:0 6px;border-radius:8px;background:var(--btn);color:var(--muted);white-space:nowrap;line-height:16px}
+.tag.s{background:#5c4720;color:#f2c14e}.tag.g{background:#284a2a;color:#8fd481}
+/* outliner */
+.ol{font-size:12.5px;user-select:none}
+.orow{display:flex;align-items:center;height:24px;padding-right:6px;cursor:pointer;white-space:nowrap;gap:5px;position:relative}
+.orow:hover{background:var(--hover)}.orow.on{background:var(--sel);color:var(--bright)}.orow.on::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--acc)}
+.orow .tw{width:16px;height:16px;flex:none;display:grid;place-items:center;opacity:.65}.orow .tw svg{transition:transform .1s}.orow .tw.c svg{transform:rotate(-90deg)}
+.orow .ic{width:16px;height:16px;flex:none}
+.orow .nm{overflow:hidden;text-overflow:ellipsis;min-width:0}.orow .ix{color:var(--muted);font-size:11px}
+.orow .bd{font-size:10px;color:var(--muted);margin-left:2px}
+.orow .eye{margin-left:auto;width:22px;height:20px;flex:none;display:grid;place-items:center;background:none;min-height:0;padding:0;color:var(--ink);opacity:.8}
+.orow .eye:hover{background:var(--btn);opacity:1}.orow.hid .nm,.orow.hid .ic{opacity:.4}.orow .eye.off{opacity:.45}
+.orow.mod .nm::after{content:" •";color:#f2c14e}
+.ol .empty{color:var(--muted);padding:8px 12px}
+.menu{position:fixed;z-index:20;background:var(--dark);border:1px solid #333944;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.45);padding:4px;display:grid;min-width:180px}
+.menu button{background:none;justify-content:flex-start;border-radius:2px}.menu button:hover{background:var(--acc);color:#fff}
+/* viewport */
+#view{position:relative;min-width:0;min-height:0;background:#2a2f37}
 #cv{width:100%;height:100%;display:block;touch-action:none}
-.tools{position:absolute;left:12px;top:12px;right:12px;display:flex;gap:6px;flex-wrap:wrap}
-.tools button{background:var(--panel)}.tools button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
-.tools .sep{width:1px;background:var(--line);margin:2px 2px}
-.hint{position:absolute;left:12px;bottom:12px;right:12px;color:var(--muted);font-size:12.5px;pointer-events:none;text-shadow:0 1px 0 var(--bg)}
+.tools{position:absolute;left:0;top:0;right:0;display:flex;gap:2px;flex-wrap:wrap;padding:4px 6px;background:rgba(33,37,43,.92);border-bottom:1px solid var(--border)}
+.tools button{background:transparent;min-height:26px;padding:3px 9px}.tools button:hover{background:var(--btn)}.tools button[aria-pressed="true"]{background:var(--acc);color:#fff}
+.tools .sep{width:1px;background:#3b414d;margin:3px 4px}
+.hint{position:absolute;left:10px;bottom:8px;right:10px;color:var(--muted);font-size:12px;pointer-events:none;text-shadow:0 1px 2px #000}
 .load{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px}
-.load .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:440px;display:grid;gap:12px}
-h2{font-size:13px;margin:0 0 8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.grid3{display:grid;grid-template-columns:62px repeat(3,1fr);gap:6px;align-items:center}
-.grid3 input{width:100%}
-.grid2{display:grid;grid-template-columns:92px 1fr;gap:6px 8px;align-items:center}
+.load .box{background:var(--ui);border:1px solid var(--border);border-radius:6px;padding:22px;max-width:440px;display:grid;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.load b{color:var(--bright)}
+h2{font-size:11px;margin:10px 0 6px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h2:first-child{margin-top:0}
+/* transform fields with coloured axis marks */
+.grid3{display:grid;grid-template-columns:58px repeat(3,1fr);gap:4px;align-items:center}
+.grid3 input{width:100%;font-variant-numeric:tabular-nums}
+.ax{position:relative}.ax input{padding-left:14px}.ax::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:3px;border-radius:2px;background:var(--c)}
+.ax.x{--c:var(--x)}.ax.y{--c:var(--y)}.ax.z{--c:var(--z)}
+.grid2{display:grid;grid-template-columns:92px 1fr;gap:5px 8px;align-items:center}
 .grid2 select,.grid2 input:not([type=checkbox]){width:100%}
-.anp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.anp label{display:grid;gap:2px;font-size:11.5px;color:var(--muted)}.anp input,.anp select{width:100%}
-.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.anp{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.anp label{display:grid;gap:2px;font-size:11px;color:var(--muted)}.anp input,.anp select{width:100%}
+.row{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
 /* palette of random colours */
-.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:8px;padding:8px;background:var(--chip);border:1px solid var(--line);border-radius:12px}
-.sw{position:relative;aspect-ratio:1;border-radius:9px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);overflow:visible}
-.sw input[type=color]{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:9px;background:none;cursor:pointer;opacity:0}
-.sw .x{position:absolute;top:-7px;right:-7px;width:19px;height:19px;min-height:0;padding:0;border-radius:50%;font-size:12px;line-height:17px;text-align:center;background:var(--panel);border:1px solid var(--line);color:var(--muted);opacity:0;transition:opacity .12s;z-index:1}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(30px,1fr));gap:7px;padding:7px;background:var(--dark);border:1px solid var(--border);border-radius:4px}
+.sw{position:relative;aspect-ratio:1;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);overflow:visible}
+.sw input[type=color]{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:4px;background:none;cursor:pointer;opacity:0}
+.sw .x{position:absolute;top:-7px;right:-7px;width:18px;height:18px;min-height:0;padding:0;border-radius:50%;font-size:12px;line-height:16px;text-align:center;background:var(--ui);border:1px solid #444b57;color:var(--muted);opacity:0;transition:opacity .12s;z-index:1}
 .sw:hover .x,.sw:focus-within .x{opacity:1}.sw .x:hover{color:var(--warn);border-color:var(--warn)}
 @media (hover:none){.sw .x{opacity:1}}
-.sw.add{display:grid;place-items:center;background:var(--panel);box-shadow:none;border:1.5px dashed var(--muted);color:var(--muted);font-size:20px;line-height:1}
-.sw.add:hover{border-color:var(--ink);color:var(--ink)}
-button.mini{min-height:26px;padding:2px 9px;font-size:12px}
-.vars{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}.vars button{min-height:28px;padding:3px 9px;font-size:12.5px}
-.sec{border-top:1px solid var(--line);padding-top:12px}
-.muted{color:var(--muted);font-size:12.5px}
-.saved{display:grid;gap:4px}.saved label{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:8px;background:var(--chip)}
+.sw.add{display:grid;place-items:center;background:transparent;box-shadow:none;border:1.5px dashed var(--muted);color:var(--muted);font-size:18px;line-height:1}
+.sw.add:hover{border-color:var(--bright);color:var(--bright)}
+button.mini{min-height:22px;padding:1px 8px;font-size:12px}
+.vars{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}.vars button{min-height:24px;padding:2px 8px;font-size:12px}
+.muted{color:var(--muted);font-size:12px}
+#mName b{color:var(--bright)}
+.saved{display:grid;gap:3px}.saved label{display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:3px;background:var(--dark)}
 .saved label span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.saved small{color:var(--muted)}
+.saved small{color:var(--muted)}.saved button{min-height:22px;padding:1px 7px;font-size:12px}
 #log{font-size:12px;color:var(--muted);white-space:pre-wrap;max-height:120px;overflow:auto}
 .err{color:var(--warn)}.okc{color:var(--ok)}
+.lib{display:grid;gap:2px}.lib button{justify-content:flex-start;background:var(--dark);text-align:left;min-height:26px}.lib button:hover{background:var(--hover)}.lib button[aria-pressed="true"]{background:var(--acc)}
+.lib svg{width:16px;height:16px;flex:none}.lib small{color:var(--muted);margin-left:auto;font-size:11px}
+.grp{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:10px;background:var(--dark);font-size:12px}
 iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:0;border:0;pointer-events:none}
-@media (max-width:900px){.app{grid-template-columns:1fr;grid-template-rows:220px 50vh auto;overflow:auto}body{overflow:auto}aside{overflow:visible}}
+@media (max-width:900px){.app{grid-template-columns:1fr;grid-template-rows:300px 55vh auto;overflow:auto}.rz{display:none}body{overflow:auto}aside{overflow:visible}#right{overflow:visible}}
 </style>
 </head>
 <body>
 <header>
-  <h1>Little Townies · Edytor modeli</h1>
+  <h1><i></i>Little Townies · Edytor modeli</h1>
   <button id="srcGh" class="blue">Wczytaj grę z GitHuba</button>
   <label class="btn">Wczytaj plik gry…<input id="srcFile" type="file" accept=".html,text/html" hidden></label>
   <span class="st" id="status">Gra nie jest wczytana</span>
 </header>
-<div class="app">
-  <aside id="left"><input id="search" placeholder="Szukaj modelu…" aria-label="Szukaj modelu"><div id="models"></div></aside>
+<div class="app" id="app">
+  <aside id="left">
+    <div class="panel" id="pModels" data-p="models">
+      <div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Modele</div>
+      <div class="pb"><div class="search"><input id="search" placeholder="Szukaj modelu…" aria-label="Szukaj modelu"></div><div id="models"></div></div>
+    </div>
+    <div class="rzh" id="rzLeft" title="Przeciągnij, żeby zmienić wysokość"></div>
+    <div class="panel" id="pOutl" data-p="outliner">
+      <div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Outliner
+        <span class="acts"><button id="olAdd" title="Dodaj bryłę" aria-label="Dodaj bryłę">+ <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg></button><button id="olFind" title="Szukaj części" aria-label="Szukaj części"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg></button><span class="cnt" id="olCnt">0 / 0</span></span></div>
+      <div class="pb"><div class="search" id="olSearchBox" hidden><input id="olSearch" placeholder="Szukaj części…" aria-label="Szukaj części"></div><div class="ol" id="outl" role="tree" aria-label="Części modelu"><div class="empty">Otwórz model z listy.</div></div></div>
+    </div>
+  </aside>
+  <div class="rz" id="rzL" title="Przeciągnij, żeby zmienić szerokość (dwuklik: domyślna)"></div>
   <section id="view">
     <canvas id="cv"></canvas>
     <div class="tools" id="tools" hidden>
@@ -106,37 +160,36 @@ iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:
       <span class="muted">„Wczytaj grę z GitHuba” pobiera aktualną wersję z MrShelo/LittleTowniesUpdates. Możesz też wskazać plik gry (index.html albo LittleTownies.html).</span>
     </div></div>
   </section>
+  <div class="rz" id="rzR" title="Przeciągnij, żeby zmienić szerokość (dwuklik: domyślna)"></div>
   <aside id="right">
-    <div>
-      <h2>Model</h2>
+    <div class="panel" data-p="model"><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Model</div><div class="pb">
       <div id="mName" class="muted">Wybierz model z listy.</div>
       <div id="varBox" hidden>
         <div class="vars" id="vars"></div>
         <div class="muted" id="varInfo" style="margin-top:6px"></div>
       </div>
-    </div>
-    <div class="sec" id="partSec" hidden>
-      <h2>Część</h2>
-      <div class="row" style="margin-bottom:8px"><select id="partSel" style="flex:1" aria-label="Część modelu"></select></div>
+    </div></div>
+    <div class="panel" id="partSec" data-p="part" hidden><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Część<span class="acts"><span class="cnt" id="selInfo"></span></span></div><div class="pb">
       <div class="grid3">
-        <span class="muted">Kolor</span><input type="color" id="pCol" aria-label="Kolor" style="grid-column:span 3;height:32px;padding:2px">
-        <span class="muted">Pozycja</span><input type="number" step="0.01" id="px" aria-label="Pozycja X"><input type="number" step="0.01" id="py" aria-label="Pozycja Y"><input type="number" step="0.01" id="pz" aria-label="Pozycja Z">
-        <span class="muted">Obrót °</span><input type="number" step="1" id="rx" aria-label="Obrót X"><input type="number" step="1" id="ry" aria-label="Obrót Y"><input type="number" step="1" id="rz" aria-label="Obrót Z">
-        <span class="muted">Skala</span><input type="number" step="0.01" id="sx" aria-label="Skala X"><input type="number" step="0.01" id="sy" aria-label="Skala Y"><input type="number" step="0.01" id="sz" aria-label="Skala Z">
+        <span class="muted">Kolor</span><input type="color" id="pCol" aria-label="Kolor" style="grid-column:span 3;height:26px">
+        <span class="muted">Pozycja</span><span class="ax x"><input type="number" step="0.01" id="px" aria-label="Pozycja X"></span><span class="ax y"><input type="number" step="0.01" id="py" aria-label="Pozycja Y"></span><span class="ax z"><input type="number" step="0.01" id="pz" aria-label="Pozycja Z"></span>
+        <span class="muted">Obrót °</span><span class="ax x"><input type="number" step="1" id="rx" aria-label="Obrót X"></span><span class="ax y"><input type="number" step="1" id="ry" aria-label="Obrót Y"></span><span class="ax z"><input type="number" step="1" id="rz" aria-label="Obrót Z"></span>
+        <span class="muted">Skala</span><span class="ax x"><input type="number" step="0.01" id="sx" aria-label="Skala X"></span><span class="ax y"><input type="number" step="0.01" id="sy" aria-label="Skala Y"></span><span class="ax z"><input type="number" step="0.01" id="sz" aria-label="Skala Z"></span>
       </div>
       <div class="muted" id="multiInfo" hidden style="margin-top:6px">Kilka części: obrót i skala działają względnie (po zmianie wracają do 0° i 1).</div>
       <div class="row" style="margin-top:8px"><button id="hideBtn">Ukryj część</button><button id="resetPart">Przywróć część</button><button id="delAdd" hidden>Usuń bryłę</button></div>
-      <div class="row" style="margin-top:6px"><button id="copyBtn" title="Ctrl+C">Kopiuj</button><button id="pasteBtn" title="Ctrl+V" disabled>Wklej</button><button id="dupBtn" title="Ctrl+D">Duplikuj</button><button id="allBtn" title="Ctrl+A">Zaznacz wszystko</button></div>
-    </div>
-    <div class="sec" id="roleSec" hidden>
-      <h2>Zachowanie części</h2>
+      <div class="row" style="margin-top:4px"><button id="copyBtn" title="Ctrl+C">Kopiuj</button><button id="pasteBtn" title="Ctrl+V" disabled>Wklej</button><button id="dupBtn" title="Ctrl+D">Duplikuj</button><button id="allBtn" title="Ctrl+A">Zaznacz wszystko</button></div>
+    </div></div>
+    <div class="panel" id="roleSec" data-p="role" hidden><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Zachowanie części</div><div class="pb">
       <div class="grid2">
         <span class="muted">Świeci</span><select id="rGl"><option value="0">nie</option><option value="1">zawsze</option><option value="2">tylko nocą (jak okna)</option></select>
-        <span class="muted" id="rGcL">Kolor nocą</span><span class="row" id="rGcBox" style="gap:6px;flex-wrap:nowrap"><label class="row" style="gap:6px;flex:none"><input type="checkbox" id="rGcOn"> <span class="muted">zmienia na</span></label><input type="color" id="rGc" style="height:30px;padding:2px;flex:1;min-width:40px" value="#ffd36b"></span>
+        <span class="muted" id="rGcL">Kolor nocą</span><span class="row" id="rGcBox" style="gap:6px;flex-wrap:nowrap"><label class="row" style="gap:6px;flex:none"><input type="checkbox" id="rGcOn"> <span class="muted">zmienia na</span></label><input type="color" id="rGc" style="height:26px;flex:1;min-width:40px" value="#ffd36b"></span>
         <span class="muted">Losowy kolor</span><label class="row" style="gap:6px"><input type="checkbox" id="rRc"> <span class="muted">każdy budynek / pojazd inny</span></label>
+        <span class="muted" id="rGrL">Wspólny kolor</span><div id="rGrBox"><div class="row" style="gap:4px"><span class="grp" id="rGrName">brak grupy</span><button class="mini" id="rGrJoin" title="Zaznaczone bryły losują jeden wspólny kolor">Połącz zaznaczone</button><button class="mini" id="rGrLeave">Odłącz</button></div>
+          <div class="muted" id="rGrInfo" style="margin-top:4px">Zaznacz kilka brył (Shift/Ctrl + klik) i połącz je: w grze wylosują ten sam kolor.</div></div>
         <span class="muted" id="rPalL" style="align-self:start;padding-top:8px">Kolory</span>
         <div id="rPalBox"><div class="pal" id="rPal" role="list" aria-label="Kolory do losowania"></div>
-          <div class="row" style="margin-top:8px;gap:4px"><button class="mini" id="palRoll" title="Wylosuj kolory w podglądzie jeszcze raz">🎲 Losuj podgląd</button><button class="mini" id="palDef">Domyślne</button></div></div>
+          <div class="row" style="margin-top:6px;gap:4px"><button class="mini" id="palRoll" title="Wylosuj kolory w podglądzie jeszcze raz">🎲 Losuj podgląd</button><button class="mini" id="palDef">Domyślne</button></div></div>
         <span class="muted">Kolor budynku</span><select id="rPt"><option value="">jak w grze</option><option value="1">bierze kolor z ustawień budynku</option><option value="-1">nie bierze</option></select>
         <span class="muted">Animacja</span><select id="rAn"><option value="">brak</option></select>
       </div>
@@ -147,40 +200,40 @@ iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:
         <label>Faza<input type="number" step="0.1" id="anPh"></label>
       </div>
       <div class="muted" id="rInfo" style="margin-top:6px"></div>
-    </div>
-    <div class="sec" id="fxSec" hidden>
-      <h2>Efekt</h2>
+    </div></div>
+    <div class="panel" id="fxSec" data-p="fx" hidden><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Efekt</div><div class="pb">
       <div class="grid2">
         <span class="muted">Rodzaj</span><select id="fK"></select>
-        <span class="muted" id="fColL">Kolor</span><input type="color" id="fCol" style="height:32px;padding:2px">
+        <span class="muted" id="fColL">Kolor</span><input type="color" id="fCol" style="height:26px">
         <span class="muted">Cząsteczki</span><input type="number" min="1" max="12" step="1" id="fN">
         <span class="muted">Prędkość</span><input type="number" min="0.1" step="0.1" id="fSp">
         <span class="muted">Działanie</span><label class="row" style="gap:6px"><input type="checkbox" id="fW"> <span class="muted">tylko gdy budynek pracuje</span></label>
       </div>
-    </div>
-    <div class="sec" id="addSec" hidden>
-      <h2>Dodaj bryłę</h2>
-      <div class="row"><button data-add="box">Prostopadłościan</button><button data-add="cyl">Walec</button><button data-add="cone">Stożek</button><button data-add="sphere">Kula</button><button data-add="pyr">Ostrosłup</button></div>
-      <h2 style="margin-top:12px">Dodaj efekt</h2>
-      <div class="row" id="fxBtns"></div>
-    </div>
-    <div class="sec" id="saveSec" hidden>
+    </div></div>
+    <div class="panel" id="addSec" data-p="add" hidden><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Dodaj bryłę</div><div class="pb">
+      <div class="row" id="addBtns"><button data-add="box">Prostopadłościan</button><button data-add="wedge">Graniastosłup trójkątny</button><button data-add="cyl">Walec</button><button data-add="cone">Stożek</button><button data-add="sphere">Kula</button><button data-add="pyr">Ostrosłup</button></div>
+    </div></div>
+    <div class="panel" id="fxLibSec" data-p="fxlib" hidden><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Biblioteka efektów</div><div class="pb">
+      <div class="muted" style="margin-bottom:6px">Kliknij, żeby dodać efekt w środku widoku.</div><div class="lib" id="fxBtns"></div>
+    </div></div>
+    <div class="panel" id="anLibSec" data-p="anlib" hidden><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Biblioteka animacji</div><div class="pb">
+      <div class="muted" style="margin-bottom:6px" id="anLibInfo">Zaznacz części i kliknij animację, żeby ją nadać. Ponowne kliknięcie zdejmuje.</div><div class="lib" id="anLib"></div>
+    </div></div>
+    <div class="panel" id="saveSec" data-p="save" hidden><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Zapis</div><div class="pb">
       <div class="row"><button class="pri" id="saveBtn">Zapisz model</button><button id="discardBtn">Cofnij niezapisane</button><button id="origBtn">Wróć do oryginału gry</button></div>
       <div class="muted" id="dirty" style="margin-top:6px"></div>
-    </div>
-    <div class="sec">
-      <h2>Zapisane modele</h2>
+    </div></div>
+    <div class="panel" data-p="saved"><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Zapisane modele</div><div class="pb">
       <div class="saved" id="saved"><span class="muted">Brak zapisanych modeli.</span></div>
       <div class="row" style="margin-top:8px"><button id="expBtn">Eksportuj zapisane</button><label class="btn">Importuj…<input id="impFile" type="file" accept=".json" hidden></label></div>
-    </div>
-    <div class="sec">
-      <h2>Wyślij jako aktualizację</h2>
+    </div></div>
+    <div class="panel" data-p="pub"><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Wyślij jako aktualizację</div><div class="pb">
       <div class="muted" style="margin-bottom:6px">Zaznacz zapisane modele powyżej. Wysyłka podbija wersję gry, a gracze dostaną zmiany przez aktualizację. Potrzebny token GitHuba z prawem zapisu do repozytorium (fine-grained, uprawnienie „Contents: Read and write”).</div>
       <input id="token" type="password" placeholder="Token GitHuba (zapamiętany tylko na tym komputerze)" style="width:100%;margin-bottom:6px" autocomplete="off">
       <input id="notes" placeholder="Opis aktualizacji (opcjonalnie)" style="width:100%;margin-bottom:6px">
       <button class="blue" id="pubBtn" disabled>Wyślij zaznaczone (0)</button>
       <div id="log" style="margin-top:8px"></div>
-    </div>
+    </div></div>
   </aside>
 </div>
 <iframe id="game" title="Little Townies (ukryta)"></iframe>
@@ -227,16 +280,16 @@ function normModel(m){if(m.grp!==undefined)return m;const cat=String(m.cat||'Inn
 function setupLibs(){const an=$('rAn');an.innerHTML='<option value="">brak</option>';const fk=$('fK');fk.innerHTML='';const fb=$('fxBtns');fb.innerHTML='';
   if(api.animLib)for(const k in api.animLib){const o=document.createElement('option');o.value=k;o.textContent=api.animLib[k].name;an.appendChild(o)}
   if(api.fxLib)for(const k in api.fxLib){const o=document.createElement('option');o.value=k;o.textContent=api.fxLib[k].name;fk.appendChild(o);
-    const b=document.createElement('button');b.textContent=api.fxLib[k].name.replace(/ \(.*\)$/,'');b.title=api.fxLib[k].name;b.onclick=()=>addFx(k);fb.appendChild(b)}
-  $('fxBtns').previousElementSibling.hidden=!api.fxLib;$('rAn').disabled=!api.animLib}
+    const b=document.createElement('button');b.innerHTML=OI.fx+'<span></span>';b.lastChild.textContent=api.fxLib[k].name;b.title=api.fxLib[k].name;b.onclick=()=>addFx(k);fb.appendChild(b)}
+  $('rAn').disabled=!api.animLib;renderAnimLib()}
 
 /* ---------- 3D view ---------- */
 function setup3D(){const cv=$('cv');renderer=new T.WebGLRenderer({canvas:cv,antialias:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
   scene=new T.Scene();bgDay=new T.Color(getComputedStyle(document.body).getPropertyValue('--bg').trim()||'#eef3ee');scene.background=bgDay.clone();
   camera=new T.PerspectiveCamera(40,1,0.01,100);camera.position.set(2.4,2.2,2.8);
   hemi=new T.HemisphereLight(0xffffff,0x8fa596,0.75);scene.add(hemi);sunL=new T.DirectionalLight(0xffffff,0.75);sunL.position.set(3,6,4);sunL.castShadow=true;sunL.shadow.mapSize.set(1024,1024);Object.assign(sunL.shadow.camera,{left:-3,right:3,top:3,bottom:-3});scene.add(sunL);
-  const gr=new T.Mesh(new T.PlaneGeometry(12,12),new T.MeshLambertMaterial({color:0x9fd36b}));gr.rotation.x=-Math.PI/2;gr.receiveShadow=true;scene.add(gr);
-  const gh=new T.GridHelper(12,12,0x6f9a4a,0x7fae55);gh.position.y=0.002;scene.add(gh);
+  const gr=new T.Mesh(new T.PlaneGeometry(12,12),new T.MeshLambertMaterial({color:0x4d5462}));gr.rotation.x=-Math.PI/2;gr.receiveShadow=true;scene.add(gr);
+  const gh=new T.GridHelper(12,24,0x6a7383,0x5a6170);gh.position.y=0.002;scene.add(gh);
   orbit=new T.OrbitControls(camera,cv);orbit.enableDamping=true;orbit.target.set(0,0.3,0);
   tc=new T.TransformControls(camera,cv);tc.setSize(0.8);tc.setSpace(space);
   tc.addEventListener('dragging-changed',e=>{orbit.enabled=!e.value;if(!e.value){ds=null;if(pivot)select(sel.slice())}});
@@ -296,7 +349,7 @@ function openModel(key){if(cur&&isDirty()&&!confirm('Model ma niezapisane zmiany
   showOrig=false;$('cmpBtn').setAttribute('aria-pressed','false');rebuild();renderList();frame()}
 function setVariant(k){vi=Math.max(0,Math.min(k,full.alt.length));work=vi?full.alt[vi-1]:full;rebuild()}
 function rebuild(){animStop();if(root)scene.remove(root);tc.detach();clearHelpers();if(pivot&&pivot.parent)pivot.parent.remove(pivot);pivot=null;pv=null;sel=[];
-  root=api.build(cur,false);if(root.parent)root.parent.remove(root);ms=[];
+  rgCols={};root=api.build(cur,false);if(root.parent)root.parent.remove(root);ms=[];
   if(root.userData.edit){ms=root.userData.edit.slice();root.traverse(m=>{if(m.isMesh&&!ms.includes(m)&&m.material&&m.material.clone){m.material=m.material.clone();m.material.transparent=true;m.material.opacity=0.45;m.material.depthWrite=false}})}else root.traverse(m=>{if(m.isMesh)ms.push(m)});
   const paint0=new Set(root.userData.paint||[]);
   orig=ms.map(m=>Object.assign({p:m.position.toArray(),r:[m.rotation.x,m.rotation.y,m.rotation.z],s:m.scale.toArray()},rootPose(m),{c:m.material&&m.material.color?'#'+m.material.color.getHexString():'#cccccc',vis:m.visible,pt0:paint0.has(m)}));
@@ -305,14 +358,15 @@ function rebuild(){animStop();if(root)scene.remove(root);tc.detach();clearHelper
   applyLooks();scene.add(root);
   const m=curModel();$('mName').innerHTML='';const b=document.createElement('b');b.textContent=m?(!m.veh&&m.grp&&m.leaf&&m.grp!==m.leaf?m.grp+' · '+m.leaf:m.name):cur;$('mName').appendChild(b);
   const sm=document.createElement('div');sm.className='muted';sm.textContent=`${cur} · ${ms.length} ${ms.length===1?'część':'części'}${work.add.length?` + ${work.add.length} nowych`:''}${work.fx.length?` · efekty: ${work.fx.length}`:''}`+(root.userData.edit?' · edytujesz tylko części dodane przez ulepszenie; reszta budynku jest półprzezroczysta':'');$('mName').appendChild(sm);
-  for(const id of['partSec','addSec','saveSec'])$(id).hidden=showOrig;$('varBox').hidden=showOrig;fillVariants();fillPartSel();select([]);updDirty()}
+  for(const id of['partSec','addSec','saveSec'])$(id).hidden=showOrig;$('fxLibSec').hidden=showOrig||!api.fxLib;$('anLibSec').hidden=showOrig||!api.animLib;$('varBox').hidden=showOrig;fillVariants();fillPartSel();select([]);updDirty()}
 function applyMod(m,d){if(d.h)m.visible=false;if(d.c&&m.material&&m.material.color)m.material.color.set(d.c);if(d.rs&&m.parent&&m.parent!==root)setRootPose(m,d);else{if(d.p)m.position.fromArray(d.p);if(d.r)m.rotation.set(d.r[0],d.r[1],d.r[2]);if(d.s)m.scale.fromArray(d.s)}}
 /* colour roles as the game shows them: random colour, glow (always, or at night when the Noc preview is on) */
 function look(m,d,baseCol){if(!m||!m.material||!m.material.color)return;let col=baseCol;
-  if(d&&d.rc){const pal=Array.isArray(d.rc)&&d.rc.length?d.rc:(api.rcDef||['#e25b45']);const key=JSON.stringify(pal);if(m.userData.rcKey!==key){m.userData.rcKey=key;m.userData.rcCol=pal[(Math.random()*pal.length)|0]}col=m.userData.rcCol}else m.userData.rcKey=null;
+  if(d&&d.rc){const pal=Array.isArray(d.rc)&&d.rc.length?d.rc:(api.rcDef||['#e25b45']);const key=JSON.stringify(pal)+(d.rg?'|g'+d.rg:'');
+    if(m.userData.rcKey!==key){m.userData.rcKey=key;let c=pal[(Math.random()*pal.length)|0];if(d.rg){const g=rgCols[d.rg];if(g&&pal.includes(g))c=g;else rgCols[d.rg]=c}m.userData.rcCol=c}col=m.userData.rcCol}else m.userData.rcKey=null;
   const g=d&&d.gl,gc=g===2&&d.gc;if(gc&&night)col=gc;
   m.material.color.set(col);if(m.material.emissive){m.material.emissive.copy(m.material.color).multiplyScalar(g===1?0.6:g===2&&night?0.95:0)}}
-function applyLooks(){if(showOrig)return;ms.forEach((m,i)=>{const d=work.mods[i];look(m,d,d&&d.c||orig[i].c)});added.forEach((m,k)=>look(m,work.add[k],work.add[k].c||'#cccccc'))}
+function applyLooks(){if(showOrig)return;for(const k in rgCols){const used=[...ms.map((m,i)=>work.mods[i]),...work.add].some(d=>d&&d.rc&&d.rg==k);if(!used)delete rgCols[k]}ms.forEach((m,i)=>{const d=work.mods[i];look(m,d,d&&d.c||orig[i].c)});added.forEach((m,k)=>look(m,work.add[k],work.add[k].c||'#cccccc'))}
 /* parts nested in sub-groups are stored relative to the model root (rs), exactly like the game applies them */
 const nested=m=>m.parent&&m.parent!==root;
 function rootLocal(o){root.updateMatrixWorld(true);return new T.Matrix4().copy(root.matrixWorld).invert().multiply(o.matrixWorld)}
@@ -321,7 +375,11 @@ function setRootPose(m,d){root.updateMatrixWorld(true);const pr=new T.Matrix4().
   if(d.p)P.fromArray(d.p);if(d.r)Q.setFromEuler(new T.Euler(d.r[0],d.r[1],d.r[2]));if(d.s)S.fromArray(d.s);pr.invert().multiply(new T.Matrix4().compose(P,Q,S)).decompose(m.position,m.quaternion,m.scale)}
 /* put an object at a pose given in model-root space */
 function setPoseRoot(o,P,Q,S){const par=o.parent===root?new T.Matrix4():rootLocal(o.parent);par.invert().multiply(new T.Matrix4().compose(P,Q,S)).decompose(o.position,o.quaternion,o.scale)}
-const GEO={};function geo(k){if(!GEO[k])GEO[k]=k==='cyl'?new T.CylinderGeometry(0.5,0.5,1,16):k==='cone'?new T.ConeGeometry(0.5,1,16):k==='sphere'?new T.SphereGeometry(0.5,16,12):k==='pyr'?new T.ConeGeometry(Math.SQRT1_2,1,4).rotateY(Math.PI/4):new T.BoxGeometry(1,1,1);return GEO[k]}
+/* triangular prism 1×1×1 (roof-like wedge), the same shape the game builds */
+function wedgeGeo(){const P=[[-.5,-.5],[.5,-.5],[0,.5]],v=[],tri=(a,b,c)=>{const ab=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],ac=[c[0]-a[0],c[1]-a[1],c[2]-a[2]],n=[ab[1]*ac[2]-ab[2]*ac[1],ab[2]*ac[0]-ab[0]*ac[2],ab[0]*ac[1]-ab[1]*ac[0]],m=[(a[0]+b[0]+c[0])/3,(a[1]+b[1]+c[1])/3+1/6,(a[2]+b[2]+c[2])/3];if(n[0]*m[0]+n[1]*m[1]+n[2]*m[2]<0)[b,c]=[c,b];v.push(...a,...b,...c)};
+  const F=P.map(p=>[p[0],p[1],.5]),B=P.map(p=>[p[0],p[1],-.5]);tri(F[0],F[1],F[2]);tri(B[0],B[1],B[2]);for(let k=0;k<3;k++){const j=(k+1)%3;tri(F[k],F[j],B[j]);tri(F[k],B[j],B[k])}
+  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.computeVertexNormals();return g}
+const GEO={};function geo(k){if(!GEO[k])GEO[k]=k==='wedge'?wedgeGeo():k==='cyl'?new T.CylinderGeometry(0.5,0.5,1,16):k==='cone'?new T.ConeGeometry(0.5,1,16):k==='sphere'?new T.SphereGeometry(0.5,16,12):k==='pyr'?new T.ConeGeometry(Math.SQRT1_2,1,4).rotateY(Math.PI/4):new T.BoxGeometry(1,1,1);return GEO[k]}
 /* same rules as the game: exact copies keep a three.js geometry type + parameters (gp, offset go) or raw triangles (v) */
 const GT=['BoxGeometry','CylinderGeometry','ConeGeometry','SphereGeometry','PlaneGeometry','CircleGeometry','TorusGeometry','RingGeometry','DodecahedronGeometry','IcosahedronGeometry','OctahedronGeometry','TetrahedronGeometry'];
 function geoOf(a){if(!a.gp&&!a.v&&!a.go)return geo(a.g);let g;try{if(a.v){g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(a.v,3));g.computeVertexNormals()}else if(a.gp&&GT.includes(a.g))g=new T[a.g](...a.gp);else g=geo(a.g).clone();if(a.go)g.translate(a.go[0],a.go[1],a.go[2])}catch(e){g=geo('box')}return g}
@@ -330,7 +388,7 @@ function geoSpec(G){const V=()=>new T.Vector3();if(G.parameters&&GT.includes(G.t
     try{const t=geoOf(a);G.computeBoundingBox();t.computeBoundingBox();const s1=G.boundingBox.getSize(V()),s2=t.boundingBox.getSize(V());
       if(s1.distanceTo(s2)<1e-3){const d=G.boundingBox.getCenter(V()).sub(t.boundingBox.getCenter(V()));if(d.length()>1e-4)a.go=d.toArray().map(r4);return a}}catch(e){}}
   const g2=G.index?G.toNonIndexed():G,pos=g2.attributes&&g2.attributes.position;if(!pos||pos.count>RAW_MAX)return null;return{g:'raw',v:Array.from(pos.array,r4)}}
-function makeAdded(a){const m=new T.Mesh(geoOf(a),new T.MeshLambertMaterial({color:a.c||'#cccccc'}));m.position.fromArray(a.p);m.rotation.set(a.r[0],a.r[1],a.r[2]);m.scale.fromArray(a.s);m.castShadow=m.receiveShadow=true;root.add(m);return m}
+function makeAdded(a){const m=new T.Mesh(geoOf(a),new T.MeshLambertMaterial({color:a.c||'#cccccc'}));m.position.fromArray(a.p);m.rotation.set(a.r[0],a.r[1],a.r[2]);m.scale.fromArray(a.s);m.castShadow=m.receiveShadow=true;m.visible=!a.h;root.add(m);return m}
 /* an effect as the game makes it, plus a small marker you can click and move */
 function makeFxE(f){const g=api.makeFx(f);const mk=new T.Mesh(new T.OctahedronGeometry(0.06),new T.MeshBasicMaterial({color:0xe2552e,wireframe:true}));mk.userData.marker=true;g.add(mk);g.userData.mk=mk;root.add(g);return g}
 function frame(){const b=new T.Box3().setFromObject(root),c=b.getCenter(new T.Vector3()),sz=b.getSize(new T.Vector3()).length()||1;orbit.target.copy(c);camera.position.copy(c).add(new T.Vector3(0.9,0.75,1.05).multiplyScalar(sz*1.2));orbit.update()}
@@ -365,17 +423,65 @@ function applyPivot(){if(!pivot||!pv)return;const P=pivot.position,Q=pivot.quate
     [['x',new T.Vector3(1,0,0)],['y',new T.Vector3(0,1,0)],['z',new T.Vector3(0,0,1)]].forEach(([ax,u])=>{s[ax]=it.S[ax]*u.applyQuaternion(it.Q).multiply(S).length()});
     setPoseRoot(o,pos,q,s);recordIdx(it.i)}}
 const selectAll=()=>{if(root&&!showOrig)select(allIdx().filter(i=>isFx(i)||objOf(i).visible))};
-const ADD_NAMES={box:'nowy prostopadłościan',cyl:'nowy walec',cone:'nowy stożek',sphere:'nowa kula',pyr:'nowy ostrosłup'};
-function roleTags(d,i){const t=[];if(!d)d={};if(d.gl)t.push(d.gl===1?'świeci':d.gc?'nocą świeci na '+d.gc:'świeci nocą');if(d.rc)t.push('losowy kolor');const pt=d.pt===1||(d.pt!==-1&&i!=null&&orig[i]&&orig[i].pt0);if(pt)t.push('kolor budynku');if(d.an&&api.animLib&&api.animLib[d.an.k])t.push('animacja');return t.length?' · '+t.join(', '):''}
-function fillPartSel(){const s=$('partSel'),fxn=k=>api.fxLib&&api.fxLib[k]?api.fxLib[k].name.replace(/ \(.*\)$/,''):'efekt';
-  s.innerHTML='<option value="-1">— wybierz część —</option><option value="multi" hidden></option>'+ms.map((m,i)=>{const d=work.mods[i];return`<option value="${i}">#${i} · ${(d&&d.h)?'ukryta':orig[i].c}${d&&(d.p||d.r||d.s||d.c)?' · zmieniona':''}${roleTags(d,i)}</option>`}).join('')
-   +added.map((m,k)=>{const a=work.add[k];return`<option value="${ms.length+k}">+${k+1} · ${a.gp||a.v?'kopia części':ADD_NAMES[a.g]||'nowa bryła'}${roleTags(a)}</option>`}).join('')
-   +fxs.map((g,k)=>`<option value="${ms.length+added.length+k}">✦ ${k+1} · ${fxn(work.fx[k].k)}</option>`).join('');syncPartSel()}
-function syncPartSel(){const s=$('partSel'),mo=s.querySelector('option[value="multi"]');if(mo){mo.hidden=sel.length<2;mo.textContent=`Zaznaczono ${sel.length} części`}s.value=sel.length===1?String(sel[0]):sel.length?'multi':'-1'}
-$('partSel').onchange=e=>{const v=e.target.value;if(v!=='multi')select(v==='-1'?[]:[+v])};
+const ADD_NAMES={wedge:'nowy graniastosłup trójkątny',box:'nowy prostopadłościan',cyl:'nowy walec',cone:'nowy stożek',sphere:'nowa kula',pyr:'nowy ostrosłup'};
+function roleTags(d,i){const t=[];if(!d)d={};if(d.gl)t.push(d.gl===1?'świeci':d.gc?'nocą świeci na '+d.gc:'świeci nocą');if(d.rc)t.push(d.rg?'wspólny losowy kolor '+d.rg:'losowy kolor');const pt=d.pt===1||(d.pt!==-1&&i!=null&&orig[i]&&orig[i].pt0);if(pt)t.push('kolor budynku');if(d.an&&api.animLib&&api.animLib[d.an.k])t.push('animacja');return t.length?' · '+t.join(', '):''}
+/* ---------- outliner: the model's own groups and parts, then added solids and effects ---------- */
+const OI={cube:'<svg class="ic" viewBox="0 0 16 16"><path d="M8 1.6l5.6 3.1v6.6L8 14.4l-5.6-3.1V4.7z" fill="var(--c)" stroke="rgba(0,0,0,.45)" stroke-width="1"/><path d="M2.4 4.7L8 7.8l5.6-3.1M8 7.8v6.6" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1"/></svg>',
+  folder:'<svg class="ic" viewBox="0 0 16 16"><path d="M1.5 4.2c0-.7.5-1.2 1.2-1.2h3.4l1.5 1.6h5.7c.7 0 1.2.5 1.2 1.2v6.5c0 .7-.5 1.2-1.2 1.2H2.7c-.7 0-1.2-.5-1.2-1.2z" fill="#5bc0f8"/></svg>',
+  fx:'<svg class="ic" viewBox="0 0 16 16"><path d="M8 1.5l1.6 4.2 4.4.4-3.4 2.9 1.1 4.3L8 10.9l-3.7 2.4 1.1-4.3L2 6.1l4.4-.4z" fill="#f2a14e"/></svg>',
+  eye:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2.1" fill="currentColor"/></svg>',
+  eyeOff:'<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><path d="M2.5 13.5l11-11"/></svg>',
+  chev:'<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6l4 4 4-4"/></svg>'};
+const GNAME={BoxGeometry:'kostka',CylinderGeometry:'walec',ConeGeometry:'stożek',SphereGeometry:'kula',PlaneGeometry:'płaszczyzna',CircleGeometry:'koło',TorusGeometry:'torus',RingGeometry:'pierścień',BufferGeometry:'bryła'};
+function partName(o,i){if(isFx(i)){const f=work.fx[i-ms.length-added.length];return api.fxLib&&api.fxLib[f.k]?api.fxLib[f.k].name.replace(/ \(.*\)$/,''):'efekt'}
+  if(isAdd(i)){const a=work.add[i-ms.length];return a.gp||a.v?'kopia części':(ADD_NAMES[a.g]||'nowa bryła').replace(/^now[ya] /,'')}
+  if(o.name)return o.name;const g=o.geometry,t=g&&g.type;if(t==='ConeGeometry'&&g.parameters&&g.parameters.radialSegments===4)return'ostrosłup';return GNAME[t]||'bryła'}
+const olClosed=new Set();let olOrder=[],olLast=-1,rgCols={};
+function badges(d,i){const b=[];if(!d)return'';if(d.gl)b.push('✦');if(d.rc)b.push(d.rg?'🎲'+d.rg:'🎲');if(d.an)b.push('⟳');return b.length?`<span class="bd">${b.join(' ')}</span>`:''}
+function renderOutliner(){const box=$('outl');olOrder=[];const total=ms.length+added.length+fxs.length;$('olCnt').textContent=`${sel.length} / ${total}`;
+  if(!root||showOrig){box.innerHTML=`<div class="empty">${showOrig?'Podgląd oryginału – wyłącz „Oryginał”, żeby edytować.':'Otwórz model z listy.'}</div>`;return}
+  const q=$('olSearch').value.trim().toLowerCase(),frag=document.createDocumentFragment(),ck=cur+'#'+vi+':';
+  const holds=o=>{let f=false;o.traverse(c=>{if(!f&&c!==o&&c.isMesh&&ms.includes(c))f=true});return f};
+  const mk=(depth,cls,html)=>{const r=document.createElement('div');r.className='orow '+cls;r.style.paddingLeft=(2+depth*14)+'px';r.innerHTML=html;frag.appendChild(r);return r};
+  const twig=(key,has)=>has?`<span class="tw${olClosed.has(key)?' c':''}" data-tw="${key}">${OI.chev}</span>`:'<span class="tw"></span>';
+  const item=(o,i,depth,key,has)=>{const kd=kindOf(i),d=kd==='o'?work.mods[i]:kd==='a'?work.add[i-ms.length]:null,hid=kd==='o'?!!(d&&d.h):kd==='a'?!!(d&&d.h):false;
+    const col=kd==='f'?'':'#'+(o.material&&o.material.color?o.material.color.getHexString():'cccccc');
+    const r=mk(depth,(sel.includes(i)?'on ':'')+(hid?'hid ':'')+(kd==='o'&&d&&(d.p||d.r||d.s||d.c)?'mod':''),
+      twig(key,has)+(kd==='f'?OI.fx:OI.cube.replace('var(--c)',col))+`<span class="nm"></span><span class="ix">${kd==='o'?'#'+i:kd==='a'?'+'+(i-ms.length+1):''}</span>${badges(d,i)}`+(kd==='f'?'':`<button class="eye${hid?' off':''}" title="${hid?'Pokaż':'Ukryj'}" aria-label="${hid?'Pokaż':'Ukryj'}">${hid?OI.eyeOff:OI.eye}</button>`));
+    r.querySelector('.nm').textContent=partName(o,i);r.dataset.i=i;r.setAttribute('role','treeitem');olOrder.push(i);
+    r.onclick=e=>{if(e.target.closest('.eye')){toggleHide([i]);return}if(e.target.closest('[data-tw]')){flip(key);return}olPick(e,i)}};
+  const folder=(label,depth,key,idx)=>{const vis=idx.filter(i=>{const o=objOf(i);return isFx(i)||o.visible});const r=mk(depth,'',twig(key,true)+OI.folder+`<span class="nm"></span><span class="ix">${idx.length}</span>`+
+      (idx.some(i=>!isFx(i))?`<button class="eye${vis.length?'':' off'}" title="Ukryj / pokaż grupę" aria-label="Ukryj albo pokaż grupę">${vis.length?OI.eye:OI.eyeOff}</button>`:''));
+    r.querySelector('.nm').textContent=label;r.setAttribute('role','treeitem');
+    r.onclick=e=>{if(e.target.closest('.eye')){toggleHide(idx.filter(i=>!isFx(i)));return}if(e.target.closest('[data-tw]')){flip(key);return}const pick=idx.filter(i=>isFx(i)||objOf(i).visible);if(e.ctrlKey||e.metaKey||e.shiftKey)select([...sel,...pick]);else select(pick)}};
+  const inside=o=>{const l=[];o.traverse(c=>{if(c!==o&&c.isMesh){const j=ms.indexOf(c);if(j>=0)l.push(j)}});return l};
+  if(q){ms.forEach((m,i)=>{if(partName(m,i).toLowerCase().includes(q)||('#'+i).includes(q))item(m,i,0,'q'+i,false)});added.forEach((m,k)=>{const i=ms.length+k;if(partName(m,i).toLowerCase().includes(q))item(m,i,0,'q'+i,false)});
+    if(!frag.childNodes.length)mk(0,'','<span class="muted" style="padding-left:8px">Nic nie pasuje.</span>')}
+  else{const walk=(o,depth,path)=>{o.children.forEach((ch,n)=>{if(ch===pivot||fxs.includes(ch)||added.includes(ch))return;const key=ck+path+'/'+n;
+      if(ch.isMesh&&ms.includes(ch)){const nest=holds(ch);item(ch,ms.indexOf(ch),depth,key,nest);if(nest&&!olClosed.has(key))walk(ch,depth+1,path+'/'+n)}
+      else if(holds(ch)){folder(ch.name||'grupa',depth,key,inside(ch));if(!olClosed.has(key))walk(ch,depth+1,path+'/'+n)}})};
+    walk(root,0,'');
+    if(added.length){const key=ck+'add';folder('Dodane bryły',0,key,added.map((m,k)=>ms.length+k));if(!olClosed.has(key))added.forEach((m,k)=>item(m,ms.length+k,1,key+k,false))}
+    if(fxs.length){const key=ck+'fx';folder('Efekty',0,key,fxs.map((g,k)=>ms.length+added.length+k));if(!olClosed.has(key))fxs.forEach((g,k)=>item(g,ms.length+added.length+k,1,key+k,false))}}
+  box.innerHTML='';box.appendChild(frag)}
+function flip(key){olClosed.has(key)?olClosed.delete(key):olClosed.add(key);renderOutliner()}
+function olPick(e,i){if(e.shiftKey&&olLast>=0){const a=olOrder.indexOf(olLast),b=olOrder.indexOf(i);if(a>=0&&b>=0){select([...new Set([...sel,...olOrder.slice(Math.min(a,b),Math.max(a,b)+1)])]);return}}
+  if(e.ctrlKey||e.metaKey)select(sel.includes(i)?sel.filter(x=>x!==i):[...sel,i]);else select([i]);olLast=i}
+/* hide / show parts and added solids (the eye) */
+function toggleHide(list){if(!list.length)return;const hid=i=>isOrig(i)?!!(work.mods[i]&&work.mods[i].h):!!work.add[i-ms.length].h;const h=!list.every(hid);
+  setHidden(list.filter(isOrig),h);for(const i of list.filter(isAdd)){const a=work.add[i-ms.length];if(h)a.h=1;else delete a.h;added[i-ms.length].visible=!h}
+  const keep=sel.filter(i=>isFx(i)||objOf(i).visible);fillPartSel();select(keep);updDirty()}
+const fillPartSel=()=>renderOutliner();
+function syncPartSel(){$('olCnt').textContent=`${sel.length} / ${ms.length+added.length+fxs.length}`;let first=null;for(const r of $('outl').querySelectorAll('.orow[data-i]')){const on=sel.includes(+r.dataset.i);r.classList.toggle('on',on);if(on&&!first)first=r}
+  if(first&&sel.length===1){const b=$('outl').parentNode,rb=first.getBoundingClientRect(),bb=b.getBoundingClientRect();if(rb.top<bb.top||rb.bottom>bb.bottom)first.scrollIntoView({block:'nearest'})}}
+$('olFind').onclick=e=>{e.stopPropagation();const b=$('olSearchBox');b.hidden=!b.hidden;if(!b.hidden)$('olSearch').focus();else{$('olSearch').value='';renderOutliner()}};
+$('olSearch').oninput=renderOutliner;
+$('olAdd').onclick=e=>{e.stopPropagation();if(!root||showOrig){note('Najpierw otwórz model.');return}const r=e.currentTarget.getBoundingClientRect(),m=document.createElement('div');m.className='menu';m.setAttribute('role','menu');
+  for(const b of document.querySelectorAll('#addBtns [data-add]')){const x=document.createElement('button');x.textContent=b.textContent;x.setAttribute('role','menuitem');x.onclick=()=>{m.remove();b.click()};m.appendChild(x)}
+  document.body.appendChild(m);m.style.left=Math.min(r.left,innerWidth-200)+'px';m.style.top=(r.bottom+2)+'px';setTimeout(()=>addEventListener('pointerdown',function cl(ev){if(!m.contains(ev.target)){m.remove();removeEventListener('pointerdown',cl)}}),0)};
 /* pose shown in the fields: in model space (nested parts too); several parts: the shared pivot */
 function poseOf(o,i){if(o===pivot)return{p:o.position,r:o.rotation,s:o.scale};if(isOrig(i)&&nested(o)){const P=new T.Vector3(),Q=new T.Quaternion(),S=new T.Vector3();rootLocal(o).decompose(P,Q,S);return{p:P,r:new T.Euler().setFromQuaternion(Q),s:S}}return{p:o.position,r:o.rotation,s:o.scale}}
-function fillProps(live){const n=sel.length,o=n===1?objOf(sel[0]):pivot,on=!!o,origs=sel.filter(isOrig),adds=sel.filter(isAdd),fxsel=sel.filter(isFx),parts=sel.filter(i=>!isFx(i));
+function fillProps(live){$('selInfo').textContent=sel.length>1?sel.length+' zaznaczonych':'';const n=sel.length,o=n===1?objOf(sel[0]):pivot,on=!!o,origs=sel.filter(isOrig),adds=sel.filter(isAdd),fxsel=sel.filter(isFx),parts=sel.filter(i=>!isFx(i));
   for(const id of['px','py','pz','rx','ry','rz','sx','sy','sz','copyBtn','dupBtn'])$(id).disabled=!on;$('pCol').disabled=!parts.length;
   $('hideBtn').disabled=!origs.length&&!(n===1&&adds.length);$('resetPart').hidden=!origs.length;$('resetPart').textContent=origs.length>1?`Przywróć części (${origs.length})`:'Przywróć część';
   const rem=adds.length+fxsel.length;$('delAdd').hidden=!rem;$('delAdd').textContent=rem>1?`Usuń dodane (${rem})`:fxsel.length?'Usuń efekt':'Usuń bryłę';$('pasteBtn').disabled=!clip.length||!root||showOrig;$('multiInfo').hidden=n<2;
@@ -416,8 +522,8 @@ $('delAdd').onclick=delAdded;
 /* ---------- part roles: glow, random colour, building colour, animation ---------- */
 function roleData(i,make){if(isOrig(i)){if(make)work.mods[i]=work.mods[i]||{};return work.mods[i]}return work.add[i-ms.length]}
 function setRole(key,val){for(const i of sel){if(isFx(i))continue;const d=roleData(i,true);if(val===undefined||val===null||val==='')delete d[key];else d[key]=val;if(isOrig(i)&&!Object.keys(d).length)delete work.mods[i]}applyLooks();fillPartSel();fillRoles(sel.filter(i=>!isFx(i)));updDirty()}
-function fillRoles(parts){const show=!!parts.length&&!showOrig;$('roleSec').hidden=!show;if(!show)return;const d=roleData(parts[0])||{};
-  $('rGl').value=String(d.gl||0);$('rGcL').hidden=$('rGcBox').hidden=d.gl!==2;$('rGcOn').checked=!!d.gc;$('rGc').value=d.gc||'#ffd36b';$('rGc').disabled=!d.gc;$('rRc').checked=!!d.rc;$('rPalBox').hidden=$('rPalL').hidden=!d.rc;if(d.rc)renderPal(curPal(d));
+function fillRoles(parts){const show=!!parts.length&&!showOrig;$('roleSec').hidden=!show;if(!show){renderAnimLib();return}const d=roleData(parts[0])||{};
+  $('rGl').value=String(d.gl||0);$('rGcL').hidden=$('rGcBox').hidden=d.gl!==2;$('rGcOn').checked=!!d.gc;$('rGc').value=d.gc||'#ffd36b';$('rGc').disabled=!d.gc;$('rRc').checked=!!d.rc;$('rPalBox').hidden=$('rPalL').hidden=!d.rc;if(d.rc)renderPal(curPal(d));$('rGrL').hidden=$('rGrBox').hidden=!d.rc;fillGroup(parts);renderAnimLib();
   $('rPt').value=d.pt===1?'1':d.pt===-1?'-1':'';$('rAn').value=d.an&&d.an.k||'';const L=d.an&&api.animLib&&api.animLib[d.an.k];$('anParams').hidden=!L;
   if(L){$('anAx').value=d.an.ax||L.ax;$('anSp').value=d.an.sp??L.sp;$('anAm').value=d.an.am??L.am;$('anPh').value=d.an.ph||0;$('anAm').disabled=d.an.k==='spin'||d.an.k==='rotor'||d.an.k==='blink'}
   const m=curModel(),pt0=isOrig(parts[0])&&orig[parts[0]].pt0;
@@ -428,7 +534,17 @@ $('rGc').oninput=()=>{if($('rGcOn').checked)setRole('gc',$('rGc').value)};
 /* random-colour palette: swatches you can recolour (click), remove (×) and add (+) */
 const curPal=d=>(Array.isArray(d.rc)&&d.rc.length?d.rc:(api.rcDef||['#e25b45'])).map(c=>c.toLowerCase());
 const palVal=pal=>pal.join(',')===(api.rcDef||[]).map(c=>c.toLowerCase()).join(',')?1:pal;
-function commitPal(pal){for(const i of sel){if(isFx(i))continue;const m=objOf(i);if(m)m.userData.rcKey=null}setRole('rc',palVal(pal))}
+function commitPal(pal){const v=palVal(pal),grs=new Set(sel.filter(i=>!isFx(i)).map(i=>(roleData(i)||{}).rg).filter(Boolean));
+  /* a colour group shares one palette: the change reaches every member */
+  for(const i of partIdx()){const d=roleData(i);if(d&&d.rg&&grs.has(d.rg)&&!sel.includes(i)){d.rc=jcopy(v);objOf(i).userData.rcKey=null}}
+  for(const i of sel){if(isFx(i))continue;const m=objOf(i);if(m)m.userData.rcKey=null}setRole('rc',v)}
+const partIdx=()=>allIdx().filter(i=>!isFx(i));
+function fillGroup(parts){const d=roleData(parts[0])||{},g=d.rg,n=g?partIdx().filter(i=>(roleData(i)||{}).rg===g).length:0,same=g&&parts.every(i=>(roleData(i)||{}).rg===g);
+  $('rGrName').textContent=g?(same?`grupa ${g} · ${n} ${n===1?'bryła':n<5?'bryły':'brył'}`:'różne grupy'):'brak grupy';$('rGrJoin').disabled=parts.length<2;$('rGrLeave').disabled=!parts.some(i=>(roleData(i)||{}).rg);
+  $('rGrInfo').textContent=parts.length<2?'Zaznacz kilka brył (Shift/Ctrl + klik w widoku albo w outlinerze) i połącz je: w grze wylosują ten sam kolor.':'Zaznaczone bryły po połączeniu wylosują w grze jeden wspólny kolor z tej samej palety.'}
+$('rGrJoin').onclick=()=>{const parts=sel.filter(i=>!isFx(i));if(parts.length<2)return;const ids=partIdx().map(i=>+((roleData(i)||{}).rg||0));const g=Math.max(0,...ids)+1;
+  const pal=(roleData(parts[0])||{}).rc||1;for(const i of parts){const d=roleData(i,true);d.rc=jcopy(pal);d.rg=g;objOf(i).userData.rcKey=null}delete rgCols[g];applyLooks();fillPartSel();select(sel.slice());updDirty();note(`Połączono ${parts.length} brył: wylosują jeden wspólny kolor.`)};
+$('rGrLeave').onclick=()=>{for(const i of sel){if(isFx(i))continue;const m=objOf(i);if(m)m.userData.rcKey=null}setRole('rg',undefined)};
 function renderPal(pal){const box=$('rPal');box.innerHTML='';
   pal.forEach((c,k)=>{const sw=document.createElement('div');sw.className='sw';sw.setAttribute('role','listitem');sw.style.background=c;sw.title=c;
     const inp=document.createElement('input');inp.type='color';inp.value=c;inp.setAttribute('aria-label','Kolor '+(k+1)+': '+c);
@@ -438,13 +554,19 @@ function renderPal(pal){const box=$('rPal');box.innerHTML='';
   const add=document.createElement('label');add.className='sw add';add.title='Dodaj kolor';add.textContent='+';const ai=document.createElement('input');ai.type='color';ai.setAttribute('aria-label','Dodaj kolor');
   ai.value='#'+((Math.random()*0xffffff)|0).toString(16).padStart(6,'0');ai.onchange=()=>commitPal(pal.concat(ai.value.toLowerCase()));add.appendChild(ai);box.appendChild(add);
   $('rPalL').textContent=`Kolory (${pal.length})`}
-$('palRoll').onclick=()=>{for(const i of sel){const m=!isFx(i)&&objOf(i);if(m)m.userData.rcKey=null}applyLooks()};
+$('palRoll').onclick=()=>{rgCols={};for(const i of partIdx()){const m=objOf(i);if(m&&(sel.includes(i)||(roleData(i)||{}).rg))m.userData.rcKey=null}applyLooks();fillPartSel()};
 $('palDef').onclick=()=>commitPal((api.rcDef||[]).slice());
-$('rRc').onchange=()=>setRole('rc',$('rRc').checked?1:undefined);
+$('rRc').onchange=()=>{if(!$('rRc').checked)for(const i of sel){const d=!isFx(i)&&roleData(i);if(d)delete d.rg}setRole('rc',$('rRc').checked?1:undefined)};
 $('rPt').onchange=()=>setRole('pt',$('rPt').value?+$('rPt').value:undefined);
 $('rAn').onchange=()=>{const k=$('rAn').value;setRole('an',k?{k}:undefined)};
 for(const id of['anAx','anSp','anAm','anPh'])$(id).onchange=()=>{const k=$('rAn').value;if(!k)return;const L=api.animLib[k],an={k};const ax=$('anAx').value,sp=+$('anSp').value,am=+$('anAm').value,ph=+$('anPh').value;
   if(ax!==L.ax)an.ax=ax;if(Number.isFinite(sp)&&sp!==L.sp)an.sp=sp;if(Number.isFinite(am)&&am!==L.am)an.am=am;if(ph)an.ph=ph;setRole('an',an)};
+/* animation library: click gives the animation to the selected parts, a second click takes it away */
+function renderAnimLib(){const box=$('anLib');if(!box||!api||!api.animLib)return;const parts=sel.filter(i=>!isFx(i));box.innerHTML='';
+  for(const k in api.animLib){const L=api.animLib[k],b=document.createElement('button');const on=parts.length&&parts.every(i=>{const d=roleData(i);return d&&d.an&&d.an.k===k});
+    b.setAttribute('aria-pressed',String(!!on));b.innerHTML='<span></span><small></small>';b.firstChild.textContent=L.name;b.lastChild.textContent='oś '+L.ax;b.disabled=!parts.length;
+    b.onclick=()=>{setRole('an',on?undefined:{k});renderAnimLib()};box.appendChild(b)}
+  $('anLibInfo').textContent=parts.length?`Nadajesz ${parts.length===1?'zaznaczonej części':parts.length+' zaznaczonym częściom'}. Ponowne kliknięcie zdejmuje animację. Podgląd: „▶ Animacje” na pasku.`:'Zaznacz części w widoku albo w outlinerze, żeby nadać im animację.'}
 /* animation preview: parts move like in the game; any edit stops it and puts them back */
 function animStart(){if(!root||showOrig||!api.animApply)return;select([]);animList=[];
   const reg=(m,d)=>{if(m&&d&&d.an&&api.animLib[d.an.k]){m.userData.an=d.an;m.userData.an0=[m.position.clone(),m.rotation.clone(),m.scale.clone(),m.visible];animList.push(m)}};
@@ -519,6 +641,22 @@ $('pubBtn').onclick=async()=>{const keys=[...checked].filter(k=>drafts[k]);if(!k
   catch(e){log('Błąd: '+e.message+(String(e.message).includes('401')?' (sprawdź token)':String(e.message).includes('409')?' (ktoś wysłał zmianę w międzyczasie, spróbuj ponownie)':''),'err')}
   finally{updPub()}};
 addEventListener('beforeunload',e=>{if(isDirty()){e.preventDefault();e.returnValue=''}});
+/* ---------- layout: drag the column edges and the split on the left; panels fold on their title ---------- */
+(function layout(){const LS_UI='lt-editor-ui',st=store.get(LS_UI,{}),save=()=>store.set(LS_UI,st),R=document.documentElement;
+  const setW=(k,v)=>{v=Math.max(200,Math.min(Math.round(innerWidth*0.45),Math.round(v)));R.style.setProperty(k,v+'px');return v};
+  if(st.lw)setW('--lw',st.lw);if(st.rw)setW('--rw',st.rw);
+  const drag=(el,fn)=>el.addEventListener('pointerdown',e=>{e.preventDefault();el.setPointerCapture(e.pointerId);el.classList.add('on');document.body.style.cursor=getComputedStyle(el).cursor;
+    const mv=ev=>fn(ev),up=()=>{el.classList.remove('on');document.body.style.cursor='';el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);save()};
+    el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)});
+  drag($('rzL'),e=>{st.lw=setW('--lw',e.clientX)});drag($('rzR'),e=>{st.rw=setW('--rw',innerWidth-e.clientX)});
+  $('rzL').ondblclick=()=>{delete st.lw;R.style.removeProperty('--lw');save()};$('rzR').ondblclick=()=>{delete st.rw;R.style.removeProperty('--rw');save()};
+  const pm=$('pModels');if(st.mh)pm.style.flex='0 0 '+st.mh+'px';
+  drag($('rzLeft'),e=>{const r=$('left').getBoundingClientRect();st.mh=Math.max(90,Math.min(r.height-90,e.clientY-r.top));pm.style.flex='0 0 '+st.mh+'px'});
+  $('rzLeft').ondblclick=()=>{delete st.mh;pm.style.flex='';save()};
+  const closed=new Set(st.closed||[]);for(const p of document.querySelectorAll('.panel')){if(closed.has(p.dataset.p))p.classList.add('closed');const h=p.querySelector('.ph');h.setAttribute('role','button');h.tabIndex=0;h.setAttribute('aria-expanded',String(!closed.has(p.dataset.p)));
+    const tg=e=>{if(e.target.closest('.acts button'))return;p.classList.toggle('closed');const c=p.classList.contains('closed');h.setAttribute('aria-expanded',String(!c));c?closed.add(p.dataset.p):closed.delete(p.dataset.p);st.closed=[...closed];save()};
+    h.addEventListener('click',tg);h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tg(e)}})}
+  addEventListener('resize',()=>{if(st.lw)setW('--lw',st.lw);if(st.rw)setW('--rw',st.rw)})})();
 renderSaved();
 })();
 </script>
