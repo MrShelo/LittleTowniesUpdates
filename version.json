@@ -1,1 +1,1 @@
-{"v": "6.0.6", "notes": "6.0.6: słupy i rury mają własny przełącznik: zwykłe stawianie albo wzdłuż drogi (ponowne kliknięcie wyłącza); tryb budynków się nie zmienia"}
+{"v": "6.0.7", "notes": "6.0.7: komisariaty i straże mają o 1 pole większy zasięg (mały komisariat i mała straż 11×11, komenda 15×15, duży komisariat 17×17), a Większy rewir daje +3 pola w każdą stronę zamiast +2"}
