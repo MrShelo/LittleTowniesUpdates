@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.0.12';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -591,14 +591,14 @@ const DEF={
   lyceum:{name:'Liceum',cost:3200,fw:2,fh:3,desc:'Zajmuje 2×3 pola. Zasięg 11: młodzież 15–18 lat się uczy, zarobki (podatki i sprzedaż) +5%.',sw:'#b8573a'},
   techn:{name:'Technikum',cost:3200,fw:2,fh:3,desc:'Zajmuje 2×3 pola. Zasięg 11: młodzież się uczy, fabryki i wytwórnie +5% produkcji, magazyny +5% pojemności.',sw:'#5a7a9a'},
   bakery:{name:'Piekarnia',cost:220,desc:'Sprzedaje pieczywo (ceny +25%). Sama piecze: 1 kg zboża z magazynów daje 3 bochenki na półce. Gdy brak zboża, bierze pieczywo z magazynu.',sw:'#d9a35a'},
-  warehouseB:{name:'Wielki magazyn',cost:600,size:2,desc:'Zajmuje 2 pola. Podnosi limit magazynów o 500 kg (2,5× magazyn). Ulepszenie podwaja pojemność.',sw:'#b8864a'},
+  warehouseB:{name:'Wielki magazyn',cost:600,size:2,desc:'Zajmuje 2 pola. Własny zapas do 500 kg (2,5× magazyn). Ciężarówki zostawiają towar w magazynie, do którego przyjechały; sklepy i fabryki biorą z najbliższego, który go ma. Ulepszenie podwaja pojemność.',sw:'#b8864a'},
   factoryB:{name:'Duża fabryka',cost:700,size:2,desc:'Zajmuje 2 pola. Na start 1 linia ogólna; w karcie fabryki wykupujesz do 3 różnych linii (każda 400 T¢). Linie pracują po kolei.',sw:'#7b8696'},
   mine:{name:'Mała wytwórnia materiałów',cost:250,desc:'Hala produkcyjna: 2,7 kg materiałów na 2 zmiany pracowników. Obok recyklingu jedyne źródło materiałów dla fabryk.',sw:'#c9782c'},
   mineB:{name:'Duża wytwórnia materiałów',cost:1100,size:4,desc:'Zajmuje 2×2 pola. 5× produkcja małej wytwórni: 13,3 kg materiałów na 2 zmiany.',sw:'#a65a1f'},
   pitS:{name:'Mała kopalnia',cost:400,desc:'Stawiasz na złożu węgla albo chalkopirytu (widać je na mapie jako ciemne lub złotawe łaty ze skałami). Wydobywa 20 kg/godz. tego, co leży pod nią, i wozi do magazynów. Potrzebuje prądu i ulicy.',sw:'#4a4744'},
   pitB:{name:'Kopalnia',cost:900,size:2,desc:'Zajmuje 2×1 pola, oba na tym samym złożu. Wydobywa 35 kg/godz. węgla albo chalkopirytu i wozi do magazynów. Potrzebuje prądu i ulicy.',sw:'#34312f'},
-  warehouse:{name:'Magazyn',cost:250,desc:'Podnosi limit magazynów o 200 kg. Tu jadą ciężarówki.',sw:'#c99a5c'},
-  smallwh:{name:'Mały magazyn',cost:125,desc:'Podnosi limit magazynów o 150 kg. Też przyjmuje ciężarówki.',sw:'#d8b37f'},
+  warehouse:{name:'Magazyn',cost:250,desc:'Własny zapas do 200 kg. Ciężarówki z farm i fabryk jadą do najbliższego magazynu, który ma miejsce; sklepy i fabryki biorą z najbliższego, który ma towar.',sw:'#c99a5c'},
+  smallwh:{name:'Mały magazyn',cost:125,desc:'Własny zapas do 150 kg. Też przyjmuje ciężarówki.',sw:'#d8b37f'},
   park1:{name:'Skwer',cost:80,desc:'Zasięg 3×3 wokół parku. Domy w zasięgu +1 zadowolenia (parki się nie sumują).',sw:'#7cc05a',r:1},
   park2:{name:'Park',cost:200,desc:'Zasięg 5×5 wokół parku. Domy w zasięgu +1 zadowolenia (parki się nie sumują).',sw:'#4f9a3c',r:2},
   park3:{name:'Park miejski',cost:550,size:2,desc:'Zajmuje 2 pola. Zasięg 7×7 wokół każdego z nich. Domy w zasięgu +1 zadowolenia (parki się nie sumują).',sw:'#2f7e5c',r:3},
@@ -1625,7 +1625,7 @@ let money=0, matl=0, roadVer=0;
 const goods={};for(const k in GOODS)if(k!=='mat')goods[k]=0;
 const stored=()=>fin(matl)+Object.values(goods).reduce((a,b)=>a+fin(b),0);
 /* repairs any value that went non-numeric so the HUD and the economy never show NaN */
-function fixNaN(){if(!Number.isFinite(matl))matl=0;if(!Number.isFinite(money))money=0;for(const k in goods)if(!Number.isFinite(goods[k]))goods[k]=0}
+function fixNaN(){for(const i of whAll()){const c=grid[i];for(const k in c.st)if(!Number.isFinite(c.st[k]))delete c.st[k]}if(!Number.isFinite(matl))matl=0;if(!Number.isFinite(money))money=0;for(const k in goods)if(!Number.isFinite(goods[k]))goods[k]=0}
 let farmDirty=true,clusters=[];
 /* economy ledger: 1 real second = 1 game minute, so 60 s = 1 game hour */
 const L0=()=>({crimeOk:0,crimeLost:0,crimeLoss:0,heists:0,used:{},tour:0,tourInc:0,entInc:0,made:{},sold:{},gGen:0,gColl:0,gBurn:0,gRec:0,matRec:0,vans:0,work:0,inc:0,refund:0,build:0,upkeep:0,matIn:0,matShop:0,matCoal:0,trips:0,trucks:0,sales:0,noStock:0,powDem:0,powCap:0,secs:0});
@@ -1900,14 +1900,30 @@ const whAccepts=(c,k)=>!c.up2||!c.whf||c.whf.includes(k);
 const WHF_GROUPS=[{n:'Artykuły spożywcze',ks:['veg','dairy','bread','drinks']}];
 function whfChips(){const o=[],done=new Set();for(const k of SHIP_GOODS){if(done.has(k))continue;const g=WHF_GROUPS.find(G=>G.ks.includes(k));if(g){g.ks.forEach(x=>done.add(x));o.push(g)}else{done.add(k);o.push({n:frName(k),ks:[k]})}}return o}
 /* stock is pooled across the city; each warehouse shows its share: every good split between the warehouses that take it, by size */
-function whShare(i){const c=grid[i],out={};if(!c||!isWH(c.t)||!c.powered||c.off)return out;const all=[];for(let j=0;j<N*N;j++){const w=grid[j];if(w&&isWH(w.t)&&w.powered&&!w.off)all.push(w)}
-  for(const k of SHIP_GOODS){const v=k==='mat'?matl:(goods[k]||0);if(v<0.05||!whAccepts(c,k))continue;let tot=0;for(const w of all)if(whAccepts(w,k))tot+=whCap(w);if(tot>0)out[k]=v*whCap(c)/tot}
-  const sum=Object.values(out).reduce((a,b)=>a+b,0),cap=whCap(c);if(sum>cap)for(const k in out)out[k]*=cap/sum;return out}
-function capFor(k){let cut=0,any=false;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!isWH(c.t)||!c.powered||c.off)continue;if(c.up2&&c.whf){any=true;if(!c.whf.includes(k))cut+=whCap(c)}}return any?matCap()-cut:Infinity}
-function addMat(x){const n=Math.max(0,Math.min(x,matCap()-stored(),capFor('mat')-matl));matl+=n;return n}
-function addGood(k,x){if(k==='mat')return addMat(x);const n=Math.max(0,Math.min(x,matCap()-stored(),capFor(k)-(goods[k]||0)));goods[k]+=n;return n}
-const have=k=>k==='mat'?matl:goods[k];
-function take(k,x){if(k==='mat')matl-=x;else goods[k]-=x}
+function whShare(i){const c=grid[i];return c&&c.st?Object.assign({},c.st):{}}
+/* ---------- 6.1: every warehouse keeps its own stock (c.st) and its own capacity; goods/matl are only the city's sum ---------- */
+let WHS=[],whDirty=true,whKeep=false;
+function whAll(){if(whDirty){WHS=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isWH(c.t)){if(!c.st)c.st={};WHS.push(i)}}whDirty=false}return WHS}
+const whOn=c=>!!c&&!!c.powered&&!c.off;
+const whUsed=c=>{let s=0;for(const k in c.st)if(c.st[k]>0)s+=c.st[k];return s};
+const tileD=(a,b)=>a==null||a<0||b==null||b<0?0:Math.abs(a%N-b%N)+Math.abs(((a/N)|0)-((b/N)|0));
+function syncGoods(){matl=0;for(const k in goods)goods[k]=0;for(const i of whAll()){const c=grid[i];if(!whOn(c))continue;for(const k in c.st){const v=c.st[k];if(!(v>0))continue;if(k==='mat')matl+=v;else goods[k]=(goods[k]||0)+v}}}
+const whRoom=(c,k)=>whOn(c)&&whAccepts(c,k)?Math.max(0,whCap(c)-whUsed(c)):0;
+/* total room for one good across active warehouses (Infinity while no warehouse sorts its goods) and a debug setter for a good's stock */
+function capFor(k){let any=false,c=0;for(const i of whAll()){const w=grid[i];if(!whOn(w))continue;if(w.up2&&w.whf)any=true;if(whAccepts(w,k))c+=whCap(w)}return any?c:Infinity}
+function setStock(k,v){for(const i of whAll())delete grid[i].st[k];syncGoods();return addGood(k,v)}
+function whFreeFor(k){let s=0;for(const i of whAll())s+=whRoom(grid[i],k);return s}
+/* goods go into the warehouse they were driven to (at), then into the nearest ones that still have room */
+function addGood(k,x,at){if(!(x>0))return 0;let left=x;const L=whAll().filter(i=>whRoom(grid[i],k)>0).sort((a,b)=>tileD(a,at)-tileD(b,at));
+  for(const i of L){const c=grid[i],n=Math.min(left,whRoom(c,k));if(n<=0)continue;c.st[k]=(c.st[k]||0)+n;left-=n;if(left<=1e-9)break}syncGoods();return x-left}
+function addMat(x,at){return addGood('mat',x,at)}
+const have=k=>k==='mat'?matl:(goods[k]||0);
+/* taking: from the warehouses nearest to the place that needs it */
+function take(k,x,at){let left=x;const L=whAll().filter(i=>whOn(grid[i])&&(grid[i].st[k]||0)>0).sort((a,b)=>tileD(a,at)-tileD(b,at));
+  for(const i of L){const c=grid[i],n=Math.min(left,c.st[k]);c.st[k]-=n;if(c.st[k]<1e-6)delete c.st[k];left-=n;if(left<=1e-9)break}syncGoods();return x-left}
+/* an older save kept one pooled stock: it is shared out among the warehouses by their size */
+function spreadPool(pool){const W=whAll().map(i=>grid[i]);for(const k in pool){let v=pool[k];if(!(v>0))continue;
+  for(const c of W.slice().sort((a,b)=>(whCap(b)-whUsed(b))-(whCap(a)-whUsed(a)))){const n=Math.min(v,Math.max(0,whCap(c)-whUsed(c)));if(n<=0)continue;c.st[k]=(c.st[k]||0)+n;v-=n;if(v<=1e-9)break}}}
 const mw=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:1});const r1=n=>mw(Math.round((+n||0)*10)/10);
 /* the longest straight road run through tile i (horizontal vs vertical), nearest tiles first */
 function straightRun(i){const x=i%N,z=(i/N)|0;
@@ -2056,7 +2072,7 @@ function refreshAround(i){const x=i%N,z=(i/N)|0;rebuildRoad(i);refreshBuilding(i
 
 function roadBase(t){return t==='highway'?[G.hwBase,mat.road]:t==='bridge'?[G.deck,mat.road]:[G.roadBase,t==='road2'?mat.road2:t==='road3'?mat.road3:mat.road]}
 let mvNext=null;
-function addCell(i,t,anim=true,second=-1){const extra=Array.isArray(second)?second:(second>=0?[second]:[]);
+function addCell(i,t,anim=true,second=-1){whDirty=true;const extra=Array.isArray(second)?second:(second>=0?[second]:[]);
   clearDeco(i);groundDeco(i,false);
   const g=new THREE.Group();g.position.set(cx(i),0,cz(i));
   const cell={t,group:g,work:0,timer:1+Math.random()*3,mv:mvNext!=null?mvNext:Math.random()};mvNext=null;
@@ -2086,14 +2102,16 @@ function addCell(i,t,anim=true,second=-1){const extra=Array.isArray(second)?seco
   xrayNew(g);
   if(anim){if(!DRIVE[t]&&cell.model&&t!=='lpole'&&t!=='hvpole'&&t!=='rail')startConstruction(cell);else{g.scale.setScalar(0.5);popping.push({g,t:0})}}
 }
-function removeCell(i){let c=grid[i];if(!c)return;if(c.t==='part'){i=c.main;c=grid[i];if(!c||c.t==='part'){grid[i]=null;return}}scene.remove(c.group);if(c.model){factories.delete(c.model);if(c.model.userData.rotor)winds.delete(c.model.userData.rotor)}if(c.bolt)bolts.delete(c.bolt);
+function removeCell(i){let c=grid[i];if(!c)return;if(c.t==='part'){i=c.main;c=grid[i];if(!c||c.t==='part'){grid[i]=null;return}}whDirty=true;const stLeft=isWH(c.t)&&!whKeep&&c.st?c.st:null;scene.remove(c.group);if(c.model){factories.delete(c.model);if(c.model.userData.rotor)winds.delete(c.model.userData.rotor)}if(c.bolt)bolts.delete(c.bolt);
   c.group.traverse(o=>{if(o.geometry&&!o.geometry.userData.keep)o.geometry.dispose()});
   if(c.t==='bridge'&&pipe[i]){pipe[i]=0}
   if(c.railFx){scene.remove(c.railFx);c.railFx=null}if(c.crossFx){scene.remove(c.crossFx);c.crossFx=null}if(c.rail||c.t==='rail'||c.t==='trainSt'||c.t==='freightSt'){railVer++;setTimeout(railRefreshAll,0)}
   counts[c.t]--;grid[i]=null;if(DRIVE[c.t]){roadVer++;bfsCache.clear();bridgeDirty=true}if(c.t==='hvpole'||c.t==='transformer'||GEN_W[c.t])topoDirty=true;
   farmDirty=true;
   if(c.tiles)for(const j of c.tiles)if(j!==i){grid[j]=null;refreshAround(j);groundDeco(j,!water[j])}
-  groundDeco(i,!water[i]);refreshAround(i);powerDirty=true;envDirty=true}
+  groundDeco(i,!water[i]);refreshAround(i);powerDirty=true;envDirty=true;whDirty=true;
+  /* a demolished warehouse: what fits moves to the nearest warehouses, the rest is lost */
+  if(stLeft){let tot=0,kept=0;for(const k in stLeft){const v=stLeft[k];if(!(v>0))continue;tot+=v;kept+=addGood(k,v,i)}if(tot-kept>=0.5)float(i,`przepadło ${mw(Math.round(tot-kept))} kg`,'warn');else if(tot>=0.5)float(i,'zapasy przewiezione','neutral')}syncGoods()}
 /* widen or narrow a street in place; a pole stays where it was */
 function convertRoad(i,t){const c=grid[i];counts[c.t]--;c.t=t;counts[t]++;const[bg,bm]=roadBase(t);c.group.children[0].geometry=bg;c.group.children[0].material=bm;
   roadVer++;bfsCache.clear();bridgeDirty=true;refreshAround(i);powerDirty=true}
@@ -2130,7 +2148,7 @@ function carMesh0(kind){const g=new THREE.Group();
 function createCar(kind,path,o){const c=Object.assign({kind,path,seg:0,dist:0,phase:'go',speed:kind==='sweeper'?1.0:kind==='hearse'?1.2:kind==='police'?1.8:kind==='fire'?2.2:kind==='taxi'?1.7:kind==='visitor'?1.6:kind==='truck'?1.05:kind==='garbage'?1.1:kind==='van'?1.3:1.5+Math.random()*0.3,
   mesh:carMesh(kind,o),rot:null,grow:0,li:(Math.random()*3)|0,id:++carSeq,res:-1,inRes:false,wait:0,ghost:0,vOff:null,lnSeg:-1},o);if(path.length>1){c.li=pickLane(c,path[0],path[1])}c.lp=c.ln=c.li;cars.push(c);placeCar(c);if(o&&o.home!=null)exitFrom(c,o.home);return c}
 function removeCar(c){releaseRes(c);if(c.kind==='hearse'&&c.load){const h=grid[c.dest],d=grid[c.home];if(c.phase==='go'){if(h){h.dead=(h.dead||0)+c.load;h.hearse=false}if(d)d.inbound=Math.max(0,(d.inbound||0)-c.load)}else hearseDeliver(c);c.load=0}if(c.pass&&c.pass.length){const pr=grid[c.dest];if(pr&&pr.inbound)pr.inbound=Math.max(0,pr.inbound-c.pass.length);const st=grid[c.home];if(st&&st.jail)st.jail.push(...c.pass);c.pass=[]}if(c.kind==='garbage')releaseG(c);
-  if(c.kind==='van'&&!c.delivered){c.delivered=true;const d=grid[c.dest];if(d&&isShop(d.t))d.incoming=Math.max(0,d.incoming-c.load);for(const k in c.items)addGood(k,c.items[k])}
+  if(c.kind==='van'&&!c.delivered){c.delivered=true;const d=grid[c.dest];if(d&&isShop(d.t))d.incoming=Math.max(0,d.incoming-c.load);for(const k in c.items)addGood(k,c.items[k],c.home)}
   c.dead=true;scene.remove(c.mesh);disposeTree(c.mesh)}
 function perp(a,b){const dx=cx(b)-cx(a),dz=cz(b)-cz(a);return[-dz,dx]}
 let carSeq=0;const occ=new Map(),resMap=new Map();
@@ -2263,15 +2281,15 @@ function arrive(c){
       if(d.work>=2)produce(c.dest,d)}
     return goBack(c,c.dest,c.home)}
   if(c.kind==='van'){c.delivered=true;
-    if(d&&isShop(d.t)){d.incoming=Math.max(0,d.incoming-c.load);let put=0;for(const k in c.items){const room=slotsOf(d)-shelfTotal(d),n=Math.min(room,c.items[k]);d.shelf[k]=(d.shelf[k]||0)+n;put+=n;if(c.items[k]>n)addGood(k,c.items[k]-n)}
+    if(d&&isShop(d.t)){d.incoming=Math.max(0,d.incoming-c.load);let put=0;for(const k in c.items){const room=slotsOf(d)-shelfTotal(d),n=Math.min(room,c.items[k]);d.shelf[k]=(d.shelf[k]||0)+n;put+=n;if(c.items[k]>n)addGood(k,c.items[k]-n,c.home)}
       float(c.dest,`+${put} towaru`,'mat')}
-    else for(const k in c.items)addGood(k,c.items[k]);
+    else for(const k in c.items)addGood(k,c.items[k],c.home);
     return goBack(c,c.dest,c.home)}
-  if(d&&isWH(d.t)){if(!d.powered)float(c.dest,'brak prądu','warn');else{const k=c.pid||'mat',n=addGood(k,c.units||TRUCK_LOAD);cur.matIn+=n;
+  if(d&&isWH(d.t)){if(!d.powered)float(c.dest,'brak prądu','warn');else{const k=c.pid||'mat',n=addGood(k,c.units||TRUCK_LOAD,c.dest);cur.matIn+=n;
     if(n>=0.05)float(c.dest,`+${mw(n)} kg ${GOODS[k].name.toLowerCase()}`,'mat');else float(c.dest,'magazyn pełny','warn')}}
   goBack(c,c.dest,c.home)}
 /* one visit: a purchase from the shelf, a ticket, a meal or a night in a hotel (hotel nights only for visitors) */
-function takeFood(){const k=FOOD.filter(f=>goods[f]>=1).sort((a,b)=>goods[b]-goods[a])[0];if(!k)return false;goods[k]-=1;cur.sold[k]=(cur.sold[k]||0)+1;return true}
+function takeFood(){const k=FOOD.filter(f=>goods[f]>=1).sort((a,b)=>goods[b]-goods[a])[0];if(!k)return false;take(k,1);cur.sold[k]=(cur.sold[k]||0)+1;return true}
 /* shops drain their queue at their hourly capacity; crowding fades 30 game minutes after the last turned-away customer */
 function shopTick(dt){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.vis==null)continue;const sc=SCAP(c);if(!sc)continue;c.vis=Math.max(0,c.vis-sc*dt/60);
   c.crowdLong=c.crowd?(c.crowdLong||0)+dt:Math.max(0,(c.crowdLong||0)-dt*0.5);
@@ -2360,11 +2378,11 @@ function renderOrd(){const el=document.getElementById('ordp');if(!el||el.hidden)
 /* ---------- shipping centre: every 6 hours trucks take the chosen goods from the warehouses, in bulk ---------- */
 const SHIP_EVERY=360,SHIP_P=0.6,SHIP_GOODS=['mat',...Object.keys(GOODS).filter(k=>k!=='mat')],SHIP_N0=50,SHIP_NMIN=25,SHIP_NMAX=300,SHIP_IMP=0.8;
 function shipImport(i){const c=grid[i],sel=c.ship||[],per=c.shipN||SHIP_N0;let tot=0,cost=0;
-  for(const k of sel){const unit=frPrice(k)*SHIP_IMP,room=Math.floor(Math.max(0,Math.min(matCap()-stored(),capFor(k)-(k==='mat'?matl:(goods[k]||0)))));const n=Math.min(per,room,Math.floor(Math.max(0,money-cost)/unit));if(n<=0)continue;
-    if(k==='mat')matl+=n;else goods[k]=(goods[k]||0)+n;tot+=n;cost+=n*unit;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
-  if(!tot){float(i,matCap()-stored()<1?'spedycja: magazyny pełne':'spedycja: brak gotówki lub towaru do sprowadzenia','warn');return}cost=Math.round(cost);money-=cost;cur.upkeep+=cost;cur.shipImp=(cur.shipImp||0)+cost;float(i,`sprowadzono ${fmt(tot)} kg · −${fmt(cost)} T¢`,'mat');
+  for(const k of sel){const unit=frPrice(k)*SHIP_IMP,room=Math.floor(whFreeFor(k));const n0=Math.min(per,room,Math.floor(Math.max(0,money-cost)/unit));if(n0<=0)continue;
+    const n=addGood(k,n0,i);tot+=n;cost+=n*unit;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
+  if(!tot){float(i,sel.every(k=>whFreeFor(k)<1)?'spedycja: magazyny pełne':'spedycja: brak gotówki lub towaru do sprowadzenia','warn');return}cost=Math.round(cost);money-=cost;cur.upkeep+=cost;cur.shipImp=(cur.shipImp||0)+cost;float(i,`sprowadzono ${fmt(tot)} kg · −${fmt(cost)} T¢`,'mat');
   const e=entryOf(i);if(e>=0){const b=bfs(e);const outs=edgeOuts().filter(o=>b.dist[o]>=0);for(let k=0;k<Math.min(5,Math.ceil(tot/20))&&outs.length&&cars.length<MAX_CARS;k++){const v=createCar('truck',pathTo(b,outs[k%outs.length]).reverse(),{home:i,dest:-1});v.kind='export';v.mesh.userData.cargo&&(v.mesh.userData.cargo.material=GM[sel[k%sel.length]]||GM.mix)}}}
-function shipRun(i){const c=grid[i];if(!c)return;if(c.shipM==='imp')return shipImport(i);const sel=c.ship||[];let tot=0,inc=0;for(const k of sel){const have0=k==='mat'?matl:(goods[k]||0),n=Math.floor(have0);if(n<=0)continue;if(k==='mat')matl-=n;else goods[k]-=n;tot+=n;inc+=n*frPrice(k)*SHIP_P;cur.shipped=cur.shipped||{};cur.shipped[k]=(cur.shipped[k]||0)+n}
+function shipRun(i){const c=grid[i];if(!c)return;if(c.shipM==='imp')return shipImport(i);const sel=c.ship||[];let tot=0,inc=0;for(const k of sel){const have0=have(k),n=Math.floor(have0);if(n<=0)continue;take(k,n,i);tot+=n;inc+=n*frPrice(k)*SHIP_P;cur.shipped=cur.shipped||{};cur.shipped[k]=(cur.shipped[k]||0)+n}
   if(!tot){float(i,'spedycja: nic do wywiezienia','warn');return}const got=addMoney(Math.round(inc));cur.inc+=got;cur.shipInc=(cur.shipInc||0)+got;float(i,`wywieziono ${fmt(tot)} kg · +${fmt(got)} T¢`,'money');
   const e=entryOf(i);if(e>=0){const b=bfs(e);const outs=edgeOuts().filter(o=>b.dist[o]>=0);for(let k=0;k<Math.min(5,Math.ceil(tot/20))&&outs.length&&cars.length<MAX_CARS;k++){const v=createCar('truck',pathTo(b,outs[k%outs.length]),{home:i,dest:-1});v.kind='export';v.mesh.userData.cargo&&(v.mesh.userData.cargo.material=GM[sel[k%sel.length]]||GM.mix)}}}
 function shipTick(dt){if(!dt)return;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='shipC'||c.off||!c.powered||c.shipAt==null)continue;if(gameT>=c.shipAt){shipRun(i);c.shipAt=c.shipAuto?gameT+SHIP_EVERY:null}}}
@@ -2474,11 +2492,11 @@ const FR_MIN=10,FR_STEP=5,FR_MAX=60,FR_IMP=0.8,FR_EXP=0.5,FR_GOODS=['mat',...Obj
 const frName=k=>k==='mat'?'Materiały':GOODS[k].name,frPrice=k=>k==='mat'?8:GOODS[k].ex||GOODS[k].price||8;
 const frRamps=c=>{c.fr=c.fr||[{k:'mat',m:'off',n:FR_MIN}];if(c.up&&c.fr.length<2)c.fr.push({k:'veg',m:'off',n:FR_MIN});return c.fr.slice(0,c.up?2:1)};
 function freightRun(st){const c=grid[st];for(const R0 of frRamps(c)){if(R0.m==='off')continue;const k=R0.k;
-    if(R0.m==='imp'){const room=Math.max(0,Math.floor(matCap()-stored())),unit=frPrice(k)*FR_IMP;let n=Math.min(R0.n,room,Math.floor(Math.max(0,money)/unit));
-      if(n<=0){float(st,room<=0?'import: magazyny pełne':'import: brak gotówki','warn');continue}if(k==='mat')matl+=n;else goods[k]=(goods[k]||0)+n;const cost=Math.round(n*unit);money-=cost;cur.upkeep+=cost;cur.frImp=(cur.frImp||0)+cost;
+    if(R0.m==='imp'){const room=Math.floor(whFreeFor(k)),unit=frPrice(k)*FR_IMP;let n=Math.min(R0.n,room,Math.floor(Math.max(0,money)/unit));
+      if(n<=0){float(st,room<=0?'import: magazyny pełne':'import: brak gotówki','warn');continue}n=Math.floor(addGood(k,n,st));const cost=Math.round(n*unit);money-=cost;cur.upkeep+=cost;cur.frImp=(cur.frImp||0)+cost;
       cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n;float(st,`+${n} kg ${frName(k).toLowerCase()} (−${fmt(cost)} T¢)`,'mat')}
     else{const have=k==='mat'?matl:(goods[k]||0),n=Math.min(R0.n,Math.floor(have));if(n<=0){float(st,`eksport: brak towaru (${frName(k).toLowerCase()})`,'warn');continue}
-      if(k==='mat')matl-=n;else goods[k]-=n;const inc=addMoney(Math.round(n*frPrice(k)*FR_EXP));cur.inc+=inc;cur.frExp=(cur.frExp||0)+inc;float(st,`−${n} kg ${frName(k).toLowerCase()} (+${fmt(inc)} T¢)`,'money')}}}
+      take(k,n,st);const inc=addMoney(Math.round(n*frPrice(k)*FR_EXP));cur.inc+=inc;cur.frExp=(cur.frExp||0)+inc;float(st,`−${n} kg ${frName(k).toLowerCase()} (+${fmt(inc)} T¢)`,'money')}}}
 function trainArrive(tr){const c=grid[tr.st];if(!c)return;if(tr.kind==='pass'){const n=Math.min(40,Math.round(visitorRate()*(c.up?1:0.6)*2));c.waiting=Math.min(60,(c.waiting||0)+n);float(tr.st,`pociąg: +${n} turystów`,'neutral')}else freightRun(tr.st)}
 /* taxis: every tourist rides a taxi from the entry road or the station, to a hotel, entertainment or a shop, and back out */
 const TAXI_FARE=5,taxiCap=b=>4+(grid[b].up?4:0),taxiCount=b=>cars.filter(v=>!v.dead&&v.kind==='taxi'&&v.home===b).length;
@@ -2704,7 +2722,7 @@ function wasteTick(dt,night){
         if(!counts.landfill&&!counts.incinerator&&!counts.recycler&&inspI<0){setHint('<b>Kosze się zapełniają</b> · postaw wysypisko (zakładka Odpady, 200 T¢) przy ulicy, inaczej pełne fabryki i sklepy staną.',true,true);hintTimer=8}}}}
     if(isFac(c)){const F=FAC[c.t];if(!F.rate)continue;if(DEMAND[c.t]&&!c.powered){if(c.t==='incinerator')c.model.userData.off=true;continue}
       const x=Math.min(c.gstock,fRate(c)*dt/60);c.gstock-=x;
-      if(c.t==='recycler'){cur.gRec+=x;cur.matRec+=addMat(x*REC_YIELD)}else cur.gBurn+=x;
+      if(c.t==='recycler'){cur.gRec+=x;cur.matRec+=addMat(x*REC_YIELD,i)}else cur.gBurn+=x;
       if(c.t==='incinerator')c.model.userData.off=c.gstock<0.05}}}
 
 /* ---------- goods ---------- */
@@ -2750,29 +2768,30 @@ function produce(i,d){
   if(isMine(d.t)){const units=MINE_T[d.t]*(d.techB?1.05:1)*prodMul('mat');if(!spawnTruck(i,'mat',units)){d.work=2;return}d.work-=2;cur.made.mat=(cur.made.mat||0)+units;addTrash(d,TRASH[d.t].per);float(i,`+${mw(Math.round(units*10)/10)} kg materiałów →`,'mat');return}
   if(d.t==='factoryB'){const ls=d.lines&&d.lines.length?d.lines:['mix'];d.li=(d.li||0)%ls.length;const k=ls[d.li],L=LINES[k];
     const pid=k==='mix'?mixPick():k,IN=k==='mix'?mixIn(pid):L.in;
-    if(lacks(i,d,IN)){d.li++;return}
+    if(lacks(i,d,IN)){d.li++;return}const AT=i;
     const units=(TRUCK_LOAD*(k==='mix'?1:1.5)*(d.up2?1.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid);if(!spawnTruck(i,pid,units)){d.work=2;return}
-    if(IN)for(const q in IN){take(q,IN[q]);cur.used[q]=(cur.used[q]||0)+IN[q]}d.li++;d.work-=2;cur.made[pid]=(cur.made[pid]||0)+units;addTrash(d,TRASH[d.t].per);float(i,`${GOODS[pid].name} →`,'neutral');bakeGrain(i);return}
+    if(IN)for(const q in IN){take(q,IN[q],AT);cur.used[q]=(cur.used[q]||0)+IN[q]}d.li++;d.work-=2;cur.made[pid]=(cur.made[pid]||0)+units;addTrash(d,TRASH[d.t].per);float(i,`${GOODS[pid].name} →`,'neutral');bakeGrain(i);return}
   const L=LINES[d.line],pid=d.line==='mix'?mixPick():d.line,IN=d.line==='mix'?mixIn(pid):L.in;
   if(lacks(i,d,IN))return;
   const units=(TRUCK_LOAD*(d.up?1.5:1)*(d.up2?1.5:1)*(d.t==='smallfac'?0.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid);
   if(!spawnTruck(i,pid,units)){d.work=2;return}
-  if(IN)for(const k in IN){take(k,IN[k]);cur.used[k]=(cur.used[k]||0)+IN[k]}
+  if(IN)for(const k in IN){take(k,IN[k],i);cur.used[k]=(cur.used[k]||0)+IN[k]}
   d.work-=2;cur.made[pid]=(cur.made[pid]||0)+units;addTrash(d,TRASH[d.t].per);float(i,`${GOODS[pid].name} →`,'neutral');bakeGrain(i)}
 /* every factory also bakes: 3 kg of grain from the warehouses become 3 kg of bread */
-function bakeGrain(i){if(have('grain')<3)return;take('grain',3);goods.bread=(goods.bread||0)+3*prodMul('bread');cur.used.grain=(cur.used.grain||0)+3;cur.made.bread=(cur.made.bread||0)+3;float(i,'+3 kg pieczywa','neutral')}
+function bakeGrain(i){if(have('grain')<3)return;take('grain',3,i);addGood('bread',3*prodMul('bread'),i);cur.used.grain=(cur.used.grain||0)+3;cur.made.bread=(cur.made.bread||0)+3;float(i,'+3 kg pieczywa','neutral')}
 /* a shop at 10 items or fewer (counting vans on the way) orders up to 5, taking whatever it sells and is lowest on the shelf */
 function spawnVan(s){const sh=grid[s];const e=entryOf(s);if(e<0)return false;const b=bfs(e);
   const sells=sellsOf(sh);if(!sells.length)return false;
-  const list=candidates(b,WH_T).filter(o=>grid[o.i].powered);
+  const list=candidates(b,WH_T).filter(o=>whOn(grid[o.i]));
   /* no warehouse reachable: the shop imports straight away; warehouses without its goods for an hour: it imports too */
   if(!list.length){sh.dry=null;return shopImport(s,b)}
-  if(!sells.some(k=>goods[k]>=1)){if(sh.dry==null)sh.dry=gameT;if(gameT-sh.dry>=60)return shopImport(s,b);return false}
-  sh.dry=null;
-  list.sort((p,q)=>p.d-q.d);let room=Math.min(VAN_MAX,slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;
-  while(room>0){let best=null,bv=1e9;for(const k of sells){if(goods[k]<1)continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
-    items[best]=(items[best]||0)+1;goods[best]-=1;load++;room--}
-  if(!load)return false;cur.matShop+=load;cur.vans++;sh.incoming+=load;
+  /* the van comes from the nearest warehouse that actually holds something this shop sells */
+  const src=list.filter(o=>sells.some(k=>(grid[o.i].st[k]||0)>=1)).sort((p,q)=>p.d-q.d);
+  if(!src.length){if(sh.dry==null)sh.dry=gameT;if(gameT-sh.dry>=60)return shopImport(s,b);return false}
+  sh.dry=null;list.length=0;list.push(src[0]);const W=grid[src[0].i].st;let room=Math.min(VAN_MAX,slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;
+  while(room>0){let best=null,bv=1e9;for(const k of sells){if((W[k]||0)<1)continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
+    items[best]=(items[best]||0)+1;W[best]-=1;if(W[best]<1e-6)delete W[best];load++;room--}
+  syncGoods();if(!load)return false;cur.matShop+=load;cur.vans++;sh.incoming+=load;
   createCar('van',pathTo(b,list[0].e).reverse(),{home:list[0].i,dest:s,load,items});return true}
 function shopImport(s,b){const sh=grid[s],sells=sellsOf(sh);const outs=edgeOuts().filter(o=>b.dist[o]>=0);if(!outs.length||!sells.length)return false;
   let room=Math.min(VAN_MAX,slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;
@@ -2782,11 +2801,12 @@ function shopImport(s,b){const sh=grid[s],sells=sellsOf(sh);const outs=edgeOuts(
   for(const k in items)payImport(k,items[k],Math.round(items[k]*(GOODS[k].price||10)*SHOP_IMP));
   cur.vans++;sh.incoming+=load;sh.impT=gameT;createCar('van',pathTo(b,o).reverse(),{home:o,dest:s,load,items,imp:true});float(s,`import −${fmt(cost)} T¢`,'warn');return true}
 function bakeTick(dt){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='bakery'||c.off||!c.powered)continue;c.bake=(c.bake||0)+dt;
-  if(c.bake<6)continue;c.bake=0;if((c.shelf.bread||0)+3>SHOP_SLOTS||goods.grain<1)continue;goods.grain-=1;c.shelf.bread=(c.shelf.bread||0)+3;cur.used.grain=(cur.used.grain||0)+1;cur.made.bread=(cur.made.bread||0)+3}}
+  if(c.bake<6)continue;c.bake=0;if((c.shelf.bread||0)+3>SHOP_SLOTS||have('grain')<1)continue;take('grain',1,i);c.shelf.bread=(c.shelf.bread||0)+3;cur.used.grain=(cur.used.grain||0)+1;cur.made.bread=(cur.made.bread||0)+3}}
 function supplyShops(){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||!isShop(c.t))continue;
   if(slotsOf(c)>0&&shelfTotal(c)+c.incoming<=slotsOf(c)-VAN_MAX&&cars.length<MAX_CARS)spawnVan(i)}}
 function spawnTruck(f,pid='mat',units=TRUCK_LOAD){const e=entryOf(f);if(e<0)return false;const b=bfs(e);
-  const all=candidates(b,WH_T).filter(o=>grid[o.i].powered),list=all.filter(o=>whAccepts(grid[o.i],pid));if(!list.length){float(f,all.length?'żaden magazyn nie przyjmuje tego towaru':'brak magazynu','warn');return false}
+  const all=candidates(b,WH_T).filter(o=>whOn(grid[o.i])),acc=all.filter(o=>whAccepts(grid[o.i],pid)),list=acc.filter(o=>whRoom(grid[o.i],pid)>=1);
+  if(!list.length){float(f,!all.length?'brak magazynu':!acc.length?'żaden magazyn nie przyjmuje tego towaru':'magazyny pełne','warn');return false}
   list.sort((a,b)=>a.d-b.d);cur.trucks++;const car=createCar('truck',pathTo(b,list[0].e),{home:f,dest:list[0].i,pid,units});car.mesh.userData.cargo.material=GM[pid];return true}
 /* big factory: up to 3 different lines; the general line is free and can be switched off, product lines are bought once */
 function paintLines(c){const sg=c.model&&c.model.userData.lineSigns;if(!sg)return;sg.forEach((o,j)=>{const k=c.lines[j];o.material=k?GM[k]:mat.facDark})}
@@ -2897,7 +2917,7 @@ function computePower(dt){if(topoDirty||powerSig()!==topoSig)rebuildHV();compute
     if(sup[c.net]<dem[c.net]-1e-6){
       /* no fuel in the warehouses: the plant buys 1 kg from outside the city, at twice the export price */
       if(c.fuel<=0&&have(fk)<1&&money>=FUEL_IMP[fk]){payImport(fk,1,FUEL_IMP[fk]);float(i,`import ${bio?'drewna':'węgla'} −${FUEL_IMP[fk]} T¢`,'warn');c.fuel=bio?BIO_BURN*BIO_MW/CMW:COAL_BURN;cur.matCoal++;cur.used[fk]=(cur.used[fk]||0)+1}
-      else if(c.fuel<=0&&have(fk)>=1){take(fk,1);cur.matCoal++;cur.used[fk]=(cur.used[fk]||0)+1;c.fuel=bio?BIO_BURN*BIO_MW/CMW:COAL_BURN;float(i,bio?'−1 kg drewna':'−1 kg węgla','mat')}
+      else if(c.fuel<=0&&have(fk)>=1){take(fk,1,i);cur.matCoal++;cur.used[fk]=(cur.used[fk]||0)+1;c.fuel=bio?BIO_BURN*BIO_MW/CMW:COAL_BURN;float(i,bio?'−1 kg drewna':'−1 kg węgla','mat')}
       if(c.fuel>0){c.fuel-=dt;sup[c.net]+=CMW;c.running=true}else float(i,bio?'brak drewna':'brak węgla','warn')}
     if(c.model)c.model.userData.off=!c.running}
   const left=Array.from(sup);let okN=0;pw.bank=0;pw.bankCap=0;pw.matCap=0;
@@ -2905,7 +2925,7 @@ function computePower(dt){if(topoDirty||powerSig()!==topoSig)rebuildHV();compute
   for(let i=0;i<N*N;i++){const c=grid[i];if(c&&DEMAND[c.t])c.powered=false}
   for(const i of cons){const c=grid[i],d=DEMAND[c.t]*dm;if(left[c.net]>=d-1e-6){left[c.net]-=d;c.powered=true}}
   for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!DEMAND[c.t])continue;c.bolt.visible=!c.powered&&!c.off;
-    if(c.powered){okN++;if(c.t==='bank'){pw.bank++;pw.bankCap+=BANK_CAP*(c.up?2:1)}if(c.t==='bankG'){pw.bank++;pw.bankCap+=12500+(c.up2?5000:0)}if(isWH(c.t))pw.matCap+=whCap(c)}
+    if(c.powered){okN++;if(c.t==='bank'){pw.bank++;pw.bankCap+=BANK_CAP*(c.up?2:1)}if(c.t==='bankG'){pw.bank++;pw.bankCap+=12500+(c.up2?5000:0)}if(isWH(c.t)&&!c.off)pw.matCap+=whCap(c)}
     if(isFactory(c.t))c.model.userData.off=!c.powered}
   {const g={};const ad=(k,v)=>{if(v>0)g[k]=(g[k]||0)+v};for(const i of gens){const c=grid[i];if(c.net<0)continue;
     if(c.t==='wind'){const sol=c.up?SOLAR_MW*dayF:0;ad('Wiatraki',Math.max(0,(c.windMW||0)-sol));ad('Panele słoneczne',sol)}else if(c.t==='hydro')ad('Elektrownie wodne',c.mw);else if(c.t==='hydrogen')ad(DEF.hydrogen.name,c.mw);else if(c.t==='coal'&&c.running)ad('Elektrownie węglowe',COAL_MW*(fOn(c)?0.9:1));else if(c.t==='biomass'&&c.running)ad('Biomasa',BIO_MW+(c.up?BIO_UP:0))}pw.gen=g}
@@ -3186,7 +3206,7 @@ function startMove(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;const c=grid
   closeHouse();selectTool('view');moveSrc=i;rotIdx=c.tiles?(c.rot!=null?c.rot:((Math.round(c.model.rotation.y/(Math.PI/2))%4)+4)%4):0;pendA=i;updateGhost()}
 function doMove(src,a,t,cost){const c=grid[src];if(!c)return;const row=rowOf(c,src);row[0]=a;row[7]=t.length>1?t.slice(1):-1;row[8].rot=t.length>1?rotIdx:null;
   const keep={happy:c.happy,vis:c.vis,crowd:c.crowd,crowdT:c.crowdT,stock:c.stock};
-  spend(cost);removeCell(src);placeRow(row,true);const n=grid[a];if(n){Object.assign(n,keep);if(n.incoming!=null)n.incoming=0}
+  spend(cost);whKeep=true;try{removeCell(src)}finally{whKeep=false}placeRow(row,true);const n=grid[a];if(n){Object.assign(n,keep);if(n.incoming!=null)n.incoming=0}
   powerDirty=true;envDirty=true;farmDirty=true;topoDirty=true;bfsCache.clear();float(a,'przeniesiono','neutral');save()}
 document.getElementById('pRot').addEventListener('click',rotateFP);document.getElementById('pOk').addEventListener('click',()=>lineConf?confirmLine():placeFP());document.getElementById('pNo').addEventListener('click',()=>lineConf?cancelLine():cancelFP());
 const hintEl=document.getElementById('hint');let hintTimer=0;
@@ -3311,7 +3331,7 @@ const IMPORT_FEE=0;let imports={};
 /* imports cost per kilogram: a shop pays 70% of the shelf price, power plants twice the export price of their fuel */
 const SHOP_IMP=0.7,FUEL_IMP={coal:24,wood:16};
 function payImport(k,n,cost){money-=cost;cur.upkeep+=cost;cur.impCost=(cur.impCost||0)+cost;imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
-function importGood(k,n){if(n<=0)return;if(k==='mat')matl+=n;else goods[k]=(goods[k]||0)+n;imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
+function importGood(k,n){if(n<=0)return;addGood(k,n);imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
 const importKinds=()=>Object.keys(imports).filter(k=>gameT-imports[k]<60);
 function taxIncome(){let t=0;for(const c of grid)if(c&&HLV[c.t]&&!c.aband)t+=popOf(c)*(TAX[c.t]??taxRate)/100*TAX_BASE*(c.lyc?1.05:1);return Math.round(t)}
 const utilIncome=()=>Math.round(popNow()*TAX.util/100*TAX_BASE*0.5);
@@ -3416,7 +3436,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
     R('Multiblok',`${cl.tiles.length} ${cl.tiles.length===1?'pole':cl.tiles.length<5?'pola':'pól'} · +${Math.round((cl.mult-1)*100)}%`);
     R('Wydajność',`${mw(Math.round(FARM_RATE*cl.tiles.length*cl.mult*(night?0.5:1)*10)/10)} kg/godz.${night?' (noc)':''}`);
     R('Do ciężarówki',`${mw(Math.round(cl.acc*10)/10)} / ${TRUCK_LOAD} kg`);R('Wyjazd',cl.hub>=0?'jest ulica przy multibloku':'brak ulicy przy żadnym polu',cl.hub>=0?'':'warnv')}
-  if(isWH(c.t)){R('Pojemność',`+${fmt(whCap(c))} kg`+(c.powered?'':' (nieaktywna)'));const sh=whShare(i),ks=Object.keys(sh).filter(k=>sh[k]>=0.5).sort((a,b)=>sh[b]-sh[a]);const tot=ks.reduce((a,k)=>a+sh[k],0);
+  if(isWH(c.t)){R('Zajęte',`${fmt(Math.round(whUsed(c)))} / ${fmt(whCap(c))} kg`+(whOn(c)?'':' · nieaktywny: towar niedostępny'),whOn(c)?'':'warnv');const sh=whShare(i),ks=Object.keys(sh).filter(k=>sh[k]>=0.5).sort((a,b)=>sh[b]-sh[a]);const tot=ks.reduce((a,k)=>a+sh[k],0);
     R('Przechowuje',!ks.length?'nic':`${fmt(Math.round(tot))} kg<div class="whl">${ks.map(k=>`<span><i class="sw2" style="background:${(GOODS[k]||GOODS.mat).col}"></i>${frName(k)} <b>${fmt(Math.round(sh[k]))}</b></span>`).join('')}</div>`)}
   if(c.t==='bank')R('Limit gotówki',`+${fmt(BANK_CAP*(c.up?2:1))} T¢`+(c.powered?'':' (nieaktywny)'));
   if(PARKS.includes(c.t)){const r=parkR(c);R('Zasięg',`${2*r+1}×${2*r+1}`);if(full)R('Stan','nie działa: pełno śmieci','warnv')}
@@ -4092,12 +4112,12 @@ function hud(){fixNaN();const mc=moneyCap(),tc=matCap();const v={m:Math.round(mo
 /* ---------- save / preset ---------- */
 const KEY='siatkowo-v4';let oldSave=false;
 let saveBlocked=false;
-function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{mv:c.mv!=null?Math.round(c.mv*1e4)/1e4:undefined,spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,up3:c.up3?1:undefined,whf:c.whf?[...c.whf]:undefined,shipM:c.shipM||undefined,shipN:c.shipN||undefined,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,filtOff:c.filtOff?1:undefined,off:c.off?1:0,rot:c.rot,rot1:c.rot1,aband:c.aband?1:undefined,ruin:c.ruin?1:undefined,ship:c.ship&&c.ship.length?[...c.ship]:undefined,shipAuto:c.shipAuto?1:undefined,shipAt:c.shipAt!=null?Math.round(c.shipAt-gameT):undefined,dirt:c.dirt?Math.round(c.dirt*100)/100:undefined,fr:c.fr?c.fr.map(r0=>({...r0})):undefined,waiting:c.waiting||undefined,burn:c.burn?Math.round(gameT-c.burn.t0):undefined,need:c.need?Object.fromEntries(Object.entries(c.need).map(([k,v])=>[k,Math.round(v*100)/100])):undefined,pp:c.pp&&c.pp.length?c.pp.map(q=>[Math.round(q.a*10)/10,q.s,q.si,q.h||0,q.s===2?q.hi:-1]):undefined,dead:c.dead||undefined,lb:c.lastBuy!=null?Math.round(gameT-c.lastBuy):undefined,bodies:c.bodies||undefined,urn:c.urn&&c.urn.length?c.urn.map(t=>Math.round(t-gameT)):undefined,lowT:c.lowT?Math.round(c.lowT*1000)/1000:undefined,jail:c.jail&&c.jail.length?c.jail.map(q=>[Math.round(q.rel),q.w||0]):undefined,lv:c.lv||0,xp:c.xp?Math.round(c.xp*1000)/1000:0,lines:c.lines,owned:c.owned}]}
+function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{mv:c.mv!=null?Math.round(c.mv*1e4)/1e4:undefined,spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,up3:c.up3?1:undefined,whf:c.whf?[...c.whf]:undefined,st:isWH(c.t)&&c.st&&Object.keys(c.st).length?Object.assign({},c.st):undefined,shipM:c.shipM||undefined,shipN:c.shipN||undefined,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,filtOff:c.filtOff?1:undefined,off:c.off?1:0,rot:c.rot,rot1:c.rot1,aband:c.aband?1:undefined,ruin:c.ruin?1:undefined,ship:c.ship&&c.ship.length?[...c.ship]:undefined,shipAuto:c.shipAuto?1:undefined,shipAt:c.shipAt!=null?Math.round(c.shipAt-gameT):undefined,dirt:c.dirt?Math.round(c.dirt*100)/100:undefined,fr:c.fr?c.fr.map(r0=>({...r0})):undefined,waiting:c.waiting||undefined,burn:c.burn?Math.round(gameT-c.burn.t0):undefined,need:c.need?Object.fromEntries(Object.entries(c.need).map(([k,v])=>[k,Math.round(v*100)/100])):undefined,pp:c.pp&&c.pp.length?c.pp.map(q=>[Math.round(q.a*10)/10,q.s,q.si,q.h||0,q.s===2?q.hi:-1]):undefined,dead:c.dead||undefined,lb:c.lastBuy!=null?Math.round(gameT-c.lastBuy):undefined,bodies:c.bodies||undefined,urn:c.urn&&c.urn.length?c.urn.map(t=>Math.round(t-gameT)):undefined,lowT:c.lowT?Math.round(c.lowT*1000)/1000:undefined,jail:c.jail&&c.jail.length?c.jail.map(q=>[Math.round(q.rel),q.w||0]):undefined,lv:c.lv||0,xp:c.xp?Math.round(c.xp*1000)/1000:0,lines:c.lines,owned:c.owned}]}
 let saveReq=false,saveRT=0;
 function save(){if(window.__testUnlock||saveBlocked||window.__LT_EDITOR)return writeSave();saveReq=true}
 function writeSave(){saveReq=false;saveRT=0;if(saveBlocked||window.__LT_EDITOR)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
   const old=localStorage.getItem(KEY);if(old)localStorage.setItem(KEY+'-prev',old);
-  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,taxes:TAX,ord:ORD,loan,sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),dep:[...dep.keys()].filter(i=>dep[i]).map(i=>[i,dep[i]]),ms:msLevel,n:N,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
+  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,taxes:TAX,ord:ORD,loan,sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),dep:[...dep.keys()].filter(i=>dep[i]).map(i=>[i,dep[i]]),ms:msLevel,n:N,whst:1,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
 function load(){if(loadKey(KEY))return true;if(oldSave){try{const r=localStorage.getItem(KEY);if(r&&!localStorage.getItem(KEY+'-pre4'))localStorage.setItem(KEY+'-pre4',r)}catch(e){}saveBlocked=true;return false}if(loadKey(KEY+'-prev')){setHint('Ostatni zapis był uszkodzony, wczytano poprzedni.',true,true);return true}
   let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
   if(raw){saveBlocked=true;try{localStorage.setItem(KEY+'-broken',raw)}catch(e){}setHint('Nie udało się wczytać zapisu. Kopia jest bezpieczna i gra jej nie nadpisze. Tylko „Zresetuj miasto” zaczyna od nowa.',true,true);hintTimer=12}
@@ -4105,7 +4125,7 @@ function load(){if(loadKey(KEY))return true;if(oldSave){try{const r=localStorage
 function recountPatients(){for(const c of grid)if(c&&MED[c.t])c.pat=0;for(const c of grid)if(c&&c.pp)for(const q of c.pp)if(q.s===2){const m=grid[q.hi];if(m&&MED[m.t])m.pat++;else{q.s=1;q.hi=-1}}}
 function placeRow(row,anim){let[i,t,p,st,up,tr,gs,sec,x]=row;mvNext=x&&typeof x.mv==='number'?x.mv:null;addCell(i,t,!!anim,Array.isArray(sec)?sec:(sec>=0?sec:-1));const c=grid[i];
     if(x&&t==='gallery'){c.stores=x.stores||[];c.shelf=x.shelf||{};paintStores(c);if(x.cinema){c.cinema=true;cinemaVisual(c)}}
-    if(x&&(t==='restaurant'||t==='bakery'))c.shelf=x.shelf||{};if(x&&t==='hotelB'&&x.attr&&ATTR[x.attr]){c.attr=x.attr;c.model.userData.attrSign.material=M(ATTR_COL[x.attr])}if(x&&x.up2&&UPG2[t]){c.up2=true;if(!isWH(t))addUpgrade2Visual(c)}if(x&&x.up3&&UPG3[t])c.up3=true;if(x&&Array.isArray(x.whf))c.whf=x.whf;if(x&&x.shipM)c.shipM=x.shipM;if(x&&x.shipN)c.shipN=x.shipN;if(x&&x.filt&&UPGF[t]){c.filt=true;c.filtOff=!!x.filtOff;filterVisual(c)}if(x&&x.off)c.off=true;
+    if(x&&(t==='restaurant'||t==='bakery'))c.shelf=x.shelf||{};if(x&&t==='hotelB'&&x.attr&&ATTR[x.attr]){c.attr=x.attr;c.model.userData.attrSign.material=M(ATTR_COL[x.attr])}if(x&&x.up2&&UPG2[t]){c.up2=true;if(!isWH(t))addUpgrade2Visual(c)}if(x&&x.up3&&UPG3[t])c.up3=true;if(x&&Array.isArray(x.whf))c.whf=x.whf;if(x&&x.st&&typeof x.st==='object'&&isWH(t)){c.st={};for(const k in x.st)if(x.st[k]>0&&(k==='mat'||GOODS[k]))c.st[k]=+x.st[k]}if(x&&x.shipM)c.shipM=x.shipM;if(x&&x.shipN)c.shipN=x.shipN;if(x&&x.filt&&UPGF[t]){c.filt=true;c.filtOff=!!x.filtOff;filterVisual(c)}if(x&&x.off)c.off=true;
     if(x&&isFactory(t)&&LINES[x.line]&&!FREE_LINES[x.line]&&t!=='smallfac')up=1;if(t==='smallfac'){up=0;if(x)x.line='mix'}
     if(x&&t==='shop1'&&SPECS[x.spec]&&x.spec!=='mall'){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(up&&t==='shop1'){c.up=true;addUpgradeVisual(c);up=0}
     if(x&&t==='shop'&&SPECS[x.spec]){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(x&&isFactory(t)&&LINES[x.line]){c.line=x.line;paintModel(c,GM[c.line])}if(x&&(isFarm(t)||PIT_RATE[t]))c.acc=x.acc||0;
@@ -4138,13 +4158,13 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
   applyWater();
   for(const[i,t,p]of s.cells)if(DRIVE[t]){try{addCell(i,t,false);if(p)grid[i].pole=true}catch(e){console.warn('pole zapisu pominięte',i,t,e)}}
   for(const row of s.cells)if(!DRIVE[row[1]])try{placeRow(row)}catch(e){console.warn('budynek z zapisu pominięty',row[0],row[1],e)}
-  for(let i=0;i<N*N;i++)rebuildRoad(i);money=s.money||0;mapType=MAPS[s.map]?s.map:'standard';diff=DIFF[s.diff]?s.diff:'old';taxRate=s.tax>=10&&s.tax<=20?s.tax:12;ORD={};if(s.ord&&typeof s.ord==='object')for(const o of ORDS)if(s.ord[o.k])ORD[o.k]=1;TAX={...TAX0};if(s.taxes&&typeof s.taxes==='object'){for(const k in TAX0)if(Number.isFinite(s.taxes[k]))TAX[k]=s.taxes[k]}else for(const k of['house','tenement','block','modern'])TAX[k]=taxRate;loan=s.loan&&LOANS[s.loan.k]?s.loan:null;imports={};if(s.imports)for(const k in s.imports)imports[k]=(s.gameT||gameT)+s.imports[k];tut=s.tut&&s.tut.on?s.tut:null;matl=s.matl||0;if(s.goods)for(const k in goods)goods[k]=s.goods[k]||0;
+  for(let i=0;i<N*N;i++)rebuildRoad(i);money=s.money||0;mapType=MAPS[s.map]?s.map:'standard';diff=DIFF[s.diff]?s.diff:'old';taxRate=s.tax>=10&&s.tax<=20?s.tax:12;ORD={};if(s.ord&&typeof s.ord==='object')for(const o of ORDS)if(s.ord[o.k])ORD[o.k]=1;TAX={...TAX0};if(s.taxes&&typeof s.taxes==='object'){for(const k in TAX0)if(Number.isFinite(s.taxes[k]))TAX[k]=s.taxes[k]}else for(const k of['house','tenement','block','modern'])TAX[k]=taxRate;loan=s.loan&&LOANS[s.loan.k]?s.loan:null;imports={};if(s.imports)for(const k in s.imports)imports[k]=(s.gameT||gameT)+s.imports[k];tut=s.tut&&s.tut.on?s.tut:null;matl=0;for(const k in goods)goods[k]=0;const POOL=s.whst?null:Object.assign({mat:s.matl||0},s.goods||{});
   pipe.fill(0);if(Array.isArray(s.pipes))for(const i of s.pipes)pipe[i]=1;
   if(Array.isArray(s.litter))for(const[i,n]of s.litter)setLitter(i,n);
   if(Array.isArray(s.cross))for(const i of s.cross)if(grid[i]&&STREET[grid[i].t]){grid[i].cross=true;drawCross(i)}
   if(Array.isArray(s.rails))for(const i of s.rails)if(grid[i]&&STREET[grid[i].t])grid[i].rail=true;railVer++;railRefreshAll();
   if(Array.isArray(s.edges))for(const[i,o]of s.edges){if(grid[i]&&grid[i].t==='rail'){grid[i].edge=true;continue}if(grid[i]&&DRIVE[grid[i].t]){grid[i].edge=true;if(o)grid[i].edgeOut=true;rebuildRoad(i)}}
-  if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(!window.__testUnlock)msLevel=Math.max(0,Math.min(MS.length-1,s.ms|0));if(typeof s.name==='string'&&s.name.trim())cityName=s.name.trim().slice(0,24);for(const[i,a]of loadShip)if(grid[i])grid[i].shipAt=gameT+a;loadShip=[];for(const[i,a]of loadFires){if(!grid[i])continue;if(a<0)makeRuin(i,true);else startFire(i,a)}loadFires=[];if(Array.isArray(s.hist))hist=s.hist;if(Array.isArray(s.dep)){dep.fill(0);for(const[i,k]of s.dep)if(i>=0&&i<N*N&&DEP[k])dep[i]=k;depDirty=true;envDirty=true}else genDeposits();return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
+  if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(!window.__testUnlock)msLevel=Math.max(0,Math.min(MS.length-1,s.ms|0));if(typeof s.name==='string'&&s.name.trim())cityName=s.name.trim().slice(0,24);for(const[i,a]of loadShip)if(grid[i])grid[i].shipAt=gameT+a;loadShip=[];for(const[i,a]of loadFires){if(!grid[i])continue;if(a<0)makeRuin(i,true);else startFire(i,a)}loadFires=[];whDirty=true;if(POOL)spreadPool(POOL);syncGoods();if(Array.isArray(s.hist))hist=s.hist;if(Array.isArray(s.dep)){dep.fill(0);for(const[i,k]of s.dep)if(i>=0&&i<N*N&&DEP[k])dep[i]=k;depDirty=true;envDirty=true}else genDeposits();return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
 function clearCity(){for(const cr of crimes)cr.pin.remove();crimes=[];for(const f of fires){scene.remove(f.fx);if(f.spray)scene.remove(f.spray);f.pin.remove()}fires=[];for(const h of helis){scene.remove(h.m)}helis=[];for(const tr of trains)scene.remove(tr.g);trains=[];for(const C of constructs){C.cell.group.remove(C.sc,C.cr)}constructs.length=0;for(const c of cars)scene.remove(c.mesh);cars=[];resMap.clear();for(let i=0;i<N*N;i++)if(grid[i])removeCell(i);
   for(const f of floats)f.el.remove();floats=[]}
 function preset(type,d){if(type&&MAPS[type])mapType=type;applyTheme();if(d&&DIFF[d])diff=d;pipe.fill(0);money=startCash();matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);applyWater();makeEntries();genDeposits()}
@@ -4240,7 +4260,7 @@ function frame(now){requestAnimationFrame(frame);
   /* pause freezes the simulation only: building, its animations and everything decorative keep running on real time */
   const vdt=paused||titleOpen?rdt:dt;time+=vdt;const night=isNight();
   if(titleOpen&&!reduce){cam.theta+=rdt*0.05;updateCamera()}msTick(rdt);
-  supT+=dt;if(supT>0.5){supT=0;bakeTick(0.5);supplyShops();dispatchGarbage();visitorTick(0.5,night);pitTick(0.5)}if((depT=(depT||0)+rdt)>0.5){depT=0;depSync()}
+  supT+=dt;if(supT>0.5){supT=0;syncGoods();bakeTick(0.5);supplyShops();dispatchGarbage();visitorTick(0.5,night);pitTick(0.5)}if((depT=(depT||0)+rdt)>0.5){depT=0;depSync()}
   wasteAcc+=dt;if(wasteAcc>=0.25){wasteTick(wasteAcc,night);wasteAcc=0}shopTick(dt);farmTick(dt,night);
   for(let i=0;i<N*N;i++){const c=grid[i];const H=c&&HOUSING[c.t];if(!H||c.off)continue;xpTick(i,c,dt);abandonTick(i,c,dt);if(c.aband||!popOf(c))continue;c.timer-=dt;
     if(c.timer<=0){const iv=60/(TIER[c.happy??3].trips*H.trips*hMul(c))*(night?2:1);c.timer+=iv;if(c.timer<=0)c.timer=iv;if(cars.length<PEOPLE_CARS)spawnCommuter(i)}}
