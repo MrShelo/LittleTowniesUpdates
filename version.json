@@ -1,1 +1,1 @@
-{"v":"6.0.11","notes":"Poprawka do pociągów"}
+{"v": "6.0.11", "notes": "6.0.10: okna świecące tylko nocą z kolorem nocnym wracają w dzień do swojego koloru (wcześniej po zbudowaniu wieczorem zostawały żółte za dnia); domy, kamienice i bloki na poziomie 0 mają wygląd z edytora (@0)"}
