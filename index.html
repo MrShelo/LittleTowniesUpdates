@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.0.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.0.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -530,8 +530,8 @@ const DEF={
   road2:{name:'Dwujezdniowa',cost:25,desc:'2 pasy w każdą stronę, auta jadą 1,4× szybciej i same wybierają luźniejszy pas. Postaw na zwykłej ulicy, by ją poszerzyć (płacisz różnicę).',sw:'#383d44'},
   road3:{name:'Trzyjezdniowa',cost:45,desc:'3 pasy w każdą stronę, auta jadą 1,8× szybciej i same wybierają luźniejszy pas.',sw:'#30353b'},
   roundabout:{name:'Rondo',cost:80,desc:'Płynny przejazd przez skrzyżowanie (1,2× szybciej), auta objeżdżają wysepkę. Postaw na istniejącej ulicy.',sw:'#5f9b4a'},
-  smallfac:{name:'Mała fabryka',cost:180,desc:'Połowa produkcji zwykłej fabryki (2 kg na partię), 40% taniej. Tylko towary ogólne (losowe). Można dokupić nową technologię (+50%).',sw:'#a8b0bb'},
-  factory:{name:'Fabryka',cost:300,desc:'Dwie zmiany pracowników + 2 kg materiałów z magazynu = ciężarówka z 5 kg towarów ogólnych (losowy produkt, bez warzyw: te są tylko z farm). Ulepszenie odblokowuje wybór produktu i +50%.',sw:'#8d97a6'},
+  smallfac:{name:'Mała fabryka',cost:180,desc:'Połowa produkcji zwykłej fabryki (2 kg na partię), 40% taniej. Tylko linia ogólna: zabawki i kosmetyki z materiałów, a odzież, meble, elektronikę, narzędzia i napoje tylko wtedy, gdy w magazynach jest ich surowiec. Można dokupić nową technologię (+50%).',sw:'#a8b0bb'},
+  factory:{name:'Fabryka',cost:300,desc:'Dwie zmiany pracowników + 2 kg materiałów z magazynu = ciężarówka z 5 kg towarów ogólnych. Z materiałów robi zabawki i kosmetyki; odzież, meble, elektronikę, narzędzia i napoje tylko z ich surowca, jeśli leży w magazynach (bawełna, drewno, chalkopiryt, warzywa). Ulepszenie odblokowuje wybór produktu i +50%.',sw:'#8d97a6'},
   supermarket:{name:'Supermarket',cost:900,size:2,desc:'Zajmuje 2 pola. 70 miejsc na półkach, obsłuży 60 klientów na godzinę (trzecia kasa +15). Ceny bazowe.',sw:'#3a7fc0'},
   shop:{name:'Sklep',cost:200,desc:'15 miejsc na półkach. Na start wielobranżowy (wszystko), w karcie sklepu zmienisz go na specjalistyczny z cenami +25%. Furgonetki dowożą towar z magazynów.',sw:'#3aa39a'},
   farmveg:{name:'Farma warzyw',cost:150,desc:'Grządki i szklarnie: warzywa i owoce, 2 kg/godz. Stawiaj pola obok siebie: multiblok daje +10% za każde kolejne pole (do +100%).',sw:'#6fb24f',farm:'veg'},
@@ -2726,18 +2726,23 @@ const needPen=c=>{if(!(c.pp&&c.pp.length))return 0;const H=needs(c);return -BASI
 /* a factory with 2 shifts turns its inputs into 4 kg of product and ships it */
 /* general lines make neither fresh food nor bread: vegetables and dairy only come from farms, bread from bakeries or the grain-only bread line */
 const MIXG=SOLD.filter(k=>k!=='veg'&&k!=='dairy'&&k!=='bread');
-function mixPick(){let tot=0;const SOLD=MIXG;const w=SOLD.map(k=>{const v=1/(1+goods[k]);tot+=v;return v});let r=Math.random()*tot;for(let k=0;k<SOLD.length;k++){r-=w[k];if(r<=0)return SOLD[k]}return SOLD[0]}
+/* the general line makes only what the warehouses allow: toys and cosmetics from 1 kg of materials, the rest from their
+   own raw material (clothes from cotton, furniture from wood, electronics and tools from chalcopyrite, drinks from vegetables) */
+const MIX_RAW={clothes:{cotton:2},furniture:{wood:3},electronics:{chalco:3},tools:{chalco:2},drinks:{veg:2}};
+const mixIn=pid=>MIX_RAW[pid]||{mat:1};
+function mixPick(){let tot=0;const SOLD=MIXG.filter(k=>{const r=MIX_RAW[k];return!r||Object.keys(r).every(q=>have(q)>=r[q])});const w=SOLD.map(k=>{const v=1/(1+goods[k]);tot+=v;return v});let r=Math.random()*tot;for(let k=0;k<SOLD.length;k++){r-=w[k];if(r<=0)return SOLD[k]}return SOLD[0]}
 function produce(i,d){
   if(isMine(d.t)){const units=MINE_T[d.t]*(d.techB?1.05:1)*prodMul('mat');if(!spawnTruck(i,'mat',units)){d.work=2;return}d.work-=2;cur.made.mat=(cur.made.mat||0)+units;addTrash(d,TRASH[d.t].per);float(i,`+${mw(Math.round(units*10)/10)} kg materiałów →`,'mat');return}
   if(d.t==='factoryB'){const ls=d.lines&&d.lines.length?d.lines:['mix'];d.li=(d.li||0)%ls.length;const k=ls[d.li],L=LINES[k];
-    if(L.in)for(const q in L.in)if(have(q)<L.in[q]){importGood(q,L.in[q]-have(q));float(i,`import: ${GOODS[q].name.toLowerCase()}`,'warn')}
-    const pid=k==='mix'?mixPick():k,units=(TRUCK_LOAD*(k==='mix'?1:1.5)*(d.up2?1.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid);if(!spawnTruck(i,pid,units)){d.work=2;return}
-    if(L.in)for(const q in L.in){take(q,L.in[q]);cur.used[q]=(cur.used[q]||0)+L.in[q]}d.li++;d.work-=2;cur.made[pid]=(cur.made[pid]||0)+units;addTrash(d,TRASH[d.t].per);float(i,`${GOODS[pid].name} →`,'neutral');bakeGrain(i);return}
-  const L=LINES[d.line];
-  if(L.in)for(const k in L.in)if(have(k)<L.in[k]){importGood(k,L.in[k]-have(k));float(i,`import: ${GOODS[k].name.toLowerCase()}`,'warn')}
-  const pid=d.line==='mix'?mixPick():d.line,units=(TRUCK_LOAD*(d.up?1.5:1)*(d.up2?1.5:1)*(d.t==='smallfac'?0.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid);
+    const pid=k==='mix'?mixPick():k,IN=k==='mix'?mixIn(pid):L.in;
+    if(IN)for(const q in IN)if(have(q)<IN[q]){importGood(q,IN[q]-have(q));float(i,`import: ${(GOODS[q]||{name:'Materiały'}).name.toLowerCase()}`,'warn')}
+    const units=(TRUCK_LOAD*(k==='mix'?1:1.5)*(d.up2?1.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid);if(!spawnTruck(i,pid,units)){d.work=2;return}
+    if(IN)for(const q in IN){take(q,IN[q]);cur.used[q]=(cur.used[q]||0)+IN[q]}d.li++;d.work-=2;cur.made[pid]=(cur.made[pid]||0)+units;addTrash(d,TRASH[d.t].per);float(i,`${GOODS[pid].name} →`,'neutral');bakeGrain(i);return}
+  const L=LINES[d.line],pid=d.line==='mix'?mixPick():d.line,IN=d.line==='mix'?mixIn(pid):L.in;
+  if(IN)for(const k in IN)if(have(k)<IN[k]){importGood(k,IN[k]-have(k));float(i,`import: ${(GOODS[k]||{name:'Materiały'}).name.toLowerCase()}`,'warn')}
+  const units=(TRUCK_LOAD*(d.up?1.5:1)*(d.up2?1.5:1)*(d.t==='smallfac'?0.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid);
   if(!spawnTruck(i,pid,units)){d.work=2;return}
-  if(L.in)for(const k in L.in){take(k,L.in[k]);cur.used[k]=(cur.used[k]||0)+L.in[k]}
+  if(IN)for(const k in IN){take(k,IN[k]);cur.used[k]=(cur.used[k]||0)+IN[k]}
   d.work-=2;cur.made[pid]=(cur.made[pid]||0)+units;addTrash(d,TRASH[d.t].per);float(i,`${GOODS[pid].name} →`,'neutral');bakeGrain(i)}
 /* every factory also bakes: 3 kg of grain from the warehouses become 3 kg of bread */
 function bakeGrain(i){if(have('grain')<3)return;take('grain',3);goods.bread=(goods.bread||0)+3*prodMul('bread');cur.used.grain=(cur.used.grain||0)+3;cur.made.bread=(cur.made.bread||0)+3;float(i,'+3 kg pieczywa','neutral')}
