@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -566,7 +566,7 @@ const DEF={
   bankG:{name:'Bank rezerw złota',cost:9000,size:4,desc:'Zajmuje 2×2 pola. Limit gotówki +12 500 T¢, rozbudowa o skrzydło księgowości: +5 000 T¢. Napad na niego może zabrać 3 razy więcej.',sw:'#c9a54a'},
   bank:{name:'Bank',cost:2000,desc:'Podnosi limit gotówki o 6 000 T¢.',sw:'#ddd3b8'},
   policeS:{name:'Komisariat',cost:800,desc:'Zasięg 11×11, cele na 10 osób. 2 radiowozy patrolują i jadą na interwencje. Ulepszenia: „Drugi garaż” (+2 radiowozy do interwencji), „Większy rewir” (+3 pola zasięgu w każdą stronę).',sw:'#2f5fa8',area:5},
-  rail:{name:'Tory',cost:40,desc:'Przeciągnij, by położyć tory. Przechodzą przez ulice (przejazd) i rzeki (most kolejowy). Dworzec działa, gdy tory dochodzą do krawędzi mapy.',sw:'#7d6a58',unit:'T¢/pole'},
+  rail:{name:'Tory',cost:40,desc:'Przeciągnij, by położyć tory. Przecinają w poprzek pojedynczą, prostą ulicę (przejazd) i rzeki (most kolejowy). Z dworcem łączą się tylko na końcach jego peronu (wjazd i wyjazd). Dworzec działa, gdy tory dochodzą do krawędzi mapy.',sw:'#7d6a58',unit:'T¢/pole'},
   taxi:{name:'Baza taxi',cost:700,size:2,desc:'Zajmuje 2 pola. 4 taksówki wożą turystów z drogi wjazdowej i z dworca do hoteli, rozrywki i sklepów. Bez bazy taxi turyści nie przyjeżdżają. Kurs: 5 T¢.',sw:'#e9b81c'},
   trainSt:{name:'Dworzec kolejowy',cost:3500,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Gdy tory łączą go z krawędzią mapy, co 2 godziny przyjeżdża pociąg z turystami (+60% turystów). Taksówki odbierają ich z dworca.',sw:'#3d6fa8'},
   freightSt:{name:'Dworzec towarowy',cost:4000,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Pociąg towarowy co godzinę: stały import do magazynów albo eksport z magazynów wybranego towaru, od 10 kg/godz. co 5. Wymaga torów do krawędzi mapy.',sw:'#6b5a3c'},
@@ -2412,7 +2412,23 @@ let railVer=0,railCache={v:-1,par:null};const isStationT=t=>t==='trainSt'||t==='
 const mainOf=j=>{const g=grid[j];return g&&g.t==='part'?g.main:j};
 const isRailT=j=>{const g=grid[j];return!!g&&(g.t==='rail'||!!g.rail)};
 function railArms(i){const o=[],out=[],x=i%N,z=(i/N)|0;for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N){out.push([dx,dz]);continue}const j=idx(nx,nz),g=grid[j];
-  if(isRailT(j)||(g&&grid[mainOf(j)]&&isStationT(grid[mainOf(j)].t)))o.push([dx,dz])}return o.length<2&&out.length?[...o,out[0]]:o}
+  if(railLink(i,j)||stEndAt(i,j))o.push([dx,dz])}return o.length<2&&out.length?[...o,out[0]]:o}
+/* two straight tracks lying side by side stay separate lines: no sideways link between tiles that both run straight across that link */
+function railStraight(k,ax){const x=k%N,z=(k/N)|0,a=ax===0?[x-1,z]:[x,z-1],b=ax===0?[x+1,z]:[x,z+1];const ok=([u,v])=>u>=0&&v>=0&&u<N&&v<N&&(isRailT(idx(u,v))||stEndAt(k,idx(u,v)));return ok(a)&&ok(b)}
+function railLink(i,j){if(!isRailT(i)||!isRailT(j))return isRailT(j);const p=1-axOf(i,j);return!(railStraight(i,p)&&railStraight(j,p))}
+/* rails join a station only at the two ends of its platform track (the way in and out), never through its side walls */
+function stEndAt(i,j){const g=grid[j];if(!g)return false;const m=mainOf(j),s=grid[m];if(!s||!isStationT(s.t))return false;const T=stTrack(m);return!!T&&T.ends.includes(i)&&(T.row[0]===j||T.row[T.row.length-1]===j)}
+/* level crossings: one straight road crossed at a right angle; never two crossings in a row and no rails laid along a road */
+const axOf=(i,j)=>Math.abs(j-i)===1?0:1,isCrossT=j=>{const g=grid[j];return!!g&&!!g.rail&&g.t!=='rail'};
+function axisBy(i,f){let a=-1;for(const j of nbrs(i))if(f(j)){const x=axOf(i,j);if(a>=0&&a!==x)return -2;a=x}return a}
+const roadAx=i=>axisBy(i,j=>{const g=grid[j];return!!g&&!!DRIVE[g.t]}),railAx=i=>axisBy(i,j=>isRailT(j)||stEndAt(i,j));
+function crossDir(j){const r=railAx(j);if(r>=0)return r;const a=roadAx(j);return a>=0?1-a:-1}
+function crossWhy(i,from=-1){for(const j of nbrs(i))if(isCrossT(j))return'Przejazdy nie mogą leżeć obok siebie – tory przechodzą tylko przez jedną ulicę naraz.';
+  const ra=roadAx(i),rr=railAx(i);if(ra===-2)return'Przejazd kolejowy stawia się na pojedynczej, prostej ulicy – nie na skrzyżowaniu, zakręcie ani kilku ulicach obok siebie.';
+  if(ra>=0&&from>=0&&from!==i){const dx=Math.abs(from%N-i%N),dz=Math.abs(((from/N)|0)-((i/N)|0));if((dx>=dz?0:1)===ra)return'Tory nie mogą biec wzdłuż ulicy – tylko przecinać ją w poprzek.'}
+  if(rr===-2)return'Na przejeździe tory muszą iść prosto, bez zakrętów.';if(ra>=0&&rr>=0&&ra===rr)return'Tory nie mogą biec wzdłuż ulicy – tylko przecinać ją w poprzek.';return null}
+function railNearWhy(k){for(const j of nbrs(k))if(isCrossT(j)){const d=crossDir(j);if(d>=0&&axOf(k,j)!==d)return'Tory nie mogą biec wzdłuż ulicy – tylko przecinać ją w poprzek.'}return null}
+function roadNearWhy(k){for(const j of nbrs(k))if(isCrossT(j)){const d=crossDir(j);if(d>=0&&axOf(k,j)===d)return'Ulica nie może biec wzdłuż torów za przejazdem – przejazd przecina tylko jedną ulicę.'}return null}
 function railModel(i,c){const m=c.model;if(!m)return;for(const ch of[...m.children]){m.remove(ch);if(ch.userData.baked)ch.geometry.dispose()}const onW=!!water[i];railPiece(m,railArms(i),onW?0.06:0.01);
   if(onW){m.add(box(0.12,0.5,0.12,mat.concrete,0,-0.44,0));m.add(box(0.4,0.04,0.4,mat.concrete,0,0.03,0))}bakeModel(m)}
 const barM={red:null,white:null,post:null,lamp:null};
@@ -2430,7 +2446,7 @@ function railRefreshAll(){for(let j=0;j<N*N;j++){const g=grid[j];if(!g)continue;
 /* a station's platform track is part of the line: trains can run through it from one end to the other */
 function stRows(){const rowOf=new Map();for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!isStationT(c.t))continue;const T=stTrack(i);if(!T)continue;
     T.row.forEach((t,k)=>rowOf.set(t,{st:i,nb:[k>0?T.row[k-1]:T.ends[0],k<T.row.length-1?T.row[k+1]:T.ends[1]].filter(j=>j>=0)}))}return rowOf}
-function railNext(i,rows){const r=rows.get(i);if(r)return r.nb;const o=[];for(const j of nbrs(i)){if(isRailT(j))o.push(j);else{const rj=rows.get(j);if(rj&&rj.nb.includes(i))o.push(j)}}return o}
+function railNext(i,rows){const r=rows.get(i);if(r)return r.nb;const o=[];for(const j of nbrs(i)){if(railLink(i,j))o.push(j);else{const rj=rows.get(j);if(rj&&rj.nb.includes(i))o.push(j)}}return o}
 function railInfo(){if(railCache.v===railVer)return railCache;const par=new Int32Array(N*N).fill(-1),q=[],rows=stRows();
   for(let i=0;i<N*N;i++){if(!isRailT(i))continue;const x=i%N,z=(i/N)|0;if(x===0||z===0||x===N-1||z===N-1){par[i]=i;q.push(i)}}
   for(let h=0;h<q.length;h++)for(const j of railNext(q[h],rows))if(par[j]<0){par[j]=q[h];q.push(j)}railCache={v:railVer,par,rows};return railCache}
@@ -3135,12 +3151,12 @@ function showLine(){const ts=lineTiles();if(!ts.length){clearLineG();hl.visible=
 function placeLine(){const ts=lineTiles();if(!ts.length)return;lineRun=true;let n=0;const m0=money;
   try{for(const t of ts){if(FP(tool)&&!roadMode()){pendA=t;const T=curT(),tt=fpTiles(t);if(fpOK(tt,T)&&money>=fpCost()){placeFP();n++}else pendA=-1}else{const m1=money;apply(t,true);if(money<m1)n++}}}finally{lineRun=false}
   updateGhost();setHint(n?`Postawiono w linii: ${n} × ${DEF[tool]?DEF[tool].name:''} za ${fmt(m0-money)} T¢.`:'Nic nie postawiono: pola zajęte albo brak gotówki.',!n,true);hintEl.hidden=false}
-function paintAt(x,y){const i=tileAt(x,y);if(i<0||i===lastPaint)return;lastPaint=i;apply(i,true)}
+let paintPrev=-1;function paintAt(x,y){const i=tileAt(x,y);if(i<0||i===lastPaint)return;paintPrev=lastPaint;lastPaint=i;apply(i,true)}
 function hover(x,y){if(lineConf)return;if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{hover(x,y)}finally{tool=sv}return}const i=tileAt(x,y);if(!areaT)area.visible=false;hoverI=i;showGhost1(i);
   if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,grid[i].t==='rail'?'Tory wjazdowe · połącz z nimi dworzec, a pociągi przywiozą turystów':'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
   const ar=DEF[tool]&&(DEF[tool].r||DEF[tool].area);if(ar)showArea(i,ar,false);
   hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;
-  const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='crosswalk')ok=crossOK(i)&&!grid[i].cross&&money>=DEF.crosswalk.cost;else if(tool==='crossDel')ok=!!grid[i]&&!!grid[i].cross;else if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c||(!!STREET[c.t]&&!c.rail&&!c.edge))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
+  const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='crosswalk')ok=crossOK(i)&&!grid[i].cross&&money>=DEF.crosswalk.cost;else if(tool==='crossDel')ok=!!grid[i]&&!!grid[i].cross;else if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c?!railNearWhy(i):(!!STREET[c.t]&&!c.rail&&!c.edge&&!crossWhy(i)))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
   else if(STREET[tool]||tool==='roundabout'){const c=grid[i];ok=c&&c.t==='rail'&&STREET[tool]?!water[i]&&!c.edge&&money>=DEF[tool].cost:c?(STREET[c.t]||c.t==='roundabout')&&c.t!==tool&&money>=DEF[tool].cost-DEF[c.t].cost:!water[i]&&money>=DEF[tool].cost&&tool!=='roundabout'}
   else if(tool==='bulldoze')ok=!!grid[i];else if(tool==='poleline')ok=!!grid[i]&&!!STREET[grid[i].t]&&money>=DEF.pole.cost;else if(tool==='pole')ok=money>=DEF.pole.cost&&((!grid[i]&&!water[i])||(!!grid[i]&&!!POLEABLE[grid[i].t]&&!grid[i].pole));else if(tool==='poleDel')ok=isLV(i);else if(FP(tool)){const x=i%N,z=(i/N)|0,[fw,fh]=FP(tool);ok=x<=N-fw&&z<=N-fh&&money>=DEF[tool].cost;if(ok)for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++){const j=idx(x+dx,z+dz);if(grid[j]||water[j])ok=false}}
   else if(tool==='fill')ok=fillOK(i)&&money>=DEF.fill.cost;else ok=!grid[i]&&money>=DEF[tool].cost&&(tool==='pitS'?!water[i]&&!!dep[i]:tool==='bridge'?!!water[i]&&straightOK(i):tool==='hydro'?!!water[i]:!water[i]);
@@ -3239,6 +3255,7 @@ function apply(i,painting){
     if(money<DEF.crosswalk.cost){setHint(`Brakuje ${fmt(DEF.crosswalk.cost-money)} T¢.`,true,true);return}spend(DEF.crosswalk.cost);c.cross=true;drawCross(i);save();return}
   if(tool==='crossDel'){if(!c||!c.cross){if(!painting)setHint('Tu nie ma przejścia dla pieszych.',true,true);return}c.cross=false;drawCross(i);const n=addMoney(Math.floor(DEF.crosswalk.cost/2));cur.refund+=n;save();return}
   if(tool==='rail'){if(c&&c.t==='rail')return;if(c&&(!STREET[c.t]||c.rail||c.edge)){if(!painting)setHint(c.rail?'Tu już są tory.':'Tory przejdą tylko przez zwykłą ulicę (przejazd kolejowy) albo wolne pole i wodę.',true,true);return}
+    {const why=c?crossWhy(i,painting?paintPrev:-1):railNearWhy(i);if(why){if(!painting)setHint(why,true,true);return}}
     if(money<DEF.rail.cost){setHint(`Brakuje ${fmt(DEF.rail.cost-money)} T¢ na tory.`,true,true);return}spend(DEF.rail.cost);
     if(c){c.rail=true;railVer++;drawCrossing(i);railRefreshNear(i)}else addCell(i,'rail',false);save();return}
   if(tool==='cityHall'&&counts.cityHall>0){setHint('W mieście może stać tylko jeden urząd.',true,true);hintEl.hidden=false;return}
@@ -3266,12 +3283,13 @@ function apply(i,painting){
     if(!n)setHint(`Brakuje ${fmt(DEF.pole.cost-money)} T¢ na słup.`,true,true);
     else{float(i,`+${n} słupów`,'neutral');setHint(n<line.length?`Postawiono ${n} z ${line.length} słupów. Zabrakło gotówki.`:`Postawiono ${n} słupów za ${fmt(n*DEF.pole.cost)} T¢.`,n<line.length,true)}
     return}
-  if(c&&c.t==='rail'&&STREET[tool]&&!water[i]&&!c.edge){const cost=DEF[tool].cost;if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢.`,true,true);return}spend(cost);removeCell(i);addCell(i,tool,false);grid[i].rail=true;railVer++;drawCrossing(i);refreshAround(i);for(const j of nbrs(i))refreshAround(j);railRefreshNear(i);if(!painting)setHint('Przejazd kolejowy: auta zatrzymają się przed rogatkami, gdy jedzie pociąg.',false,true);save();return}
+  if(c&&c.t==='rail'&&STREET[tool]&&!water[i]&&!c.edge){{const why=crossWhy(i);if(why){if(!painting)setHint(why,true,true);return}}const cost=DEF[tool].cost;if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢.`,true,true);return}spend(cost);removeCell(i);addCell(i,tool,false);grid[i].rail=true;railVer++;drawCrossing(i);refreshAround(i);for(const j of nbrs(i))refreshAround(j);railRefreshNear(i);if(!painting)setHint('Przejazd kolejowy: auta zatrzymają się przed rogatkami, gdy jedzie pociąg.',false,true);save();return}
    if(c&&c.t==='lpole'&&(STREET[tool]||tool==='highway')&&!water[i]){const cost=DEF[tool].cost;if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢.`,true,true);return}spend(cost);removeCell(i);addCell(i,tool,false);if(POLEABLE[tool])grid[i].pole=true;refreshAround(i);for(const j of nbrs(i))refreshAround(j);powerDirty=true;topoDirty=true;save();return}
   if(c){if(!painting)setHint('To pole jest już zajęte.',true,true);return}
   if(tool==='bridge'&&!water[i]){if(!painting)setHint('Most stawia się na wodzie.',true,true);return}
   if(tool!=='bridge'&&tool!=='hydro'&&water[i]){if(!painting)setHint('Na wodzie zbudujesz tylko most.',true,true);return}
   if(tool==='bridge'&&!straightOK(i)){setHint('Most musi iść prosto: bez zakrętów (L) i rozgałęzień (T).',true,true);return}
+  if(DRIVE[tool]){const why=roadNearWhy(i);if(why){if(!painting)setHint(why,true,true);return}}
   const cost=DEF[tool].cost;
   if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢ na: ${DEF[tool].name.toLowerCase()}.`,true,true);return}
   spend(cost);lockBuy();addCell(i,tool==='incS'?'incinerator':tool);if(rot1!=null&&grid[i]&&!grid[i].tiles){grid[i].rot1=rot1;refreshBuilding(i)}if(DEF[tool].r||DEF[tool].area)showArea(i,DEF[tool].r||DEF[tool].area,true);
