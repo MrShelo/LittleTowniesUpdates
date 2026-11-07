@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -165,6 +165,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .upkCtl{display:grid;gap:6px;margin:4px 0 8px}.upkCtl .chips{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12px;color:var(--muted)}.upkCtl .chipb{padding:4px 9px;font-size:12px}
 .upk .ucat{font-weight:700;font-family:var(--font-d);padding-top:7px;border-top:1px solid var(--line);margin-top:3px}
 .tut{position:absolute;z-index:6;right:max(12px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);width:min(290px,calc(100% - 90px));padding:10px 12px;display:grid;gap:6px;font-size:13px}
+/* the tutorial sits between the top bar and the bottom dock, never over their buttons */
+.tut{top:calc(var(--hudB,0px) + 8px);bottom:calc(var(--dockT,0px) + 8px);transform:none;height:fit-content;max-height:calc(100% - var(--hudB,0px) - var(--dockT,0px) - 16px);margin:auto 0;overflow:auto}
 .tut .th{display:flex;align-items:center;gap:6px}.tut .th b{font-family:var(--font-d);font-size:15px;flex:1}.tut ol{margin:0;padding:0;list-style:none;display:grid;gap:4px;max-height:52vh;overflow:auto}
 .tut li{display:grid;grid-template-columns:18px 1fr;gap:6px;line-height:1.35;color:var(--muted)}.tut li i{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);box-sizing:border-box;margin-top:1px;font-style:normal;font-size:11px;display:grid;place-items:center}
 .tut li.ok{color:var(--fg);text-decoration:line-through;opacity:.6}.tut li.ok i{background:var(--money);border-color:var(--money);color:#fff}.tut li.now{color:var(--fg);font-weight:600}.tut li.now i{border-color:var(--accent)}
@@ -186,7 +188,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .clock{display:grid;gap:1px;padding:6px 12px;line-height:1.15}
 .clock b{font-family:var(--font-d);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
 .clock small{font-size:11px;color:var(--muted)}
-.stats{position:absolute;z-index:5;top:10px;bottom:10px;height:max-content;right:max(16px,env(safe-area-inset-right,0px));left:max(16px,env(safe-area-inset-left,0px));
+.stats{position:absolute;z-index:8;top:10px;bottom:10px;height:max-content;right:max(16px,env(safe-area-inset-right,0px));left:max(16px,env(safe-area-inset-left,0px));
   margin-left:auto;max-width:480px;max-height:calc(95% - 20px);overflow:auto;padding:14px 16px 22px;display:grid;gap:14px;background:var(--panel2)}
 .stats header{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .stats h2{margin:0;font:600 19px var(--font-d);text-wrap:balance}
@@ -205,6 +207,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .upk span:nth-child(2n){text-align:right}
 .stats .foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .insp{justify-self:center;width:min(440px,100%);padding:10px 12px 12px;display:grid;gap:8px}
+/* the building card stays above the tutorial and side panels, so its buttons always take the click */
+.insp{position:relative;z-index:7}
 .insp .top{display:flex;align-items:center;gap:8px}
 .insp .top b{font:600 16px var(--font-d)}
 .insp .top small{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
@@ -3080,6 +3084,12 @@ const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(ne
 function tileAt(px,py){const r=renderer.domElement.getBoundingClientRect();ndc.set(((px-r.left)/r.width)*2-1,-((py-r.top)/r.height)*2+1);
   ray.setFromCamera(ndc,camera);if(!ray.ray.intersectPlane(plane,hit))return -1;
   const x=Math.floor(hit.x+HALF),z=Math.floor(hit.z+HALF);if(x<0||z<0||x>=N||z>=N)return -1;return idx(x,z)}
+/* tapping a building picks the building that is actually under the finger (its walls and roof too), not the ground tile behind it */
+const shown=o=>{for(;o;o=o.parent)if(!o.visible)return false;return true};
+function pickAt(px,py){const g=tileAt(px,py);const gs=[],own=new Map();
+  for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!c.group||DRIVE[c.t]||NOINSP.has(c.t))continue;gs.push(c.group);own.set(c.group,i)}
+  let hs=[];try{hs=ray.intersectObjects(gs,true)}catch(e){return g}
+  for(const h of hs){if(!(h.object.isMesh||h.object.isSprite)||!shown(h.object))continue;let o=h.object;while(o&&!own.has(o))o=o.parent;if(o)return own.get(o)}return g}
 
 let tool='view',lineRun=false,lineA=-1,lineB=-1;
 const ptrs=new Map();let mode='none',multi=null,lastPaint=-1;
@@ -3087,7 +3097,7 @@ const el=renderer.domElement;
 el.addEventListener('contextmenu',e=>e.preventDefault());
 el.addEventListener('pointerdown',e=>{el.setPointerCapture(e.pointerId);
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,btn:e.button,shift:e.shiftKey});
-  if(ptrs.size===1)mode='pending';else if(ptrs.size===2){mode='multi';multi=twoInfo();multi.kind=null;for(const q of ptrs.values()){q.mx0=q.x;q.my0=q.y}}else mode='none'});
+  if(ptrs.size===1){mode='pending';focus=null}else if(ptrs.size===2){mode='multi';multi=twoInfo();multi.kind=null;for(const q of ptrs.values()){q.mx0=q.x;q.my0=q.y}}else mode='none'});
 function twoInfo(){const [a,b]=[...ptrs.values()];return{d:Math.hypot(a.x-b.x,a.y-b.y),ang:Math.atan2(b.y-a.y,b.x-a.x),mx:(a.x+b.x)/2,my:(a.y+b.y)/2}}
 el.addEventListener('pointermove',e=>{
   const p=ptrs.get(e.pointerId);
@@ -3109,7 +3119,7 @@ el.addEventListener('pointermove',e=>{
   if(e.pointerType==='mouse')hover(e.clientX,e.clientY);
   updateCamera()});
 function endPtr(e){const p=ptrs.get(e.pointerId);if(!p)return;
-  if(mode==='pending'&&e.type==='pointerup'&&p.btn===0&&!lineConf){const i=tileAt(e.clientX,e.clientY);if(i>=0)apply(i)}
+  if(mode==='pending'&&e.type==='pointerup'&&p.btn===0&&!lineConf){const i=tool==='view'&&moveSrc<0?pickAt(e.clientX,e.clientY):tileAt(e.clientX,e.clientY);if(i>=0)apply(i)}
   if(mode==='line'&&(e.type==='pointerup'||e.type==='pointercancel'))endLine();
   ptrs.delete(e.pointerId);if(ptrs.size===0)mode='none';else if(mode==='multi')mode='none'}
 el.addEventListener('pointerup',endPtr);el.addEventListener('pointercancel',endPtr);
@@ -3329,6 +3339,10 @@ let buyLock=0;const lockBuy=()=>{buyLock=performance.now()+500;inspEl.classList.
 function openHouse(i){lockBuy();if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;inspI=i;inspEl.hidden=false;hintEl.hidden=true;document.body&&document.body.classList.add('inspOn');ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
   const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='heliB'?HELI_R:c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold');
   else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');renderInsp()}
+/* the card refreshes twice a second; a refresh between pressing and releasing a button would swallow the click, so it waits while a finger or the mouse is down on the card */
+let inspDown=0,inspRel=0;inspEl.addEventListener('pointerdown',()=>{inspDown=performance.now()},true);
+for(const ty of['pointerup','pointercancel'])addEventListener(ty,()=>{if(inspDown){inspDown=0;inspRel=performance.now()+150}},true);
+const inspBusy=()=>{const t=performance.now();return(inspDown&&t-inspDown<4000)||t<inspRel};
 function closeHouse(){if(areaT>1e8){areaT=0;area.visible=false}inspI=-1;inspEl.hidden=true;document.body&&document.body.classList.remove('inspOn');hintEl.hidden=false;ring.visible=false}
 function stepHouse(d){const c=grid[inspI];if(!c)return closeHouse();const list=catList(catOfT(c.t));let k=list.indexOf(inspI);
   k=k<0?0:(k+d+list.length)%list.length;openHouse(list[k])}
@@ -3865,6 +3879,9 @@ function openMenu(opts){if(!opts&&(gameOver||titleOpen||!document.getElementById
   mReset.classList.remove('armed');mReset.textContent='Zresetuj miasto';document.getElementById('mResume').focus()}
 function closeMenu(){menuEl.hidden=true;if(titleOpen||gameOver||!mapsEl.hidden){paused=true;return}paused=false;prev=performance.now()}
 document.getElementById('optBtn').addEventListener('click',()=>menuEl.hidden?openMenu():closeMenu());
+{const g=document.getElementById('game'),h=document.querySelector('header.hud'),d=document.querySelector('footer.dock');
+  const upd=()=>{if(!g||!h||!d)return;const G=g.getBoundingClientRect();g.style.setProperty('--hudB',Math.max(0,Math.round(h.getBoundingClientRect().bottom-G.top))+'px');g.style.setProperty('--dockT',Math.max(0,Math.round(G.bottom-d.getBoundingClientRect().top))+'px')};
+  try{const ro=new ResizeObserver(upd);ro.observe(h);ro.observe(d);ro.observe(g)}catch(e){}addEventListener('resize',upd);setTimeout(upd,0)}
 document.getElementById('mResume').addEventListener('click',closeMenu);
 document.getElementById('mBack').addEventListener('click',()=>{if(menuFrom==='pause'&&!titleOpen){openMenu();document.getElementById('mOpt').focus();return}menuEl.hidden=true;document.getElementById('tOpt').focus()});
 document.getElementById('mOpt').addEventListener('click',()=>openMenu(true));
@@ -4310,7 +4327,7 @@ cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();if(Math.
   if(areaT>0){areaT-=vdt;if(areaT<=0){areaT=0;area.visible=false}}
   if(focus){const k=Math.min(1,vdt*6);cam.target.x+=(focus.x-cam.target.x)*k;cam.target.z+=(focus.z-cam.target.z)*k;updateCamera();
     if(Math.hypot(focus.x-cam.target.x,focus.z-cam.target.z)<0.02)focus=null}
-  if(inspI>=0&&statsAcc>0.5&&statsEl.hidden){statsAcc=0;renderInsp()}
+  if(inspI>=0&&statsAcc>0.5&&statsEl.hidden&&!inspBusy()){statsAcc=0;renderInsp()}
   if(ring.visible&&!reduce)ring.material.opacity=0.65+0.35*Math.sin(time*4);
   if(hintTimer>0){hintTimer-=vdt;if(hintTimer<=0)setHint(toolHint())}
   saveRT+=rdt;if((saveReq&&saveRT>2)||(!paused&&saveRT>30))writeSave()
