@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.19';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.20';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -425,9 +425,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <section class="stats panel" id="stats" hidden aria-label="Gospodarka">
   <header><div><h2 id="stTitle">Gospodarka miasta</h2><p class="sub" id="stClock"></p></div><button class="btn icon panel" id="statsClose" aria-label="Zamknij">×</button></header>
   <div class="chips stTabs" role="tablist"><button class="chipb" data-st="fin" aria-pressed="true">Finanse</button><button class="chipb" data-st="prod" aria-pressed="false">Produkcja i potrzeby</button><button class="chipb" data-st="ppl" aria-pressed="false">Mieszkańcy</button><button class="chipb" data-st="waste" aria-pressed="false">Odpady</button><button class="chipb" data-st="traf" aria-pressed="false">Ruch</button><button class="chipb" data-st="pow" aria-pressed="false">Prąd</button><button class="chipb" data-st="wat" aria-pressed="false">Woda</button><button class="chipb" data-st="safe" aria-pressed="false">Bezpieczeństwo</button><button class="chipb" data-st="health" aria-pressed="false">Zdrowie</button><button class="chipb" data-st="edu" aria-pressed="false">Edukacja</button></div>
-  <div data-tab="fin"><h3>Finanse teraz</h3><div class="scards" id="fCards"></div></div>
+  <div data-tab="fin"><h3>Finanse · bieżąca godzina</h3><div class="scards" id="fCards"></div></div>
   <div data-tab="fin"><h3>Gotówka (T¢)</h3><div style="overflow-x:auto"><table class="tbl" id="stTbl"></table></div><p class="tnote" id="dayNote"></p></div>
-  <div class="chart" data-tab="fin"><h3>Saldo gotówki · ostatnie 24 godz.</h3><div id="chMoney"></div></div>
+  <div class="chart" data-tab="fin"><h3>Wynik miasta co godzinę · ostatnie 24 godz. (jasny słupek: trwająca godzina)</h3><div id="chMoney"></div></div>
   <div data-tab="fin"><h3>Utrzymanie miasta</h3><div class="upkL" id="stUpk"></div></div>
   <div data-tab="prod"><h3>Potrzeby mieszkańców</h3><div class="needs" id="stNeeds"></div></div>
   <div data-tab="prod"><h3>Produkty</h3><div style="overflow-x:auto"><table class="tbl" id="stGoods"></table></div></div>
@@ -3803,7 +3803,7 @@ document.getElementById('browse').addEventListener('click',()=>{const l=houses()
 document.getElementById('statsClose').addEventListener('click',()=>toggleStats(false));
 const pad2=n=>String(n).padStart(2,'0');
 function clockText(t){const m=Math.floor(t);return`Dz. ${Math.floor(m/1440)+1} · ${pad2(Math.floor(m/60)%24)}:${pad2(m%60)}`}
-const sgn=(n,u)=>{const r=Math.abs(n)>=10?Math.round(n):Math.round(n*10)/10;return`<span class="${r>0?'pos':r<0?'neg':''}">${r>0?'+':''}${mw(r)}${u?' '+u:''}</span>`};
+const sgn=(n,u)=>{const r=(Math.abs(n)>=10?Math.round(n):Math.round(n*10)/10)||0;return`<span class="${r>0?'pos':r<0?'neg':''}">${r>0?'+':''}${mw(r)}${u?' '+u:''}</span>`};
 function avg(list,f){return list.length?list.reduce((a,o)=>a+f(o),0)/list.length:0}
 const TCAT={};for(const C of CATS)for(const t of C.tools)TCAT[t]=C.name;TCAT.lpole='Energia';const PCATS=['Domy','Przemysł','Usługi','Rozrywka','Turystyka','Policja','Straż','Transport','Woda','Odpady','Energia','Farmy','Zieleń'];
 let stTab='fin';{const rn=document.getElementById('r-needs');if(rn)rn.addEventListener('click',()=>{stTab='prod';toggleStats(true)})}
@@ -3847,17 +3847,27 @@ function renderStats(){for(const b of document.querySelectorAll('[data-st]'))b.s
   const last=hist[hist.length-1],ref=last||cur,L24=hist.slice(-24),H24=f=>L24.reduce((a,o)=>a+f(o),0);
   document.getElementById('stClock').textContent=`${clockText(gameT)} · bieżąca godzina: ${Math.floor(cur.secs)} z 60 min`;
   const note=dayNote();
-  if(stTab==='fin'){{const{d,rows:dr}=dayRows(),day=dr.length?dr.reduce((a,o)=>a+netOf(o),0):null,fc=hourForecast(),lastN=last?opNet(last):null,an=lastN==null?fc:(lastN+fc)/2,inc=L24.length?avg(L24,o=>o.inc):null,cap=moneyCap(),T1=v=>(v>=0?'+':'−')+cpt(Math.abs(v));
-    document.getElementById('fCards').innerHTML=scard('bank','#2f9e5a','Gotówka',`${cpt(money)} T¢`,`limit ${cpt(cap)} T¢${money>=cap?' · kasa pełna, dobuduj bank':''}`)+
-      scard('shop',an>=0?'#2f9e5a':'#d4483a','Saldo / godz.',`${T1(an)} T¢`,`${lastN==null?'':`ostatnia ${T1(lastN)} · `}ta godz. ${T1(fc)} (prognoza)`)+
-      scard('ord',day==null?'#7d8790':day>=0?'#2f9e5a':'#d4483a',dr.length?`Bilans dnia ${d+1}`:'Bilans dnia',day==null?'–':`${T1(day)} T¢`,day==null?'pierwszy o północy':'')+
-      scard('suitcase','#3c9a5f','Przychody / godz.',inc==null?'–':`${cpt(inc)} T¢`,`podatki ok. ${cpt(taxIncome())} T¢/godz.`)+
-      scard('cityHall','#e98a3a','Utrzymanie / godz.',`${cpt(upkeepRate(isNight()))} T¢`,`co 6 min pobierane 10%: ${cpt(upkeepRate(isNight())/10)} T¢`)+
-      (loan?scard('bankG','#d4483a','Pożyczka do spłaty',`${cpt(loan.left)} T¢`,`${loan.daysLeft} ${loan.daysLeft===1?'dzień':'dni'} · rata ${cpt(loanDue())} T¢`):'')}
-    document.getElementById('stTbl').innerHTML=flowTable([['Przychody razem',o=>o.inc],['  Sklepy, piekarnie, galerie',o=>o.shopInc!=null?o.shopInc:Math.max(0,o.inc-(o.entInc||0)),1],['  Rozrywka (kino, teatr, kasyno, restauracje)',o=>o.entInc||0,1],['  Hotele (noclegi)',o=>o.hotelInc||0,1],['  Podatki od mieszkańców',o=>o.taxInc||0,1],['  Praca więźniów',o=>o.prisonInc||0,1],['  w tym od przyjezdnych',o=>o.tourInc||0,1],
-      ['Zwroty z wyburzeń',o=>o.refund],['Utrzymanie',o=>-o.upkeep],['Pożyczki (wypłata)',o=>o.loanIn||0],['Spłata pożyczki',o=>-(o.loanPay||0)],['Straty z przestępstw',o=>-(o.crimeLoss||0)],['s','Saldo gotówki',netOf]]);
-    document.getElementById('dayNote').textContent=note;
-    document.getElementById('chMoney').innerHTML=barChart(netOf,'T¢');
+  if(stTab==='fin'){/* 6.1.20: the finance tab is about the hour in progress: this hour so far, the previous hour and today so far (no building, upgrades or loans in the city result) */
+    const today=Math.floor(gameT/1440),dayRowsNow=[...hist.filter(o=>dayOf(o)===today),cur],mins=Math.min(60,Math.floor(cur.secs)),fc=hourForecast(),lastN=last?opNet(last):null,cap=moneyCap(),
+      T1=v=>(v>=0?'+':'−')+cpt(Math.abs(v)),col=v=>v==null?'#7d8790':v>=0?'#2f9e5a':'#d4483a',dayN=dayRowsNow.reduce((a,o)=>a+opNet(o),0),nowN=opNet(cur),out=o=>o.upkeep+(o.crimeLoss||0);
+    document.getElementById('fCards').innerHTML=scard('bank',col(money),'Gotówka',`${cpt(money)} T¢`,money<0?`dług · bankructwo poniżej −2000 T¢`:`limit ${cpt(cap)} T¢${money>=cap?' · kasa pełna, dobuduj bank':''}`)+
+      scard('shop',col(nowN),`Ta godzina (${mins} z 60 min)`,`${T1(nowN)} T¢`,`przychody +${cpt(cur.inc)} · wydatki −${cpt(out(cur))}`)+
+      scard('ord',col(fc),'Prognoza na koniec godziny',`${T1(fc)} T¢`,'przy obecnym tempie')+
+      scard('suitcase',col(lastN),'Poprzednia godzina',lastN==null?'–':`${T1(lastN)} T¢`,last?`przychody +${cpt(last.inc)} · wydatki −${cpt(out(last))}`:'po pierwszej pełnej godzinie')+
+      scard('cityHall','#e98a3a','Utrzymanie / godz.',`${cpt(upkeepRate(isNight()))} T¢`,`co 6 min 10%: ${cpt(upkeepRate(isNight())/10)} T¢`)+
+      scard('ord',col(dayN),`Dziś (dzień ${today+1})`,`${T1(dayN)} T¢`,'wynik od północy, bez budowy i pożyczek')+
+      (loan?scard('bankG','#d4483a','Pożyczka do spłaty',`${cpt(loan.left)} T¢`,`${loan.daysLeft} ${loan.daysLeft===1?'dzień':'dni'} · rata ${cpt(loanDue())} T¢`):'')
+    const cols=[{h:`Ta godzina<br><small>${mins}/60 min</small>`,v:f=>f(cur)},{h:'Poprzednia<br><small>godzina</small>',v:f=>last?f(last):null},{h:`Dziś<br><small>dzień ${today+1}</small>`,v:f=>dayRowsNow.reduce((a,o)=>a+f(o),0)}];
+    const rows=[['Przychody razem',o=>o.inc],['  Sklepy, piekarnie, galerie',o=>o.shopInc!=null?o.shopInc:Math.max(0,o.inc-(o.entInc||0)),1],['  Rozrywka (kino, teatr, kasyno, restauracje)',o=>o.entInc||0,1],['  Hotele (noclegi)',o=>o.hotelInc||0,1],['  Podatki od mieszkańców',o=>o.taxInc||0,1],['  Praca więźniów',o=>o.prisonInc||0,1],['  w tym od przyjezdnych',o=>o.tourInc||0,1],
+      ['Utrzymanie (w tym importy)',o=>-o.upkeep],['Straty z przestępstw',o=>-(o.crimeLoss||0)],['s','Wynik miasta',opNet],
+      ['g','Poza wynikiem miasta'],['Zwroty z wyburzeń',o=>o.refund||0],['Pożyczki (wypłata)',o=>o.loanIn||0],['Spłata pożyczki',o=>-(o.loanPay||0)],['s','Zmiana gotówki (bez budowy)',netOf]];
+    let h='<tr><th></th>'+cols.map(c=>`<th>${c.h}</th>`).join('')+'</tr>';
+    for(const r of rows){if(r[0]==='g'){h+=`<tr><td colspan="4" style="padding-top:9px;color:var(--muted);font-size:11.5px;font-weight:600;border-top:0">${r[1]}</td></tr>`;continue}
+      const sum=r[0]==='s',label=sum?r[1]:r[0],f=sum?r[2]:r[1],plain=!sum&&r[2];
+      h+=`<tr${sum?' class="sum"':''}><td>${label}</td>`+cols.map(c=>{const v=c.v(f);if(v==null)return'<td>–</td>';return`<td>${plain?mw(Math.abs(v)>=10?Math.round(v):Math.round(v*10)/10):sgn(v)}</td>`}).join('')+'</tr>'}
+    document.getElementById('stTbl').innerHTML=h;
+    document.getElementById('dayNote').textContent=`„Ta godzina” liczy się na bieżąco od pełnej godziny, „Dziś” to suma od północy razem z bieżącą godziną. Wynik miasta = przychody − utrzymanie − straty (bez budowy, ulepszeń, zwrotów i pożyczek).`;
+    document.getElementById('chMoney').innerHTML=barChart(opNet,'T¢');
     const items=upkeepItems(),cats=[...new Set(items.map(q=>q.cat))].sort((x,y)=>PCATS.indexOf(x)-PCATS.indexOf(y));let u='';
     for(const k of cats){const l=items.filter(q=>q.cat===k).sort((x,y)=>y.sum-x.sum),tot=l.reduce((a,z)=>a+z.sum,0),n=l.reduce((a,z)=>a+z.n,0),open=upkOpen.has(k);
       u+=`<button class="ucath" data-uc="${k}" aria-expanded="${open}">${k} <span class="n">${n} ${n===1?'pozycja':n<5?'pozycje':'pozycji'}</span><span class="v">${fmt1(tot)} T¢/godz.</span></button>`;
@@ -3947,7 +3957,7 @@ function barChart(f,unit){
   m=step*2;const y0=T+(H-T-B)/2,sc=(H-T-B)/2/m;
   let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Saldo na godzinę, ${unit}">`;
   for(const v of[m,m/2,0,-m/2,-m]){const y=y0-v*sc;g+=`<line x1="${L}" x2="${W-2}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="${v===0?1.2:0.6}"/>`+
-    `<text x="${L-5}" y="${y+3}" text-anchor="end">${v>0?'+':''}${mw(v)}</text>`}
+    `<text x="${L-5}" y="${y+3}" text-anchor="end">${v>0?'+':v<0?'−':''}${cpt(Math.abs(v),1e3)}</text>`}
   data.forEach((d,k)=>{const x=L+2+(24-data.length+k)*cw,hgt=Math.abs(d.v)*sc,y=d.v>=0?y0-hgt:y0;
     g+=`<rect x="${x+1}" y="${y}" width="${Math.max(1,cw-2)}" height="${Math.max(d.v?1:0,hgt)}" rx="1.5" fill="${d.v>=0?'var(--money)':'var(--warn)'}" opacity="${d.p?0.45:0.9}"/>`;
     if(d.h%6===0)g+=`<text x="${x+cw/2}" y="${H-4}" text-anchor="middle">${pad2(d.h%24)}:00</text>`});
