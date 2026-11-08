@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.7';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -537,8 +537,8 @@ const DEF={
   roundabout:{name:'Rondo',cost:80,desc:'Płynny przejazd przez skrzyżowanie (1,2× szybciej), auta objeżdżają wysepkę. Postaw na istniejącej ulicy.',sw:'#5f9b4a'},
   smallfac:{name:'Mała fabryka',cost:180,desc:'Połowa produkcji zwykłej fabryki (2 kg na partię), 40% taniej. Tylko linia ogólna: zabawki i kosmetyki z materiałów, a odzież, meble, elektronikę, narzędzia i napoje tylko wtedy, gdy w magazynach jest ich surowiec. Można dokupić nową technologię (+50%).',sw:'#a8b0bb'},
   factory:{name:'Fabryka',cost:300,desc:'Dwie zmiany pracowników + 2 kg materiałów z magazynu = ciężarówka z 5 kg towarów ogólnych. Z materiałów robi zabawki i kosmetyki; odzież, meble, elektronikę, narzędzia i napoje tylko z ich surowca, jeśli leży w magazynach (bawełna, drewno, chalkopiryt, warzywa). Ulepszenie odblokowuje wybór produktu i +50%.',sw:'#8d97a6'},
-  supermarket:{name:'Supermarket',cost:900,size:2,desc:'Zajmuje 2 pola. 70 miejsc na półkach, obsłuży 60 klientów na godzinę (trzecia kasa +15). Ceny bazowe.',sw:'#3a7fc0'},
-  shop:{name:'Sklep',cost:200,desc:'15 miejsc na półkach. Na start wielobranżowy (wszystko), w karcie sklepu zmienisz go na specjalistyczny z cenami +25%. Furgonetki dowożą towar z magazynów.',sw:'#3aa39a'},
+  supermarket:{name:'Supermarket',cost:900,size:2,desc:'Zajmuje 2 pola. 77 miejsc na półkach (po równo na każdy towar), obsłuży 60 klientów na godzinę (trzecia kasa +15). Ceny bazowe.',sw:'#3a7fc0'},
+  shop:{name:'Sklep',cost:200,desc:'17 miejsc na półkach, dzielonych po równo między sprzedawane towary. Na start wielobranżowy (wszystko), w karcie sklepu zmienisz go na specjalistyczny z cenami +25%. Furgonetki dowożą towar z magazynów.',sw:'#3aa39a'},
   farmveg:{name:'Farma warzyw',cost:150,desc:'Grządki i szklarnie: warzywa i owoce, 2 kg/godz. Stawiaj pola obok siebie: multiblok daje +10% za każde kolejne pole (do +100%).',sw:'#6fb24f',farm:'veg'},
   farmdairy:{name:'Farma hodowlana',cost:220,desc:'Krowy, świnie i owce: nabiał, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).',sw:'#f2f2ee',farm:'dairy'},
   farmgrain:{name:'Pole zboża',cost:120,desc:'Zboże dla piekarni, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).',sw:'#e3c35a',farm:'grain'},
@@ -551,7 +551,7 @@ const DEF={
   incinerator:{name:'Spalarnia',cost:1400,fw:2,fh:3,desc:'Zajmuje 2×3 pola. 1 komin: 40 kg odpadów na godz., dokupisz drugi i trzeci komin (+40 kg każdy). Bufor 150 kg, 2 śmieciarki. Pobiera 1 MW i dymi.',sw:'#9a8f86'},
   recycler:{name:'Recykling',cost:700,desc:'Przerabia 10 kg odpadów na godz. na 5 kg materiałów (bufor 60 kg), 2 śmieciarki. Pobiera 1,5 MW.',sw:'#4f9a6a'},
   hvpole:{name:'Słup WN',cost:120,desc:'Wysokie napięcie: łączy się z innymi słupami WN, transformatorami i el. węglowymi w zasięgu 11×11 (po ulepszeniu 17×17). Nie z wiatrakami.',sw:'#8c959d',area:3},
-  gallery:{name:'Galeria handlowa',cost:1500,desc:'Zajmuje 2×2 pola. W karcie galerii wykupujesz lokale (sklep 100 T¢): na parterze 4 (np. 3 sklepy i kino), po dobudowie piętra wszystkie. Galeria ma 60 miejsc na półkach, a każdy lokal dokłada 15. Ceny +25% i więcej klientów.',sw:'#d8c48a',size:4},
+  gallery:{name:'Galeria handlowa',cost:1500,desc:'Zajmuje 2×2 pola. W karcie galerii wykupujesz lokale (sklep 100 T¢): na parterze 4 (np. 3 sklepy i kino), po dobudowie piętra wszystkie. Galeria ma 66 miejsc na półkach, a każdy lokal dokłada ok. 16; miejsce dzieli się po równo między towary. Ceny +25% i więcej klientów.',sw:'#d8c48a',size:4},
   restaurant:{name:'Restauracja',cost:400,desc:'Rozrywka w zasięgu 3×3 (+1 zadowolenia). Zużywa jedzenie z magazynów, posiłek 30 T¢. Najtańsza w utrzymaniu.',sw:'#d9773a'},
   cinema:{name:'Kino',cost:900,desc:'Rozrywka w zasięgu 5×5 (+1 zadowolenia). Bilet 30 T¢.',sw:'#7a2a3a'},
   theater:{name:'Teatr',cost:1200,desc:'Rozrywka w zasięgu 5×5 (+1 zadowolenia). Bilet 40 T¢.',sw:'#b0303f'},
@@ -685,7 +685,7 @@ const UPG={
   heliB:{name:'Drugi helikopter',cost:3000,upkeep:150,desc:'+1 helikopter gaśniczy'},fireS:{name:'Drugi garaż',cost:600,upkeep:30,desc:'+1 wóz strażacki'},fireB:{name:'Drugi garaż',cost:900,upkeep:40,desc:'+2 wozy strażackie'},
   policeS:{name:'Drugi garaż',cost:600,upkeep:24,desc:'+2 radiowozy do interwencji (stoją w garażu, wyjeżdżają tylko na wezwanie)'},policeB:{name:'Drugi garaż',cost:900,upkeep:32,desc:'+2 radiowozy do interwencji (stoją w garażu, wyjeżdżają tylko na wezwanie)'},
   hydrogen:{name:'Drugi odwiert',cost:2000,upkeep:60,desc:'+30 MW (90 MW z czystą wodą)'},
-  shop1:{name:'Dodatkowe piętro',cost:400,upkeep:10,desc:'50 klientów/godz. i 30 miejsc na półkach'},
+  shop1:{name:'Dodatkowe piętro',cost:400,upkeep:10,desc:'50 klientów/godz. i 33 miejsca na półkach'},
   cemB:{name:'Katakumby',cost:1500,upkeep:15,desc:'Podziemne katakumby pod środkiem cmentarza: +20 miejsc (300)'},crem:{name:'Drugi piec kremacyjny',cost:2000,upkeep:40,desc:'Druga komora kremacyjna: 160 miejsc'},
   restaurant:{name:'Wykwintna restauracja',cost:450,upkeep:15,desc:'Dwupiętrowy lokal, zasięg rozrywki 5×5 zamiast 3×3, kolejka 35 gości zamiast 25'}};
 const UPGF={factory:{name:'Filtry',cost:300,upkeep:15,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},factoryB:{name:'Filtry',cost:450,upkeep:20,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},smallfac:{name:'Filtry',cost:180,upkeep:10,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},
@@ -2294,7 +2294,7 @@ function arrive(c){
       if(d.work>=2)produce(c.dest,d)}
     return goBack(c,c.dest,c.home)}
   if(c.kind==='van'){c.delivered=true;
-    if(d&&isShop(d.t)){d.incoming=Math.max(0,d.incoming-c.load);let put=0;for(const k in c.items){const room=slotsOf(d)-shelfTotal(d),n=Math.min(room,c.items[k]);d.shelf[k]=(d.shelf[k]||0)+n;put+=n;if(c.items[k]>n)addGood(k,c.items[k]-n,c.home)}
+    if(d&&isShop(d.t)){d.incoming=Math.max(0,d.incoming-c.load);let put=0;for(const k in c.items){const room=Math.min(slotsOf(d)-shelfTotal(d),shelfCap(d)-(d.shelf[k]||0)),n=Math.max(0,Math.min(room,c.items[k]));d.shelf[k]=(d.shelf[k]||0)+n;put+=n;if(c.items[k]>n)addGood(k,c.items[k]-n,c.home)}
       float(c.dest,`+${put} towaru`,'mat')}
     else for(const k in c.items)addGood(k,c.items[k],c.home);
     return goBack(c,c.dest,c.home)}
@@ -2756,7 +2756,12 @@ function wasteTick(dt,night){
 
 /* ---------- goods ---------- */
 const sellsOf=c=>c.t==='bakery'?['bread']:c.t==='restaurant'?FOOD:c.t==='gallery'?[...new Set(c.stores.flatMap(s=>SPECS[s].sells))]:SPECS[c.spec].sells;
-const slotsOf=c=>c.t==='shop1'?(c.up?30:15):c.t==='gallery'?SHOP_SLOTS*c.stores.length+60:c.t==='supermarket'?70:SHOP_SLOTS;
+const slotsBase=c=>c.t==='shop1'?(c.up?30:15):c.t==='gallery'?SHOP_SLOTS*c.stores.length+60:c.t==='supermarket'?70:SHOP_SLOTS;
+/* 6.1.7: +10% shelf room; the room is split evenly between the goods a shop sells, so one good can never crowd out the rest */
+const slotsOf=c=>Math.round(slotsBase(c)*1.1);
+const shelfCap=c=>{const n=sellsOf(c).length;return Math.max(1,Math.ceil(slotsOf(c)/Math.max(1,n)))};
+let VANINC=new Map();const vanInc=()=>{VANINC=new Map();for(const v of cars)if(v.kind==='van'&&!v.delivered&&v.items){let m=VANINC.get(v.dest);if(!m)VANINC.set(v.dest,m={});for(const k in v.items)m[k]=(m[k]||0)+v.items[k]}return VANINC};
+const shelfRoom=(s,k,extra=0)=>{const c=grid[s],m=VANINC.get(s);return shelfCap(c)-(c.shelf[k]||0)-(m&&m[k]||0)-extra};
 /* customers per game hour a shop can serve; above that it is crowded */
 const SCAP=c=>(c.up&&(c.t==='shop'||c.t==='supermarket')?1.5:1)*SCAP0(c)*(c.edu&&c.edu.tech?1:1);const SCAP0=c=>c.t==='shop1'?(c.up?50:35)+(c.up2?5:0)+(c.up3?10:0):c.t==='bakery'?22:c.t==='supermarket'?60+(c.up3?15:0):c.t==='gallery'?8*Math.max(1,c.stores.length)+20+(c.up?16:0):c.t==='restaurant'?(c.up?35:25):c.t==='shop'?30+(c.up2?10:0):0;
 const shelfTotal=c=>Object.values(c.shelf||{}).reduce((a,b)=>a+b,0);
@@ -2815,24 +2820,25 @@ function spawnVan(s){const sh=grid[s];const e=entryOf(s);if(e<0)return false;con
   /* no warehouse reachable: the shop imports straight away; warehouses without its goods for an hour: it imports too */
   if(!list.length){sh.dry=null;return shopImport(s,b)}
   /* the van comes from the nearest warehouse that actually holds something this shop sells */
-  const src=list.filter(o=>sells.some(k=>(grid[o.i].st[k]||0)>=1)).sort((p,q)=>p.d-q.d);
+  vanInc();const src=list.filter(o=>sells.some(k=>(grid[o.i].st[k]||0)>=1&&shelfRoom(s,k)>=1)).sort((p,q)=>p.d-q.d);
   if(!src.length){if(sh.dry==null)sh.dry=gameT;if(gameT-sh.dry>=60)return shopImport(s,b);return false}
   sh.dry=null;list.length=0;list.push(src[0]);const W=grid[src[0].i].st;let room=Math.min(VAN_MAX,slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;
-  while(room>0){let best=null,bv=1e9;for(const k of sells){if((W[k]||0)<1)continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
+  while(room>0){let best=null,bv=1e9;for(const k of sells){if((W[k]||0)<1||shelfRoom(s,k,items[k]||0)<1)continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
     items[best]=(items[best]||0)+1;W[best]-=1;if(W[best]<1e-6)delete W[best];load++;room--}
   syncGoods();if(!load)return false;cur.matShop+=load;cur.vans++;sh.incoming+=load;
   createCar('van',pathTo(b,list[0].e).reverse(),{home:list[0].i,dest:s,load,items});return true}
 function shopImport(s,b){const sh=grid[s],sells=sellsOf(sh);const outs=edgeOuts().filter(o=>b.dist[o]>=0);if(!outs.length||!sells.length)return false;
   let room=Math.min(VAN_MAX,slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;
-  while(room>0){let best=sells[0],bv=1e9;for(const k of sells){const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}items[best]=(items[best]||0)+1;load++;room--}
+  vanInc();while(room>0){let best=null,bv=1e9;for(const k of sells){if(shelfRoom(s,k,items[k]||0)<1)continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;items[best]=(items[best]||0)+1;load++;room--}
   if(!load)return false;const o=outs.reduce((a,q)=>b.dist[q]<b.dist[a]?q:a,outs[0]);
   const cost=Math.round(Object.keys(items).reduce((a,k)=>a+items[k]*(GOODS[k].price||10)*SHOP_IMP,0));if(money<cost){if(!(sh.impW>gameT)){sh.impW=gameT+30;float(s,'import: brak gotówki','warn')}return false}
   for(const k in items)payImport(k,items[k],Math.round(items[k]*(GOODS[k].price||10)*SHOP_IMP));
   cur.vans++;sh.incoming+=load;sh.impT=gameT;createCar('van',pathTo(b,o).reverse(),{home:o,dest:s,load,items,imp:true});float(s,`import −${fmt(cost)} T¢`,'warn');return true}
 function bakeTick(dt){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='bakery'||c.off||!c.powered)continue;c.bake=(c.bake||0)+dt;
-  if(c.bake<6)continue;c.bake=0;if((c.shelf.bread||0)+3>SHOP_SLOTS||have('grain')<1)continue;take('grain',1,i);c.shelf.bread=(c.shelf.bread||0)+3;cur.used.grain=(cur.used.grain||0)+1;cur.made.bread=(cur.made.bread||0)+3}}
-function supplyShops(){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||!isShop(c.t))continue;
-  if(slotsOf(c)>0&&shelfTotal(c)+c.incoming<=slotsOf(c)-VAN_MAX&&cars.length<MAX_CARS)spawnVan(i)}}
+  if(c.bake<6)continue;c.bake=0;if((c.shelf.bread||0)+3>slotsOf(c)||have('grain')<1)continue;take('grain',1,i);c.shelf.bread=(c.shelf.bread||0)+3;cur.used.grain=(cur.used.grain||0)+1;cur.made.bread=(cur.made.bread||0)+3}}
+function supplyShops(){vanInc();for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||!isShop(c.t))continue;if(slotsOf(c)<=0||cars.length>=MAX_CARS)continue;
+  const sells=sellsOf(c);let free=0,empty=false;for(const k of sells){const r=Math.max(0,shelfRoom(i,k));free+=r;if(r>0&&(c.shelf[k]||0)<1)empty=true}
+  const tot=slotsOf(c)-shelfTotal(c)-c.incoming;if((tot>=VAN_MAX&&free>=VAN_MAX)||(empty&&free>0&&tot>0)){if(spawnVan(i))vanInc()}}}
 function spawnTruck(f,pid='mat',units=TRUCK_LOAD){const e=entryOf(f);if(e<0)return false;const b=bfs(e);
   const all=candidates(b,WH_T).filter(o=>whOn(grid[o.i])),acc=all.filter(o=>whAccepts(grid[o.i],pid)),list=acc.filter(o=>whRoom(grid[o.i],pid)>=1);
   if(!list.length){float(f,!all.length?'brak magazynu':!acc.length?'żaden magazyn nie przyjmuje tego towaru':'magazyny pełne','warn');return false}
@@ -3331,7 +3337,7 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
       transformer:`<b>Transformator</b> · łączy elektrownie obok (też po skosie) ze słupami · ${UPKEEP.transformer} T¢/godz.`,
       coal:'<b>El. węglowa</b> · '+(c.net<0?'<b>niepodłączona</b>: postaw obok transformator':c.running?`pracuje, ${COAL_MW} MW`:'czeka: wiatraki wystarczają albo brak węgla')+` · ${UPKEEP.coal} T¢/godz.`,house:'<b>Rezydencja</b>',factory:`<b>Fabryka</b> · zmiany do kolejnej ciężarówki: ${c.work}/2`,
       bakery:`<b>Piekarnia</b> · ${c.shelf?c.shelf.bread||0:0} bochenków`,gallery:'<b>Galeria handlowa</b>',restaurant:'<b>Restauracja</b>',cinema:'<b>Kino</b>',theater:'<b>Teatr</b>',casino:'<b>Kasyno</b>',hotelS:'<b>Mały hotel</b>',hotelB:'<b>Duży hotel</b>',tenement:'<b>Kamienica</b>',block:'<b>Tani blok</b>',modern:'<b>Apartamentowiec</b>',
-      shop:`<b>Sklep</b> · półki ${c.shelf?shelfTotal(c):0}/${SHOP_SLOTS}`,bank:`<b>Bank</b> · +${fmt(BANK_CAP)} T¢ limitu`,warehouse:`<b>Magazyn</b> · +${fmt(whCap(c))} kg limitu`,smallwh:`<b>Mały magazyn</b> · +${WHCAP.smallwh} kg limitu`,
+      shop:`<b>Sklep</b> · półki ${c.shelf?shelfTotal(c):0}/${slotsOf(c)}`,bank:`<b>Bank</b> · +${fmt(BANK_CAP)} T¢ limitu`,warehouse:`<b>Magazyn</b> · +${fmt(whCap(c))} kg limitu`,smallwh:`<b>Mały magazyn</b> · +${WHCAP.smallwh} kg limitu`,
       park1:`<b>Skwer</b> · zasięg 3×3 · ${UPKEEP.park1} T¢/godz.`,park2:`<b>Park</b> · zasięg 5×5 · ${UPKEEP.park2} T¢/godz.`,park3:`<b>Park miejski</b> · zasięg 7×7 · ${UPKEEP.park3} T¢/godz.`}[c.t]+pwr+no;
     if(DEF[c.t].r||DEF[c.t].area)showArea(i,DEF[c.t].r?parkR(c):c.t==='hvpole'?hvR(i):DEF[c.t].area,true);
     if(pol[i]&&!isFactory(c.t)&&c.t!=='coal')s+=pol[i]===2?' · smog (żółte pole)':' · lekki smog'}
@@ -3448,20 +3454,20 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
     if(c.t!=='smallfac')pick=`<div class="chips">${Object.keys(LINES).map(k=>{const lock=!FREE_LINES[k]&&!c.up;return`<button class="chipb" data-line="${k}" aria-pressed="${k===c.line}"${lock?' style="opacity:.5"':''}><i style="background:${LMETA(k).col}"></i>${lock?'🔒 ':''}${LMETA(k).name}</button>`}).join('')}</div>`}
   if(SCAP(c))R('Klienci',`${mw(Math.round((c.vis||0)*10)/10)} w kolejce · do ${SCAP(c)}/godz.`+(c.crowd?' · tłok!':''),c.crowd?'warnv':'');
   if(isShop(c.t)&&sellsOf(c).length&&!c.off)R('Dostawy',c.impT!=null&&gameT-c.impT<60?`import spoza miasta (${Math.round(SHOP_IMP*100)}% ceny półkowej)`:c.dry!=null?`magazyny puste · import za ${Math.max(0,Math.ceil(60-(gameT-c.dry)))} min`:'z magazynu',c.impT!=null&&gameT-c.impT<60||c.dry!=null?'warnv':'');
-  if(c.t==='supermarket'){R('Półki',`${shelfTotal(c)}/45`+(c.incoming?` (+${c.incoming} w drodze)`:''));for(const k of SOLD)R(`<span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}`,`${c.shelf[k]||0} szt. · ${priceAt(c,k)} T¢`)}
-  if(c.t==='shop'||c.t==='shop1'){const S=SPECS[c.spec];R('Rodzaj',S.name);R('Półki',`${shelfTotal(c)}/${slotsOf(c)}`+(c.incoming?` (+${c.incoming} w drodze)`:''));
+  if(c.t==='supermarket'){R('Półki',`${shelfTotal(c)}/${slotsOf(c)} · po ${shelfCap(c)} na towar`+(c.incoming?` (+${c.incoming} w drodze)`:''));for(const k of SOLD)R(`<span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}`,`${c.shelf[k]||0} szt. · ${priceAt(c,k)} T¢`)}
+  if(c.t==='shop'||c.t==='shop1'){const S=SPECS[c.spec];R('Rodzaj',S.name);R('Półki',`${shelfTotal(c)}/${slotsOf(c)} · po ${shelfCap(c)} na towar`+(c.incoming?` (+${c.incoming} w drodze)`:''));
     for(const k of S.sells)R(`<span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}`,`${c.shelf[k]||0} szt. · ${priceAt(c,k)} T¢ · mag. ${fmt(goods[k])}`);
     R('Ceny',c.spec==='mall'?'bazowe':'+25% (sklep specjalistyczny)');
     R('Stan',full?'zamknięty: pełno śmieci':!c.powered?'zamknięty: brak prądu':'otwarty',full||!c.powered?'warnv':'');
     pick=`<div class="chips">${Object.keys(SPECS).filter(k=>c.t!=='shop1'||k!=='mall').map(k=>`<button class="chipb" data-spec="${k}" aria-pressed="${k===c.spec}"><i style="background:${SPECS[k].col}"></i>${SPECS[k].name}</button>`).join('')}</div>`}
-  if(c.t==='gallery'){R('Lokale',c.up?`${c.stores.length} sklepów${c.cinema?' + kino':''} · piętro: bez limitu`:`${galUsed(c)} / ${GAL_BASE} na parterze`);R('Półki',`${shelfTotal(c)}/${slotsOf(c)}`+(c.incoming?` (+${c.incoming} w drodze)`:''));
+  if(c.t==='gallery'){R('Lokale',c.up?`${c.stores.length} sklepów${c.cinema?' + kino':''} · piętro: bez limitu`:`${galUsed(c)} / ${GAL_BASE} na parterze`);R('Półki',`${shelfTotal(c)}/${slotsOf(c)} · po ${shelfCap(c)} na towar`+(c.incoming?` (+${c.incoming} w drodze)`:''));
     for(const k of sellsOf(c))R(`<span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}`,`${c.shelf[k]||0} szt. · ${priceAt(c,k)} T¢ · mag. ${fmt(goods[k])}`);
     R('Stan',!c.stores.length?'pusta: wykup pierwszy sklep':full?'zamknięta: pełno śmieci':!c.powered?'zamknięta: brak prądu':'otwarta',!c.stores.length||full||!c.powered?'warnv':'');
     pick=`<div class="chips">${Object.keys(SPECS).filter(k=>k!=='mall').map(k=>{const own=c.stores.includes(k),dis=!own&&(c.stores.length>=STORE_MAX||galFull(c)||money<STORE_COST);
       return`<button class="chipb" data-buy="${k}" aria-pressed="${own}"${dis?' disabled style="opacity:.5"':''}><i style="background:${SPECS[k].col}"></i>${own?'✓ ':'+ '}${SPECS[k].name}${own?'':` · ${STORE_COST} T¢`}</button>`}).join('')}
       <button class="chipb" data-cinema="1" aria-pressed="${!!c.cinema}"${!c.cinema&&(money<CINEMA_COST||galFull(c))?' disabled style="opacity:.5"':''}><i style="background:#7a2a3a"></i>${c.cinema?'✓ Kino (rozrywka 5×5)':`+ Kino · ${CINEMA_COST} T¢`}</button></div>`}
-  if(c.t==='bakery'){R('Półki',`${c.shelf.bread||0}/${SHOP_SLOTS} bochenków`+(c.incoming?` (+${c.incoming} w drodze)`:''));R('Wypiek',`1 kg zboża → 3 bochenki · zboże w magazynach ${fmt(goods.grain)}`,goods.grain<1?'warnv':'');R('Cena',`${priceAt(c,'bread')} T¢`)}
-  if(c.t==='restaurant'){R('Półki z jedzeniem',`${shelfTotal(c)}/${SHOP_SLOTS}`+(c.incoming?` (+${c.incoming} w drodze)`:''));for(const k of FOOD)R(`<span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}`,`${c.shelf[k]||0} szt. · mag. ${fmt(goods[k])}`);R('Posiłek',`${PRICE.restaurant} T¢`)}
+  if(c.t==='bakery'){R('Półki',`${c.shelf.bread||0}/${slotsOf(c)} bochenków`+(c.incoming?` (+${c.incoming} w drodze)`:''));R('Wypiek',`1 kg zboża → 3 bochenki · zboże w magazynach ${fmt(goods.grain)}`,goods.grain<1?'warnv':'');R('Cena',`${priceAt(c,'bread')} T¢`)}
+  if(c.t==='restaurant'){R('Półki z jedzeniem',`${shelfTotal(c)}/${slotsOf(c)} · po ${shelfCap(c)} na towar`+(c.incoming?` (+${c.incoming} w drodze)`:''));for(const k of FOOD)R(`<span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}`,`${c.shelf[k]||0} szt. · mag. ${fmt(goods[k])}`);R('Posiłek',`${PRICE.restaurant} T¢`)}
   if(entR(c))R('Rozrywka',`zasięg ${2*entR(c)+1}×${2*entR(c)+1}, +1 zadowolenia`);
   if(c.t==='cinema'||c.t==='theater'||c.t==='casino')R(c.t==='casino'?'Stawka':'Bilet',c.t==='casino'?`${PRICE.casino} T¢ (wygrane gości: −150…−600 T¢)`:`${PRICE[c.t]} T¢`);
   if(MED[c.t])R('Pacjenci',`${c.pat||0} / ${medCap(c)} · zasięg ${MED[c.t].r} pól od budynku`,(c.pat||0)>=medCap(c)?'warnv':'');
