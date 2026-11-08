@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -830,9 +830,18 @@ area.rotation.x=-Math.PI/2;area.position.y=0.055;area.visible=false;scene.add(ar
 /* bright frames: green around the effect range, orange around the building's own tile */
 const areaB=new THREE.Group();scene.add(areaB);const AREA_COL={green:['#5fd84a','#1fbf4a'],noise:['#eef0f2','#9aa0a6'],pol:['#f2d64b','#c9900f']};const abM=new THREE.MeshBasicMaterial({color:'#1fbf4a'}),abT=new THREE.MeshBasicMaterial({color:'#f07a4f'}),abG=new THREE.BoxGeometry(1,0.025,1);
 function frameAt(x,z,size,w,m){for(const[dx,dz,sx,sz]of[[0,-1,size+w,w],[0,1,size+w,w],[-1,0,w,size+w],[1,0,w,size+w]]){const b=new THREE.Mesh(abG,m);b.scale.set(sx,1,sz);b.position.set(x+dx*size/2,0.075,z+dz*size/2);areaB.add(b)}}
-function showArea(i,r,flash,kind='green'){area.visible=true;area.position.set(cx(i),0.055,cz(i));area.scale.set(2*r+1,2*r+1,1);areaT=flash==='hold'?1e9:flash?1.6:0;
+function frameRect(x,z,sx,sz,w,m){for(const[dx,dz,a,b]of[[0,-1,sx+w,w],[0,1,sx+w,w],[-1,0,w,sz+w],[1,0,w,sz+w]]){const q=new THREE.Mesh(abG,m);q.scale.set(a,1,b);q.position.set(x+dx*sx/2,0.075,z+dz*sz/2);areaB.add(q)}}
+/* fp: footprint [w,h] of the building — its reach counts from every tile it covers */
+function showArea(i,r,flash,kind='green',fp=null){const fw=fp?fp[0]:1,fh=fp?fp[1]:1,x=cx(i)+(fw-1)/2,z=cz(i)+(fh-1)/2;
+  area.visible=true;area.position.set(x,0.055,z);area.scale.set(2*r+fw,2*r+fh,1);areaT=flash==='hold'?1e9:flash?1.6:0;
   const col=AREA_COL[kind];area.material.color.set(col[0]);area.material.opacity=kind==='noise'?0.42:0.3;abM.color.set(col[1]);
-  if(areaB.userData.k!==i*10+r+kind){areaB.userData.k=i*10+r+kind;areaB.clear();frameAt(cx(i),cz(i),2*r+1,0.08,abM);frameAt(cx(i),cz(i),1,0.06,abT)}}
+  const k=i+'|'+r+'|'+kind+'|'+fw+'x'+fh;if(areaB.userData.k!==k){areaB.userData.k=k;areaB.clear();frameRect(x,z,2*r+fw,2*r+fh,0.08,abM);frameRect(x,z,fw,fh,0.06,abT)}}
+/* reach of service buildings that keep it outside DEF (health, education, police, fire, shops, entertainment, road service) */
+const SHOPS_R=new Set(['shop','shop1','bakery','gallery','supermarket']);
+function svcRange(t,c){if(MED[t])return MED[t].r;if(EDU[t])return EDU[t].r;if(POL[t])return c?polRad(c):POL[t].r;if(FIRE[t])return c?fireRad(c):FIRE[t].r;
+  if(t==='heliB')return HELI_R;if(t==='roadSvc')return SVC_R;if(ENT_R[t])return c?entR(c):ENT_R[t];if(SHOPS_R.has(t))return SHOP_R;return 0}
+const rangeKind=t=>POL[t]?'pol':'green',rangeFP=t=>SHOPS_R.has(t)||ENT_R[t]?null:FP(t);
+function toolRange(t){const d=DEF[t];return(d&&(d.r||d.area))||svcRange(t)}
 const ring=new THREE.Mesh(new THREE.RingGeometry(0.5,0.6,40),new THREE.MeshBasicMaterial({color:'#f07a4f',side:THREE.DoubleSide,depthWrite:false,transparent:true}));
 ring.rotation.x=-Math.PI/2;ring.position.y=0.07;ring.visible=false;scene.add(ring);
 
@@ -3164,7 +3173,7 @@ function placeLine(){const ts=lineTiles();if(!ts.length)return;lineRun=true;let 
 let paintPrev=-1;function paintAt(x,y){const i=tileAt(x,y);if(i<0||i===lastPaint)return;paintPrev=lastPaint;lastPaint=i;apply(i,true)}
 function hover(x,y){if(lineConf)return;if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{hover(x,y)}finally{tool=sv}return}const i=tileAt(x,y);if(!areaT)area.visible=false;hoverI=i;showGhost1(i);
   if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,grid[i].t==='rail'?'Tory wjazdowe · połącz z nimi dworzec, a pociągi przywiozą turystów':'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
-  const ar=DEF[tool]&&(DEF[tool].r||DEF[tool].area);if(ar)showArea(i,ar,false);
+  const ar=toolRange(tool);if(ar)showArea(i,ar,false,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool));
   hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;
   const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='crosswalk')ok=crossOK(i)&&!grid[i].cross&&money>=DEF.crosswalk.cost;else if(tool==='crossDel')ok=!!grid[i]&&!!grid[i].cross;else if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c?!railNearWhy(i):(!!STREET[c.t]&&!c.rail&&!c.edge&&!crossWhy(i)))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
   else if(STREET[tool]||tool==='roundabout'){const c=grid[i];ok=c&&c.t==='rail'&&STREET[tool]?!water[i]&&!c.edge&&money>=DEF[tool].cost:c?(STREET[c.t]||c.t==='roundabout')&&c.t!==tool&&money>=DEF[tool].cost-DEF[c.t].cost:!water[i]&&money>=DEF[tool].cost&&tool!=='roundabout'}
@@ -3203,9 +3212,10 @@ function ghostFor(T){const sm=moveSrc>=0&&grid[moveSrc]&&!grid[moveSrc].tiles&&(
   m.traverse(o=>{if(o.material){o.castShadow=false;o.receiveShadow=false;o.material=Array.isArray(o.material)?o.material.map(mk):mk(o.material)}});
   ghost=new THREE.Group();ghost.add(m);ghost.renderOrder=5;scene.add(ghost);ghostT=GK;return ghost}
 const faceRoad=i=>{const e=nbrs(i).find(k=>grid[k]&&DRIVE[grid[k].t]);return e!=null&&e>=0?Math.atan2(cx(e)-cx(i),cz(e)-cz(i)):0};
-function updateGhost(){if(lineConf&&pendA<0){sel.visible=false;if(ghost)ghost.visible=false;return}const F=curFP();if(pendA<0||!F){sel.visible=false;placeEl.hidden=true;if(ghost)ghost.visible=false;return}const[fw,fh]=F,T=curT(),t=fpTiles(pendA);
+function updateGhost(){if(lineConf&&pendA<0){sel.visible=false;if(ghost)ghost.visible=false;return}const F=curFP();if(pendA<0||!F){sel.visible=false;placeEl.hidden=true;if(ghost)ghost.visible=false;if(areaT>=1e9&&inspI<0){area.visible=false;areaT=0}return}const[fw,fh]=F,T=curT(),t=fpTiles(pendA);
   const ok=fpOK(t,T),cost=fpCost(),afford=money>=cost;sel.visible=true;sel.scale.set(fw,fh,1);sel.position.set(cx(pendA)+(fw-1)/2,0.065,cz(pendA)+(fh-1)/2);
   sel.material.color.set(ok&&afford?'#3fbf5a':'#e0402b');placeEl.hidden=false;hintEl.hidden=true;
+  {const ar=toolRange(T);if(ar)showArea(pendA,ar,'hold',rangeKind(T),DEF[T]&&(DEF[T].r||DEF[T].area)?null:[fw,fh])}
   try{const g=ghostFor(T);g.visible=true;g.position.set(cx(pendA)+(fw-1)/2,0,cz(pendA)+(fh-1)/2);g.rotation.y=FP0(T)?rotIdx*Math.PI/2:faceRoad(pendA)}catch(e){}
   document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?(T==='pitB'||T==='pitS'?'oba pola muszą leżeć na tym samym złożu':'musi stać przy rzece'):'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:`${fmt(cost)} T¢`}`;
   document.getElementById('pOk').disabled=!(ok&&afford)}
@@ -3213,7 +3223,7 @@ function placeFP(){if(pendA<0)return;const T=curT(),t=fpTiles(pendA),cost=fpCost
   const a=pendA;pendA=-1;lockBuy();
   if(moveSrc>=0){const src=moveSrc;moveSrc=-1;doMove(src,a,t,cost);updateGhost();hintEl.hidden=false;
     if(entryOf(a)<0&&!NOROAD[T])setHint('Przeniesiono. Budynek nie ma dojazdu: dołóż ulicę obok.',true,true);else setHint(`Przeniesiono za ${fmt(cost)} T¢.`,false,true);return}
-  spend(cost);addCell(a,tool,true,t.slice(1));if(grid[a]&&grid[a].tiles){grid[a].rot=rotIdx;refreshBuilding(a)}updateGhost();hintEl.hidden=false;
+  spend(cost);addCell(a,tool,true,t.slice(1));if(grid[a]&&grid[a].tiles){grid[a].rot=rotIdx;refreshBuilding(a)}updateGhost();{const ar=toolRange(tool);if(ar&&grid[a])showArea(a,svcRange(tool,grid[a])||ar,true,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool))}hintEl.hidden=false;
   if(entryOf(a)<0)setHint('Budynek nie ma dojazdu. Dołóż ulicę obok, by zaczął działać.',true,true);else setHint(toolHint());save();afterPlace(true)}
 function cancelFP(){pendA=-1;const mv=moveSrc>=0;moveSrc=-1;updateGhost();hintEl.hidden=false;if(mv)setHint('Przenoszenie anulowane.',false,true)}
 /* R: single-tile buildings get a fixed facing (auto = front to the street); with a building open in the inspector, R turns that building */
@@ -3302,7 +3312,7 @@ function apply(i,painting){
   if(DRIVE[tool]){const why=roadNearWhy(i);if(why){if(!painting)setHint(why,true,true);return}}
   const cost=DEF[tool].cost;
   if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢ na: ${DEF[tool].name.toLowerCase()}.`,true,true);return}
-  spend(cost);lockBuy();addCell(i,tool==='incS'?'incinerator':tool);if(rot1!=null&&grid[i]&&!grid[i].tiles){grid[i].rot1=rot1;refreshBuilding(i)}if(DEF[tool].r||DEF[tool].area)showArea(i,DEF[tool].r||DEF[tool].area,true);
+  spend(cost);lockBuy();addCell(i,tool==='incS'?'incinerator':tool);if(rot1!=null&&grid[i]&&!grid[i].tiles){grid[i].rot1=rot1;refreshBuilding(i)}if(DEF[tool].r||DEF[tool].area)showArea(i,DEF[tool].r||DEF[tool].area,true);else if(svcRange(tool))showArea(i,svcRange(tool,grid[i]),true,rangeKind(tool),rangeFP(tool));
   if(!DRIVE[tool]&&!NOROAD[tool]&&entryOf(i)<0)setHint('Budynek nie ma dojazdu. Dołóż ulicę obok, by zaczął działać.',true,true);
   save();afterPlace(painting)}
 function afterPlace(quiet){if(buildMode==='one'&&MODE_OK(tool)&&!lineRun){const t=tool;selectTool('view');if(!quiet)setHint(`Postawiono: ${DEF[t].name}. Tryb „Pojedynczo” – wróciłeś do podglądu.`,false,true)}}
@@ -3338,7 +3348,7 @@ const houses=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&HOUSING[grid[i].t
 let buyLock=0;const lockBuy=()=>{buyLock=performance.now()+500;inspEl.classList.add('locked');setTimeout(()=>inspEl.classList.remove('locked'),520)};
 function openHouse(i){lockBuy();if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;inspI=i;inspEl.hidden=false;hintEl.hidden=true;document.body&&document.body.classList.add('inspOn');ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
   const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='heliB'?HELI_R:c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold');
-  else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');renderInsp()}
+  else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');else if(c&&svcRange(c.t,c))showArea(i,svcRange(c.t,c),'hold',rangeKind(c.t),rangeFP(c.t));renderInsp()}
 /* the card refreshes twice a second; a refresh between pressing and releasing a button would swallow the click, so it waits while a finger or the mouse is down on the card */
 let inspDown=0,inspRel=0;inspEl.addEventListener('pointerdown',()=>{inspDown=performance.now()},true);
 for(const ty of['pointerup','pointercancel'])addEventListener(ty,()=>{if(inspDown){inspDown=0;inspRel=performance.now()+150}},true);
