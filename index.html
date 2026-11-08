@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.8';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.9';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2835,19 +2835,21 @@ function spawnVan(s){const sh=grid[s];const e=entryOf(s);if(e<0)return false;con
   while(room>0){let best=null,bv=1e9;const kn=Object.keys(items).length;for(const k of sells){if((W[k]||0)<1||shelfRoom(s,k,items[k]||0)<1||(!items[k]&&kn>=KM))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
     items[best]=(items[best]||0)+1;W[best]-=1;if(W[best]<1e-6)delete W[best];load++;room--}
   syncGoods();if(!load)return false;cur.matShop+=load;cur.vans++;sh.incoming+=load;
-  createCar(delivKind(sh),pathTo(b,list[0].e).reverse(),{home:list[0].i,dest:s,load,items});return true}
+  createCar(delivKind(sh),pathTo(b,list[0].e).reverse(),{home:list[0].i,dest:s,load,items,shop:s});return true}
 function shopImport(s,b){const sh=grid[s],sells=sellsOf(sh);const outs=edgeOuts().filter(o=>b.dist[o]>=0);if(!outs.length||!sells.length)return false;
   let room=Math.min(delivCap(sh),slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;const KM=delivKinds(sh);
   vanInc();while(room>0){let best=null,bv=1e9;const kn=Object.keys(items).length;for(const k of sells){if(shelfRoom(s,k,items[k]||0)<1||(!items[k]&&kn>=KM))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;items[best]=(items[best]||0)+1;load++;room--}
   if(!load)return false;const o=outs.reduce((a,q)=>b.dist[q]<b.dist[a]?q:a,outs[0]);
   const cost=Math.round(Object.keys(items).reduce((a,k)=>a+items[k]*(GOODS[k].price||10)*SHOP_IMP,0));if(money<cost){if(!(sh.impW>gameT)){sh.impW=gameT+30;float(s,'import: brak gotówki','warn')}return false}
   for(const k in items)payImport(k,items[k],Math.round(items[k]*(GOODS[k].price||10)*SHOP_IMP));
-  cur.vans++;sh.incoming+=load;sh.impT=gameT;createCar(delivKind(sh),pathTo(b,o).reverse(),{home:o,dest:s,load,items,imp:true});float(s,`import −${fmt(cost)} T¢`,'warn');return true}
+  cur.vans++;sh.incoming+=load;sh.impT=gameT;createCar(delivKind(sh),pathTo(b,o).reverse(),{home:o,dest:s,load,items,imp:true,shop:s});float(s,`import −${fmt(cost)} T¢`,'warn');return true}
 function bakeTick(dt){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='bakery'||c.off||!c.powered)continue;c.bake=(c.bake||0)+dt;
   if(c.bake<6)continue;c.bake=0;if((c.shelf.bread||0)+3>slotsOf(c)||have('grain')<1)continue;take('grain',1,i);c.shelf.bread=(c.shelf.bread||0)+3;cur.used.grain=(cur.used.grain||0)+1;cur.made.bread=(cur.made.bread||0)+3}}
-function supplyShops(){vanInc();for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||!isShop(c.t))continue;if(slotsOf(c)<=0||cars.length>=MAX_CARS)continue;
+/* 6.1.9: every shop has exactly one delivery vehicle (a van, or an articulated truck for galleries and supermarkets); the next delivery leaves only once it is back */
+function supplyShops(){vanInc();const busy=new Set();for(const v of cars)if(v.shop!=null&&isDeliv(v.kind))busy.add(v.shop);
+  for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||!isShop(c.t)||busy.has(i))continue;if(slotsOf(c)<=0||cars.length>=MAX_CARS)continue;
   const sells=sellsOf(c);let free=0,empty=false;for(const k of sells){const r=Math.max(0,shelfRoom(i,k));free+=r;if(r>0&&(c.shelf[k]||0)<1)empty=true}
-  const tot=slotsOf(c)-shelfTotal(c)-c.incoming;const at=restockAt(c);if((tot>=at&&free>=at)||(empty&&free>0&&tot>0)){if(spawnVan(i))vanInc()}}}
+  const tot=slotsOf(c)-shelfTotal(c)-c.incoming;const at=restockAt(c);if((tot>=at&&free>=at)||(empty&&free>0&&tot>0)){if(spawnVan(i)){vanInc();busy.add(i)}}}}
 function spawnTruck(f,pid='mat',units=TRUCK_LOAD){const e=entryOf(f);if(e<0)return false;const b=bfs(e);
   const all=candidates(b,WH_T).filter(o=>whOn(grid[o.i])),acc=all.filter(o=>whAccepts(grid[o.i],pid)),list=acc.filter(o=>whRoom(grid[o.i],pid)>=1);
   if(!list.length){float(f,!all.length?'brak magazynu':!acc.length?'żaden magazyn nie przyjmuje tego towaru':'magazyny pełne','warn');return false}
