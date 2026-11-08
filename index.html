@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.7';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.8';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -653,6 +653,10 @@ const isFarm=t=>!!DEF[t]&&!!DEF[t].farm;
 const HOUSING={house:{trips:1,base:3},tenement:{trips:2,base:3},block:{trips:3,base:2},modern:{trips:3.5,base:4}};
 const UPG3={pump:{name:'Efektywność zaworów',cost:150,upkeep:5,desc:'+25% poboru wody'},pumpB:{name:'Efektywność zaworów',cost:350,upkeep:10,desc:'+25% poboru wody: 300 m³/godz.'},supermarket:{name:'Trzecia kasa',cost:400,upkeep:10,desc:'+15 klientów na godzinę'},shop1:{name:'Trzecia kasa',cost:250,upkeep:8,desc:'+10 klientów na godzinę'}};
 const SHOP_SLOTS=15,VAN_MAX=5,HV_R=5;
+/* 6.1.8: delivery vans carry up to 30 items of at most 3 kinds; galleries and supermarkets are stocked by articulated trucks: up to 80 items of at most 7 kinds */
+const VAN_CAP=30,VAN_KINDS=3,SEMI_CAP=80,SEMI_KINDS=7;const bigShop=c=>!!c&&(c.t==='gallery'||c.t==='supermarket');
+const delivKind=c=>bigShop(c)?'semi':'van',delivCap=c=>bigShop(c)?SEMI_CAP:VAN_CAP,delivKinds=c=>bigShop(c)?SEMI_KINDS:VAN_KINDS;
+const restockAt=c=>Math.min(delivCap(c),Math.max(3,Math.round(slotsOf(c)*0.3)));
 /* happiness tiers: trips per game hour and factory shift value per worker visit */
 const TIER={0:{trips:3,work:0.4,name:'Zrozpaczeni'},7:{trips:15,work:1.9,name:'Bardzo zachwyceni'},8:{trips:16,work:2,name:'W siódmym niebie'},6:{trips:14,work:1.75,name:'Zachwyceni'},1:{trips:4,work:0.5,name:'Zniechęceni'},2:{trips:6,work:0.75,name:'Niezadowoleni'},3:{trips:8,work:1,name:'Pogodni'},4:{trips:10,work:1.25,name:'Zadowoleni'},5:{trips:12,work:1.5,name:'Szczęśliwi'}};
 const HCOL={0:'#8a2a2a',1:'#d4483a',2:'#e58a3a',3:'#d9b23a',4:'#7dbb4a',5:'#2f9e5a',6:'#1f8a8a',7:'#2a7fb8',8:'#5a5fd0'};const HMAX=8;
@@ -2131,7 +2135,8 @@ function convertRoad(i,t){const c=grid[i];counts[c.t]--;c.t=t;counts[t]++;const[
 
 /* ---------- cars ---------- */
 const WALKC=['#c8372d','#2f6fe0','#3c9a5f','#e0a91c','#7d4ab0','#2b2f36','#e98a3a','#4ab0c8'].map(M),SKIN=[M('#f1c9a5'),M('#c99a6e'),M('#8a5a3a')];
-const VEH_KIND=['walker','truck','garbage','visitor','hearse','police','sweeper','taxi','fire','van'];
+const VEH_KIND=['walker','truck','garbage','visitor','hearse','police','sweeper','taxi','fire','van','semi'];
+const isDeliv=k=>k==='van'||k==='semi';
 const bldPaint=c=>!c?null:(c.t==='shop'||c.t==='shop1')&&SM[c.spec]?SM[c.spec]:isFactory(c.t)&&GM[c.line]?GM[c.line]:null;
 function carMesh(kind,o){const g=carMesh0(kind),key='veh:'+(VEH_KIND.includes(kind)?kind:'car');if(MODEL_OVR[key])applyOvr(key,g,Math.random(),{paint:o?bldPaint(grid[o.dest])||bldPaint(grid[o.home]):null});return g}
 function carMesh0(kind){const g=new THREE.Group();
@@ -2149,19 +2154,23 @@ function carMesh0(kind){const g=new THREE.Group();
   else if(kind==='taxi'){g.add(box(0.2,0.08,0.34,M('#f2c230'),0,0.03,0));g.add(box(0.17,0.07,0.17,mat.cabin,0,0.11,-0.02));g.add(box(0.08,0.035,0.05,M('#26302f'),0,0.18,-0.02));g.add(box(0.205,0.012,0.12,M('#26302f'),0,0.075,0.05))}
   else if(kind==='fire'){const red=M('#d0342a');g.add(box(0.22,0.14,0.42,red,0,0.03,0));g.add(box(0.18,0.06,0.02,mat.cabin,0,0.12,0.211));g.add(box(0.06,0.02,0.36,mat.steel,0,0.18,-0.02));
     for(const z of[-0.18,-0.06,0.06])g.add(box(0.07,0.005,0.012,mat.steel,0,0.19,z));const r=box(0.05,0.015,0.05,new THREE.MeshBasicMaterial({color:'#ff3b30'}),-0.05,0.17,0.15),b=box(0.05,0.015,0.05,new THREE.MeshBasicMaterial({color:'#fff3c4'}),0.05,0.17,0.15);g.add(r,b);g.userData.bar=[r,b]}
+  else if(kind==='semi'){/* articulated truck: tractor up front, long box trailer behind */
+    g.add(box(0.2,0.13,0.14,mat.vanW,0,0.03,0.25));g.add(box(0.16,0.06,0.02,mat.cabin,0,0.1,0.321));g.add(box(0.12,0.02,0.06,mat.dark,0,0.03,0.15));
+    const tr=box(0.22,0.18,0.5,mat.vanW,0,0.045,-0.1);g.add(tr);g.add(box(0.225,0.035,0.42,mat.awn,0,0.15,-0.1));
+    for(const[a,z]of[[1,-0.24],[-1,-0.24],[1,-0.31],[-1,-0.31]]){const w=new THREE.Mesh(boxGeo(0.03,0.06,0.07),mat.tire);w.position.set(a*0.105,0.03,z);g.add(w)}}
   else if(kind==='van'){g.add(box(0.2,0.15,0.34,mat.vanW,0,0.03,0));g.add(box(0.205,0.03,0.2,mat.awn,0,0.1,-0.05));g.add(box(0.16,0.06,0.02,mat.cabin,0,0.11,0.17))}
   else{g.add(box(0.2,0.08,0.34,carCols[(Math.random()*carCols.length)|0],0,0.03,0));g.add(box(0.17,0.07,0.17,mat.cabin,0,0.11,-0.02))}
-  for(const[a,b]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const w=new THREE.Mesh(boxGeo(0.03,0.06,0.07),mat.tire);w.position.set(a*0.105,0.03,b*(kind==='truck'?0.13:0.1));g.add(w)}
+  for(const[a,b]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const w=new THREE.Mesh(boxGeo(0.03,0.06,0.07),mat.tire);w.position.set(a*0.105,0.03,kind==='semi'?(b>0?0.27:0.18):b*(kind==='truck'?0.13:0.1));g.add(w)}
   /* head and tail lights; at night they glow and a soft beam lights the road ahead */
-  const big=kind==='truck'||kind==='garbage',fz=big?0.228:0.172,bz=kind==='truck'?-0.222:kind==='garbage'?-0.172:-0.172,ly=big?0.08:0.075;
+  const big=kind==='truck'||kind==='garbage'||kind==='semi',fz=kind==='semi'?0.322:big?0.228:0.172,bz=kind==='semi'?-0.352:kind==='truck'?-0.222:kind==='garbage'?-0.172:-0.172,ly=big?0.08:0.075;
   for(const x of[-0.065,0.065]){const h=new THREE.Mesh(CL.light,mat.head);h.position.set(x,ly,fz);g.add(h);
     const t=new THREE.Mesh(CL.light,mat.tail);t.position.set(x,ly,bz);g.add(t)}
   const beam=new THREE.Mesh(CL.beam,mat.beam);beam.position.set(0,0.008,fz+0.26);g.add(beam);
   g.scale.setScalar(0.01);scene.add(g);return g}
-function createCar(kind,path,o){const c=Object.assign({kind,path,seg:0,dist:0,phase:'go',speed:kind==='sweeper'?1.0:kind==='hearse'?1.2:kind==='police'?1.8:kind==='fire'?2.2:kind==='taxi'?1.7:kind==='visitor'?1.6:kind==='truck'?1.05:kind==='garbage'?1.1:kind==='van'?1.3:1.5+Math.random()*0.3,
+function createCar(kind,path,o){const c=Object.assign({kind,path,seg:0,dist:0,phase:'go',speed:kind==='sweeper'?1.0:kind==='hearse'?1.2:kind==='police'?1.8:kind==='fire'?2.2:kind==='taxi'?1.7:kind==='visitor'?1.6:kind==='truck'?1.05:kind==='garbage'?1.1:kind==='van'?1.3:kind==='semi'?1.0:1.5+Math.random()*0.3,
   mesh:carMesh(kind,o),rot:null,grow:0,li:(Math.random()*3)|0,id:++carSeq,res:-1,inRes:false,wait:0,ghost:0,vOff:null,lnSeg:-1},o);if(path.length>1){c.li=pickLane(c,path[0],path[1])}c.lp=c.ln=c.li;cars.push(c);placeCar(c);if(o&&o.home!=null)exitFrom(c,o.home);return c}
 function removeCar(c){releaseRes(c);if(c.kind==='hearse'&&c.load){const h=grid[c.dest],d=grid[c.home];if(c.phase==='go'){if(h){h.dead=(h.dead||0)+c.load;h.hearse=false}if(d)d.inbound=Math.max(0,(d.inbound||0)-c.load)}else hearseDeliver(c);c.load=0}if(c.pass&&c.pass.length){const pr=grid[c.dest];if(pr&&pr.inbound)pr.inbound=Math.max(0,pr.inbound-c.pass.length);const st=grid[c.home];if(st&&st.jail)st.jail.push(...c.pass);c.pass=[]}if(c.kind==='garbage')releaseG(c);
-  if(c.kind==='van'&&!c.delivered){c.delivered=true;const d=grid[c.dest];if(d&&isShop(d.t))d.incoming=Math.max(0,d.incoming-c.load);for(const k in c.items)addGood(k,c.items[k],c.home)}
+  if(isDeliv(c.kind)&&!c.delivered){c.delivered=true;const d=grid[c.dest];if(d&&isShop(d.t))d.incoming=Math.max(0,d.incoming-c.load);for(const k in c.items)addGood(k,c.items[k],c.home)}
   c.dead=true;scene.remove(c.mesh);disposeTree(c.mesh)}
 function perp(a,b){const dx=cx(b)-cx(a),dz=cz(b)-cz(a);return[-dz,dx]}
 let carSeq=0;const occ=new Map(),resMap=new Map();
@@ -2293,7 +2302,7 @@ function arrive(c){
     else if(d&&isWork(d.t)){const w=TIER[c.tier??3].work;d.work+=w;cur.work+=w;
       if(d.work>=2)produce(c.dest,d)}
     return goBack(c,c.dest,c.home)}
-  if(c.kind==='van'){c.delivered=true;
+  if(isDeliv(c.kind)){c.delivered=true;
     if(d&&isShop(d.t)){d.incoming=Math.max(0,d.incoming-c.load);let put=0;for(const k in c.items){const room=Math.min(slotsOf(d)-shelfTotal(d),shelfCap(d)-(d.shelf[k]||0)),n=Math.max(0,Math.min(room,c.items[k]));d.shelf[k]=(d.shelf[k]||0)+n;put+=n;if(c.items[k]>n)addGood(k,c.items[k]-n,c.home)}
       float(c.dest,`+${put} towaru`,'mat')}
     else for(const k in c.items)addGood(k,c.items[k],c.home);
@@ -2760,7 +2769,7 @@ const slotsBase=c=>c.t==='shop1'?(c.up?30:15):c.t==='gallery'?SHOP_SLOTS*c.store
 /* 6.1.7: +10% shelf room; the room is split evenly between the goods a shop sells, so one good can never crowd out the rest */
 const slotsOf=c=>Math.round(slotsBase(c)*1.1);
 const shelfCap=c=>{const n=sellsOf(c).length;return Math.max(1,Math.ceil(slotsOf(c)/Math.max(1,n)))};
-let VANINC=new Map();const vanInc=()=>{VANINC=new Map();for(const v of cars)if(v.kind==='van'&&!v.delivered&&v.items){let m=VANINC.get(v.dest);if(!m)VANINC.set(v.dest,m={});for(const k in v.items)m[k]=(m[k]||0)+v.items[k]}return VANINC};
+let VANINC=new Map();const vanInc=()=>{VANINC=new Map();for(const v of cars)if(isDeliv(v.kind)&&!v.delivered&&v.items){let m=VANINC.get(v.dest);if(!m)VANINC.set(v.dest,m={});for(const k in v.items)m[k]=(m[k]||0)+v.items[k]}return VANINC};
 const shelfRoom=(s,k,extra=0)=>{const c=grid[s],m=VANINC.get(s);return shelfCap(c)-(c.shelf[k]||0)-(m&&m[k]||0)-extra};
 /* customers per game hour a shop can serve; above that it is crowded */
 const SCAP=c=>(c.up&&(c.t==='shop'||c.t==='supermarket')?1.5:1)*SCAP0(c)*(c.edu&&c.edu.tech?1:1);const SCAP0=c=>c.t==='shop1'?(c.up?50:35)+(c.up2?5:0)+(c.up3?10:0):c.t==='bakery'?22:c.t==='supermarket'?60+(c.up3?15:0):c.t==='gallery'?8*Math.max(1,c.stores.length)+20+(c.up?16:0):c.t==='restaurant'?(c.up?35:25):c.t==='shop'?30+(c.up2?10:0):0;
@@ -2822,23 +2831,23 @@ function spawnVan(s){const sh=grid[s];const e=entryOf(s);if(e<0)return false;con
   /* the van comes from the nearest warehouse that actually holds something this shop sells */
   vanInc();const src=list.filter(o=>sells.some(k=>(grid[o.i].st[k]||0)>=1&&shelfRoom(s,k)>=1)).sort((p,q)=>p.d-q.d);
   if(!src.length){if(sh.dry==null)sh.dry=gameT;if(gameT-sh.dry>=60)return shopImport(s,b);return false}
-  sh.dry=null;list.length=0;list.push(src[0]);const W=grid[src[0].i].st;let room=Math.min(VAN_MAX,slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;
-  while(room>0){let best=null,bv=1e9;for(const k of sells){if((W[k]||0)<1||shelfRoom(s,k,items[k]||0)<1)continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
+  sh.dry=null;list.length=0;list.push(src[0]);const W=grid[src[0].i].st;let room=Math.min(delivCap(sh),slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;const KM=delivKinds(sh);
+  while(room>0){let best=null,bv=1e9;const kn=Object.keys(items).length;for(const k of sells){if((W[k]||0)<1||shelfRoom(s,k,items[k]||0)<1||(!items[k]&&kn>=KM))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
     items[best]=(items[best]||0)+1;W[best]-=1;if(W[best]<1e-6)delete W[best];load++;room--}
   syncGoods();if(!load)return false;cur.matShop+=load;cur.vans++;sh.incoming+=load;
-  createCar('van',pathTo(b,list[0].e).reverse(),{home:list[0].i,dest:s,load,items});return true}
+  createCar(delivKind(sh),pathTo(b,list[0].e).reverse(),{home:list[0].i,dest:s,load,items});return true}
 function shopImport(s,b){const sh=grid[s],sells=sellsOf(sh);const outs=edgeOuts().filter(o=>b.dist[o]>=0);if(!outs.length||!sells.length)return false;
-  let room=Math.min(VAN_MAX,slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;
-  vanInc();while(room>0){let best=null,bv=1e9;for(const k of sells){if(shelfRoom(s,k,items[k]||0)<1)continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;items[best]=(items[best]||0)+1;load++;room--}
+  let room=Math.min(delivCap(sh),slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;const KM=delivKinds(sh);
+  vanInc();while(room>0){let best=null,bv=1e9;const kn=Object.keys(items).length;for(const k of sells){if(shelfRoom(s,k,items[k]||0)<1||(!items[k]&&kn>=KM))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;items[best]=(items[best]||0)+1;load++;room--}
   if(!load)return false;const o=outs.reduce((a,q)=>b.dist[q]<b.dist[a]?q:a,outs[0]);
   const cost=Math.round(Object.keys(items).reduce((a,k)=>a+items[k]*(GOODS[k].price||10)*SHOP_IMP,0));if(money<cost){if(!(sh.impW>gameT)){sh.impW=gameT+30;float(s,'import: brak gotówki','warn')}return false}
   for(const k in items)payImport(k,items[k],Math.round(items[k]*(GOODS[k].price||10)*SHOP_IMP));
-  cur.vans++;sh.incoming+=load;sh.impT=gameT;createCar('van',pathTo(b,o).reverse(),{home:o,dest:s,load,items,imp:true});float(s,`import −${fmt(cost)} T¢`,'warn');return true}
+  cur.vans++;sh.incoming+=load;sh.impT=gameT;createCar(delivKind(sh),pathTo(b,o).reverse(),{home:o,dest:s,load,items,imp:true});float(s,`import −${fmt(cost)} T¢`,'warn');return true}
 function bakeTick(dt){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='bakery'||c.off||!c.powered)continue;c.bake=(c.bake||0)+dt;
   if(c.bake<6)continue;c.bake=0;if((c.shelf.bread||0)+3>slotsOf(c)||have('grain')<1)continue;take('grain',1,i);c.shelf.bread=(c.shelf.bread||0)+3;cur.used.grain=(cur.used.grain||0)+1;cur.made.bread=(cur.made.bread||0)+3}}
 function supplyShops(){vanInc();for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||!isShop(c.t))continue;if(slotsOf(c)<=0||cars.length>=MAX_CARS)continue;
   const sells=sellsOf(c);let free=0,empty=false;for(const k of sells){const r=Math.max(0,shelfRoom(i,k));free+=r;if(r>0&&(c.shelf[k]||0)<1)empty=true}
-  const tot=slotsOf(c)-shelfTotal(c)-c.incoming;if((tot>=VAN_MAX&&free>=VAN_MAX)||(empty&&free>0&&tot>0)){if(spawnVan(i))vanInc()}}}
+  const tot=slotsOf(c)-shelfTotal(c)-c.incoming;const at=restockAt(c);if((tot>=at&&free>=at)||(empty&&free>0&&tot>0)){if(spawnVan(i))vanInc()}}}
 function spawnTruck(f,pid='mat',units=TRUCK_LOAD){const e=entryOf(f);if(e<0)return false;const b=bfs(e);
   const all=candidates(b,WH_T).filter(o=>whOn(grid[o.i])),acc=all.filter(o=>whAccepts(grid[o.i],pid)),list=acc.filter(o=>whRoom(grid[o.i],pid)>=1);
   if(!list.length){float(f,!all.length?'brak magazynu':!acc.length?'żaden magazyn nie przyjmuje tego towaru':'magazyny pełne','warn');return false}
@@ -4355,13 +4364,13 @@ cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();if(Math.
   renderer.render(scene,camera)}
 if(!ED)requestAnimationFrame(frame);
 /* the model editor (a separate page) reads the game's models through this */
-const VEH_LIST=[['car','Samochód mieszkańca','Pojazdy','Samochody'],['taxi','Taksówka','Pojazdy','Samochody'],['visitor','Auto turysty','Pojazdy','Samochody'],['van','Dostawczak (kolor sklepu)','Pojazdy','Dostawy'],['truck','Ciężarówka (kolor linii fabryki)','Pojazdy','Dostawy'],
+const VEH_LIST=[['car','Samochód mieszkańca','Pojazdy','Samochody'],['taxi','Taksówka','Pojazdy','Samochody'],['visitor','Auto turysty','Pojazdy','Samochody'],['van','Dostawczak (kolor sklepu)','Pojazdy','Dostawy'],['truck','Ciężarówka (kolor linii fabryki)','Pojazdy','Dostawy'],['semi','Ciężarówka przegubowa (galerie i supermarkety)','Pojazdy','Dostawy'],
   ['garbage','Śmieciarka','Pojazdy','Służby'],['sweeper','Zamiatarka','Pojazdy','Służby'],['police','Radiowóz','Pojazdy','Służby'],['fire','Wóz strażacki','Pojazdy','Służby'],['hearse','Karawan','Pojazdy','Służby'],['heli','Helikopter gaśniczy','Pojazdy','Lotnictwo'],
   ['loco','Lokomotywa','Pojazdy','Kolej'],['coach','Wagon pasażerski','Pojazdy','Kolej'],['wagon','Wagon towarowy','Pojazdy','Kolej'],['walker','Pieszy','Piesi',null]];
 window.__ltModelAPI={THREE,version:LT_VERSION,ovr:MODEL_OVR,
   list(){const o=[];for(const t of Object.keys(BUILD)){if(!DEF[t]||HBUILD[t])continue;o.push({key:t,name:DEF[t].name,cat:TCAT[t]||(t==='incS'?TCAT.incinerator:null)||'Inne',grp:DEF[t].name,leaf:'Budynek',pt:t==='shop'||t==='shop1'||isFactory(t)})}
     for(const t in HBUILD)HLV[t].res.forEach((r,lv)=>o.push({key:t+'@'+lv,name:`${DEF[t].name} · poziom ${lv+1}`,cat:'Domy',grp:DEF[t].name,leaf:`Poziom ${lv+1}`}));
-    for(const[k,n,c,gp]of VEH_LIST)o.push({key:'veh:'+k,name:n,cat:c,grp:gp,leaf:n,veh:true,pt:k==='van'||k==='truck'});return o},
+    for(const[k,n,c,gp]of VEH_LIST)o.push({key:'veh:'+k,name:n,cat:c,grp:gp,leaf:n,veh:true,pt:k==='van'||k==='truck'||k==='semi'});return o},
   animLib:ANIM_LIB,fxLib:FX_LIB,rcDef:RC_DEF,makeFx,fxApply,animApply,animReset,
   build(key,withOvr){if(key.startsWith('veh:')){const k=key.slice(4),T=trainM;let g;if(k==='heli')g=heliMesh0();else if(k==='loco')g=trainLoco(T.blue,T.white);else if(k==='coach')g=trainCoach(T.blue,T.white);else if(k==='wagon')g=trainWagon(T.fr[0]);else{g=carMesh0(k);scene.remove(g);g.scale.setScalar(1)}
     return withOvr?applyOvr(key,g):g}
