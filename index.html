@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.9';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.10';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2167,10 +2167,22 @@ function carMesh0(kind){const g=new THREE.Group();
     const t=new THREE.Mesh(CL.light,mat.tail);t.position.set(x,ly,bz);g.add(t)}
   const beam=new THREE.Mesh(CL.beam,mat.beam);beam.position.set(0,0.008,fz+0.26);g.add(beam);
   g.scale.setScalar(0.01);scene.add(g);return g}
+/* LOD: with the camera pulled back every vehicle is drawn as one box of a single instanced mesh (one draw call) instead of its own dozen meshes, lights and shadow casters */
+const LOD_R=30,LOD_MAX=1500,lodGeo=new THREE.BoxGeometry(1,1,1);lodGeo.translate(0,0.5,0);
+const lodM=new THREE.InstancedMesh(lodGeo,new THREE.MeshLambertMaterial({color:'#ffffff'}),LOD_MAX);lodM.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+lodM.setColorAt(0,new THREE.Color('#ffffff'));lodM.instanceColor.setUsage(THREE.DynamicDrawUsage);lodM.count=0;lodM.frustumCulled=false;lodM.castShadow=false;lodM.receiveShadow=false;scene.add(lodM);/* colours first: three sizes the colour buffer from count */
+const LOD_SZ={truck:[0.22,0.2,0.46],garbage:[0.22,0.2,0.42],semi:[0.22,0.22,0.68],fire:[0.22,0.17,0.42],van:[0.2,0.18,0.34],hearse:[0.2,0.15,0.36],sweeper:[0.2,0.15,0.3]},LOD_DEF=[0.2,0.15,0.34];
+let lodOn=false;const lodA=new THREE.Matrix4(),lodS=new THREE.Matrix4(),lodC=new THREE.Color();
+function carLOD(){const on=cam.radius>LOD_R;
+  if(!on){if(lodOn){lodOn=false;lodM.count=0;for(const c of cars)if(c.mesh)c.mesh.visible=true}return}
+  lodOn=true;let n=0;for(const c of cars){const m=c.mesh;if(!m)continue;m.visible=false;if(c.walk||c.kind==='walker'||n>=LOD_MAX)continue;
+    m.updateMatrix();const z=LOD_SZ[c.kind]||LOD_DEF;lodS.makeScale(z[0],z[1],z[2]);lodA.multiplyMatrices(m.matrix,lodS);lodM.setMatrixAt(n,lodA);
+    if(!c.lodCol){const b=m.children.find(o=>o.isMesh&&o.material&&o.material.color);c.lodCol=b?'#'+b.material.color.getHexString():'#cfcfcf'}lodC.set(c.lodCol);lodM.setColorAt(n,lodC);n++}
+  lodM.count=n;lodM.instanceMatrix.needsUpdate=true;if(lodM.instanceColor)lodM.instanceColor.needsUpdate=true}
 function createCar(kind,path,o){const c=Object.assign({kind,path,seg:0,dist:0,phase:'go',speed:kind==='sweeper'?1.0:kind==='hearse'?1.2:kind==='police'?1.8:kind==='fire'?2.2:kind==='taxi'?1.7:kind==='visitor'?1.6:kind==='truck'?1.05:kind==='garbage'?1.1:kind==='van'?1.3:kind==='semi'?1.0:1.5+Math.random()*0.3,
   mesh:carMesh(kind,o),rot:null,grow:0,li:(Math.random()*3)|0,id:++carSeq,res:-1,inRes:false,wait:0,ghost:0,vOff:null,lnSeg:-1},o);if(path.length>1){c.li=pickLane(c,path[0],path[1])}c.lp=c.ln=c.li;cars.push(c);placeCar(c);if(o&&o.home!=null)exitFrom(c,o.home);return c}
 function removeCar(c){releaseRes(c);if(c.kind==='hearse'&&c.load){const h=grid[c.dest],d=grid[c.home];if(c.phase==='go'){if(h){h.dead=(h.dead||0)+c.load;h.hearse=false}if(d)d.inbound=Math.max(0,(d.inbound||0)-c.load)}else hearseDeliver(c);c.load=0}if(c.pass&&c.pass.length){const pr=grid[c.dest];if(pr&&pr.inbound)pr.inbound=Math.max(0,pr.inbound-c.pass.length);const st=grid[c.home];if(st&&st.jail)st.jail.push(...c.pass);c.pass=[]}if(c.kind==='garbage')releaseG(c);
-  if(isDeliv(c.kind)&&!c.delivered){c.delivered=true;const d=grid[c.dest];if(d&&isShop(d.t))d.incoming=Math.max(0,d.incoming-c.load);for(const k in c.items)addGood(k,c.items[k],c.home)}
+  if(isDeliv(c.kind)&&!c.delivered){c.delivered=true;const d=grid[c.shop??c.dest];if(d&&isShop(d.t))d.incoming=Math.max(0,d.incoming-c.load);for(const k in c.items)addGood(k,c.items[k],c.home)}
   c.dead=true;scene.remove(c.mesh);disposeTree(c.mesh)}
 function perp(a,b){const dx=cx(b)-cx(a),dz=cz(b)-cz(a);return[-dz,dx]}
 let carSeq=0;const occ=new Map(),resMap=new Map();
@@ -2274,6 +2286,10 @@ function goBack(c,from,to){const s=entryOf(from),e=entryOf(to);if(s<0||e<0)retur
   if(c.walk&&!walkPlan(bp,from,to)){const n=createCar(c.kind,bp,{home:from,dest:to});Object.assign(n,{home:c.home,dest:c.dest,tier:c.tier,phase:'back'});removeCar(c);return}
   c.path=bp;c.seg=0;c.dist=0;c.phase='back';if(c.walk){const pl=walkPlan(c.path,from,to);c.side=pl.s0;c.flip=pl.flip}c.rot=c.rot===null?null:c.rot+Math.PI;c.lp=c.ln=c.li;c.lnSeg=-1;
   if(c.kind==='truck')c.mesh.userData.cargo.material=mat.cargoE;placeCar(c);exitFrom(c,from)}
+function stockShop(c,d,at,back){c.delivered=true;
+  if(d&&isShop(d.t)){d.incoming=Math.max(0,d.incoming-c.load);let put=0;for(const k in c.items){const room=Math.min(slotsOf(d)-shelfTotal(d),shelfCap(d)-(d.shelf[k]||0)),n=Math.max(0,Math.min(room,c.items[k]));d.shelf[k]=(d.shelf[k]||0)+n;put+=n;if(c.items[k]>n)addGood(k,c.items[k]-n,back)}
+    float(at,`+${put} towaru`,'mat')}
+  else for(const k in c.items)addGood(k,c.items[k],back)}
 function arrive(c){
   if(c.kind==='police')return policeArrive(c);
   if(c.kind==='fire')return fireArrive(c);
@@ -2281,7 +2297,7 @@ function arrive(c){
   if(c.kind==='sweeper')return sweepArrive(c);
   if(c.kind==='export')return removeCar(c);
   if(c.kind==='hearse'){const h=grid[c.dest];if(c.phase==='go'){if(h)h.hearse=false;return goBack(c,c.dest,c.home)}hearseDeliver(c);return removeCar(c)}
-  if(c.phase!=='go'){if(c.kind==='garbage')unloadG(c);return removeCar(c)}
+  if(c.phase!=='go'){if(c.kind==='garbage')unloadG(c);if(isDeliv(c.kind)&&c.tour&&!c.delivered)stockShop(c,grid[c.shop],c.shop,c.shop);return removeCar(c)}
   const d=grid[c.dest];
   if(c.kind==='garbage'){let load=0;
     if(d&&TRASH[d.t]){load=Math.min(d.trash,GT_CAP,Math.max(0,(c.res||GT_CAP)-(c.load||0)));const wasFull=d.trash>=TRASH[d.t].cap;d.trash-=load;d.truckOn=false;d.want=d.trash>=TRASH[d.t].cap*0.5;
@@ -2302,11 +2318,12 @@ function arrive(c){
     else if(d&&isWork(d.t)){const w=TIER[c.tier??3].work;d.work+=w;cur.work+=w;
       if(d.work>=2)produce(c.dest,d)}
     return goBack(c,c.dest,c.home)}
-  if(isDeliv(c.kind)){c.delivered=true;
-    if(d&&isShop(d.t)){d.incoming=Math.max(0,d.incoming-c.load);let put=0;for(const k in c.items){const room=Math.min(slotsOf(d)-shelfTotal(d),shelfCap(d)-(d.shelf[k]||0)),n=Math.max(0,Math.min(room,c.items[k]));d.shelf[k]=(d.shelf[k]||0)+n;put+=n;if(c.items[k]>n)addGood(k,c.items[k]-n,c.home)}
-      float(c.dest,`+${put} towaru`,'mat')}
-    else for(const k in c.items)addGood(k,c.items[k],c.home);
+  if(isDeliv(c.kind)&&c.tour){/* a pick-up at one warehouse of the round, then on to the next one or back to the shop */
+    float(c.dest,'załadunek','mat');
+    while(c.stops&&c.stops.length){const nx=c.stops.shift(),s0=entryOf(c.dest),e1=entryOf(nx);if(s0<0||e1<0||!grid[nx])continue;const b=bfs(s0);if(b.dist[e1]<0)continue;
+      const from=c.dest;c.path=pathTo(b,e1);c.seg=0;c.dist=0;c.dest=nx;c.rot=c.rot===null?null:c.rot+Math.PI;c.lp=c.ln=c.li;c.lnSeg=-1;placeCar(c);exitFrom(c,from);return}
     return goBack(c,c.dest,c.home)}
+  if(isDeliv(c.kind)){stockShop(c,d,c.dest,c.home);return goBack(c,c.dest,c.home)}
   if(d&&isWH(d.t)){if(!d.powered)float(c.dest,'brak prądu','warn');else{const k=c.pid||'mat',n=addGood(k,c.units||TRUCK_LOAD,c.dest);cur.matIn+=n;
     if(n>=0.05)float(c.dest,`+${mw(n)} kg ${GOODS[k].name.toLowerCase()}`,'mat');else float(c.dest,'magazyn pełny','warn')}}
   goBack(c,c.dest,c.home)}
@@ -2769,7 +2786,7 @@ const slotsBase=c=>c.t==='shop1'?(c.up?30:15):c.t==='gallery'?SHOP_SLOTS*c.store
 /* 6.1.7: +10% shelf room; the room is split evenly between the goods a shop sells, so one good can never crowd out the rest */
 const slotsOf=c=>Math.round(slotsBase(c)*1.1);
 const shelfCap=c=>{const n=sellsOf(c).length;return Math.max(1,Math.ceil(slotsOf(c)/Math.max(1,n)))};
-let VANINC=new Map();const vanInc=()=>{VANINC=new Map();for(const v of cars)if(isDeliv(v.kind)&&!v.delivered&&v.items){let m=VANINC.get(v.dest);if(!m)VANINC.set(v.dest,m={});for(const k in v.items)m[k]=(m[k]||0)+v.items[k]}return VANINC};
+let VANINC=new Map();const vanInc=()=>{VANINC=new Map();for(const v of cars)if(isDeliv(v.kind)&&!v.delivered&&v.items){const sd=v.shop??v.dest;let m=VANINC.get(sd);if(!m)VANINC.set(sd,m={});for(const k in v.items)m[k]=(m[k]||0)+v.items[k]}return VANINC};
 const shelfRoom=(s,k,extra=0)=>{const c=grid[s],m=VANINC.get(s);return shelfCap(c)-(c.shelf[k]||0)-(m&&m[k]||0)-extra};
 /* customers per game hour a shop can serve; above that it is crowded */
 const SCAP=c=>(c.up&&(c.t==='shop'||c.t==='supermarket')?1.5:1)*SCAP0(c)*(c.edu&&c.edu.tech?1:1);const SCAP0=c=>c.t==='shop1'?(c.up?50:35)+(c.up2?5:0)+(c.up3?10:0):c.t==='bakery'?22:c.t==='supermarket'?60+(c.up3?15:0):c.t==='gallery'?8*Math.max(1,c.stores.length)+20+(c.up?16:0):c.t==='restaurant'?(c.up?35:25):c.t==='shop'?30+(c.up2?10:0):0;
@@ -2823,19 +2840,24 @@ function produce(i,d){
 /* every factory also bakes: 3 kg of grain from the warehouses become 3 kg of bread */
 function bakeGrain(i){if(have('grain')<3)return;take('grain',3,i);addGood('bread',3*prodMul('bread'),i);cur.used.grain=(cur.used.grain||0)+3;cur.made.bread=(cur.made.bread||0)+3;float(i,'+3 kg pieczywa','neutral')}
 /* a shop at 10 items or fewer (counting vans on the way) orders up to 5, taking whatever it sells and is lowest on the shelf */
+/* 6.1.10: the shop's own vehicle leaves the shop, drives round the warehouses (nearest first) picking up everything the shelves need, then comes back and stocks it all at once */
 function spawnVan(s){const sh=grid[s];const e=entryOf(s);if(e<0)return false;const b=bfs(e);
   const sells=sellsOf(sh);if(!sells.length)return false;
   const list=candidates(b,WH_T).filter(o=>whOn(grid[o.i]));
   /* no warehouse reachable: the shop imports straight away; warehouses without its goods for an hour: it imports too */
   if(!list.length){sh.dry=null;return shopImport(s,b)}
-  /* the van comes from the nearest warehouse that actually holds something this shop sells */
-  vanInc();const src=list.filter(o=>sells.some(k=>(grid[o.i].st[k]||0)>=1&&shelfRoom(s,k)>=1)).sort((p,q)=>p.d-q.d);
-  if(!src.length){if(sh.dry==null)sh.dry=gameT;if(gameT-sh.dry>=60)return shopImport(s,b);return false}
-  sh.dry=null;list.length=0;list.push(src[0]);const W=grid[src[0].i].st;let room=Math.min(delivCap(sh),slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;const KM=delivKinds(sh);
-  while(room>0){let best=null,bv=1e9;const kn=Object.keys(items).length;for(const k of sells){if((W[k]||0)<1||shelfRoom(s,k,items[k]||0)<1||(!items[k]&&kn>=KM))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
-    items[best]=(items[best]||0)+1;W[best]-=1;if(W[best]<1e-6)delete W[best];load++;room--}
+  vanInc();const need={};for(const k of sells){const r=Math.floor(shelfRoom(s,k));if(r>=1)need[k]=r}
+  if(!list.some(o=>sells.some(k=>need[k]>=1&&(grid[o.i].st[k]||0)>=1))){if(sh.dry==null)sh.dry=gameT;if(gameT-sh.dry>=60)return shopImport(s,b);return false}
+  sh.dry=null;let room=Math.min(delivCap(sh),slotsOf(sh)-shelfTotal(sh)-sh.incoming);const KM=delivKinds(sh),items={},stops=[];let load=0,at=b;const left=list.slice();
+  const fits=k=>need[k]>=1&&(items[k]||Object.keys(items).length<KM);
+  while(room>0&&left.length){let bi=-1,bd=1e9;
+    left.forEach((o,q)=>{const d=at.dist[o.e];if(d<0||d>=bd)return;const W=grid[o.i].st;if(sells.some(k=>fits(k)&&(W[k]||0)>=1)){bd=d;bi=q}});
+    if(bi<0)break;const o=left.splice(bi,1)[0],W=grid[o.i].st;let got=0;
+    while(room>0){let best=null,bv=1e9;for(const k of sells){if((W[k]||0)<1||!fits(k))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
+      items[best]=(items[best]||0)+1;need[best]--;W[best]-=1;if(W[best]<1e-6)delete W[best];load++;room--;got++}
+    if(got){stops.push(o.i);at=bfs(o.e)}}
   syncGoods();if(!load)return false;cur.matShop+=load;cur.vans++;sh.incoming+=load;
-  createCar(delivKind(sh),pathTo(b,list[0].e).reverse(),{home:list[0].i,dest:s,load,items,shop:s});return true}
+  const first=stops.shift();createCar(delivKind(sh),pathTo(b,entryOf(first)),{home:s,dest:first,stops,load,items,shop:s,tour:true});return true}
 function shopImport(s,b){const sh=grid[s],sells=sellsOf(sh);const outs=edgeOuts().filter(o=>b.dist[o]>=0);if(!outs.length||!sells.length)return false;
   let room=Math.min(delivCap(sh),slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;const KM=delivKinds(sh);
   vanInc();while(room>0){let best=null,bv=1e9;const kn=Object.keys(items).length;for(const k of sells){if(shelfRoom(s,k,items[k]||0)<1||(!items[k]&&kn>=KM))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;items[best]=(items[best]||0)+1;load++;room--}
@@ -4358,7 +4380,7 @@ cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();if(Math.
   if(ring.visible&&!reduce)ring.material.opacity=0.65+0.35*Math.sin(time*4);
   if(hintTimer>0){hintTimer-=vdt;if(hintTimer<=0)setHint(toolHint())}
   saveRT+=rdt;if((saveReq&&saveRT>2)||(!paused&&saveRT>30))writeSave()
-  hud();
+  carLOD();hud();
   if(!window.__drawn&&app.clientWidth>0&&app.clientHeight>0){
     const sz=renderer.getDrawingBufferSize(new THREE.Vector2());
     if(sz.x!==Math.round(app.clientWidth*renderer.getPixelRatio()))resize();
