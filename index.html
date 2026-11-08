@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.13';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.14';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -654,9 +654,10 @@ const HOUSING={house:{trips:1,base:3},tenement:{trips:2,base:3},block:{trips:3,b
 const UPG3={pump:{name:'Efektywność zaworów',cost:150,upkeep:5,desc:'+25% poboru wody'},pumpB:{name:'Efektywność zaworów',cost:350,upkeep:10,desc:'+25% poboru wody: 300 m³/godz.'},supermarket:{name:'Trzecia kasa',cost:400,upkeep:10,desc:'+15 klientów na godzinę'},shop1:{name:'Trzecia kasa',cost:250,upkeep:8,desc:'+10 klientów na godzinę'}};
 const SHOP_SLOTS=15,VAN_MAX=5,HV_R=5;
 /* 6.1.8: delivery vans carry up to 30 items of at most 3 kinds; galleries and supermarkets are stocked by articulated trucks: up to 80 items of at most 7 kinds */
-const VAN_CAP=30,VAN_KINDS=3,SEMI_CAP=80,SEMI_KINDS=7;const bigShop=c=>!!c&&(c.t==='gallery'||c.t==='supermarket');
-const delivKind=c=>bigShop(c)?'semi':'van',delivCap=c=>bigShop(c)?SEMI_CAP:VAN_CAP,delivKinds=c=>bigShop(c)?SEMI_KINDS:VAN_KINDS;
-const restockAt=c=>Math.min(delivCap(c),Math.max(3,Math.round(slotsOf(c)*0.3)));
+/* 6.1.14: no load limit — the shop's one vehicle (a van, an articulated truck for galleries and supermarkets) fetches everything the shelves need in one round */
+const bigShop=c=>!!c&&(c.t==='gallery'||c.t==='supermarket');
+const delivKind=c=>bigShop(c)?'semi':'van';
+const restockAt=c=>Math.max(3,Math.round(slotsOf(c)*0.3));
 /* happiness tiers: trips per game hour and factory shift value per worker visit */
 const TIER={0:{trips:3,work:0.4,name:'Zrozpaczeni'},7:{trips:15,work:1.9,name:'Bardzo zachwyceni'},8:{trips:16,work:2,name:'W siódmym niebie'},6:{trips:14,work:1.75,name:'Zachwyceni'},1:{trips:4,work:0.5,name:'Zniechęceni'},2:{trips:6,work:0.75,name:'Niezadowoleni'},3:{trips:8,work:1,name:'Pogodni'},4:{trips:10,work:1.25,name:'Zadowoleni'},5:{trips:12,work:1.5,name:'Szczęśliwi'}};
 const HCOL={0:'#8a2a2a',1:'#d4483a',2:'#e58a3a',3:'#d9b23a',4:'#7dbb4a',5:'#2f9e5a',6:'#1f8a8a',7:'#2a7fb8',8:'#5a5fd0'};const HMAX=8;
@@ -2333,10 +2334,13 @@ function arrive(c){
     else if(d&&isWork(d.t)){const w=TIER[c.tier??3].work;d.work+=w;cur.work+=w;
       if(d.work>=2)produce(c.dest,d)}
     return goBack(c,c.dest,c.home)}
-  if(isDeliv(c.kind)&&c.tour){/* a pick-up at one warehouse of the round, then on to the next one or back to the shop */
+  if(isDeliv(c.kind)&&c.tour){/* a pick-up at one warehouse of the round, then on to the next one, the city edge for imports, or back to the shop */
+    if(c.toEdge){c.toEdge=false;const b=bfs(c.dest),e=entryOf(c.home);if(e<0||b.dist[e]<0)return removeCar(c);
+      c.path=pathTo(b,e);c.seg=0;c.dist=0;c.phase='back';c.rot=c.rot===null?null:c.rot+Math.PI;c.lp=c.ln=c.li;c.lnSeg=-1;placeCar(c);return}
     float(c.dest,'załadunek','mat');
     while(c.stops&&c.stops.length){const nx=c.stops.shift(),s0=entryOf(c.dest),e1=entryOf(nx);if(s0<0||e1<0||!grid[nx])continue;const b=bfs(s0);if(b.dist[e1]<0)continue;
       const from=c.dest;c.path=pathTo(b,e1);c.seg=0;c.dist=0;c.dest=nx;c.rot=c.rot===null?null:c.rot+Math.PI;c.lp=c.ln=c.li;c.lnSeg=-1;placeCar(c);exitFrom(c,from);return}
+    if(c.edgeStop!=null){const o=c.edgeStop,s0=entryOf(c.dest);c.edgeStop=null;if(s0>=0){const b=bfs(s0);if(b.dist[o]>=0){const from=c.dest;c.toEdge=true;c.path=pathTo(b,o);c.seg=0;c.dist=0;c.dest=o;c.rot=c.rot===null?null:c.rot+Math.PI;c.lp=c.ln=c.li;c.lnSeg=-1;placeCar(c);exitFrom(c,from);return}}}
     return goBack(c,c.dest,c.home)}
   if(isDeliv(c.kind)){stockShop(c,d,c.dest,c.home);return goBack(c,c.dest,c.home)}
   if(d&&isWH(d.t)){if(!d.powered)float(c.dest,'brak prądu','warn');else{const k=c.pid||'mat',n=addGood(k,c.units||TRUCK_LOAD,c.dest);cur.matIn+=n;
@@ -2855,31 +2859,35 @@ function produce(i,d){
 /* every factory also bakes: 3 kg of grain from the warehouses become 3 kg of bread */
 function bakeGrain(i){if(have('grain')<3)return;take('grain',3,i);addGood('bread',3*prodMul('bread'),i);cur.used.grain=(cur.used.grain||0)+3;cur.made.bread=(cur.made.bread||0)+3;float(i,'+3 kg pieczywa','neutral')}
 /* a shop at 10 items or fewer (counting vans on the way) orders up to 5, taking whatever it sells and is lowest on the shelf */
-/* 6.1.10: the shop's own vehicle leaves the shop, drives round the warehouses (nearest first) picking up everything the shelves need, then comes back and stocks it all at once */
+/* the shop's own vehicle leaves the shop, drives round the warehouses (nearest first) picking up everything the shelves need, imports at the city edge what no warehouse has (at once with no warehouse, after an hour of empty warehouses otherwise), then comes back and stocks it all at once */
 function spawnVan(s){const sh=grid[s];const e=entryOf(s);if(e<0)return false;const b=bfs(e);
   const sells=sellsOf(sh);if(!sells.length)return false;
-  const list=candidates(b,WH_T).filter(o=>whOn(grid[o.i]));
-  /* no warehouse reachable: the shop imports straight away; warehouses without its goods for an hour: it imports too */
-  if(!list.length){sh.dry=null;return shopImport(s,b)}
   vanInc();const need={};for(const k of sells){const r=Math.floor(shelfRoom(s,k));if(r>=1)need[k]=r}
-  if(!list.some(o=>sells.some(k=>need[k]>=1&&(grid[o.i].st[k]||0)>=1))){if(sh.dry==null)sh.dry=gameT;if(gameT-sh.dry>=60)return shopImport(s,b);return false}
-  sh.dry=null;let room=Math.min(delivCap(sh),slotsOf(sh)-shelfTotal(sh)-sh.incoming);const KM=delivKinds(sh),items={},stops=[];let load=0,at=b;const left=list.slice();
-  const fits=k=>need[k]>=1&&(items[k]||Object.keys(items).length<KM);
+  let room=Math.floor(slotsOf(sh)-shelfTotal(sh)-sh.incoming);if(room<1||!Object.keys(need).length)return false;
+  const list=candidates(b,WH_T).filter(o=>whOn(grid[o.i]));const items={},stops=[];let load=0,whLoad=0,at=b;const left=list.slice();
   while(room>0&&left.length){let bi=-1,bd=1e9;
-    left.forEach((o,q)=>{const d=at.dist[o.e];if(d<0||d>=bd)return;const W=grid[o.i].st;if(sells.some(k=>fits(k)&&(W[k]||0)>=1)){bd=d;bi=q}});
+    left.forEach((o,q)=>{const d=at.dist[o.e];if(d<0||d>=bd)return;const W=grid[o.i].st;if(sells.some(k=>need[k]>=1&&(W[k]||0)>=1)){bd=d;bi=q}});
     if(bi<0)break;const o=left.splice(bi,1)[0],W=grid[o.i].st;let got=0;
-    while(room>0){let best=null,bv=1e9;for(const k of sells){if((W[k]||0)<1||!fits(k))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
-      items[best]=(items[best]||0)+1;need[best]--;W[best]-=1;if(W[best]<1e-6)delete W[best];load++;room--;got++}
+    while(room>0){let best=null,bv=1e9;for(const k of sells){if((W[k]||0)<1||!(need[k]>=1))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
+      items[best]=(items[best]||0)+1;need[best]--;W[best]-=1;if(W[best]<1e-6)delete W[best];load++;whLoad++;room--;got++}
     if(got){stops.push(o.i);at=bfs(o.e)}}
-  syncGoods();if(!load)return false;cur.matShop+=load;cur.vans++;sh.incoming+=load;
-  const first=stops.shift();createCar(delivKind(sh),pathTo(b,entryOf(first)),{home:s,dest:first,stops,load,items,shop:s,tour:true});return true}
-function shopImport(s,b){const sh=grid[s],sells=sellsOf(sh);const outs=edgeOuts().filter(o=>b.dist[o]>=0);if(!outs.length||!sells.length)return false;
-  let room=Math.min(delivCap(sh),slotsOf(sh)-shelfTotal(sh)-sh.incoming);const items={};let load=0;const KM=delivKinds(sh);
-  vanInc();while(room>0){let best=null,bv=1e9;const kn=Object.keys(items).length;for(const k of sells){if(shelfRoom(s,k,items[k]||0)<1||(!items[k]&&kn>=KM))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;items[best]=(items[best]||0)+1;load++;room--}
-  if(!load)return false;const o=outs.reduce((a,q)=>b.dist[q]<b.dist[a]?q:a,outs[0]);
-  const cost=Math.round(Object.keys(items).reduce((a,k)=>a+items[k]*(GOODS[k].price||10)*SHOP_IMP,0));if(cashNow()<cost){if(!(sh.impW>gameT)){sh.impW=gameT+30;float(s,'import: brak gotówki','warn')}return false}
-  for(const k in items)payImport(k,items[k],Math.round(items[k]*(GOODS[k].price||10)*SHOP_IMP));
-  cur.vans++;sh.incoming+=load;sh.impT=gameT;createCar(delivKind(sh),pathTo(b,o).reverse(),{home:o,dest:s,load,items,imp:true,shop:s});float(s,`import −${fmt(cost)} T¢`,'warn');return true}
+  syncGoods();
+  /* goods no warehouse holds: import them at the nearest city edge on the same round */
+  const miss=sells.filter(k=>need[k]>=1);let edge=-1;
+  if(room>0&&miss.length){if(sh.dry==null)sh.dry=gameT;
+    if(!list.length||gameT-sh.dry>=60){const outs=edgeOuts().filter(o=>at.dist[o]>=0);
+      if(outs.length){const o=outs.reduce((a,q)=>at.dist[q]<at.dist[a]?q:a,outs[0]);const imp={};let n=0,cost=0;
+        while(room>0){let best=null,bv=1e9;for(const k of miss){if(!(need[k]>=1))continue;const v=(sh.shelf[k]||0)+(items[k]||0);if(v<bv){bv=v;best=k}}if(!best)break;
+          const u=(GOODS[best].price||10)*SHOP_IMP;if(cashNow()<cost+u)break;imp[best]=(imp[best]||0)+1;need[best]--;room--;n++;cost+=u}
+        if(n){for(const k in imp){items[k]=(items[k]||0)+imp[k];payImport(k,imp[k],Math.round(imp[k]*(GOODS[k].price||10)*SHOP_IMP))}load+=n;edge=o;sh.impT=gameT;float(s,`import −${fmt(Math.round(cost))} T¢`,'warn')}
+        else if(!(sh.impW>gameT)){sh.impW=gameT+30;float(s,'import: brak gotówki','warn')}}}}
+  else sh.dry=null;
+  if(!load)return false;cur.matShop+=whLoad;cur.vans++;sh.incoming+=load;
+  const kind=delivKind(sh),o0={home:s,load,items,shop:s,tour:true,imp:edge>=0};
+  if(stops.length){const first=stops.shift();createCar(kind,pathTo(b,entryOf(first)),Object.assign(o0,{dest:first,stops,edgeStop:edge>=0?edge:null}))}
+  else createCar(kind,pathTo(b,edge),Object.assign(o0,{dest:edge,stops:[],toEdge:true}));
+  return true}
+const shopImport=(s)=>spawnVan(s);
 function bakeTick(dt){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='bakery'||c.off||!c.powered)continue;c.bake=(c.bake||0)+dt;
   if(c.bake<6)continue;c.bake=0;if((c.shelf.bread||0)+3>slotsOf(c)||have('grain')<1)continue;take('grain',1,i);c.shelf.bread=(c.shelf.bread||0)+3;cur.used.grain=(cur.used.grain||0)+1;cur.made.bread=(cur.made.bread||0)+3}}
 /* 6.1.9: every shop has exactly one delivery vehicle (a van, or an articulated truck for galleries and supermarkets); the next delivery leaves only once it is back */
