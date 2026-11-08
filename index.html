@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.23';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.2.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -576,7 +576,7 @@ const DEF={
   freightSt:{name:'Dworzec towarowy',cost:4000,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Pociąg towarowy co godzinę: stały import do magazynów albo eksport z magazynów wybranego towaru, od 10 kg/godz. co 5. Wymaga torów do krawędzi mapy.',sw:'#6b5a3c'},
   heliB:{name:'Baza helikopterów gaśniczych',cost:6000,size:4,desc:'Zajmuje 2×2 pola. Helikopter gaśniczy leci prosto do pożaru w zasięgu 25 pól (51×51) i gasi go z góry – także tam, gdzie wóz nie dojedzie. Potrzebuje prądu i wody. Ulepszenie: drugi helikopter.',sw:'#b8241c',area:25},
   cityHall:{name:'Urząd miasta',cost:5000,size:4,desc:'Zajmuje 2×2 pola. Otwiera zakładkę Uchwały: za opłatą wprowadzasz prawa, które zmieniają całe miasto. Jeden na miasto.',sw:'#8a6a3a'},
-  shipC:{name:'Centrum spedycji',cost:2500,fw:3,fh:1,desc:'Zajmuje 3×1 pola. Co 6 godzin ciężarówki wywożą hurtem wybrane towary z magazynów (60% ceny) albo – w trybie importu – sprowadzają je (80% ceny). Można włączyć automatyczne ponawianie.',sw:'#5a6b7a'},
+  shipC:{name:'Centrum spedycji',cost:2500,fw:3,fh:1,desc:'Zajmuje 3×1 pola. Co 6 godzin ciężarówki wywożą hurtem wybrane towary z magazynów (60% ceny) albo – w trybie importu – sprowadzają je (50% ceny). Można włączyć automatyczne ponawianie.',sw:'#5a6b7a'},
   crosswalk:{name:'Przejście dla pieszych',cost:20,desc:'Pasy i znak na prostym odcinku ulicy. Nie stawia się ich na skrzyżowaniach. Usuwasz je w Wyburz → „Przejścia”.',sw:'#f4f6f8'},
   roadSvc:{name:'Służby drogowe',cost:600,size:2,desc:'Zajmuje 2 pola. Zamiatarki sprzątają śmieci z ulic, a ekipy czyszczą parki i farmy zabrudzone smogiem w zasięgu 21×21.',sw:'#e07b1a',area:10},
   fireS:{name:'Mała straż pożarna',cost:900,desc:'Zasięg 11×11, 1 wóz strażacki. Gasi pożar w pół godziny od przyjazdu. Ulepszenia: „Drugi garaż” (+1 wóz), „Większy rewir” (zasięg +3).',sw:'#c8372d',area:5},
@@ -765,9 +765,11 @@ const dep=new Uint8Array(N*N);
 const DEP={1:{k:'coal',name:'Złoże węgla',col:'#38332f',spot:'#1f1c1a'},2:{k:'chalco',name:'Złoże chalkopirytu',col:'#a9843f',spot:'#5c9a80'}};
 /* pollution overlay: 1 = yellow-green, 2 = yellow */
 let groundSig=-1;
-function paintGround(pol){{let h=N;for(let i=0;i<N*N;i++)h=(Math.imul(h,31)+(pol?pol[i]:0)*5+water[i]*3+dep[i]*11)|0;try{calcBeach();if(beachMap)for(let i=0;i<N*N;i++)if(beachMap[i])h=(Math.imul(h,7)+i)|0}catch(e){}if(h===groundSig&&gtex)return;groundSig=h}
+function paintGround(pol){let SK=0;try{SK=snowOn()?3:seasonIdx()===2?2:seasonIdx()===1?1:0}catch(e){}{let h=N+SK*7919;for(let i=0;i<N*N;i++)h=(Math.imul(h,31)+(pol?pol[i]:0)*5+water[i]*3+dep[i]*11)|0;try{calcBeach();if(beachMap)for(let i=0;i<N*N;i++)if(beachMap[i])h=(Math.imul(h,7)+i)|0}catch(e){}if(h===groundSig&&gtex)return;groundSig=h}
   g2.drawImage(gbase,0,0);
+  if(SK===1){g2.fillStyle='rgba(235,215,90,.08)';g2.fillRect(0,0,N*32,N*32)}else if(SK===2){g2.fillStyle='rgba(205,128,45,.22)';g2.fillRect(0,0,N*32,N*32)}
   for(let i=0;i<N*N;i++){const d=dep[i];if(!d||water[i])continue;const D=DEP[d],x=(i%N)*32,z=((i/N)|0)*32;g2.fillStyle=D.col;g2.globalAlpha=0.8;g2.beginPath();g2.ellipse(x+16,z+16,14,12,(i%5)*0.6,0,Math.PI*2);g2.fill();g2.globalAlpha=1;g2.fillStyle=D.spot;for(let k=0;k<7;k++){g2.beginPath();g2.arc(x+7+((i*7+k*13)%19),z+7+((i*11+k*5)%19),1.8+(k%3)*0.6,0,Math.PI*2);g2.fill()}}let bm=null;try{calcBeach();bm=beachMap}catch(e){}if(bm){for(let i=0;i<N*N;i++)if(bm[i]){const x=i%N,z=(i/N)|0;g2.fillStyle='#e9d8a4';g2.fillRect(x*32,z*32,32,32);g2.fillStyle='rgba(255,250,225,.35)';g2.fillRect(x*32+((i*7)%20),z*32+((i*13)%22),5,3)}}
+  if(SK===3){g2.fillStyle='rgba(240,245,249,.8)';g2.fillRect(0,0,N*32,N*32)}
   for(let i=0;i<N*N;i++){if(!water[i])continue;const x=i%N,z=(i/N)|0;g2.fillStyle='#3d82b5';g2.fillRect(x*32,z*32,32,32);
     g2.fillStyle='rgba(224,206,150,.95)';
     for(const[dx,dz]of[[0,1],[1,0],[0,-1],[-1,0]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N||water[nz*N+nx])continue;
@@ -1031,9 +1033,9 @@ const MS=[{name:'Osada',pop:0},{name:'Wioska',pop:15},{name:'Mała wieś',pop:10
 const MS_OF={};[
  'road crosswalk house pole poleline poleDel transformer wind pipe pipeDel pump tower outlet shop smallfac smallwh impDep mine farmveg farmgrain landfill park1',
  'tenement roadSvc farmdairy factory warehouse restaurant park2 bridge coal pitS farmcotton farmwood',
- 'road2 clinic cemS schoolS policeS fireS hvpole incS shop1 pitB fill',
- 'block supermarket hotelS cinema hydro treatment school recycler taxi shipC pumpB biomass',
- 'road3 roundabout factoryB warehouseB bank theater crem park3 rail trainSt freightSt heliB cityHall',
+ 'road2 clinic cemS schoolS hvpole incS shop1 pitB fill',
+ 'block supermarket hotelS cinema hydro treatment school recycler taxi shipC pumpB biomass policeS',
+ 'road3 roundabout factoryB warehouseB bank theater crem park3 rail trainSt freightSt heliB cityHall fireS',
  'modern highway hosp mineB policeB fireB lyceum techn incinerator',
  'gallery cemB casino prison','hotelB hydrogen','hospC bankG'].forEach((l,k)=>l.split(' ').forEach(t=>MS_OF[t]=k));
 /* hazards and their menu tab start once the first building of the service is unlocked */
@@ -1676,12 +1678,15 @@ function upkeepItems(){const map=new Map(),add=(cat,name,unit,n=1,per=1)=>{const
 const impOf=o=>(o.impCost||0)+(o.shipImp||0)+(o.frImp||0),upkOf=o=>Math.max(0,(o.upkeep||0)-impOf(o));
 const opNet=o=>o.inc-o.upkeep-(o.crimeLoss||0);
 /* 6.1.16: finance panels leave out building and upgrade costs (player spending, not the city's running balance) */
-const netOf=o=>o.inc+o.refund-o.upkeep-(o.crimeLoss||0)+(o.loanIn||0)-(o.loanPay||0);
+const netOf=o=>o.inc+o.refund+(o.reward||0)-o.upkeep-(o.crimeLoss||0)+(o.loanIn||0)-(o.loanPay||0);
 const upkeepRate=night=>{let s=IMPORT_FEE*importKinds().length;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||c.off)continue;if(UPKEEP[c.t])s+=UPKEEP[c.t]*(night&&PARKS.includes(c.t)?0.5:1);
   if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t]/ROAD_PER;if(c.jail)s+=JAIL_FEE*c.jail.length;if(jailOver(c))s+=OVERJAIL;if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(c.up3&&UPG3[c.t])s+=UPG3[c.t].upkeep;if(fOn(c)&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s};
 /* day and night: 1 real minute = 1 game hour; people sleep 22:00–06:00 */
 const hourOf=t=>(t/60)%24;
 const isNight=()=>{const h=hourOf(gameT);return h>=22||h<6};
+/* 6.2 calendar: a season lasts 7 days, the game starts in spring; winter brings snow (not on the Caribbean map) */
+const SEASONS=['Wiosna','Lato','Jesień','Zima'],SEASON_DAYS=7;
+const seasonIdx=()=>Math.floor(Math.floor(gameT/1440)/SEASON_DAYS)%4,seasonDay=()=>Math.floor(gameT/1440)%SEASON_DAYS+1,snowOn=()=>seasonIdx()===3&&mapType!=='carib';
 function spend(x){money-=x;cur.build+=x}
 /* decorative trees on free tiles: one instance slot per tile, hidden slots have zero scale */
 const deco=new Set();let decoUpd=false;const ZM=new THREE.Matrix4().makeScale(0,0,0),dObj=new THREE.Object3D();
@@ -1835,7 +1840,7 @@ function calcBeach(){beachMap.fill(0);if(!themeOf().beach)return;for(let i=0;i<N
 function applyTheme(){groundSig=-1;const T=themeOf(),g=gbase.getContext('2d');g.fillStyle=T.grass;g.fillRect(0,0,N*32,N*32);
   /* a little colour drift so large meadows are not flat */
   for(let k=0;k<90;k++){const x=Math.random()*N*32,y=Math.random()*N*32,r=40+Math.random()*120;const gr=g.createRadialGradient(x,y,0,x,y,r);const c=Math.random()<0.5?'255,255,230':'0,30,0';gr.addColorStop(0,`rgba(${c},.05)`);gr.addColorStop(1,`rgba(${c},0)`);g.fillStyle=gr;g.fillRect(x-r,y-r,2*r,2*r)}
-  T.blades.forEach((c,k)=>BLC[k].set(c));pineM.color.set(T.pine);blobM.color.set(T.blob);envDirty=true}
+  T.blades.forEach((c,k)=>BLC[k].set(c));pineM.color.set(T.pine);blobM.color.set(T.blob);envDirty=true;try{seasonSeen=-1}catch(e){}}
 function riverPath(vert,c0,A,f,ph,dmax=5){let drift=0;const cs=[];for(let t=0;t<N;t++){drift=Math.max(-dmax,Math.min(dmax,drift+rnd(-0.4,0.4)));cs.push(Math.round(c0+A*Math.sin(t*f+ph)+drift))}return cs}
 function paintPath(cs,vert,w,from=0,to=N-1,off=0,out=null){let prev=null;for(let t=from;t<=to;t++){const c=cs[t]+off,lo=Math.min(c,prev??c)-Math.floor(w/2),hi=Math.max(c,prev??c)-Math.floor(w/2)+w-1;prev=c;
   for(let u=lo;u<=hi;u++){if(u<0||u>=N)continue;const i=vert?idx(u,t):idx(t,u);if(out)out.push(i);else water[i]=1}}}
@@ -2198,6 +2203,25 @@ const lodM=new THREE.InstancedMesh(lodGeo,new THREE.MeshLambertMaterial({color:'
 lodM.setColorAt(0,new THREE.Color('#ffffff'));lodM.instanceColor.setUsage(THREE.DynamicDrawUsage);lodM.count=0;lodM.frustumCulled=false;lodM.castShadow=false;lodM.receiveShadow=false;scene.add(lodM);/* colours first: three sizes the colour buffer from count */
 const LOD_SZ={truck:[0.22,0.2,0.46],garbage:[0.22,0.2,0.42],semi:[0.22,0.22,0.68],fire:[0.22,0.17,0.42],van:[0.2,0.18,0.34],hearse:[0.2,0.15,0.36],sweeper:[0.2,0.15,0.3]},LOD_DEF=[0.2,0.15,0.34];
 let lodOn=false;const lodA=new THREE.Matrix4(),lodS=new THREE.Matrix4(),lodC=new THREE.Color();
+/* seasons: tint of grass blades and trees, snowfall, snow on roads that no road service clears; snowy roads slow cars down */
+let seasonSeen=-1;const snowRoad=new Uint8Array(N*N);let snowT=0;
+const SNOW_SLOW=0.6;
+const snowM=new THREE.InstancedMesh(new THREE.PlaneGeometry(0.98,0.98).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:'#f4f8fb',transparent:true,opacity:0.45,depthWrite:false}),N*N);
+snowM.count=0;snowM.frustumCulled=false;snowM.renderOrder=2;scene.add(snowM);
+const flakeN=1600,flakeG=new THREE.BufferGeometry(),flakeP=new Float32Array(flakeN*3);for(let k=0;k<flakeN;k++){flakeP[k*3]=Math.random()*2-1;flakeP[k*3+1]=Math.random();flakeP[k*3+2]=Math.random()*2-1}
+flakeG.setAttribute('position',new THREE.BufferAttribute(flakeP,3));const flakes=new THREE.Points(flakeG,new THREE.PointsMaterial({color:'#ffffff',size:0.07,transparent:true,opacity:0.85,depthWrite:false}));flakes.frustumCulled=false;flakes.visible=false;scene.add(flakes);
+function seasonLook(){const T=themeOf(),si=seasonIdx(),sn=snowOn(),C=c=>new THREE.Color(c);
+  gBl.material.emissive.set(sn?'#aeb8bc':si===2?'#2e1a00':'#000000');gFh.visible=!sn&&si!==2;
+  pineM.color.copy(sn?C(T.pine).lerp(C('#dfe8ea'),0.4):C(T.pine));blobM.color.copy(sn?C(T.blob).lerp(C('#e4ecef'),0.55):si===2?C(T.blob).lerp(C('#d07a28'),0.6):si===1?C(T.blob).lerp(C('#6f9a2e'),0.15):C(T.blob));
+  groundSig=-1;envDirty=true}
+function updateSnowRoads(){snowRoad.fill(0);let n=0;if(!snowOn()){snowM.count=0;return}const bases=svcBases(),m=new THREE.Matrix4();
+  for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!DRIVE[c.t]||c.t==='bridge')continue;if(bases.some(b=>svcCover(b,i)))continue;snowRoad[i]=1;m.makeTranslation(cx(i),0.064,cz(i));snowM.setMatrixAt(n++,m)}
+  snowM.count=n;snowM.instanceMatrix.needsUpdate=true}
+function seasonTick(rdt){const si=seasonIdx()*2+(snowOn()?1:0);if(si!==seasonSeen){const first=seasonSeen<0;seasonSeen=si;seasonLook();updateSnowRoads();
+    if(!first&&!titleOpen){const s=seasonIdx();setHint(s===3?(snowOn()?'Nadeszła zima: spadł śnieg. Na ulicach bez służb drogowych auta jadą wolniej.':'Nadeszła zima – na Karaibach bez śniegu.'):s===0?'Nadeszła wiosna.':s===1?'Nadeszło lato.':'Nadeszła jesień.',false,true);hintEl.hidden=false}}
+  if(snowOn()){if((snowT-=rdt)<=0){snowT=2;updateSnowRoads()}}
+  flakes.visible=snowOn()&&!reduce;if(flakes.visible){const R=Math.max(10,cam.radius*0.9),H=Math.max(6,cam.radius*0.6);flakes.position.set(cam.target.x,0,cam.target.z);flakes.scale.set(R,H,R);
+    const a=flakeG.attributes.position.array,dy=Math.min(rdt,0.05)*0.12;for(let k=0;k<flakeN;k++){let y=a[k*3+1]-dy*(0.7+(k%5)*0.12);if(y<0)y+=1;a[k*3+1]=y;a[k*3]+=Math.sin(time*0.7+k)*0.0008}flakeG.attributes.position.needsUpdate=true}}
 function carLOD(){const on=cam.radius>LOD_R;
   if(!on){if(lodOn){lodOn=false;lodM.count=0;for(const c of cars)if(c.mesh)c.mesh.visible=true}return}
   lodOn=true;let n=0;for(const c of cars){const m=c.mesh;if(!m)continue;m.visible=false;if(c.walk||c.kind==='walker'||n>=LOD_MAX)continue;
@@ -2294,7 +2318,7 @@ function updateCar(c,dt){
     if(crossClosed.has(nx)&&!(here&&here.rail)&&c.dist>=0.72){c.spd=0;c.xw=true;placeCar(c);return}
     if(waitAhead(c)<CAR_GAP){c.spd=0;c.xw=true;placeCar(c);return}}
   c.xw=false;
-  let adv=c.speed*(SPEED[effType(T.k)]||1)*c.spd*dt/tileLen(c,T);
+  let adv=c.speed*(SPEED[effType(T.k)]||1)*c.spd*dt/tileLen(c,T)*(snowRoad[T.k]?SNOW_SLOW:1);
   while(adv>0&&c.seg<p.length-1){const lim=c.dist<0.5?0.5-c.dist:1-c.dist,st=Math.min(adv,lim);c.dist+=st;adv-=st;
     if(c.dist>=1-1e-9){c.dist=0;c.seg++;if(!isDrive(p[c.seg])){removeCar(c);return}c.lp=c.li;c.li=c.ln}
     else if(c.dist>=0.5-1e-9&&c.lnSeg!==c.seg){c.lnSeg=c.seg;c.ln=pickLane(c,p[c.seg+1],c.seg+2<p.length?p[c.seg+2]:-1)}}
@@ -2444,7 +2468,7 @@ function renderOrd(){const el=document.getElementById('ordp');if(!el||el.hidden)
     ${ORD[o.k]?`<button class="btn panel" data-ord="${o.k}">Uchyl uchwałę</button>`:`<button class="btn panel" data-ord="${o.k}"${money<o.cost||!ok?' disabled':''}>Wprowadź · ${fmt(o.cost)} T¢</button>`}</div>`).join('');
   for(const b of el.querySelectorAll('[data-ord]'))b.onclick=()=>{const o=ORDS.find(q=>q.k===b.dataset.ord);if(ORD[o.k]){delete ORD[o.k];float(-1,'','neutral');setHint(`Uchylono: ${o.name}.`,false,true)}else{if(money<o.cost||!hallOK())return;spend(o.cost);ORD[o.k]=1;setHint(`Wprowadzono uchwałę: ${o.name}.`,false,true)}hintEl.hidden=false;envDirty=true;powerDirty=true;save();renderOrd()}}
 /* ---------- shipping centre: every 6 hours trucks take the chosen goods from the warehouses, in bulk ---------- */
-const SHIP_EVERY=360,SHIP_P=0.6,SHIP_GOODS=['mat',...Object.keys(GOODS).filter(k=>k!=='mat')],SHIP_N0=50,SHIP_NMIN=25,SHIP_NMAX=300,SHIP_IMP=0.8;
+const SHIP_EVERY=360,SHIP_P=0.6,SHIP_GOODS=['mat',...Object.keys(GOODS).filter(k=>k!=='mat')],SHIP_N0=50,SHIP_NMIN=25,SHIP_NMAX=300,SHIP_IMP=0.5;
 function shipImport(i){const c=grid[i],sel=c.ship||[],per=c.shipN||SHIP_N0;let tot=0,cost=0;
   for(const k of sel){const unit=frPrice(k)*SHIP_IMP,room=Math.floor(whFreeFor(k));const n0=Math.min(per,room,Math.floor(Math.max(0,cashNow()-cost)/unit));if(n0<=0)continue;
     const n=addGood(k,n0,i);tot+=n;cost+=n*unit;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
@@ -2581,7 +2605,7 @@ function depotHour(){for(const i of depots()){const c=grid[i];c.dimp=c.dimp||{};
     const u=depPrice(k);n=Math.min(n,Math.floor((cashNow()-IMP_FLOOR)/u));if(n<1){float(i,'import wstrzymany: za duży dług','warn');continue}
     const cost=Math.round(n*u);payImport(k,n,cost);const car=createCar('truck',pathTo(b,o).reverse(),{home:o,dest:i,pid:k,units:n,depImp:true});try{if(GM[k])car.mesh.userData.cargo.material=GM[k]}catch(e){}
     c.dlast=gameT;float(i,`import: ${n} kg ${frName(k).toLowerCase()} · −${fmt(cost)} T¢`,'warn')}}}
-const FR_MIN=10,FR_STEP=5,FR_MAX=60,FR_IMP=0.8,FR_EXP=0.5,FR_GOODS=['mat',...Object.keys(GOODS).filter(k=>k!=='mat')];
+const FR_MIN=10,FR_STEP=5,FR_MAX=60,FR_IMP=0.5,FR_EXP=0.5,FR_GOODS=['mat',...Object.keys(GOODS).filter(k=>k!=='mat')];
 const frName=k=>k==='mat'?'Materiały':GOODS[k].name,frPrice=k=>k==='mat'?8:GOODS[k].ex||GOODS[k].price||8;
 const frRamps=c=>{c.fr=c.fr||[{k:'mat',m:'off',n:FR_MIN}];if(c.up&&c.fr.length<2)c.fr.push({k:'veg',m:'off',n:FR_MIN});return c.fr.slice(0,c.up?2:1)};
 function freightRun(st){const c=grid[st];for(const R0 of frRamps(c)){if(R0.m==='off')continue;const k=R0.k;
@@ -3337,7 +3361,7 @@ function rotateBuilding(i){const c=grid[i];if(!c||DRIVE[c.t]||c.t==='hydro')retu
   refreshBuilding(i);save();setHint(`Obrócono: ${DEF[c.t].name}`,false,true);hintEl.hidden=false}
 function rotateFP(){rotIdx=(rotIdx+1)%4;if(pendA>=0)updateGhost();if(moveSrc<0)setHint(toolHint())}
 /* move a building with its upgrades and stock; pays half of the building's own price */
-function startMove(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;const c=grid[i];if(!movable(c))return;
+function startMove(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;const c=grid[i];if(!movable(c))return;if(c.burn){setHint('Ten budynek się pali – nie można go przenieść.',true,true);hintEl.hidden=false;return}
   if(money<moveCost(c)){setHint(`Brakuje ${fmt(moveCost(c)-money)} T¢ na przeniesienie.`,true,true);hintEl.hidden=false;return}
   closeHouse();selectTool('view');moveSrc=i;rotIdx=c.tiles?(c.rot!=null?c.rot:((Math.round(c.model.rotation.y/(Math.PI/2))%4)+4)%4):0;pendA=i;updateGhost()}
 function doMove(src,a,t,cost){const c=grid[src];if(!c)return;const row=rowOf(c,src);row[0]=a;row[7]=t.length>1?t.slice(1):-1;row[8].rot=t.length>1?rotIdx:null;
@@ -3382,6 +3406,7 @@ function apply(i,painting){
   if(FP(tool)){if(painting)return;pendA=i;updateGhost();return}
   if(tool==='bulldoze'&&c&&c.edge){if(!painting)setHint(c.t==='rail'?'To tory wjazdowe do miasta. Nie da się ich wyburzyć.':'To droga wjazdowa do miasta dla przejezdnych. Możesz ją poszerzyć, ale nie wyburzyć.',true,true);return}
   if(tool==='bulldoze'){if(!c){if(deco.has(i)){clearDeco(i);save()}return}
+    if(c.burn){if(!painting)setHint('Ten budynek się pali – nie można go wyburzyć, dopóki straż nie ugasi pożaru.',true,true);hintEl.hidden=false;return}
     if(c.t==='landfill'){const cap=facCap(c),fill=cap?(c.gstock||0)/cap:0;if(fill>=0.999){setHint('Pełnego wysypiska nie da się zlikwidować – śmieci nie mają gdzie trafić.',true,true);hintEl.hidden=false;return}
       if(fill>=0.3){const pen=Math.round((c.gstock||0)*3);money-=pen;cur.upkeep+=pen;float(i,`−${fmt(pen)} T¢ za wywóz śmieci`,'warn');setHint(`Likwidacja zapełnionego wysypiska: kara ${fmt(pen)} T¢ (3 T¢ za każdy kg odpadów).`,true,true);hintEl.hidden=false}}const refund=Math.floor((DEF[c.t].cost+(c.pole?DEF.pole.cost:0))/2);removeCell(i);
     const n=addMoney(refund);cur.refund+=n;if(n>=0.5)float(i,`+${fmt(n)} T¢`,'money');save();return}
@@ -3471,7 +3496,7 @@ function loanUI(){const el=document.getElementById('loanBox');if(!el)return;if(l
 /* automatic imports: a missing input is brought in, and each imported kind adds to the upkeep for an hour */
 const IMPORT_FEE=0;let imports={};
 /* imports cost per kilogram: a shop pays 70% of the shelf price, power plants twice the export price of their fuel */
-const SHOP_IMP=0.7,FUEL_IMP={coal:24,wood:16};
+const SHOP_IMP=0.5,FUEL_IMP={coal:24,wood:16};
 function payImport(k,n,cost){owe(cost);cur.upkeep+=cost;cur.impCost=(cur.impCost||0)+cost;imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
 function importGood(k,n){if(n<=0)return;addGood(k,n);imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
 const importKinds=()=>Object.keys(imports).filter(k=>gameT-imports[k]<60);
@@ -3884,7 +3909,7 @@ function renderStats(){for(const b of document.querySelectorAll('[data-st]'))b.s
     const cols=[{h:`Ta godzina<br><small>${mins}/60 min</small>`,v:f=>f(cur)},{h:'Poprzednia<br><small>godzina</small>',v:f=>last?f(last):null},{h:`Dziś<br><small>dzień ${today+1}</small>`,v:f=>dayRowsNow.reduce((a,o)=>a+f(o),0)}];
     const rows=[['Przychody razem',o=>o.inc],['  Sklepy, piekarnie, galerie',o=>o.shopInc!=null?o.shopInc:Math.max(0,o.inc-(o.entInc||0)),1],['  Rozrywka (kino, teatr, kasyno, restauracje)',o=>o.entInc||0,1],['  Hotele (noclegi)',o=>o.hotelInc||0,1],['  Podatki od mieszkańców',o=>o.taxInc||0,1],['  Praca więźniów',o=>o.prisonInc||0,1],['  w tym od przyjezdnych',o=>o.tourInc||0,1],
       ['Utrzymanie budynków',o=>-upkOf(o)],['Import towarów',o=>-impOf(o)],['Straty z przestępstw',o=>-(o.crimeLoss||0)],['s','Wynik miasta',opNet],
-      ['g','Poza wynikiem miasta'],['Zwroty z wyburzeń',o=>o.refund||0],['Pożyczki (wypłata)',o=>o.loanIn||0],['Spłata pożyczki',o=>-(o.loanPay||0)],['s','Zmiana gotówki (bez budowy)',netOf]];
+      ['g','Poza wynikiem miasta'],['Nagrody za kamienie milowe',o=>o.reward||0],['Zwroty z wyburzeń',o=>o.refund||0],['Pożyczki (wypłata)',o=>o.loanIn||0],['Spłata pożyczki',o=>-(o.loanPay||0)],['s','Zmiana gotówki (bez budowy)',netOf]];
     let h='<tr><th></th>'+cols.map(c=>`<th>${c.h}</th>`).join('')+'</tr>';
     for(const r of rows){if(r[0]==='g'){h+=`<tr><td colspan="4" style="padding-top:9px;color:var(--muted);font-size:11.5px;font-weight:600;border-top:0">${r[1]}</td></tr>`;continue}
       const sum=r[0]==='s',label=sum?r[1]:r[0],f=sum?r[2]:r[1],plain=!sum&&r[2];
@@ -4177,19 +4202,21 @@ const msBtn=document.getElementById('msBtn'),mspEl=document.getElementById('msp'
 function medalSVG(n,big){return`<svg viewBox="0 0 100 120" aria-hidden="true"><path d="M30 0h16l10 40H40z" fill="#c8372d"/><path d="M54 0h16L60 40H44z" fill="#2f6fe0"/><circle cx="50" cy="74" r="40" fill="#a8760c"/><circle cx="50" cy="74" r="36" fill="url(#mg${big?'b':''})"/><circle cx="50" cy="74" r="28" fill="none" stroke="#a8760c" stroke-width="2" stroke-dasharray="3 3"/><defs><radialGradient id="mg${big?'b':''}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff2b8"/><stop offset=".55" stop-color="#e8b52a"/><stop offset="1" stop-color="#b8860b"/></radialGradient></defs><text x="50" y="88" text-anchor="middle" font-family="Chakra Petch,Trebuchet MS,sans-serif" font-weight="700" font-size="40" fill="#5a3d00">${n}</text></svg>`}
 const msUnlocks=k=>Object.keys(MS_OF).filter(t=>MS_OF[t]===k&&DEF[t]&&!/Del$/.test(t)).map(t=>DEF[t].name);
 const msHaz=k=>Object.keys(HAZ).filter(h=>hazAt(h)===k&&HAZ[h].tools.some(t=>DEF[t])).map(h=>HAZ[h].name);
-function renderMS(){const p=popNow();mspEl.innerHTML=`<b>Kamienie milowe · ${esc(cityName)}</b><small>${fmt(p)} mieszkańców. Kolejne etapy odblokowują budynki; nagrodą jest order.</small>`+MS.map((m,k)=>{
+function renderMS(){const p=popNow();mspEl.innerHTML=`<b>Kamienie milowe · ${esc(cityName)}</b><small>${fmt(p)} mieszkańców. Kolejne etapy odblokowują budynki; nagrodą jest order i premia w T¢.</small>`+MS.map((m,k)=>{
     const ok=k<=msLevel,nx=k===msLevel+1,un=msUnlocks(k),hz=msHaz(k);
-    return`<div class="mrow ${ok?'ok':nx?'next':''}"><span class="md">${k}</span><div class="mt">${esc(m.name)}<span>${k?fmt(m.pop)+' mieszk.':'start'}${ok?' · ✓':''}</span></div>
+    return`<div class="mrow ${ok?'ok':nx?'next':''}"><span class="md">${k}</span><div class="mt">${esc(m.name)}<span>${k?fmt(m.pop)+' mieszk.':'start'}${MS_REWARD[k]?` · +${fmt(MS_REWARD[k])} T¢`:''}${ok?' · ✓':''}</span></div>
       <div class="ml">${un.length?un.join(', '):'—'}${hz.length?`<br><i>Od teraz: ${hz.join(', ')}</i>`:''}${nx?`<div class="pb"><i style="width:${Math.min(100,Math.round((p-MS[k-1].pop)/Math.max(1,m.pop-MS[k-1].pop)*100))}%"></i></div>`:''}</div></div>`}).join('')}
 function setRail(which){for(const[id,btn]of[['msp',msBtn],['ordp',document.getElementById('ordBtn')],['ovl',document.getElementById('ovlBtn')],['taxp',document.getElementById('taxBtn')]]){const el=document.getElementById(id);const on=id===which&&el.hidden;if(id===which)el.hidden=!on;else el.hidden=true;btn.setAttribute('aria-expanded',String(!el.hidden))}}
 msBtn.addEventListener('click',()=>{setRail('msp');if(!mspEl.hidden)renderMS()});
 document.getElementById('ordBtn').addEventListener('click',()=>{setRail('ordp');renderOrd()});
 for(const id of['ovlBtn','taxBtn'])document.getElementById(id).addEventListener('click',()=>{document.getElementById('ordp').hidden=true;document.getElementById('ordBtn').setAttribute('aria-expanded','false')});
-let orderT=0;function showOrder(k){const un=msUnlocks(k),hz=msHaz(k);orderEl.innerHTML=`<div class="ob">${medalSVG(k,true)}<span class="k">Kamień milowy ${k}</span><b>${esc(MS[k].name)}</b><small>${fmt(MS[k].pop)} mieszkańców w mieście ${esc(cityName)}.${un.length?'<br>Nowe: '+un.join(', ')+'.':''}${hz.length?'<br>Od teraz: '+hz.join(', ')+'.':''}</small></div>`;
-  orderEl.hidden=false;orderT=8;orderEl.querySelector('.ob').onclick=()=>{orderEl.hidden=true;orderT=0}}
+/* 6.2: every milestone pays a reward; the message has a button to hide it at once */
+const MS_REWARD=[0,500,1000,2000,3000,4000,5000,6000,7000];
+let orderT=0;function showOrder(k,rw){const un=msUnlocks(k),hz=msHaz(k);orderEl.innerHTML=`<div class="ob">${medalSVG(k,true)}<span class="k">Kamień milowy ${k}</span><b>${esc(MS[k].name)}</b>${rw?`<span class="rw" style="font:700 17px var(--font-d);color:var(--money)">+${fmt(rw)} T¢ nagrody</span>`:''}<small>${fmt(MS[k].pop)} mieszkańców w mieście ${esc(cityName)}.${un.length?'<br>Nowe: '+un.join(', ')+'.':''}${hz.length?'<br>Od teraz: '+hz.join(', ')+'.':''}</small><button class="btn panel" id="orderX" style="margin-top:4px">Schowaj</button></div>`;
+  orderEl.hidden=false;orderT=10;const hide=()=>{orderEl.hidden=true;orderT=0};orderEl.querySelector('.ob').onclick=hide;document.getElementById('orderX').onclick=e=>{e.stopPropagation();hide()}}
 let msT=0;function msTick(dt){{const ob=document.getElementById('ordBtn'),has=counts.cityHall>0;if(ob.hidden===has){ob.hidden=!has;if(!has)document.getElementById('ordp').hidden=true}}if(orderT>0){orderT-=dt;if(orderT<=0)orderEl.hidden=true}msT-=dt;if(msT>0||titleOpen||saveBlocked)return;msT=1;const p=popNow();let got=-1;
-  while(msLevel<MS.length-1&&p>=MS[msLevel+1].pop){msLevel++;got=msLevel}
-  if(got>=0){refreshLocks();showOrder(got);if(!mspEl.hidden)renderMS();save()}}
+  let rw=0;while(msLevel<MS.length-1&&p>=MS[msLevel+1].pop){msLevel++;got=msLevel;const r=MS_REWARD[msLevel]||0;if(r){money+=r;rw+=r;cur.reward=(cur.reward||0)+r}}
+  if(got>=0){refreshLocks();showOrder(got,rw);if(!mspEl.hidden)renderMS();save()}}
 document.getElementById('ovlBtn').addEventListener('click',()=>{mspEl.hidden=true;msBtn.setAttribute('aria-expanded','false')});
 document.getElementById('taxBtn').addEventListener('click',()=>{mspEl.hidden=true;msBtn.setAttribute('aria-expanded','false')});
 document.getElementById('taxBtn').addEventListener('click',()=>{const o=document.getElementById('taxp');o.hidden=!o.hidden;document.getElementById('taxBtn').setAttribute('aria-expanded',String(!o.hidden));if(!o.hidden){document.getElementById('ovl').hidden=true;document.getElementById('ovlBtn').setAttribute('aria-expanded','false');taxUI()}});
@@ -4230,7 +4257,7 @@ const CapApp=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugin
 if(CapApp){try{CapApp.addListener('appStateChange',st=>{if(!st.isActive){saveNow();if(menuEl.hidden)openMenu()}});CapApp.addListener('pause',saveNow);
   CapApp.addListener('backButton',()=>{if(!menuEl.hidden)closeMenu();else if(inspI>=0)closeHouse();else if(!statsEl.hidden)toggleStats(false);else openMenu()})}catch(e){}}
 document.getElementById('mExit').addEventListener('click',()=>{writeSave();menuEl.hidden=true;openTitle()});
-window.addEventListener('keydown',e=>{if(lineConf&&menuEl.hidden){if(e.key==='Escape')return cancelLine();if(e.key==='Enter')return confirmLine()}if(e.key==='Escape'){if((pendA>=0||moveSrc>=0)&&menuEl.hidden)return cancelFP();if(!menuEl.hidden)closeMenu();else openMenu()}
+window.addEventListener('keydown',e=>{if(lineConf&&menuEl.hidden){if(e.key==='Escape')return cancelLine();if(e.key==='Enter')return confirmLine()}if(e.key==='Escape'){if((pendA>=0||moveSrc>=0)&&menuEl.hidden)return cancelFP();if(!menuEl.hidden)closeMenu();else if(!closeWindows())openMenu()}
   if((FP(tool)||moveSrc>=0)&&menuEl.hidden){if(e.key==='r'||e.key==='R')rotateFP();if(e.key==='Enter'&&pendA>=0)placeFP()}
   else if((e.key==='r'||e.key==='R')&&menuEl.hidden&&!(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))){if(inspI>=0&&tool==='view')rotateBuilding(inspI);else if(BUILD[tool]&&!DRIVE[tool])rotate1()}});
 
@@ -4266,7 +4293,7 @@ function hud(){fixNaN();const mc=moneyCap(),tc=matCap();const v={m:Math.round(mo
     U.rwt.classList.toggle('short',wtr.none+wtr.sick>0);U.rwt.title=`Woda (m³/godz.): zużycie ${r1(wtr.dem)} / podaż ${r1(wtr.clean+wtr.dirty)} (czysta ${r1(wtr.clean)}, brudna ${r1(wtr.dirty)}) · ścieki do rzeki ${r1(wtr.out+wtr.over)} / przepustowość wylotów ${r1(wtr.outCap)}`+(wtr.over>0.05?` · bez odpływu ${r1(wtr.over)}`:'')+(wtr.none?` · domy bez wody: ${wtr.none}`:'')+(wtr.sick?` · chorzy: ${wtr.sick}`:'');
     U.happyBar.style.background=n?HCOL[Math.max(0,Math.min(HMAX,Math.round(pw.happy)))]:''}
   v.ck=clockText(gameT);if(v.ck!==last.ck)U.clock.textContent=v.ck;
-  v.nt=isNight()+'|'+gameSpeed;if(v.nt!==last.nt)U.clockSub.textContent=gameSpeed===0?'Pauza':gameSpeed===2?'Tempo ×2':isNight()?'Noc · domy: prąd ×0,8 · panele bez prądu':'Dzień · 1 min = 1 godz.';
+  v.nt=isNight()+'|'+gameSpeed+'|'+seasonIdx()+'|'+seasonDay();if(v.nt!==last.nt)U.clockSub.textContent=clockSubText();
   needsHud();
   v.pd=pw.dem;v.pc=pw.cap;if(v.pd!==last.pd||v.pc!==last.pc){{const gw=pw.cap>=1000||pw.dem>=1000;U.pow.textContent=pwr(pw.dem,gw);U.powCap.textContent=pwr(pw.cap,gw)+(gw?' GW':'')}
     U.powBar.style.width=(pw.cap?Math.min(1,pw.dem/pw.cap)*100:(pw.dem?100:0))+'%';U.rp.classList.toggle('short',pw.dem>pw.cap+1e-6)}
@@ -4414,15 +4441,34 @@ function resize(){const w=app.clientWidth||innerWidth,h=app.clientHeight||innerH
 let framed=false;
 new ResizeObserver(resize).observe(app);resize();
 const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-let gameSpeed=1;function setSpeed(v){gameSpeed=v;for(const b of document.querySelectorAll('[data-sp]'))b.setAttribute('aria-pressed',String(+b.dataset.sp===v));document.getElementById('clockSub').textContent=v===0?'Pauza':v===2?'Tempo ×2':isNight()?'Noc · domy: prąd ×0,8 · panele bez prądu':'Dzień · 1 min = 1 godz.'}
+let gameSpeed=1;function setSpeed(v){gameSpeed=v;for(const b of document.querySelectorAll('[data-sp]'))b.setAttribute('aria-pressed',String(+b.dataset.sp===v));document.getElementById('clockSub').textContent=clockSubText()}
+function clockSubText(){const se=`${SEASONS[seasonIdx()]} ${seasonDay()}/${SEASON_DAYS}`;return se+' · '+(gameSpeed===0?'Pauza':gameSpeed===2?'Tempo ×2':isNight()?'Noc · domy prąd ×0,8':'Dzień')}
 for(const b of document.querySelectorAll('[data-sp]'))b.addEventListener('click',()=>setSpeed(+b.dataset.sp));setSpeed(1);
 addEventListener('keydown',e=>{if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.code==='Space'&&menuEl.hidden){e.preventDefault();setSpeed(gameSpeed===0?1:0)}});
+/* 6.2 keyboard: WASD move the camera, Q/E turn it, 0/1/2 game speed, Delete/Backspace demolition on/off, Esc closes the open window (or opens the pause menu) */
+const camKeys=new Set(),CAMK=['KeyW','KeyA','KeyS','KeyD','KeyQ','KeyE'];
+addEventListener('keydown',e=>{if(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(titleOpen||!menuEl.hidden||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.code;
+  if(CAMK.includes(k)){camKeys.add(k);e.preventDefault();return}
+  if(k==='Digit0'||k==='Numpad0')setSpeed(0);else if(k==='Digit1'||k==='Numpad1')setSpeed(1);else if(k==='Digit2'||k==='Numpad2')setSpeed(2);
+  else if(k==='Delete'||k==='Backspace'){e.preventDefault();if(lineConf)cancelLine();if(pendA>=0||moveSrc>=0)cancelFP();selectTool(tool==='bulldoze'?'view':'bulldoze')}});
+addEventListener('keyup',e=>camKeys.delete(e.code));addEventListener('blur',()=>camKeys.clear());
+function keyCam(rdt){if(!camKeys.size)return;if(titleOpen||!menuEl.hidden){camKeys.clear();return}const v=700*Math.min(rdt,0.05);let dx=0,dy=0;
+  if(camKeys.has('KeyW'))dy+=v;if(camKeys.has('KeyS'))dy-=v;if(camKeys.has('KeyA'))dx+=v;if(camKeys.has('KeyD'))dx-=v;if(dx||dy)pan(dx,dy);
+  if(camKeys.has('KeyQ'))cam.theta+=1.8*Math.min(rdt,0.05);if(camKeys.has('KeyE'))cam.theta-=1.8*Math.min(rdt,0.05);updateCamera()}
+/* Esc: close whatever window is open and go back to the plain view; returns false when there was nothing to close */
+function closeWindows(){let did=false;
+  if(!orderEl.hidden){orderEl.hidden=true;orderT=0;did=true}
+  if(inspI>=0){closeHouse();did=true}
+  if(!statsEl.hidden){toggleStats(false);did=true}
+  for(const[id,bid]of[['msp','msBtn'],['ordp','ordBtn'],['ovl','ovlBtn'],['taxp','taxBtn']]){const el=document.getElementById(id);if(el&&!el.hidden){el.hidden=true;const b=document.getElementById(bid);if(b)b.setAttribute('aria-expanded','false');did=true}}
+  if(tool!=='view'){selectTool('view');did=true}
+  return did}
 let prev=performance.now(),time=0,saveT=0,statsAcc=0,supT=0,depT=0,wasteAcc=0;
 function frame(now){requestAnimationFrame(frame);
   const rdt=Math.max(0,Math.min(0.05,(now-prev)/1000)),dt=paused?0:rdt*gameSpeed;prev=now;
   /* pause freezes the simulation only: building, its animations and everything decorative keep running on real time */
   const vdt=paused||titleOpen?rdt:dt;time+=vdt;const night=isNight();
-  if(titleOpen&&!reduce){cam.theta+=rdt*0.05;updateCamera()}msTick(rdt);
+  if(titleOpen&&!reduce){cam.theta+=rdt*0.05;updateCamera()}else keyCam(rdt);msTick(rdt);
   supT+=dt;if(supT>0.5){supT=0;syncGoods();facTick(0.5);bakeTick(0.5);supplyShops();dispatchGarbage();visitorTick(0.5,night);pitTick(0.5)}if((depT=(depT||0)+rdt)>0.5){depT=0;depSync()}
   wasteAcc+=dt;if(wasteAcc>=0.25){wasteTick(wasteAcc,night);wasteAcc=0}shopTick(dt);farmTick(dt,night);
   for(let i=0;i<N*N;i++){const c=grid[i];const H=c&&HOUSING[c.t];if(!H||c.off)continue;xpTick(i,c,dt);abandonTick(i,c,dt);if(c.aband||!popOf(c))continue;c.timer-=dt;
@@ -4460,7 +4506,7 @@ settleHour();cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=
   if(ring.visible&&!reduce)ring.material.opacity=0.65+0.35*Math.sin(time*4);
   if(hintTimer>0){hintTimer-=vdt;if(hintTimer<=0)setHint(toolHint())}
   saveRT+=rdt;if((saveReq&&saveRT>2)||(!paused&&saveRT>30))writeSave()
-  carLOD();hud();
+  carLOD();seasonTick(rdt);hud();
   if(!window.__drawn&&app.clientWidth>0&&app.clientHeight>0){
     const sz=renderer.getDrawingBufferSize(new THREE.Vector2());
     if(sz.x!==Math.round(app.clientWidth*renderer.getPixelRatio()))resize();
