@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.16';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.17';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2851,14 +2851,27 @@ function produce(i,d){
   if(d.t==='factoryB'){const ls=d.lines&&d.lines.length?d.lines:['mix'];d.li=(d.li||0)%ls.length;const k=ls[d.li],L=LINES[k];
     const pid=k==='mix'?mixPick():k,IN=k==='mix'?mixIn(pid):L.in;
     if(lacks(i,d,IN)){d.li++;return}const AT=i;
-    const units=(TRUCK_LOAD*(k==='mix'?1:1.5)*(d.up2?1.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid);if(!spawnTruck(i,pid,units)){d.work=2;return}
-    if(IN)for(const q in IN){take(q,IN[q],AT);cur.used[q]=(cur.used[q]||0)+IN[q]}d.li++;d.work-=2;cur.made[pid]=(cur.made[pid]||0)+units;addTrash(d,TRASH[d.t].per);float(i,`${GOODS[pid].name} →`,'neutral');bakeGrain(i);return}
+    const units=(TRUCK_LOAD*(k==='mix'?1:1.5)*(d.up2?1.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid);
+    if(!startBatch(i,d,pid,IN,units))return;d.li++;return}
   const L=LINES[d.line],pid=d.line==='mix'?mixPick():d.line,IN=d.line==='mix'?mixIn(pid):L.in;
   if(lacks(i,d,IN))return;
   const units=(TRUCK_LOAD*(d.up?1.5:1)*(d.up2?1.5:1)*(d.t==='smallfac'?0.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid);
-  if(!spawnTruck(i,pid,units)){d.work=2;return}
-  if(IN)for(const k in IN){take(k,IN[k],i);cur.used[k]=(cur.used[k]||0)+IN[k]}
-  d.work-=2;cur.made[pid]=(cur.made[pid]||0)+units;addTrash(d,TRASH[d.t].per);float(i,`${GOODS[pid].name} →`,'neutral');bakeGrain(i)}
+  startBatch(i,d,pid,IN,units)}
+/* 6.1.17: a factory first consumes its inputs, works on the batch for PROC_T game minutes, puts the product in its own yard, and a truck then takes it to a warehouse */
+const PROC_T=6,OUT_BATCHES=3,WORK_MAX=6;
+const outSum=d=>{let s=0;for(const k in d.out||{})s+=d.out[k]||0;return s};
+function startBatch(i,d,pid,IN,units){if(d.prod)return false;
+  if(outSum(d)>=units*OUT_BATCHES){d.work=Math.min(d.work,2);return false}
+  const used=[];if(IN)for(const q in IN){take(q,IN[q],i);cur.used[q]=(cur.used[q]||0)+IN[q];used.push(`${mw(IN[q])} kg ${GOODS[q].name.toLowerCase()}`)}
+  let bread=0;if(have('grain')>=3){take('grain',3,i);cur.used.grain=(cur.used.grain||0)+3;bread=3*prodMul('bread')}
+  d.prod={k:pid,u:units,t:PROC_T,b:bread};d.work-=2;float(i,used.length?`−${used.join(', ')}`:`produkcja: ${GOODS[pid].name.toLowerCase()}`,'neutral');return true}
+function facTick(dt){for(let i=0;i<N*N;i++){const d=grid[i];if(!d||!isFactory(d.t))continue;if(d.work>WORK_MAX)d.work=WORK_MAX;
+  if(d.prod&&d.powered&&!d.off){d.prod.t-=dt;if(d.prod.t<=0){const P=d.prod;d.prod=null;d.out=d.out||{};d.out[P.k]=(d.out[P.k]||0)+P.u;cur.made[P.k]=(cur.made[P.k]||0)+P.u;
+      if(P.b){d.out.bread=(d.out.bread||0)+P.b;cur.made.bread=(cur.made.bread||0)+P.b}addTrash(d,TRASH[d.t].per);float(i,`+${mw(Math.round(P.u*10)/10)} kg ${GOODS[P.k].name.toLowerCase()} gotowe`,'mat');
+      if(d.work>=2)produce(i,d)}}
+  /* one truck at a time collects the finished goods from the yard */
+  if(d.out&&!(d.outW>gameT)&&!cars.some(c=>c.kind==='truck'&&c.home===i&&c.phase==='go')){for(const k in d.out){const u=d.out[k];if(!(u>0.05)){delete d.out[k];continue}
+      if(spawnTruck(i,k,u)){delete d.out[k];d.outW=0}else d.outW=gameT+5;break}}}}
 /* every factory also bakes: 3 kg of grain from the warehouses become 3 kg of bread */
 function bakeGrain(i){if(have('grain')<3)return;take('grain',3,i);addGood('bread',3*prodMul('bread'),i);cur.used.grain=(cur.used.grain||0)+3;cur.made.bread=(cur.made.bread||0)+3;float(i,'+3 kg pieczywa','neutral')}
 /* a shop at 10 items or fewer (counting vans on the way) orders up to 5, taking whatever it sells and is lowest on the shelf */
@@ -3509,6 +3522,8 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
     pick=`<div class="chips">${Object.keys(LINES).map(k=>{const on=ls.includes(k),own=k==='mix'||(c.owned||[]).includes(k),dis=!on&&(ls.length>=LINES_MAX||(!own&&money<LINE_COST));
       return`<button class="chipb" data-line="${k}" aria-pressed="${on}"${dis?' disabled style="opacity:.5"':''}><i style="background:${LMETA(k).col}"></i>${on?'✓ ':own?'':'+ '}${LMETA(k).name}${!on&&!own?` · ${LINE_COST} T¢`:''}</button>`}).join('')}</div>`}
   if(c.t==='smallfac')c.line='mix';
+  if(isFactory(c.t)){R('Przetwarzanie',c.prod?`${GOODS[c.prod.k].name}: ${mw(Math.round(c.prod.u*10)/10)} kg · gotowe za ${Math.max(1,Math.ceil(c.prod.t))} min`:'czeka na zmianę pracowników i surowce');
+    const ok=Object.entries(c.out||{}).filter(([k,v])=>v>0.05);R('Gotowe do odbioru',ok.length?ok.map(([k,v])=>`${mw(Math.round(v*10)/10)} kg ${GOODS[k].name.toLowerCase()}`).join(', '):'nic')}
   if(isFactory(c.t)&&c.t!=='factoryB'){const L=LINES[c.line]||LINES.mix;R('Produkuje',`<span class="sw2" style="background:${LMETA(c.line).col}"></span>${LMETA(c.line).name}`);R('Partia',`${mw(Math.round((TRUCK_LOAD*(c.up?1.5:1)*(c.up2?1.5:1)*(c.t==='smallfac'?0.5:1)*(fOn(c)?0.9:1)*(c.techB?1.05:1)+1)*10)/10)} kg`);
     R('Surowiec',L.in?Object.entries(L.in).map(([k,v])=>`${v} kg ${GOODS[k].name.toLowerCase()} (w magazynach ${fmt(have(k))})`).join(', '):'nie potrzebuje',L.in&&Object.entries(L.in).some(([k,v])=>have(k)<v)?'warnv':'');
     R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':'pracuje',full||!c.powered?'warnv':'');
@@ -4223,7 +4238,7 @@ function hud(){fixNaN();const mc=moneyCap(),tc=matCap();const v={m:Math.round(mo
 /* ---------- save / preset ---------- */
 const KEY='siatkowo-v4';let oldSave=false;
 let saveBlocked=false;
-function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{mv:c.mv!=null?Math.round(c.mv*1e4)/1e4:undefined,spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,up3:c.up3?1:undefined,whf:c.whf?[...c.whf]:undefined,st:isWH(c.t)&&c.st&&Object.keys(c.st).length?Object.assign({},c.st):undefined,shipM:c.shipM||undefined,shipN:c.shipN||undefined,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,filtOff:c.filtOff?1:undefined,off:c.off?1:0,rot:c.rot,rot1:c.rot1,aband:c.aband?1:undefined,ruin:c.ruin?1:undefined,ship:c.ship&&c.ship.length?[...c.ship]:undefined,shipAuto:c.shipAuto?1:undefined,shipAt:c.shipAt!=null?Math.round(c.shipAt-gameT):undefined,dirt:c.dirt?Math.round(c.dirt*100)/100:undefined,fr:c.fr?c.fr.map(r0=>({...r0})):undefined,waiting:c.waiting||undefined,burn:c.burn?Math.round(gameT-c.burn.t0):undefined,need:c.need?Object.fromEntries(Object.entries(c.need).map(([k,v])=>[k,Math.round(v*100)/100])):undefined,pp:c.pp&&c.pp.length?c.pp.map(q=>[Math.round(q.a*10)/10,q.s,q.si,q.h||0,q.s===2?q.hi:-1]):undefined,dead:c.dead||undefined,lb:c.lastBuy!=null?Math.round(gameT-c.lastBuy):undefined,bodies:c.bodies||undefined,urn:c.urn&&c.urn.length?c.urn.map(t=>Math.round(t-gameT)):undefined,lowT:c.lowT?Math.round(c.lowT*1000)/1000:undefined,jail:c.jail&&c.jail.length?c.jail.map(q=>[Math.round(q.rel),q.w||0]):undefined,lv:c.lv||0,xp:c.xp?Math.round(c.xp*1000)/1000:0,lines:c.lines,owned:c.owned}]}
+function rowOf(c,i){return[i,c.t,c.pole?1:0,c.stock||0,c.up?1:0,Math.round((c.trash||0)*10)/10,Math.round(c.gstock||0),c.tiles?c.tiles.slice(1):-1,{mv:c.mv!=null?Math.round(c.mv*1e4)/1e4:undefined,spec:c.spec,line:c.line,shelf:c.shelf?{...c.shelf}:c.shelf,acc:c.acc,stores:c.stores?[...c.stores]:c.stores,up2:c.up2?1:0,up3:c.up3?1:undefined,whf:c.whf?[...c.whf]:undefined,st:isWH(c.t)&&c.st&&Object.keys(c.st).length?Object.assign({},c.st):undefined,shipM:c.shipM||undefined,shipN:c.shipN||undefined,cinema:c.cinema?1:0,attr:c.attr,filt:c.filt?1:0,filtOff:c.filtOff?1:undefined,off:c.off?1:0,rot:c.rot,rot1:c.rot1,aband:c.aband?1:undefined,ruin:c.ruin?1:undefined,ship:c.ship&&c.ship.length?[...c.ship]:undefined,shipAuto:c.shipAuto?1:undefined,shipAt:c.shipAt!=null?Math.round(c.shipAt-gameT):undefined,dirt:c.dirt?Math.round(c.dirt*100)/100:undefined,fr:c.fr?c.fr.map(r0=>({...r0})):undefined,prod:isFactory(c.t)&&c.prod?{...c.prod}:undefined,out:isFactory(c.t)&&c.out&&Object.keys(c.out).length?{...c.out}:undefined,waiting:c.waiting||undefined,burn:c.burn?Math.round(gameT-c.burn.t0):undefined,need:c.need?Object.fromEntries(Object.entries(c.need).map(([k,v])=>[k,Math.round(v*100)/100])):undefined,pp:c.pp&&c.pp.length?c.pp.map(q=>[Math.round(q.a*10)/10,q.s,q.si,q.h||0,q.s===2?q.hi:-1]):undefined,dead:c.dead||undefined,lb:c.lastBuy!=null?Math.round(gameT-c.lastBuy):undefined,bodies:c.bodies||undefined,urn:c.urn&&c.urn.length?c.urn.map(t=>Math.round(t-gameT)):undefined,lowT:c.lowT?Math.round(c.lowT*1000)/1000:undefined,jail:c.jail&&c.jail.length?c.jail.map(q=>[Math.round(q.rel),q.w||0]):undefined,lv:c.lv||0,xp:c.xp?Math.round(c.xp*1000)/1000:0,lines:c.lines,owned:c.owned}]}
 let saveReq=false,saveRT=0;
 function save(){if(window.__testUnlock||saveBlocked||window.__LT_EDITOR)return writeSave();saveReq=true}
 function writeSave(){saveReq=false;saveRT=0;if(saveBlocked||window.__LT_EDITOR)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
@@ -4239,7 +4254,7 @@ function placeRow(row,anim){let[i,t,p,st,up,tr,gs,sec,x]=row;mvNext=x&&typeof x.
     if(x&&(t==='restaurant'||t==='bakery'))c.shelf=x.shelf||{};if(x&&t==='hotelB'&&x.attr&&ATTR[x.attr]){c.attr=x.attr;c.model.userData.attrSign.material=M(ATTR_COL[x.attr])}if(x&&x.up2&&UPG2[t]){c.up2=true;if(!isWH(t))addUpgrade2Visual(c)}if(x&&x.up3&&UPG3[t])c.up3=true;if(x&&Array.isArray(x.whf))c.whf=x.whf;if(x&&x.st&&typeof x.st==='object'&&isWH(t)){c.st={};for(const k in x.st)if(x.st[k]>0&&(k==='mat'||GOODS[k]))c.st[k]=+x.st[k]}if(x&&x.shipM)c.shipM=x.shipM;if(x&&x.shipN)c.shipN=x.shipN;if(x&&x.filt&&UPGF[t]){c.filt=true;c.filtOff=!!x.filtOff;filterVisual(c)}if(x&&x.off)c.off=true;
     if(x&&isFactory(t)&&LINES[x.line]&&!FREE_LINES[x.line]&&t!=='smallfac')up=1;if(t==='smallfac'){up=0;if(x)x.line='mix'}
     if(x&&t==='shop1'&&SPECS[x.spec]&&x.spec!=='mall'){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(up&&t==='shop1'){c.up=true;addUpgradeVisual(c);up=0}
-    if(x&&t==='shop'&&SPECS[x.spec]){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(x&&isFactory(t)&&LINES[x.line]){c.line=x.line;paintModel(c,GM[c.line])}if(x&&(isFarm(t)||PIT_RATE[t]))c.acc=x.acc||0;
+    if(x&&t==='shop'&&SPECS[x.spec]){c.spec=x.spec;c.shelf=x.shelf||{};paintModel(c,SM[c.spec])}if(x&&isFactory(t)&&LINES[x.line]){c.line=x.line;paintModel(c,GM[c.line])}if(x&&isFactory(t)){if(x.prod&&GOODS[x.prod.k])c.prod=x.prod;if(x.out&&typeof x.out==='object'){c.out={};for(const k in x.out)if(GOODS[k]&&x.out[k]>0)c.out[k]=+x.out[k]}}if(x&&(isFarm(t)||PIT_RATE[t]))c.acc=x.acc||0;
     if(up&&UPG[t]){c.up=true;addUpgradeVisual(c);if(t==='coal'){c.gstock=0;c.gin=0;c.gtrucks=0}}if(TRASH[t])c.trash=tr||0;if(isFac(c))c.gstock=gs||0;if(x&&x.rot!=null&&c.tiles){c.rot=x.rot;refreshBuilding(i)}if(x&&x.rot1!=null&&!c.tiles){c.rot1=x.rot1;refreshBuilding(i)}if(x&&HLV[t]){if(x.aband){c.aband=true;abandVisual(c)}c.lowT=x.lowT||0;if(Array.isArray(x.pp)){c.pp=x.pp.map(([a,s,si,h,hi])=>({a,s,si,sk:0,h:h||0,hi:hi??-1}))}else if(!x.aband)seedPeople(c,1);if(x.aband)c.pp=[];c.dead=x.dead||0;c.lastBuy=x.lb!=null?gameT-x.lb:gameT}
     if(x&&DCARE[t]){c.bodies=x.bodies||0;c.urn=Array.isArray(x.urn)?x.urn.map(v=>gameT+v):[]}if(HOUSING[t])c.off=false;if(x&&Array.isArray(x.jail))c.jail=x.jail.map(([rel,w])=>({rel,w}));if(x&&HLV[t]){c.xp=x.xp||0;if(x.lv){c.lv=Math.min(x.lv,HLV[t].res.length-1);setHousingModel(i)}}if(x&&Array.isArray(x.fr))c.fr=x.fr.filter(r0=>r0&&FR_GOODS.includes(r0.k)).map(r0=>({k:r0.k,m:['off','imp','exp'].includes(r0.m)?r0.m:'off',n:Math.max(FR_MIN,Math.min(FR_MAX,r0.n|0))}));if(x&&x.waiting)c.waiting=x.waiting|0;if(x&&x.dirt)c.dirt=+x.dirt||0;if(x&&Array.isArray(x.ship))c.ship=x.ship.filter(k=>SHIP_GOODS.includes(k));if(x&&x.shipAuto)c.shipAuto=true;if(x&&x.shipAt!=null)loadShip.push([i,x.shipAt]);if(x&&x.need&&typeof x.need==='object')c.need={...x.need};if(x&&x.ruin)loadFires.push([i,-1]);else if(x&&x.burn!=null)loadFires.push([i,x.burn]);if(x&&t==='factoryB'){c.owned=(x.owned||[]).filter(k=>LINES[k]&&k!=='mix');c.lines=(x.lines||['mix']).filter(k=>k==='mix'||c.owned.includes(k)).slice(0,LINES_MAX);if(!c.lines.length)c.lines=['mix'];paintLines(c)}}
 let loadFires=[],loadShip=[];
@@ -4371,7 +4386,7 @@ function frame(now){requestAnimationFrame(frame);
   /* pause freezes the simulation only: building, its animations and everything decorative keep running on real time */
   const vdt=paused||titleOpen?rdt:dt;time+=vdt;const night=isNight();
   if(titleOpen&&!reduce){cam.theta+=rdt*0.05;updateCamera()}msTick(rdt);
-  supT+=dt;if(supT>0.5){supT=0;syncGoods();bakeTick(0.5);supplyShops();dispatchGarbage();visitorTick(0.5,night);pitTick(0.5)}if((depT=(depT||0)+rdt)>0.5){depT=0;depSync()}
+  supT+=dt;if(supT>0.5){supT=0;syncGoods();facTick(0.5);bakeTick(0.5);supplyShops();dispatchGarbage();visitorTick(0.5,night);pitTick(0.5)}if((depT=(depT||0)+rdt)>0.5){depT=0;depSync()}
   wasteAcc+=dt;if(wasteAcc>=0.25){wasteTick(wasteAcc,night);wasteAcc=0}shopTick(dt);farmTick(dt,night);
   for(let i=0;i<N*N;i++){const c=grid[i];const H=c&&HOUSING[c.t];if(!H||c.off)continue;xpTick(i,c,dt);abandonTick(i,c,dt);if(c.aband||!popOf(c))continue;c.timer-=dt;
     if(c.timer<=0){const iv=60/(TIER[c.happy??3].trips*H.trips*hMul(c));c.timer+=iv;if(c.timer<=0)c.timer=iv;if(cars.length<PEOPLE_CARS)spawnCommuter(i)}}
