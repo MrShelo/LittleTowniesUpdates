@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.14';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.15';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -537,8 +537,8 @@ const DEF={
   roundabout:{name:'Rondo',cost:80,desc:'Płynny przejazd przez skrzyżowanie (1,2× szybciej), auta objeżdżają wysepkę. Postaw na istniejącej ulicy.',sw:'#5f9b4a'},
   smallfac:{name:'Mała fabryka',cost:180,desc:'Połowa produkcji zwykłej fabryki (2 kg na partię), 40% taniej. Tylko linia ogólna: zabawki i kosmetyki z materiałów, a odzież, meble, elektronikę, narzędzia i napoje tylko wtedy, gdy w magazynach jest ich surowiec. Można dokupić nową technologię (+50%).',sw:'#a8b0bb'},
   factory:{name:'Fabryka',cost:300,desc:'Dwie zmiany pracowników + 2 kg materiałów z magazynu = ciężarówka z 5 kg towarów ogólnych. Z materiałów robi zabawki i kosmetyki; odzież, meble, elektronikę, narzędzia i napoje tylko z ich surowca, jeśli leży w magazynach (bawełna, drewno, chalkopiryt, warzywa). Ulepszenie odblokowuje wybór produktu i +50%.',sw:'#8d97a6'},
-  supermarket:{name:'Supermarket',cost:900,size:2,desc:'Zajmuje 2 pola. 77 miejsc na półkach (po równo na każdy towar), obsłuży 60 klientów na godzinę (trzecia kasa +15). Ceny bazowe.',sw:'#3a7fc0'},
-  shop:{name:'Sklep',cost:200,desc:'17 miejsc na półkach, dzielonych po równo między sprzedawane towary. Na start wielobranżowy (wszystko), w karcie sklepu zmienisz go na specjalistyczny z cenami +25%. Furgonetki dowożą towar z magazynów.',sw:'#3aa39a'},
+  supermarket:{name:'Supermarket',cost:900,size:2,desc:'Zajmuje 2 pola. 300 miejsc na półkach (po równo na każdy towar), obsłuży 60 klientów na godzinę (trzecia kasa +15). Ceny bazowe.',sw:'#3a7fc0'},
+  shop:{name:'Sklep',cost:200,desc:'80 miejsc na półkach, dzielonych po równo między sprzedawane towary. Na start wielobranżowy (wszystko), w karcie sklepu zmienisz go na specjalistyczny z cenami +25%. Furgonetki dowożą towar z magazynów.',sw:'#3aa39a'},
   farmveg:{name:'Farma warzyw',cost:150,desc:'Grządki i szklarnie: warzywa i owoce, 2 kg/godz. Stawiaj pola obok siebie: multiblok daje +10% za każde kolejne pole (do +100%).',sw:'#6fb24f',farm:'veg'},
   farmdairy:{name:'Farma hodowlana',cost:220,desc:'Krowy, świnie i owce: nabiał, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).',sw:'#f2f2ee',farm:'dairy'},
   farmgrain:{name:'Pole zboża',cost:120,desc:'Zboże dla piekarni, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).',sw:'#e3c35a',farm:'grain'},
@@ -551,7 +551,7 @@ const DEF={
   incinerator:{name:'Spalarnia',cost:1400,fw:2,fh:3,desc:'Zajmuje 2×3 pola. 1 komin: 40 kg odpadów na godz., dokupisz drugi i trzeci komin (+40 kg każdy). Bufor 150 kg, 2 śmieciarki. Pobiera 1 MW i dymi.',sw:'#9a8f86'},
   recycler:{name:'Recykling',cost:700,desc:'Przerabia 10 kg odpadów na godz. na 5 kg materiałów (bufor 60 kg), 2 śmieciarki. Pobiera 1,5 MW.',sw:'#4f9a6a'},
   hvpole:{name:'Słup WN',cost:120,desc:'Wysokie napięcie: łączy się z innymi słupami WN, transformatorami i el. węglowymi w zasięgu 11×11 (po ulepszeniu 17×17). Nie z wiatrakami.',sw:'#8c959d',area:3},
-  gallery:{name:'Galeria handlowa',cost:1500,desc:'Zajmuje 2×2 pola. W karcie galerii wykupujesz lokale (sklep 100 T¢): na parterze 4 (np. 3 sklepy i kino), po dobudowie piętra wszystkie. Galeria ma 66 miejsc na półkach, a każdy lokal dokłada ok. 16; miejsce dzieli się po równo między towary. Ceny +25% i więcej klientów.',sw:'#d8c48a',size:4},
+  gallery:{name:'Galeria handlowa',cost:1500,desc:'Zajmuje 2×2 pola. W karcie galerii wykupujesz lokale (sklep 100 T¢): na parterze 4 (np. 3 sklepy i kino), po dobudowie piętra wszystkie. Galeria ma 960 miejsc na półkach, dzielonych po równo między towary jej sklepów. Ceny +25% i więcej klientów.',sw:'#d8c48a',size:4},
   restaurant:{name:'Restauracja',cost:400,desc:'Rozrywka w zasięgu 3×3 (+1 zadowolenia). Zużywa jedzenie z magazynów, posiłek 30 T¢. Najtańsza w utrzymaniu.',sw:'#d9773a'},
   cinema:{name:'Kino',cost:900,desc:'Rozrywka w zasięgu 5×5 (+1 zadowolenia). Bilet 30 T¢.',sw:'#7a2a3a'},
   theater:{name:'Teatr',cost:1200,desc:'Rozrywka w zasięgu 5×5 (+1 zadowolenia). Bilet 40 T¢.',sw:'#b0303f'},
@@ -583,7 +583,7 @@ const DEF={
   fireB:{name:'Komenda straży pożarnej',cost:2800,size:4,desc:'Zajmuje 2×2 pola. Zasięg 15×15, 2 wozy strażackie. Ulepszenia: „Drugi garaż” (+2 wozy), „Większy rewir”.',sw:'#a8241c',area:7},
   policeB:{name:'Duży komisariat',cost:2500,size:4,desc:'Zajmuje 2×2 pola. Zasięg 17×17, cele na 25 osób, 4 radiowozy patrolowe. Ulepszenia: „Drugi garaż”, „Większy rewir”.',sw:'#1f3f7a',area:8},
   prison:{name:'Więzienie',cost:4000,fw:3,fh:3,desc:'3×3 pola za drucianym płotem, 100 miejsc (ulepszenie: blok na +30). Radiowozy przywożą zatrzymanych z komisariatów. Każdy więzień kosztuje 2 T¢/godz. i wychodzi po 2–3 dniach.',sw:'#6b7480'},
-  shop1:{name:'Sklep jednobranżowy',cost:350,desc:'Jedna branża do wyboru (nie wielobranżowy), ceny +25%. 35 klientów/godz., z piętrem 50, z kasami SCO +5, z trzecią kasą +10. Półki 15, z piętrem 30.',sw:'#3aa39a'},
+  shop1:{name:'Sklep jednobranżowy',cost:350,desc:'Jedna branża do wyboru (nie wielobranżowy), ceny +25%. 35 klientów/godz., z piętrem 50, z kasami SCO +5, z trzecią kasą +10. Półki 120, z piętrem 240.',sw:'#3aa39a'},
   clinic:{name:'Klinika medyczna',cost:1000,size:2,desc:'Zajmuje 2×1 pola. Leczy chorych w zasięgu 9 pól od każdego pola budynku, do 35 pacjentów naraz.',sw:'#e8eef2'},
   hosp:{name:'Szpital',cost:4500,size:4,desc:'Zajmuje 2×2 pola. Zasięg 11 od każdego pola, do 100 pacjentów.',sw:'#d9e6ef'},
   hospC:{name:'Szpital kliniczny',cost:12000,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Zasięg 13 od każdego pola, do 300 pacjentów.',sw:'#c3d9ea'},
@@ -690,7 +690,7 @@ const UPG={
   heliB:{name:'Drugi helikopter',cost:3000,upkeep:150,desc:'+1 helikopter gaśniczy'},fireS:{name:'Drugi garaż',cost:600,upkeep:30,desc:'+1 wóz strażacki'},fireB:{name:'Drugi garaż',cost:900,upkeep:40,desc:'+2 wozy strażackie'},
   policeS:{name:'Drugi garaż',cost:600,upkeep:24,desc:'+2 radiowozy do interwencji (stoją w garażu, wyjeżdżają tylko na wezwanie)'},policeB:{name:'Drugi garaż',cost:900,upkeep:32,desc:'+2 radiowozy do interwencji (stoją w garażu, wyjeżdżają tylko na wezwanie)'},
   hydrogen:{name:'Drugi odwiert',cost:2000,upkeep:60,desc:'+30 MW (90 MW z czystą wodą)'},
-  shop1:{name:'Dodatkowe piętro',cost:400,upkeep:10,desc:'50 klientów/godz. i 33 miejsca na półkach'},
+  shop1:{name:'Dodatkowe piętro',cost:400,upkeep:10,desc:'50 klientów/godz. i 240 miejsc na półkach'},
   cemB:{name:'Katakumby',cost:1500,upkeep:15,desc:'Podziemne katakumby pod środkiem cmentarza: +20 miejsc (300)'},crem:{name:'Drugi piec kremacyjny',cost:2000,upkeep:40,desc:'Druga komora kremacyjna: 160 miejsc'},
   restaurant:{name:'Wykwintna restauracja',cost:450,upkeep:15,desc:'Dwupiętrowy lokal, zasięg rozrywki 5×5 zamiast 3×3, kolejka 35 gości zamiast 25'}};
 const UPGF={factory:{name:'Filtry',cost:300,upkeep:15,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},factoryB:{name:'Filtry',cost:450,upkeep:20,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},smallfac:{name:'Filtry',cost:180,upkeep:10,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},
@@ -2801,9 +2801,11 @@ function wasteTick(dt,night){
 
 /* ---------- goods ---------- */
 const sellsOf=c=>c.t==='bakery'?['bread']:c.t==='restaurant'?FOOD:c.t==='gallery'?[...new Set(c.stores.flatMap(s=>SPECS[s].sells))]:SPECS[c.spec].sells;
-const slotsBase=c=>c.t==='shop1'?(c.up?30:15):c.t==='gallery'?SHOP_SLOTS*c.stores.length+60:c.t==='supermarket'?70:SHOP_SLOTS;
+/* 6.1.15: shelf room — shop 80, single-trade shop 120 (240 with the extra floor), supermarket 300, gallery 960; bakery and restaurant 17 */
+const SLOTS={shop:80,shop1:120,supermarket:300,gallery:960};
+const slotsBase=c=>SLOTS[c.t]?(c.t==='shop1'&&c.up?SLOTS.shop1*2:SLOTS[c.t]):Math.round(SHOP_SLOTS*1.1);
 /* 6.1.7: +10% shelf room; the room is split evenly between the goods a shop sells, so one good can never crowd out the rest */
-const slotsOf=c=>Math.round(slotsBase(c)*1.1);
+const slotsOf=c=>slotsBase(c);
 const shelfCap=c=>{const n=sellsOf(c).length;return Math.max(1,Math.ceil(slotsOf(c)/Math.max(1,n)))};
 let VANINC=new Map();const vanInc=()=>{VANINC=new Map();for(const v of cars)if(isDeliv(v.kind)&&!v.delivered&&v.items){const sd=v.shop??v.dest;let m=VANINC.get(sd);if(!m)VANINC.set(sd,m={});for(const k in v.items)m[k]=(m[k]||0)+v.items[k]}return VANINC};
 const shelfRoom=(s,k,extra=0)=>{const c=grid[s],m=VANINC.get(s);return shelfCap(c)-(c.shelf[k]||0)-(m&&m[k]||0)-extra};
