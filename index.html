@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.15';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.16';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1668,7 +1668,8 @@ function upkeepItems(){const map=new Map(),add=(cat,name,unit,n=1,per=1)=>{const
     if(c.jail&&c.jail.length)add('Policja','Więźniowie i zatrzymani',JAIL_FEE,c.jail.length);if(jailOver(c))add('Policja','Przepełnione cele (dopłata)',OVERJAIL)}
   return[...map.values()]}
 const opNet=o=>o.inc-o.upkeep-(o.crimeLoss||0);
-const netOf=o=>o.inc+o.refund-o.build-o.upkeep-(o.crimeLoss||0)+(o.loanIn||0)-(o.loanPay||0);
+/* 6.1.16: finance panels leave out building and upgrade costs (player spending, not the city's running balance) */
+const netOf=o=>o.inc+o.refund-o.upkeep-(o.crimeLoss||0)+(o.loanIn||0)-(o.loanPay||0);
 const upkeepRate=night=>{let s=IMPORT_FEE*importKinds().length;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||c.off)continue;if(UPKEEP[c.t])s+=UPKEEP[c.t]*(night&&PARKS.includes(c.t)?0.5:1);
   if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t]/ROAD_PER;if(c.jail)s+=JAIL_FEE*c.jail.length;if(jailOver(c))s+=OVERJAIL;if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(c.up3&&UPG3[c.t])s+=UPG3[c.t].upkeep;if(fOn(c)&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s};
 /* day and night: 1 real minute = 1 game hour; people sleep 22:00–06:00 */
@@ -3836,7 +3837,7 @@ function renderStats(){for(const b of document.querySelectorAll('[data-st]'))b.s
       scard('cityHall','#e98a3a','Utrzymanie / godz.',`${cpt(upkeepRate(isNight()))} T¢`,`rozliczenie na koniec godziny`)+
       (loan?scard('bankG','#d4483a','Pożyczka do spłaty',`${cpt(loan.left)} T¢`,`${loan.daysLeft} ${loan.daysLeft===1?'dzień':'dni'} · rata ${cpt(loanDue())} T¢`):'')}
     document.getElementById('stTbl').innerHTML=flowTable([['Przychody razem',o=>o.inc],['  Sklepy, piekarnie, galerie',o=>o.shopInc!=null?o.shopInc:Math.max(0,o.inc-(o.entInc||0)),1],['  Rozrywka (kino, teatr, kasyno, restauracje)',o=>o.entInc||0,1],['  Hotele (noclegi)',o=>o.hotelInc||0,1],['  Podatki od mieszkańców',o=>o.taxInc||0,1],['  Praca więźniów',o=>o.prisonInc||0,1],['  w tym od przyjezdnych',o=>o.tourInc||0,1],
-      ['Zwroty z wyburzeń',o=>o.refund],['Budowa',o=>-o.build],['Utrzymanie',o=>-o.upkeep],['Pożyczki (wypłata)',o=>o.loanIn||0],['Spłata pożyczki',o=>-(o.loanPay||0)],['Straty z przestępstw',o=>-(o.crimeLoss||0)],['s','Saldo gotówki',netOf]]);
+      ['Zwroty z wyburzeń',o=>o.refund],['Utrzymanie',o=>-o.upkeep],['Pożyczki (wypłata)',o=>o.loanIn||0],['Spłata pożyczki',o=>-(o.loanPay||0)],['Straty z przestępstw',o=>-(o.crimeLoss||0)],['s','Saldo gotówki',netOf]]);
     document.getElementById('dayNote').textContent=note;
     document.getElementById('chMoney').innerHTML=barChart(netOf,'T¢');
     const items=upkeepItems(),cats=[...new Set(items.map(q=>q.cat))].sort((x,y)=>PCATS.indexOf(x)-PCATS.indexOf(y));let u='';
