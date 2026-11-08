@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.12';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.13';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1642,7 +1642,14 @@ let money=0, matl=0, roadVer=0;
 const goods={};for(const k in GOODS)if(k!=='mat')goods[k]=0;
 const stored=()=>fin(matl)+Object.values(goods).reduce((a,b)=>a+fin(b),0);
 /* repairs any value that went non-numeric so the HUD and the economy never show NaN */
-function fixNaN(){for(const i of whAll()){const c=grid[i];for(const k in c.st)if(!Number.isFinite(c.st[k]))delete c.st[k]}if(!Number.isFinite(matl))matl=0;if(!Number.isFinite(money))money=0;for(const k in goods)if(!Number.isFinite(goods[k]))goods[k]=0}
+let deepT=0;
+function fixDeep(){for(let i=0;i<N*N;i++){const c=grid[i];if(!c)continue;
+    for(const k in c){const v=c[k];if(typeof v==='number'&&!Number.isFinite(v))c[k]=0}
+    if(c.shelf){const sl=sellsOf(c);for(const k in c.shelf){const v=c.shelf[k];if(!Number.isFinite(v)||v<=0||k==='undefined'){delete c.shelf[k];continue}
+      if(sl&&sl.length&&!sl.includes(k)){addGood(k,v);delete c.shelf[k]}}}
+    if(c.st)for(const k in c.st)if(!Number.isFinite(c.st[k]))delete c.st[k]}
+  if(!Number.isFinite(pendIn))pendIn=0;if(!Number.isFinite(pendOut))pendOut=0;for(const k in cur)if(typeof cur[k]==='number'&&!Number.isFinite(cur[k]))cur[k]=0}
+function fixNaN(){if((deepT+=1)>=120){deepT=0;try{fixDeep()}catch(e){}}for(const i of whAll()){const c=grid[i];for(const k in c.st)if(!Number.isFinite(c.st[k]))delete c.st[k]}if(!Number.isFinite(matl))matl=0;if(!Number.isFinite(money))money=0;for(const k in goods)if(!Number.isFinite(goods[k]))goods[k]=0}
 let farmDirty=true,clusters=[];
 /* economy ledger: 1 real second = 1 game minute, so 60 s = 1 game hour */
 const L0=()=>({crimeOk:0,crimeLost:0,crimeLoss:0,heists:0,used:{},tour:0,tourInc:0,entInc:0,made:{},sold:{},gGen:0,gColl:0,gBurn:0,gRec:0,matRec:0,vans:0,work:0,inc:0,refund:0,build:0,upkeep:0,matIn:0,matShop:0,matCoal:0,trips:0,trucks:0,sales:0,noStock:0,powDem:0,powCap:0,secs:0});
@@ -1948,7 +1955,8 @@ function take(k,x,at){let left=x;const L=whAll().filter(i=>whOn(grid[i])&&(grid[
 /* an older save kept one pooled stock: it is shared out among the warehouses by their size */
 function spreadPool(pool){const W=whAll().map(i=>grid[i]);for(const k in pool){let v=pool[k];if(!(v>0))continue;
   for(const c of W.slice().sort((a,b)=>(whCap(b)-whUsed(b))-(whCap(a)-whUsed(a)))){const n=Math.min(v,Math.max(0,whCap(c)-whUsed(c)));if(n<=0)continue;c.st[k]=(c.st[k]||0)+n;v-=n;if(v<=1e-9)break}}}
-const mw=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:1});const r1=n=>mw(Math.round((+n||0)*10)/10);
+const fin=v=>Number.isFinite(+v)?+v:0;
+const mw=n=>(Number.isFinite(+n)?+n:0).toLocaleString('pl-PL',{maximumFractionDigits:1});const r1=n=>mw(Math.round((+n||0)*10)/10);
 /* the longest straight road run through tile i (horizontal vs vertical), nearest tiles first */
 function straightRun(i){const x=i%N,z=(i/N)|0;
   let l=x,r=x;while(l>0&&isRoad(idx(l-1,z)))l--;while(r<N-1&&isRoad(idx(r+1,z)))r++;
@@ -2294,7 +2302,7 @@ function goBack(c,from,to){const s=entryOf(from),e=entryOf(to);if(s<0||e<0)retur
   c.path=bp;c.seg=0;c.dist=0;c.phase='back';if(c.walk){const pl=walkPlan(c.path,from,to);c.side=pl.s0;c.flip=pl.flip}c.rot=c.rot===null?null:c.rot+Math.PI;c.lp=c.ln=c.li;c.lnSeg=-1;
   if(c.kind==='truck')c.mesh.userData.cargo.material=mat.cargoE;placeCar(c);exitFrom(c,from)}
 function stockShop(c,d,at,back){c.delivered=true;
-  if(d&&isShop(d.t)){d.incoming=Math.max(0,d.incoming-c.load);let put=0;for(const k in c.items){const room=Math.min(slotsOf(d)-shelfTotal(d),shelfCap(d)-(d.shelf[k]||0)),n=Math.max(0,Math.min(room,c.items[k]));d.shelf[k]=(d.shelf[k]||0)+n;put+=n;if(c.items[k]>n)addGood(k,c.items[k]-n,back)}
+  if(d&&isShop(d.t)){d.incoming=Math.max(0,d.incoming-c.load);let put=0;const sells=sellsOf(d);for(const k in c.items){const q=fin(c.items[k]),room=sells.includes(k)?Math.min(slotsOf(d)-shelfTotal(d),shelfCap(d)-fin(d.shelf[k])):0,n=Math.max(0,Math.floor(fin(Math.min(room,q))));if(n>0)d.shelf[k]=fin(d.shelf[k])+n;put+=n;if(q>n)addGood(k,q-n,back)}
     float(at,`+${put} towaru`,'mat')}
   else for(const k in c.items)addGood(k,c.items[k],back)}
 function arrive(c){
@@ -2345,7 +2353,7 @@ function serve(c,d,i){
   if(TRASH[d.t]&&d.trash>=TRASH[d.t].cap){float(i,'pełno śmieci','warn');return}
   const sc=SCAP(d);if(sc){d.vis=d.vis||0;if(d.vis>=sc){d.crowdT=30;if(!d.crowd){d.crowd=true;envDirty=true}cur.crowd=(cur.crowd||0)+1;float(i,'tłok, klient odchodzi','warn');return}d.vis+=1}
   let pay=0,ent=0;
-  if(isShop(d.t)&&(d.t!=='gallery'||d.stores.length)){if(shelfTotal(d)>=1){const k=pickShelf(d,c.kind==='commuter'?c.home:null);d.shelf[k]--;cur.sales++;cur.sold[k]=(cur.sold[k]||0)+1;if(c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t]){const n=needOf(k);if(n){const H=needs(grid[c.home]);H[n.k]=Math.min(1,H[n.k]+0.5/Math.max(1,popOf(grid[c.home])/4))}}pay+=d.t==='restaurant'?priceAt(d,k):priceAt(d,k)*TAX.buy/20;cur.buyTax=(cur.buyTax||0)+(d.t==='restaurant'?0:priceAt(d,k)*TAX.buy/20)}
+  if(isShop(d.t)&&(d.t!=='gallery'||d.stores.length)){const k=shelfTotal(d)>=1?pickShelf(d,c.kind==='commuter'?c.home:null):undefined;if(k!==undefined){d.shelf[k]=Math.max(0,(d.shelf[k]||0)-1);cur.sales++;cur.sold[k]=(cur.sold[k]||0)+1;if(c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t]){const n=needOf(k);if(n){const H=needs(grid[c.home]);H[n.k]=Math.min(1,H[n.k]+0.5/Math.max(1,popOf(grid[c.home])/4))}}pay+=d.t==='restaurant'?priceAt(d,k):priceAt(d,k)*TAX.buy/20;cur.buyTax=(cur.buyTax||0)+(d.t==='restaurant'?0:priceAt(d,k)*TAX.buy/20)}
     else if(!(d.t==='gallery'&&d.cinema)){cur.noStock++;float(i,d.t==='restaurant'?'brak jedzenia':'brak towaru','warn');return}}
   if(d.t==='gallery'&&d.cinema&&(Math.random()<0.4||!pay)){pay+=PRICE.cinema;ent+=PRICE.cinema}
   if(d.t==='casino'){const r=Math.random();if(r<0.12){const loss=Math.round(PRICE.casino*(1+Math.random()*3));owe(loss);cur.inc-=loss;cur.entInc-=loss;float(i,`−${fmt(loss)} T¢ wygrana gościa`,'warn');addTrash(d,TRASH[d.t].per);return}
@@ -2797,7 +2805,7 @@ let VANINC=new Map();const vanInc=()=>{VANINC=new Map();for(const v of cars)if(i
 const shelfRoom=(s,k,extra=0)=>{const c=grid[s],m=VANINC.get(s);return shelfCap(c)-(c.shelf[k]||0)-(m&&m[k]||0)-extra};
 /* customers per game hour a shop can serve; above that it is crowded */
 const SCAP=c=>(c.up&&(c.t==='shop'||c.t==='supermarket')?1.5:1)*SCAP0(c)*(c.edu&&c.edu.tech?1:1);const SCAP0=c=>c.t==='shop1'?(c.up?50:35)+(c.up2?5:0)+(c.up3?10:0):c.t==='bakery'?22:c.t==='supermarket'?60+(c.up3?15:0):c.t==='gallery'?8*Math.max(1,c.stores.length)+20+(c.up?16:0):c.t==='restaurant'?(c.up?35:25):c.t==='shop'?30+(c.up2?10:0):0;
-const shelfTotal=c=>Object.values(c.shelf||{}).reduce((a,b)=>a+b,0);
+const shelfTotal=c=>{let s=0;for(const k in c.shelf||{}){const v=c.shelf[k];if(Number.isFinite(v)&&v>0)s+=v}return s};
 const NEEDS=[{k:'food',name:'Żywność',goods:['veg','dairy','bread'],decay:0.08},{k:'drink',name:'Napoje',goods:['drinks'],decay:0.05},{k:'wear',name:'Odzież i kosmetyki',goods:['clothes','cosmetics'],decay:0.03},{k:'home',name:'Meble i narzędzia',goods:['furniture','tools'],decay:0.02},{k:'fun',name:'Elektronika i zabawki',goods:['electronics','toys'],decay:0.02}];
 const needOf=g=>NEEDS.find(n=>n.goods.includes(g));
 /* homes use water per resident: an empty home uses none, a full block uses a lot */
@@ -3623,7 +3631,6 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   for(const h of inspEl.querySelectorAll('[data-fold]')){const go=()=>{const k=h.dataset.fold;inspFold.has(k)?inspFold.delete(k):inspFold.add(k);try{localStorage.setItem('lt-insp-fold',JSON.stringify([...inspFold]))}catch(e){}inspEl.__html=null;renderInsp()};h.onclick=go;h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}}}
 
 /* ---------- UI ---------- */
-const fin=v=>Number.isFinite(+v)?+v:0;
 const fmt=n=>Math.round(fin(n)).toLocaleString('pl-PL');
 const fmt1=n=>Math.abs(n)<100&&Math.round(n)!==n?(Math.round(n*10)/10).toLocaleString('pl-PL'):fmt(n);
 const toolsEl=document.getElementById('tools'),catsEl=document.getElementById('cats');
@@ -4257,7 +4264,7 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
   if(Array.isArray(s.cross))for(const i of s.cross)if(grid[i]&&STREET[grid[i].t]){grid[i].cross=true;drawCross(i)}
   if(Array.isArray(s.rails))for(const i of s.rails)if(grid[i]&&STREET[grid[i].t])grid[i].rail=true;railVer++;railRefreshAll();
   if(Array.isArray(s.edges))for(const[i,o]of s.edges){if(grid[i]&&grid[i].t==='rail'){grid[i].edge=true;continue}if(grid[i]&&DRIVE[grid[i].t]){grid[i].edge=true;if(o)grid[i].edgeOut=true;rebuildRoad(i)}}
-  if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(!window.__testUnlock)msLevel=Math.max(0,Math.min(MS.length-1,s.ms|0));if(typeof s.name==='string'&&s.name.trim())cityName=s.name.trim().slice(0,24);for(const[i,a]of loadShip)if(grid[i])grid[i].shipAt=gameT+a;loadShip=[];for(const[i,a]of loadFires){if(!grid[i])continue;if(a<0)makeRuin(i,true);else startFire(i,a)}loadFires=[];whDirty=true;if(POOL)spreadPool(POOL);syncGoods();if(Array.isArray(s.hist))hist=s.hist;if(Array.isArray(s.dep)){dep.fill(0);for(const[i,k]of s.dep)if(i>=0&&i<N*N&&DEP[k])dep[i]=k;depDirty=true;envDirty=true}else genDeposits();return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
+  if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(!window.__testUnlock)msLevel=Math.max(0,Math.min(MS.length-1,s.ms|0));if(typeof s.name==='string'&&s.name.trim())cityName=s.name.trim().slice(0,24);for(const[i,a]of loadShip)if(grid[i])grid[i].shipAt=gameT+a;loadShip=[];for(const[i,a]of loadFires){if(!grid[i])continue;if(a<0)makeRuin(i,true);else startFire(i,a)}loadFires=[];whDirty=true;if(POOL)spreadPool(POOL);syncGoods();try{fixDeep();for(const h of hist)for(const k in h)if(typeof h[k]==='number'&&!Number.isFinite(h[k]))h[k]=0}catch(e){}if(Array.isArray(s.hist))hist=s.hist;if(Array.isArray(s.dep)){dep.fill(0);for(const[i,k]of s.dep)if(i>=0&&i<N*N&&DEP[k])dep[i]=k;depDirty=true;envDirty=true}else genDeposits();return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
 function clearCity(){for(const cr of crimes)cr.pin.remove();crimes=[];for(const f of fires){scene.remove(f.fx);if(f.spray)scene.remove(f.spray);f.pin.remove()}fires=[];for(const h of helis){scene.remove(h.m)}helis=[];for(const tr of trains)scene.remove(tr.g);trains=[];for(const C of constructs){C.cell.group.remove(C.sc,C.cr)}constructs.length=0;for(const c of cars)scene.remove(c.mesh);cars=[];resMap.clear();for(let i=0;i<N*N;i++)if(grid[i])removeCell(i);
   for(const f of floats)f.el.remove();floats=[]}
 function preset(type,d){if(type&&MAPS[type])mapType=type;applyTheme();if(d&&DIFF[d])diff=d;pipe.fill(0);money=startCash();pendIn=0;pendOut=0;matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);applyWater();makeEntries();genDeposits()}
