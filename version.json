@@ -1,1 +1,1 @@
-{"v": "6.1.21", "notes": "6.1.21 – magazyny (mały, zwykły, wielki) działają bez prądu: przyjmują i wydają towar, ich pojemność zawsze się liczy, nie pobierają już prądu z sieci i nie pokazują ikony braku zasilania. Tylko wyłączony magazyn jest nieaktywny."}
+{"v": "6.1.22", "notes": "6.1.22 – w finansach utrzymanie jest rozdzielone na Utrzymanie budynków i Import towarów (sklepy, stacja towarowa, centrum spedycji): osobne wiersze w tabeli, nowy kafelek Import ta godzina, rozbicie w kafelkach godzin i w podpowiedzi przy gotówce."}
