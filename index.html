@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.1.17';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.1.18';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1921,8 +1921,9 @@ const baseCash=()=>Math.round(startCash()*1.5);const moneyCap=()=>baseCash()+(pw
 const matCap=()=>pw.matCap;
 /* 6.1.12: running income and costs (sales, fares, exports, taxes / upkeep, imports, fines, losses) wait on the hour's account and are settled at the end of every game hour; building, demolition refunds and loans stay immediate */
 let pendIn=0,pendOut=0;const cashNow=()=>money+pendIn-pendOut;
-function earn(x){if(!(x>0))return 0;pendIn+=x;return x}
-function owe(x){if(x>0)pendOut+=x}
+/* 6.1.18: income and costs flow in continuously again (pendIn/pendOut stay 0; kept so old saves load) */
+function earn(x){if(!(x>0))return 0;return addMoney(x)}
+function owe(x){if(x>0)money-=x}
 function settleHour(){const inc=pendIn,out=pendOut;pendIn=0;pendOut=0;if(!inc&&!out)return;let net=inc-out;
   if(net>0){const room=Math.max(0,moneyCap()-money),add=Math.min(net,room);if(add<net){cur.inc-=net-add;cur.capLost=(cur.capLost||0)+(net-add)}money+=add;net=add}else money+=net;
   setHint(`Rozliczenie godziny: +${fmt(inc)} T¢ przychodów, −${fmt(out)} T¢ wydatków → ${net>=0?'+':'−'}${fmt(Math.abs(Math.round(net)))} T¢`+(money<0?` · Dług ${fmt(-money)} T¢: poniżej −2 000 T¢ miasto zbankrutuje!`:''),money<0,true);float(-1,'','money')}
@@ -3817,7 +3818,7 @@ function dayRows(){const d=Math.floor(gameT/1440)-1;return{d,rows:d>=0?hist.filt
 function hourForecast(){const sec=Math.min(60,Math.max(0,cur.secs)),rest=60-sec,L=hist[hist.length-1];
   const run=(cur.inc||0)-(cur.taxInc||0)-(cur.utilTax||0),lastRun=L?(L.inc||0)-(L.taxInc||0)-(L.utilTax||0):run*60/Math.max(1,sec);
   const pace=sec>=8?run/sec:(L?lastRun/60:run/Math.max(1,sec)),inc=run+pace*rest+taxIncome()+utilIncome();
-  const bills=(sec<30?2:1)-(Math.floor(gameT%60)>=30&&sec<30?1:0),up=(cur.upkeep||0)+Math.max(0,bills)*upkeepRate(isNight())/2;
+  const bills=Math.max(0,10-Math.floor((gameT%60)/6)),up=(cur.upkeep||0)+bills*upkeepRate(isNight())/10;
   return inc-up-(cur.crimeLoss||0)}
 function dayReport(){const{d,rows}=dayRows();if(!rows.length)return;const v=rows.reduce((a,o)=>a+netOf(o),0);setHint(`Bilans dnia ${d+1}: ${v>=0?'+':'−'}${fmt(Math.abs(v))} T¢ (szczegóły w Gospodarce)`,v<0,true);hintEl.hidden=false}
 /* a table with “average per hour” and “day balance” columns; rows: ['g',group] | [label,f,plain] | ['s',label,f]; day:'sum'|'mwh'|'avg' */
@@ -3849,7 +3850,7 @@ function renderStats(){for(const b of document.querySelectorAll('[data-st]'))b.s
       scard('shop',an>=0?'#2f9e5a':'#d4483a','Saldo / godz.',`${T1(an)} T¢`,`${lastN==null?'':`ostatnia ${T1(lastN)} · `}ta godz. ${T1(fc)} (prognoza)`)+
       scard('ord',day==null?'#7d8790':day>=0?'#2f9e5a':'#d4483a',dr.length?`Bilans dnia ${d+1}`:'Bilans dnia',day==null?'–':`${T1(day)} T¢`,day==null?'pierwszy o północy':'')+
       scard('suitcase','#3c9a5f','Przychody / godz.',inc==null?'–':`${cpt(inc)} T¢`,`podatki ok. ${cpt(taxIncome())} T¢/godz.`)+
-      scard('cityHall','#e98a3a','Utrzymanie / godz.',`${cpt(upkeepRate(isNight()))} T¢`,`rozliczenie na koniec godziny`)+
+      scard('cityHall','#e98a3a','Utrzymanie / godz.',`${cpt(upkeepRate(isNight()))} T¢`,`co 6 min pobierane 10%: ${cpt(upkeepRate(isNight())/10)} T¢`)+
       (loan?scard('bankG','#d4483a','Pożyczka do spłaty',`${cpt(loan.left)} T¢`,`${loan.daysLeft} ${loan.daysLeft===1?'dzień':'dni'} · rata ${cpt(loanDue())} T¢`):'')}
     document.getElementById('stTbl').innerHTML=flowTable([['Przychody razem',o=>o.inc],['  Sklepy, piekarnie, galerie',o=>o.shopInc!=null?o.shopInc:Math.max(0,o.inc-(o.entInc||0)),1],['  Rozrywka (kino, teatr, kasyno, restauracje)',o=>o.entInc||0,1],['  Hotele (noclegi)',o=>o.hotelInc||0,1],['  Podatki od mieszkańców',o=>o.taxInc||0,1],['  Praca więźniów',o=>o.prisonInc||0,1],['  w tym od przyjezdnych',o=>o.tourInc||0,1],
       ['Zwroty z wyburzeń',o=>o.refund],['Utrzymanie',o=>-o.upkeep],['Pożyczki (wypłata)',o=>o.loanIn||0],['Spłata pożyczki',o=>-(o.loanPay||0)],['Straty z przestępstw',o=>-(o.crimeLoss||0)],['s','Saldo gotówki',netOf]]);
@@ -3859,7 +3860,7 @@ function renderStats(){for(const b of document.querySelectorAll('[data-st]'))b.s
     for(const k of cats){const l=items.filter(q=>q.cat===k).sort((x,y)=>y.sum-x.sum),tot=l.reduce((a,z)=>a+z.sum,0),n=l.reduce((a,z)=>a+z.n,0),open=upkOpen.has(k);
       u+=`<button class="ucath" data-uc="${k}" aria-expanded="${open}">${k} <span class="n">${n} ${n===1?'pozycja':n<5?'pozycje':'pozycji'}</span><span class="v">${fmt1(tot)} T¢/godz.</span></button>`;
       if(open)u+=`<div class="ucatb">${l.map(q=>`<span>${q.name}${q.n>1||q.unit?`: ${q.n} × ${q.unit} T¢${q.per>1?' / '+q.per+' godz.':''}`:''}</span><span>${fmt1(q.sum)} T¢/godz.</span>`).join('')}</div>`}
-    document.getElementById('stUpk').innerHTML=(u||'<small class="tnote">Brak budynków z utrzymaniem.</small>')+`<div class="upkTot"><span><b>Razem w dzień</b></span><span><b>${fmt(upkeepRate(false))} T¢/godz.</b></span><span>W nocy (parki ×0,5)</span><span>${fmt(upkeepRate(true))} T¢/godz.</span><span>Na rachunku tej godziny</span><span>+${fmt(Math.round(pendIn))} / −${fmt(Math.round(pendOut))} T¢</span><span>Rozliczenie za</span><span>${60-Math.floor(gameT%60)} min</span></div>`}
+    document.getElementById('stUpk').innerHTML=(u||'<small class="tnote">Brak budynków z utrzymaniem.</small>')+`<div class="upkTot"><span><b>Razem w dzień</b></span><span><b>${fmt(upkeepRate(false))} T¢/godz.</b></span><span>W nocy (parki ×0,5)</span><span>${fmt(upkeepRate(true))} T¢/godz.</span><span>Co 6 min gry (10% stawki)</span><span>${fmt(upkeepRate(isNight())/10)} T¢</span><span>Następne pobranie za</span><span>${6-Math.floor(gameT%6)} min</span></div>`}
   if(stTab==='prod'){renderNeeds();const gl=Object.keys(GOODS);
     document.getElementById('stGoods').innerHTML='<tr><th>Produkt</th><th>Cena</th><th>Magazyn</th><th>Półki</th><th>Produkcja</th><th>Zużycie</th><th>Sprzedaż</th></tr>'+gl.map(k=>{let sh=0;
         for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isShop(c.t))sh+=c.shelf[k]||0}
@@ -4210,8 +4211,8 @@ const pwr=(x,gw)=>gw?(x/1000).toLocaleString('pl-PL',{minimumFractionDigits:2,ma
 let last={},hudT=0;const segs={};
 for(const k of['mat',...Object.keys(goods)]){const sp=document.createElement('span');sp.style.background=GOODS[k].col;sp.title=GOODS[k].name;document.getElementById('matBar').appendChild(sp);segs[k]=sp}
 function hud(){fixNaN();const mc=moneyCap(),tc=matCap();const v={m:Math.round(money),mc,t:Math.round(stored()),tc};
-  {const L=hist[hist.length-1],d=Math.round(pendIn-pendOut),key=d+'|'+Math.round(pendIn)+'|'+(L?Math.round(opNet(L)):''),el=document.getElementById('moneyD');if(key!==last.md){last.md=key;el.textContent=(d>=0?'+':'−')+cpt(Math.abs(d),1e3);el.className='dlt '+(d>=0?'pos':'neg');
-    el.title=`Rozliczenie na koniec godziny: przychody +${fmt(Math.round(pendIn))} T¢, wydatki −${fmt(Math.round(pendOut))} T¢`+(L?` · poprzednia godzina: ${opNet(L)>=0?'+':'−'}${fmt(Math.abs(Math.round(opNet(L))))} T¢`:'')}}
+  {const L=hist[hist.length-1],d=L?Math.round(opNet(L)):null,el=document.getElementById('moneyD');if(d!==last.md){last.md=d;el.textContent=d==null?'':(d>=0?'+':'−')+cpt(Math.abs(d),1e3);el.className='dlt '+(d==null?'':d>=0?'pos':'neg');
+    el.title=L?`Bilans poprzedniej godziny: przychody +${fmt(Math.round(L.inc))} T¢, utrzymanie i straty −${fmt(Math.round(L.upkeep+(L.crimeLoss||0)))} T¢ (bez budowy, ulepszeń i pożyczek)`:'Bilans pojawi się po pierwszej pełnej godzinie gry'}}
   if(v.m!==last.m||v.mc!==last.mc){U.money.textContent=cpt(v.m);U.moneyCap.textContent=cpt(mc);U.moneyBar.style.width=(mc?v.m/mc*100:0)+'%';U.rm.classList.toggle('full',v.m>=mc);U.rm.classList.toggle('short',v.m<0);
     for(const k in DEF)if(toolBtns[k])toolBtns[k].classList.toggle('poor',money<DEF[k].cost)}
   if(v.t!==last.t||v.tc!==last.tc){U.mat.textContent=cpt(v.t);U.matCap.textContent=cpt(tc);U.rt.classList.toggle('full',tc>0&&v.t>=tc);
@@ -4395,8 +4396,9 @@ function frame(now){requestAnimationFrame(frame);
   constructTick(paused&&!titleOpen?rdt:dt);shipTick(dt);policeTick(dt,night);svcTick(dt);fireTick(dt);heliTick(dt);transportTick(dt);riverTick(dt);tutTick(Math.max(dt,0.016));ovlTick(Math.max(dt,0.016));
   for(let k=popping.length-1;k>=0;k--){const p=popping[k];p.t+=vdt*5;const s=p.t>=1?1:0.5+0.5*Math.sin(p.t*Math.PI/2)*1.08;p.g.scale.setScalar(Math.min(s,1.05));if(p.t>=1){p.g.scale.setScalar(1);popping.splice(k,1)}}
   powerAcc+=dt;if(powerAcc>=0.5||powerDirty){computePower(powerAcc);powerAcc=0}
-  const hBefore=Math.floor(gameT/60),halfBefore=Math.floor(gameT/30);gameT+=dt;cur.secs+=dt;cur.powDem+=pw.dem*dt;if(pw.cat){cur.powCat=cur.powCat||{};for(const k in pw.cat)cur.powCat[k]=(cur.powCat[k]||0)+pw.cat[k]*dt}if(pw.gen){cur.genCat=cur.genCat||{};for(const k in pw.gen)cur.genCat[k]=(cur.genCat[k]||0)+pw.gen[k]*dt}cur.wDem=(cur.wDem||0)+wtr.dem*dt;cur.wClean=(cur.wClean||0)+wtr.clean*dt;cur.wDirty=(cur.wDirty||0)+wtr.dirty*dt;cur.wTreat=(cur.wTreat||0)+wtr.treated*dt;cur.wOut=(cur.wOut||0)+wtr.out*dt;cur.wOver=(cur.wOver||0)+wtr.over*dt;cur.powCap+=pw.cap*dt;
-  if(Math.floor(gameT/30)!==halfBefore){const bill=Math.round(upkeepRate(isNight())/2);
+  const hBefore=Math.floor(gameT/60),tenthBefore=Math.floor(gameT/6);gameT+=dt;cur.secs+=dt;cur.powDem+=pw.dem*dt;if(pw.cat){cur.powCat=cur.powCat||{};for(const k in pw.cat)cur.powCat[k]=(cur.powCat[k]||0)+pw.cat[k]*dt}if(pw.gen){cur.genCat=cur.genCat||{};for(const k in pw.gen)cur.genCat[k]=(cur.genCat[k]||0)+pw.gen[k]*dt}cur.wDem=(cur.wDem||0)+wtr.dem*dt;cur.wClean=(cur.wClean||0)+wtr.clean*dt;cur.wDirty=(cur.wDirty||0)+wtr.dirty*dt;cur.wTreat=(cur.wTreat||0)+wtr.treated*dt;cur.wOut=(cur.wOut||0)+wtr.out*dt;cur.wOver=(cur.wOver||0)+wtr.over*dt;cur.powCap+=pw.cap*dt;
+  /* upkeep: a tenth of the hourly rate every 6 game minutes */
+  if(Math.floor(gameT/6)!==tenthBefore){const bill=Math.round(upkeepRate(isNight())/10);
     if(bill>0){owe(bill);cur.upkeep+=bill}}
   checkBankrupt();
   if(Math.floor(gameT/1440)!==Math.floor((gameT-dt)/1440))loanDay();
