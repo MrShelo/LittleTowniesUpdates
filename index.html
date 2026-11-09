@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.5.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.5.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -4346,7 +4346,7 @@ const MUSIC_SRC=f=>[`music/${f}.mp3`,`https://media.githubusercontent.com/media/
    quiet ambient loops mixed by what is around the middle of the screen: traffic, factories, power plants, the dam, landfills, rivers;
    trains, their horns and sirens are heard only close by; the wind grows with the camera height (from where the far-away car boxes appear).
    Everything plays under the "Sounds" volume, separate from the music */
-const SFX_BASE={cars:0.32,river:0.3,factories:0.26,electricalgenerators:0.26,dam:0.34,garbages:0.26,wind:0.38,railstrain:0.42,sirens:0.34},SFX_HORN=0.45;
+const SFX_BASE={cars:0.96,river:0.3,factories:0.26,electricalgenerators:0.26,dam:0.34,garbages:0.26,wind:0.38,railstrain:0.42,sirens:0.34},SFX_HORN=0.45;
 const SFX_LOOPS=Object.keys(SFX_BASE);
 const sfx={ctx:null,master:null,ch:{},buf:{},vol:0.5,t:0,ready:false,trPh:new Map(),closed:new Set(),hornT:0};
 try{const v=parseFloat(localStorage.getItem('lt-sfx'));if(v>=0&&v<=1)sfx.vol=v}catch(e){}
