@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.5.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.5.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -4187,7 +4187,7 @@ function renderStats(){for(const b of document.querySelectorAll('[data-st]'))b.s
       scard('ord',col(dayN),`Dziś (dzień ${today+1})`,`${T1(dayN)} T¢`,'wynik od północy, bez budowy i pożyczek')+
       (loan?scard('bankG','#d4483a','Pożyczka do spłaty',`${cpt(loan.left)} T¢`,`${loan.daysLeft} ${loan.daysLeft===1?'dzień':'dni'} · rata ${cpt(loanDue())} T¢`):'')
     const cols=[{h:`Ta godzina<br><small>${mins}/60 min</small>`,v:f=>f(cur)},{h:'Poprzednia<br><small>godzina</small>',v:f=>last?f(last):null},{h:`Dziś<br><small>dzień ${today+1}</small>`,v:f=>dayRowsNow.reduce((a,o)=>a+f(o),0)}];
-    const rows=[['Przychody razem',o=>o.inc],['  Sklepy, piekarnie, galerie',o=>o.shopInc!=null?o.shopInc:Math.max(0,o.inc-(o.entInc||0)),1],['  Rozrywka (kino, teatr, kasyno, restauracje)',o=>o.entInc||0,1],['  Hotele (noclegi)',o=>o.hotelInc||0,1],['  Podatki od mieszkańców',o=>o.taxInc||0,1],['  Praca więźniów',o=>o.prisonInc||0,1],['  Bilety (autobusy, kolej)',o=>o.fareInc||0,1],['  w tym od przyjezdnych',o=>o.tourInc||0,1],
+    const rows=[['Przychody razem',o=>o.inc],['  Sklepy, piekarnie, galerie',o=>o.shopInc!=null?o.shopInc:Math.max(0,o.inc-(o.entInc||0)),1],['  Rozrywka (kino, teatr, kasyno, restauracje)',o=>o.entInc||0,1],['  Hotele (noclegi)',o=>o.hotelInc||0,1],['  Podatki od mieszkańców',o=>o.taxInc||0,1],['  Pozostałe podatki (turystyczny, komunalny)',o=>o.utilTax||0,1],['  Eksport towarów (spedycja, dworzec towarowy)',o=>(o.shipInc||0)+(o.frExp||0),1],['  Taksówki',o=>o.taxiInc||0,1],['  Praca więźniów',o=>o.prisonInc||0,1],['  Bilety (autobusy, kolej)',o=>o.fareInc||0,1],['  w tym od przyjezdnych',o=>o.tourInc||0,1],
       ['Utrzymanie budynków',o=>-upkOf(o)],['Import towarów',o=>-impOf(o)],['Straty z przestępstw',o=>-(o.crimeLoss||0)],['s','Wynik miasta',opNet],
       ['g','Poza wynikiem miasta'],['Nagrody za kamienie milowe',o=>o.reward||0],['Zwroty z wyburzeń',o=>o.refund||0],['Pożyczki (wypłata)',o=>o.loanIn||0],['Spłata pożyczki',o=>-(o.loanPay||0)],['s','Zmiana gotówki (bez budowy)',netOf]];
     let h='<tr><th></th>'+cols.map(c=>`<th>${c.h}</th>`).join('')+'</tr>';
@@ -6535,7 +6535,9 @@ const LT_TR=[
 ["Muzyka", "Music", "Musik"],
 ["Dźwięki", "Sounds", "Geräusche"],
 ["{} T¢/kg · w magazynach {}", "{} T¢/kg · in warehouses {}", "{} T¢/kg · im Lager {}"],
-["Krok {} kg, najwyżej {} kg/godz. każdego towaru.", "Step {} kg, at most {} kg/h of each good.", "Schritt {} kg, höchstens {} kg/Std. je Ware."]
+["Krok {} kg, najwyżej {} kg/godz. każdego towaru.", "Step {} kg, at most {} kg/h of each good.", "Schritt {} kg, höchstens {} kg/Std. je Ware."],
+["Pozostałe podatki (turystyczny, komunalny)", "Other taxes (tourist, municipal)", "Weitere Steuern (Touristen-, Kommunal-)"],
+["Eksport towarów (spedycja, dworzec towarowy)", "Goods export (logistics, freight station)", "Warenexport (Spedition, Güterbahnhof)"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
