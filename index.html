@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.7.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.7.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2678,7 +2678,7 @@ let thruT=60;
 function transportTick(dt){if(!dt)return;
   for(const tr of[...trains]){if(tr.line!=null){lineTrainTick(tr,dt);continue}const c=grid[tr.st],L=tr.p.length;if(tr.phase!=='thru'&&(!c||!isStationT(c.t))){removeTrain(tr);continue}if(tr.phase==='thru'&&tr.p.some(j=>!isRailT(j)&&!(grid[j]&&isStationT(grid[mainOf(j)]?grid[mainOf(j)].t:'')))){removeTrain(tr);continue}
     if(tr.phase==='thru'){tr.u+=dt*3.5;if(tr.u-tr.parts.length*TRAIN_GAP>L+0.5){removeTrain(tr);continue}placeTrain(tr);continue}
-    if(tr.phase==='in'){tr.u+=dt*3;if(tr.u>=L-1){tr.u=L-1;tr.phase='wait';tr.wait=4;trainArrive(tr)}}else if(tr.phase==='wait'){tr.wait-=dt;if(tr.wait<=0)tr.phase='out'}else{tr.u-=dt*3;if(tr.u<=-2.2){removeTrain(tr);continue}}placeTrain(tr)}
+    if(tr.phase==='in'){tr.u+=dt*3;if(tr.u>=L-1){tr.u=L-1;tr.phase='wait';tr.wait=tr.kind==='pass'?9:4;trainArrive(tr)}}else if(tr.phase==='wait'){tr.wait-=dt;if(tr.wait<=0)tr.phase='out'}else{tr.u-=dt*3;if(tr.u<=-2.2){removeTrain(tr);continue}}placeTrain(tr)}
   crossingTick(dt);
   thruT-=dt;if(thruT<=0){thruT=150+Math.random()*90;if(!trains.some(t=>t.phase==='thru')){const pth=thruPath();if(pth)spawnTrain(-1,Math.random()<0.5?'pass':'freight',pth)}}
   trainChk-=dt;if(trainChk>0)return;trainChk=0.5;
@@ -2791,7 +2791,7 @@ function lineTrainTick(tr,dt){const L=lineOf(tr.line),R=L&&L.on?railRoute(L):nul
     if(tr.next!=null){const k=L.stops.indexOf(tr.next);if(k<0){removeTrain(tr);return}tr.at=tr.next;tr.to=L.stops[(k+1)%L.stops.length];tr.next=null;tr.p=R.legs[k].p;tr.u=R.legs[k].u0;placeTrain(tr)}
     tr.phase='lgo';return}
   if(!tr.p.every(onRail)){removeTrain(tr);return}
-  const n=tr.p.length;tr.u+=dt*3;if(tr.u>=n-1){tr.u=n-1;const S=tr.to;tr.next=L.stops.includes(S)?S:L.stops[0];tr.phase='lwait';tr.wait=4;railAtStop(tr,L,S)}placeTrain(tr)}
+  const n=tr.p.length;tr.u+=dt*3;if(tr.u>=n-1){tr.u=n-1;const S=tr.to;tr.next=L.stops.includes(S)?S:L.stops[0];tr.phase='lwait';tr.wait=9;railAtStop(tr,L,S)}placeTrain(tr)}
 /* ---------- lines: vehicles, waiting, the map overlay ---------- */
 function delLine(id){const L=lineOf(id);if(!L)return;tLines=tLines.filter(q=>q!==L);for(const c of cars)if(!c.dead&&c.kind==='bus'&&c.line===id)removeCar(c);for(const tr of[...trains])if(tr.line===id)removeTrain(tr);
   for(const[S,q]of paxQ){const k=q.filter(r=>r.line!==id);if(k.length!==q.length){paxQ.set(S,k);stopVis(S)}}if(lineEdit===id)lineEdit=null;transVer++}
@@ -4374,7 +4374,7 @@ const MUSIC_SRC=f=>[`music/${f}.mp3`,`https://media.githubusercontent.com/media/
    quiet ambient loops mixed by what is around the middle of the screen: traffic, factories, power plants, the dam, landfills, rivers;
    trains, their horns and sirens are heard only close by; the wind grows with the camera height (from where the far-away car boxes appear).
    Everything plays under the "Sounds" volume, separate from the music */
-const SFX_BASE={cars:1.22,river:0.27,factories:0.21,electricalgenerators:0.21,dam:0.32,garbages:0.26,wind:0.38,railstrain:0.42,sirens:0.34},SFX_HORN=0.45;
+const SFX_BASE={cars:1.22,river:0.27,factories:0.21,electricalgenerators:0.21,dam:0.32,garbages:0.26,wind:0.38,railstrain:0.42,sirens:0.34},SFX_HORN=0.36;
 const SFX_LOOPS=Object.keys(SFX_BASE);
 const sfx={ctx:null,master:null,ch:{},buf:{},vol:0.5,t:0,ready:false,trPh:new Map(),closed:new Set(),hornT:0};
 try{const v=parseFloat(localStorage.getItem('lt-sfx'));if(v>=0&&v<=1)sfx.vol=v}catch(e){}
