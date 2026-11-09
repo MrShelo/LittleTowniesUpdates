@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.6.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.6.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2420,7 +2420,7 @@ function serve(c,d,i){
   if(TRASH[d.t]&&d.trash>=TRASH[d.t].cap){float(i,'pełno śmieci','warn');return}
   const sc=SCAP(d);if(sc){d.vis=d.vis||0;if(d.vis>=sc){d.crowdT=30;if(!d.crowd){d.crowd=true;envDirty=true}cur.crowd=(cur.crowd||0)+1;float(i,'tłok, klient odchodzi','warn');return}d.vis+=1}
   let pay=0,ent=0;
-  if(isShop(d.t)&&(d.t!=='gallery'||d.stores.length)){const k=shelfTotal(d)>=1?pickShelf(d,c.kind==='commuter'?c.home:null):undefined;if(k!==undefined){d.shelf[k]=Math.max(0,(d.shelf[k]||0)-1);cur.sales++;cur.sold[k]=(cur.sold[k]||0)+1;if(c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t]){const n=needOf(k);if(n){const H=needs(grid[c.home]);H[n.k]=Math.min(1,H[n.k]+0.5/Math.max(1,popOf(grid[c.home])/4))}}pay+=d.t==='restaurant'?priceAt(d,k):priceAt(d,k)*TAX.buy/20;cur.buyTax=(cur.buyTax||0)+(d.t==='restaurant'?0:priceAt(d,k)*TAX.buy/20)}
+  if(isShop(d.t)&&(d.t!=='gallery'||d.stores.length)){const k=shelfTotal(d)>=1?pickShelf(d,c.kind==='commuter'?c.home:null):undefined;{/* demand: what the customer came for, even when the shelf is empty */const w=k!==undefined?k:wantedGood(d,c.kind==='commuter'?c.home:null);if(w!==undefined){cur.want=cur.want||{};cur.want[w]=(cur.want[w]||0)+1}}if(k!==undefined){d.shelf[k]=Math.max(0,(d.shelf[k]||0)-1);cur.sales++;cur.sold[k]=(cur.sold[k]||0)+1;if(c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t]){const n=needOf(k);if(n){const H=needs(grid[c.home]);H[n.k]=Math.min(1,H[n.k]+0.5/Math.max(1,popOf(grid[c.home])/4))}}pay+=d.t==='restaurant'?priceAt(d,k):priceAt(d,k)*TAX.buy/20;cur.buyTax=(cur.buyTax||0)+(d.t==='restaurant'?0:priceAt(d,k)*TAX.buy/20)}
     else if(!(d.t==='gallery'&&d.cinema)){cur.noStock++;float(i,d.t==='restaurant'?'brak jedzenia':'brak towaru','warn');return}}
   if(d.t==='gallery'&&d.cinema&&(Math.random()<0.4||!pay)){pay+=PRICE.cinema;ent+=PRICE.cinema}
   if(d.t==='casino'){const r=Math.random();if(r<0.12){const loss=Math.round(PRICE.casino*(1+Math.random()*3));owe(loss);cur.inc-=loss;cur.entInc-=loss;float(i,`−${fmt(loss)} T¢ wygrana gościa`,'warn');addTrash(d,TRASH[d.t].per);return}
@@ -3135,6 +3135,9 @@ const needOf=g=>NEEDS.find(n=>n.goods.includes(g));const NEED_FULL=0.95;const wa
 const WATER_PP=0.25,waterOf=c=>HLV[c.t]?popOf(c)*WATER_PP:WATER[c.t]*hMul(c);
 const needs=c=>{c.need=c.need||{};for(const n of NEEDS)if(c.need[n.k]==null)c.need[n.k]=0.7;return c.need};
 /* the shopper takes what their household lacks most; without a household it is random */
+/* the good a resident came for: the one of their lowest need among what the shop sells */
+function wantedGood(c,home){let l;try{l=sellsOf(c)}catch(e){return undefined}if(!l||!l.length)return undefined;const H=home!=null&&grid[home]&&HLV[grid[home].t]?needs(grid[home]):null;if(!H)return undefined;
+  let best,bv=9;for(const k of l){const n=needOf(k);if(!n||H[n.k]>=NEED_FULL)continue;if(H[n.k]<bv){bv=H[n.k];best=k}}return best}
 function pickShelf(c,home){let l=sellsOf(c).filter(k=>(c.shelf[k]||0)>0);if(!l.length)return undefined;const H=home!=null&&grid[home]&&HLV[grid[home].t]?needs(grid[home]):null;if(H){l=l.filter(k=>wantsGood(H,k));if(!l.length)return undefined}
   if(!H)return l[(Math.random()*l.length)|0];let best=l[0],bv=9;const ok=BASIC.every(k=>H[k]>=0.5);for(const k of l){const n=needOf(k);const v=(n?H[n.k]+(BASIC.includes(n.k)?0:ok?0.1:0.6):1)+Math.random()*0.15;if(v<bv){bv=v;best=k}}return best}
 function needsHour(){for(const c of grid){if(!c||!HLV[c.t]||c.aband||!popOf(c))continue;const H=needs(c);for(const n of NEEDS)H[n.k]=Math.max(0,H[n.k]-n.decay*(n.k==='food'&&typeof ORD!=='undefined'&&ORD.health?1.5:1))}}
@@ -4219,10 +4222,10 @@ function renderStats(){for(const b of document.querySelectorAll('[data-st]'))b.s
       if(open)u+=`<div class="ucatb">${l.map(q=>`<span>${q.name}${q.n>1||q.unit?`: ${q.n} × ${q.unit} T¢${q.per>1?' / '+q.per+' godz.':''}`:''}</span><span>${fmt1(q.sum)} T¢/godz.</span>`).join('')}</div>`}
     document.getElementById('stUpk').innerHTML=(u||'<small class="tnote">Brak budynków z utrzymaniem.</small>')+`<div class="upkTot"><span><b>Razem w dzień</b></span><span><b>${fmt(upkeepRate(false))} T¢/godz.</b></span><span>W nocy (parki ×0,5)</span><span>${fmt(upkeepRate(true))} T¢/godz.</span><span>Co 6 min gry (10% stawki)</span><span>${fmt(upkeepRate(isNight())/10)} T¢</span><span>Następne pobranie za</span><span>${6-Math.floor(gameT%6)} min</span></div>`}
   if(stTab==='prod'){renderNeeds();const gl=Object.keys(GOODS);
-    document.getElementById('stGoods').innerHTML='<tr><th>Produkt</th><th>Cena</th><th>Magazyn</th><th>Półki</th><th>Produkcja</th><th>Zużycie</th><th>Sprzedaż</th></tr>'+gl.map(k=>{let sh=0;
+    document.getElementById('stGoods').innerHTML='<tr><th>Produkt</th><th>Cena</th><th>Magazyn</th><th>Półki</th><th>Produkcja</th><th>Zapotrzebowanie</th><th>Zużycie i sprzedaż</th></tr>'+gl.map(k=>{let sh=0;
         for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isShop(c.t))sh+=c.shelf[k]||0}
-        return`<tr><td><span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}</td><td>${GOODS[k].raw?'–':GOODS[k].price}</td><td>${fmt(have(k))}</td><td>${GOODS[k].raw?'–':sh}</td><td>${r1(((ref.made&&ref.made[k])||0)+(k==='mat'?(ref.matRec||0):0))}</td><td>${r1((ref.used&&ref.used[k])||0)}</td><td>${GOODS[k].raw?'–':r1((ref.sold&&ref.sold[k])||0)}</td></tr>`}).join('')+
-      `<tr><td colspan="7" style="color:var(--muted);font-size:11.5px">Na godzinę gry (${last?'ostatnia pełna':'bieżąca'}). Zużycie: surowce w fabrykach i materiały spalane w elektrowniach. Materiały powstają tylko w wytwórniach materiałów i recyklingu; fabryki zużywają je na każdą partię.</td></tr>`;
+        return`<tr><td><span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}</td><td>${GOODS[k].raw?'–':GOODS[k].price}</td><td>${fmt(have(k))}</td><td>${GOODS[k].raw?'–':sh}</td><td>${r1(((ref.made&&ref.made[k])||0)+(k==='mat'?(ref.matRec||0):0))}</td><td>${r1(GOODS[k].raw?((ref.used&&ref.used[k])||0):((ref.want&&ref.want[k])||0))}</td><td>${r1(((ref.used&&ref.used[k])||0)+((ref.sold&&ref.sold[k])||0))}</td></tr>`}).join('')+
+      `<tr><td colspan="7" style="color:var(--muted);font-size:11.5px">Na godzinę gry (${last?'ostatnia pełna':'bieżąca'}). Zapotrzebowanie: ilu klientów przyszło po dany towar (także gdy półka była pusta); przy surowcach – ile zużyły fabryki i elektrownie. Zużycie i sprzedaż: surowce zużyte w fabrykach, materiały spalone w elektrowniach i towary sprzedane w sklepach. Materiały powstają tylko w wytwórniach materiałów i recyklingu; fabryki zużywają je na każdą partię.</td></tr>`;
     document.getElementById('stMatT').innerHTML=flowTable([['Dostarczone do magazynów',o=>o.matIn],['Wysłane do sklepów',o=>-o.matShop],['Spalone w elektrowniach',o=>-o.matCoal],['Z recyklingu',o=>o.matRec||0],['s','Saldo magazynów',o=>o.matIn-o.matShop-o.matCoal+(o.matRec||0)]]);
     document.getElementById('chMat').innerHTML=barChart(o=>o.matIn-o.matShop-o.matCoal+(o.matRec||0),'t')}
   if(stTab==='ppl'){const st=[0,0,0,0,0];for(const c of grid)if(c&&c.pp)for(const q of c.pp)st[stageOf(q.a)]++;const pop=st.reduce((a,b)=>a+b,0);
@@ -6559,7 +6562,10 @@ const LT_TR=[
 ["Krok {} kg, łącznie najwyżej {} kg na jeden wywóz.", "Step {} kg, at most {} kg in total per shipment.", "Schritt {} kg, insgesamt höchstens {} kg pro Abholung."],
 ["Krok {} kg, łącznie najwyżej {} kg na jeden transport.", "Step {} kg, at most {} kg in total per delivery.", "Schritt {} kg, insgesamt höchstens {} kg pro Lieferung."],
 ["Wywozi tyle, ile jest w magazynach.", "Takes as much as there is in the warehouses.", "Nimmt so viel, wie im Lager ist."],
-["Sprowadza tyle, ile zmieści się w magazynach i na ile starczy gotówki.", "Brings as much as fits in the warehouses and the cash allows.", "Bringt so viel, wie ins Lager passt und das Geld reicht."]
+["Sprowadza tyle, ile zmieści się w magazynach i na ile starczy gotówki.", "Brings as much as fits in the warehouses and the cash allows.", "Bringt so viel, wie ins Lager passt und das Geld reicht."],
+["Zapotrzebowanie", "Demand", "Nachfrage"],
+["Zużycie i sprzedaż", "Used and sold", "Verbrauch und Verkauf"],
+["Na godzinę gry ({}). Zapotrzebowanie: ilu klientów przyszło po dany towar (także gdy półka była pusta); przy surowcach – ile zużyły fabryki i elektrownie. Zużycie i sprzedaż: surowce zużyte w fabrykach, materiały spalone w elektrowniach i towary sprzedane w sklepach. Materiały powstają tylko w wytwórniach materiałów i recyklingu; fabryki zużywają je na każdą partię.", "Per game hour ({}). Demand: how many customers came for the good (also when the shelf was empty); for raw materials – how much factories and power plants used. Used and sold: raw materials used in factories, materials burned in power plants and goods sold in shops. Materials are made only in materials workshops and recycling; factories use them for every batch.", "Pro Spielstunde ({}). Nachfrage: wie viele Kunden wegen der Ware kamen (auch bei leerem Regal); bei Rohstoffen – wie viel Fabriken und Kraftwerke verbraucht haben. Verbrauch und Verkauf: in Fabriken verbrauchte Rohstoffe, in Kraftwerken verbranntes Material und in Läden verkaufte Waren. Material entsteht nur in Materialwerkstätten und beim Recycling; Fabriken verbrauchen es für jede Charge."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
