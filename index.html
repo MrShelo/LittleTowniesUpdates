@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.3.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.3.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1821,10 +1821,13 @@ function computeDams(){lowW.fill(0);damSealed.fill(0);damRank.fill(0);const seen
     /* water still runs through a working dam's turbines, so dams further down the river (in series) work too */
     const fed=reach.slice(),groups=[],dg=new Uint8Array(N*N);/* fed: 0 = no water from a source, 1 = straight from the source, n = below n−1 working dams */
     for(const d0 of comp){if(!isDam(d0)||dg[d0])continue;const grp=[d0];dg[d0]=1;for(let h=0;h<grp.length;h++)for(const j of nbrs(grp[h]))if(water[j]&&isDam(j)&&!dg[j]){dg[j]=1;grp.push(j)}groups.push(grp)}
-    for(let changed=true;changed;){changed=false;for(const grp of groups){if(damSealed[grp[0]])continue;let up=0;const dn=[];
+    /* in waves: every dam that works on the water fed so far is sealed together, and only then does water flow on past them, so parallel dams on the
+       branches around an island both work (before 6.3.2 the water let through one branch reached the other dam from below and switched it off) */
+    for(let changed=true;changed;){changed=false;const wave=[];for(const grp of groups){if(damSealed[grp[0]])continue;let up=0;const dn=[];
         for(const d of grp)for(const j of nbrs(d))if(water[j]&&!isDam(j)){if(fed[j])up=up?Math.min(up,fed[j]):fed[j];else dn.push(j)}
-        if(!up||!dn.length)continue;for(const j of grp){damSealed[j]=1;damRank[j]=Math.min(9,up-1)}changed=true;const r=Math.min(250,up+1);
-        for(const j of dn)fed[j]=r;for(let h=0;h<dn.length;h++)for(const k of nbrs(dn[h]))if(water[k]&&!fed[k]&&!isDam(k)){fed[k]=r;dn.push(k)}}}
+        if(up&&dn.length)wave.push([grp,up,dn])}
+      for(const[grp,up,dn]of wave){for(const j of grp){damSealed[j]=1;damRank[j]=Math.min(9,up-1)}changed=true;const r=Math.min(250,up+1);
+        for(const j of dn)if(!fed[j])fed[j]=r;const q=dn.filter(j=>fed[j]===r);for(let h=0;h<q.length;h++)for(const k of nbrs(q[h]))if(water[k]&&!fed[k]&&!isDam(k)){fed[k]=r;q.push(k)}}}
     for(const j of comp)if(!isDam(j)&&!reach[j])lowW[j]=Math.max(1,Math.min(9,fed[j]-1))}
   const sig=lowW.join('');if(sig!==lowSig){lowSig=sig;applyWaterLevels()}}
 function applyWaterLevels(){for(const[i,[m,k]]of wIdx){dObj.position.set(cx(i),-LOW_DROP*Math.min(3,lowW[i]),cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();m.setMatrixAt(k,dObj.matrix)}
