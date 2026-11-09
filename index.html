@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.5.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.5.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -311,6 +311,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ucath[aria-expanded="true"]::before{transform:rotate(90deg)}.ucath .n{color:var(--muted);font-weight:500;font-size:12px}.ucath .v{margin-left:auto;font-variant-numeric:tabular-nums}
 .ucatb{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:12.5px;padding:2px 10px 8px 25px;font-variant-numeric:tabular-nums}.ucatb span:nth-child(2n){text-align:right}
 .upkTot{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:13px;margin-top:6px;font-variant-numeric:tabular-nums}.upkTot span:nth-child(2n){text-align:right}
+.dep{display:flex;flex-direction:column;gap:5px}.dep .dpr{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:6px 8px 6px 11px;border-radius:10px;background:var(--chip);border:1px solid transparent}.dep .dpr.on{border-color:var(--accent)}
+.dep .dpn{min-width:0;text-align:left}.dep .dpn b{display:block;font-size:13px;line-height:1.25}.dep .dpn small{display:block;color:var(--muted);font-size:11px;line-height:1.3}.dep .stp{display:flex;align-items:center;gap:4px}.dep .stp .btn{width:32px;height:30px;padding:0;font-size:16px;line-height:1}.dep .stp b{min-width:70px;text-align:center;font-size:12.5px;white-space:nowrap}.dep .dpnote{color:var(--muted);font-size:11px;margin-top:2px}
 .needs{display:flex;flex-direction:column;gap:8px}.needs .nd{display:flex;flex-direction:column;gap:5px;padding:9px 11px;border-radius:10px;background:var(--chip)}.needs .ndh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.needs .ndh em{font-style:normal;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-left:6px}.needs .ndv{font:600 15px var(--font-d)}.needs .ndf{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px}.needs .ndf span{white-space:nowrap}.needs .ndf b{font-weight:600}.needs .nnote{font-size:12px;color:var(--muted);line-height:1.45}.needs .nd b{font-size:13px}.needs .bar2{height:8px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden}.needs .bar2 i{display:block;height:100%}.needs small{color:var(--muted);font-size:11.5px}#taxBox{display:grid;gap:3px}#taxBox small{color:var(--muted);font-size:11.5px;margin-bottom:4px}#taxBox input{width:100%}.taxp{max-height:calc(100% - 150px);overflow:auto}.insp.locked .up,.insp.locked [data-line],.insp.locked [data-spec],.insp.locked [data-buy],.insp.locked [data-cinema],.insp.locked [data-attr],.insp.locked [data-fm],.insp.locked [data-fg],.insp.locked [data-fn]{opacity:.55;pointer-events:none}.insp .catnav{margin-top:6px}.insp .fr{display:grid;gap:6px;padding:8px 0;border-top:1px solid var(--line)}.insp .fr small{color:var(--muted)}.insp .frr{display:flex;align-items:center;gap:10px}.insp .frr b{min-width:90px;text-align:center}.insp .frr .btn{min-height:34px;padding:4px 12px}.crimeChip .s-fire{background:#e8641c;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;color:#fff;box-shadow:0 0 0 2px #fff3}.crimeChip .s-fire svg{width:16px;height:16px}.crimeChip.big .s-crime{background:#b8860b;width:26px;height:26px}.crimeChip.big .s-crime svg{width:18px;height:18px}.crimeChip.blink{box-shadow:0 0 0 2px #ff3b30,0 2px 6px rgba(0,0,0,.25)}
 .st .s-aband{background:#4a4038}.st .s-ill{background:#c43c5a}.st .s-dead{background:#3d3d44}.st .s-crowd{background:#c25a2a}.st .s-off{background:#5a6168}
 .st .s-dirty{background:#6f5a3a}
@@ -2621,9 +2623,9 @@ function crossingTick(dt){if(crossVer!==railVer){crossVer=railVer;crossList=[];f
 function removeTrain(tr){trains=trains.filter(q=>q!==tr);scene.remove(tr.g);disposeTree(tr.g)}
 /* freight: per ramp a good, a mode (import/export/off) and an hourly amount from 10, in steps of 5 */
 /* 6.1.23: import depot — the player sets kg per hour for each good; every game hour a truck per good brings it from the nearest city edge to the depot, from where it goes into the warehouses. With an active depot in town, shops stop importing on their own */
-const DEP_STEP=10,DEP_MAX=300;const depots=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.t==='impDep'&&!c.off&&entryOf(i)>=0)o.push(i)}return o};
+const DEP_STEP=5,DEP_MAX=50;const depots=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.t==='impDep'&&!c.off&&entryOf(i)>=0)o.push(i)}return o};
 const hasDepot=()=>counts.impDep>0&&depots().length>0,depPrice=k=>frPrice(k)*SHOP_IMP;
-function depotHour(){for(const i of depots()){const c=grid[i];c.dimp=c.dimp||{};const e=entryOf(i),b=bfs(e),outs=edgeOuts().filter(o=>b.dist[o]>=0);
+function depotHour(){for(const i of depots()){const c=grid[i];c.dimp=c.dimp||{};for(const k in c.dimp)if(c.dimp[k]>DEP_MAX)c.dimp[k]=DEP_MAX;const e=entryOf(i),b=bfs(e),outs=edgeOuts().filter(o=>b.dist[o]>=0);
   if(!outs.length){if(Object.values(c.dimp).some(v=>v>0))float(i,'brak drogi do granicy miasta','warn');continue}const o=outs.reduce((a,q)=>b.dist[q]<b.dist[a]?q:a,outs[0]);
   for(const k in c.dimp){const want=c.dimp[k]||0;if(want<=0)continue;let n=Math.floor(Math.min(want,whFreeFor(k)));if(n<1){float(i,`${frName(k)}: magazyny pełne`,'warn');continue}
     const u=depPrice(k);n=Math.min(n,Math.floor((cashNow()-IMP_FLOOR)/u));if(n<1){float(i,'import wstrzymany: za duży dług','warn');continue}
@@ -3903,7 +3905,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(c.t==='impDep'){c.dimp=c.dimp||{};const on=FR_GOODS.filter(k=>(c.dimp[k]||0)>0),tot=on.reduce((a,k)=>a+c.dimp[k]*depPrice(k),0);
     R('Zamówienia',on.length?`${on.length} ${on.length===1?'towar':on.length<5?'towary':'towarów'} · ok. ${fmt(Math.round(tot))} T¢/godz.`:'nic — ustaw ilości poniżej');R('Dostawa','co pełną godzinę, ciężarówką z granicy miasta');
     R('Ostatnia',c.dlast!=null?`${Math.max(0,Math.round(gameT-c.dlast))} min temu`:'jeszcze nie było');
-    pick=`<div class="dep">${FR_GOODS.map(k=>{const v=c.dimp[k]||0;return`<div class="frr"><span style="flex:1;text-align:left">${frName(k)} <small>· ${mw(Math.round(depPrice(k)*10)/10)} T¢/kg · w magazynach ${fmt(Math.round(have(k)))}</small></span><button class="btn panel" data-dpn="${k}:-${DEP_STEP}"${v<=0?' disabled':''}>−${DEP_STEP}</button><b style="min-width:84px">${v} kg/godz.</b><button class="btn panel" data-dpn="${k}:${DEP_STEP}"${v>=DEP_MAX?' disabled':''}>+${DEP_STEP}</button></div>`}).join('')}</div>`}
+    pick=`<div class="dep">${FR_GOODS.map(k=>{const v=Math.min(DEP_MAX,c.dimp[k]||0);return`<div class="dpr${v?' on':''}"><div class="dpn"><b>${frName(k)}</b><small>${mw(Math.round(depPrice(k)*10)/10)} T¢/kg · w magazynach ${fmt(Math.round(have(k)))}</small></div><div class="stp"><button class="btn panel" data-dpn="${k}:-${DEP_STEP}"${v<=0?' disabled':''} aria-label="−${DEP_STEP} kg">−</button><b>${v} kg/godz.</b><button class="btn panel" data-dpn="${k}:${DEP_STEP}"${v>=DEP_MAX?' disabled':''} aria-label="+${DEP_STEP} kg">+</button></div></div>`}).join('')}<small class="dpnote">Krok ${DEP_STEP} kg, najwyżej ${DEP_MAX} kg/godz. każdego towaru.</small></div>`}
   if(c.t==='freightSt'){pick=frRamps(c).map((r0,r)=>{const cost=Math.round(r0.n*frPrice(r0.k)*(r0.m==='imp'?FR_IMP:FR_EXP));return`<div class="fr"><b>Rampa ${r+1}</b>
       <div class="chips">${[['off','Wyłączona'],['imp','Import'],['exp','Eksport']].map(([m,nm])=>`<button class="chipb" data-fm="${r}:${m}" aria-pressed="${r0.m===m}">${nm}</button>`).join('')}</div>
       <div class="chips">${FR_GOODS.map(k=>`<button class="chipb" data-fg="${r}:${k}" aria-pressed="${r0.k===k}">${frName(k)}</button>`).join('')}</div>
@@ -6531,7 +6533,9 @@ const LT_TR=[
 ["przy: {}", "near: {}", "bei: {}"],
 ["ulica", "street", "Straße"],
 ["Muzyka", "Music", "Musik"],
-["Dźwięki", "Sounds", "Geräusche"]
+["Dźwięki", "Sounds", "Geräusche"],
+["{} T¢/kg · w magazynach {}", "{} T¢/kg · in warehouses {}", "{} T¢/kg · im Lager {}"],
+["Krok {} kg, najwyżej {} kg/godz. każdego towaru.", "Step {} kg, at most {} kg/h of each good.", "Schritt {} kg, höchstens {} kg/Std. je Ware."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
