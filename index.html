@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.3.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.3.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -65,10 +65,10 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
 @keyframes ordIn{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.order .ob{animation:none}}
 .msp{width:min(320px,calc(100% - 80px));max-height:min(70vh,560px);overflow:auto;align-content:start}
-.linp{width:min(300px,calc(100% - 80px));gap:6px}.linp .lhd{display:flex;align-items:center;gap:6px}.linp .lhd .chipb{margin-left:auto;padding:4px 8px}.linp .ltabs{display:flex;gap:5px}.linp .ltabs .chipb[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
-.linp .lrow{display:grid;grid-template-columns:22px 1fr auto;gap:4px 6px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}.linp .lrow.sel{background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:8px;padding:7px 5px}.linp .lrow.off{opacity:.6}
+.linp{width:min(320px,calc(100% - 80px));gap:6px}.linp .lhd{display:flex;align-items:center;gap:6px}.linp .lhd .chipb{margin-left:auto;padding:4px 8px}.linp .ltabs{display:flex;gap:5px}.linp .ltabs .chipb[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.linp .lrow{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:4px 6px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}.linp .lrow.sel{background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:8px;padding:7px 5px}.linp .lrow.off{opacity:.6}
 .linp .ldot{width:20px;height:20px;border-radius:50%;border:2px solid var(--panel2);box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}.linp .lname{font:700 13px var(--font-d);background:transparent;border:1px solid transparent;border-radius:6px;color:var(--fg);padding:3px 5px;min-width:0}.linp .lname:focus,.linp .lname:hover{border-color:var(--line)}
-.linp .lmeta,.linp .lctl{grid-column:1/-1}.linp .lctl{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:12px;color:var(--muted)}.linp .lctl b{color:var(--fg);min-width:34px;text-align:center}.linp .lctl .chipb{padding:4px 9px}.linp .lupk{margin-left:auto}.linp .ldel{color:var(--warn)}.linp .lst{line-height:1.4}.linp .lst .chipb{padding:3px 8px;margin-left:4px}
+.linp .lmeta,.linp .lctl{grid-column:1/-1}.linp .lctl{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:12px;color:var(--muted)}.linp .lctl b{color:var(--fg);min-width:34px;text-align:center}.linp .lctl .chipb{padding:4px 9px}.linp .lupk{margin-left:auto}.linp .ldel{color:var(--warn)}.linp .lst{line-height:1.4}.linp .lstb{grid-column:1/-1;justify-self:start;padding:3px 9px}.linp .lstops{grid-column:1/-1;min-width:0;width:100%;box-sizing:border-box;grid-template-columns:minmax(0,1fr);list-style:none;margin:0;padding:0;display:grid;gap:3px;max-height:220px;overflow:auto}.linp .lstops li{display:flex;align-items:center;gap:5px;font-size:12px}.linp .lstops li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.linp .lstops .chipb{padding:2px 7px;font-size:11px}.linp .lnum{min-width:20px;height:20px;border-radius:50%;color:#fff;font-size:11px;display:inline-grid;place-items:center;flex:none}.linp .lst .chipb{padding:3px 8px;margin-left:4px}
 .msp .mrow{display:grid;grid-template-columns:34px 1fr;gap:4px 8px;padding:8px 0;border-top:1px solid var(--line)}.msp .mrow:first-of-type{border-top:0}
 .msp .md{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 14px var(--font-d);background:var(--chip);color:var(--muted);grid-row:span 2}
 .msp .mrow.ok .md{background:radial-gradient(circle at 35% 30%,#ffe9a3,#e0a91c 60%,#a8760c);color:#5a3d00;box-shadow:0 0 0 2px #f6d36a}
@@ -2789,17 +2789,26 @@ function transitHour(){for(const L of tLines){L.pl=L.ph||0;L.ph=0}renderLines()}
 const routeG=new THREE.Group();routeG.visible=false;scene.add(routeG);let routeSig='';const tPinG=new THREE.CylinderGeometry(0.13,0.13,0.05,16);tPinG.userData.keep=true;
 const routeKey=()=>isLineT(tool)?[tool,transVer,roadVer,railVer,lineEdit,lineDraft?lineDraft.stops[0]:-1,tLines.map(L=>L.on?1:0).join('')].join('|'):'off';
 const stCenter=S=>{const ts=tilesOf(S);let x=0,z=0;for(const t of ts){x+=cx(t);z+=cz(t)}return[x/ts.length,z/ts.length]};
-/* the routes are drawn only while a line tool is on: a coloured ribbon above the streets or rails, a pin on every stop; every stop and station that can be clicked gets a white ring */
+/* the routes are drawn only while a line tool is on: a coloured ribbon on the side of the street the vehicle drives (so both directions are told apart),
+   white arrows along it, and a numbered badge on every stop in the order the line serves them; every stop and station that can be clicked gets a white ring */
+const tArrG=new THREE.BufferGeometry();tArrG.setAttribute('position',new THREE.Float32BufferAttribute([0.14,0,0,-0.09,0,-0.11,-0.09,0,0.11,-0.09,0,-0.11,-0.02,0,0,-0.09,0,0.11],3));tArrG.userData.keep=true;
+const numTex=new Map();
+function numTexOf(col,n){const k=col+n;if(numTex.has(k))return numTex.get(k);let t=null;try{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
+  g.fillStyle=col;g.beginPath();g.arc(32,32,28,0,7);g.fill();g.lineWidth=5;g.strokeStyle='#ffffff';g.stroke();g.fillStyle='#ffffff';g.font='bold 32px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(String(n),32,34);
+  t=new THREE.CanvasTexture(c)}catch(e){}numTex.set(k,t);return t}
 function drawRoutes(){routeSig=routeKey();for(const o of[...routeG.children]){routeG.remove(o);if(o.material&&o.material.userData.own)o.material.dispose()}
-  if(routeSig==='off'){routeG.visible=false;return}routeG.visible=true;const kind=tool==='busLine'?'bus':'rail',slot={bus:0,rail:0},own=c=>{const m=new THREE.MeshBasicMaterial({color:c,transparent:true,depthWrite:false});m.userData.own=true;return m};
+  if(routeSig==='off'){routeG.visible=false;return}routeG.visible=true;const kind=tool==='busLine'?'bus':'rail',slot={bus:0,rail:0},own=(c,side)=>{const m=new THREE.MeshBasicMaterial({color:c,transparent:true,depthWrite:false});if(side)m.side=THREE.DoubleSide;m.userData.own=true;return m};
   const ring=own('#ffffff');ring.opacity=0.85;
   if(kind==='bus'){for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].bus){const r=new THREE.Mesh(tPinG,ring);r.position.set(cx(i),0.13,cz(i));r.scale.set(1.25,0.6,1.25);r.renderOrder=6;routeG.add(r)}}
   else for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].t==='trainSt'){const[x,z]=stCenter(i);const r=new THREE.Mesh(tPinG,ring);r.position.set(x,0.42,z);r.scale.set(2,0.6,2);r.renderOrder=6;routeG.add(r)}
-  for(const L of tLines){const sl=slot[L.kind]++,R=lineRoute(L);if(!R)continue;const mine=L.kind===kind,sel=L.id===lineEdit,m=own(L.col);m.opacity=!mine?0.2:!L.on?0.35:sel||lineEdit==null?0.92:0.45;
-    const bus=L.kind==='bus',y=bus?0.16:0.36,w=sel?0.11:0.07,off=((sl%5)-2)*0.05,P=R.path;
-    for(let k=1;k<P.length;k++){const a=P[k-1],b=P[k];if(a===b)continue;const dx=cx(b)-cx(a),dz=cz(b)-cz(a),len=Math.hypot(dx,dz);
-      const s=new THREE.Mesh(boxGeo(1,1,1),m);s.scale.set(len+w,0.02,w);s.rotation.y=-Math.atan2(dz,dx);s.position.set((cx(a)+cx(b))/2-dz/len*off,y,(cz(a)+cz(b))/2+dx/len*off);s.renderOrder=7;routeG.add(s)}
-    for(const S of L.stops){const[x,z]=bus?[cx(S),cz(S)]:stCenter(S);const p=new THREE.Mesh(tPinG,m);p.position.set(x,y+0.05,z);if(!bus)p.scale.set(1.5,1,1.5);p.renderOrder=8;routeG.add(p)}}
+  for(const L of tLines){const sl=slot[L.kind]++,R=lineRoute(L);if(!R)continue;const mine=L.kind===kind,sel=L.id===lineEdit,focus=mine&&(sel||lineEdit==null),m=own(L.col);m.opacity=!mine?0.18:!L.on?0.35:focus?0.95:0.4;
+    const arr=own('#ffffff',true);arr.opacity=focus&&L.on?0.95:0.35;
+    const bus=L.kind==='bus',y=bus?0.16:0.36,w=sel?0.12:0.09,off=bus?0.2+(sl%3)*0.05:0.1+(sl%3)*0.05,P=R.path;
+    for(let k=1;k<P.length;k++){const a=P[k-1],b=P[k];if(a===b)continue;const dx=cx(b)-cx(a),dz=cz(b)-cz(a),len=Math.hypot(dx,dz),ox=-dz/len*off,oz=dx/len*off,mx=(cx(a)+cx(b))/2+ox,mz=(cz(a)+cz(b))/2+oz;
+      const s=new THREE.Mesh(boxGeo(1,1,1),m);s.scale.set(len+w,0.02,w);s.rotation.y=-Math.atan2(dz,dx);s.position.set(mx,y,mz);s.renderOrder=7;routeG.add(s);
+      if(mine){const t=new THREE.Mesh(tArrG,arr);t.rotation.y=-Math.atan2(dz,dx);t.position.set(mx,y+0.015,mz);t.scale.setScalar(sel?1.45:1.3);t.renderOrder=8;routeG.add(t)}}
+    L.stops.forEach((S,k)=>{const[x,z]=bus?[cx(S),cz(S)]:stCenter(S);const p=new THREE.Mesh(tPinG,m);p.position.set(x,y+0.05,z);if(!bus)p.scale.set(1.5,1,1.5);p.renderOrder=8;routeG.add(p);
+      if(mine){const tx=numTexOf(L.col,k+1);if(tx){const sm=new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true,opacity:focus?1:0.55});sm.userData.own=true;const sp=new THREE.Sprite(sm);sp.position.set(x,y+(bus?0.42:0.6),z);sp.scale.set(0.42,0.42,1);sp.renderOrder=9;routeG.add(sp)}}})}
   if(lineDraft&&lineDraft.kind===kind){const S=lineDraft.stops[0],[x,z]=kind==='bus'?[cx(S),cz(S)]:stCenter(S),m=own('#ffd23a');m.opacity=0.95;const p=new THREE.Mesh(tPinG,m);p.position.set(x,kind==='bus'?0.24:0.46,z);p.scale.set(1.6,1.6,1.6);p.renderOrder=8;routeG.add(p)}}
 /* building a line: click the stops in order; the line exists from the second stop on and always loops back to the first */
 function lineStopAt(i,bus){if(bus)return grid[i]&&grid[i].bus?i:-1;const m=mainOf(i);return grid[m]&&grid[m].t==='trainSt'?m:-1}
@@ -2835,6 +2844,8 @@ function renderLines(){if(!linpEl||linpEl.hidden)return;if(linDown&&performance.
 <button class="ldot" type="button" data-lcol style="background:${L.col}" title="Zmień kolor" aria-label="Zmień kolor"></button><input class="lname" data-lname value="${escA(L.name)}" maxlength="18" aria-label="Nazwa linii"><button class="chipb" type="button" data-ledit title="Dodaj ${bus?'przystanki':'dworce'}">${L.id===lineEdit?'✓':'✎'}</button>
 <small class="lmeta">${L.stops.length} ${bus?'przyst.':'dworce'} · ${R?`trasa ${R.len} pól`:'<span class="neg">brak trasy</span>'} · ${fmt(L.pl||0)} pasaż./godz. · czeka ${wait(L)}</small>
 <div class="lctl"><span>${bus?'Autobusy':'Pociągi'}</span><button class="chipb" type="button" data-lv="-1"${L.veh<=1?' disabled':''}>−</button><b>${v}/${L.veh}</b><button class="chipb" type="button" data-lv="1"${L.veh>=(bus?BUS_MAX:TRAIN_MAX)?' disabled':''}>+</button><span class="lupk">${fmt(L.on?L.veh*(bus?BUS_UPK:TRAIN_UPK):0)} T¢/godz.</span></div>
+<button class="chipb lstb" type="button" data-lst aria-expanded="${!!(L.open||L.id===lineEdit)}">${bus?'Przystanki':'Dworce'} (kolejność) ${L.open||L.id===lineEdit?'▴':'▾'}</button>
+${L.open||L.id===lineEdit?`<ol class="lstops">${L.stops.map((S,k)=>`<li><b class="lnum" style="background:${L.col}">${k+1}</b><span title="${escA(stopLabel(L,S))}">${esc(stopLabel(L,S))}</span><button class="chipb" type="button" data-smv="-1" data-si="${k}" aria-label="Wyżej"${k?'':' disabled'}>▲</button><button class="chipb" type="button" data-smv="1" data-si="${k}" aria-label="Niżej"${k<L.stops.length-1?'':' disabled'}>▼</button><button class="chipb" type="button" data-sdel data-si="${k}" aria-label="Usuń z linii"${L.stops.length>2?'':' disabled'}>✕</button></li>`).join('')}</ol>`:''}
 <div class="lctl"><button class="chipb" type="button" data-lon>${L.on?'Wstrzymaj':'Wznów'}</button><button class="chipb ldel" type="button" data-ldel>${L.del?'Na pewno usunąć?':'Usuń linię'}</button></div></div>`}).join(''):`<small class="lmeta">Brak linii ${bus?'autobusowych':'kolejowych'}.</small>`)+
 `<small class="lsum">Bilet ${bus?BUS_FARE:RAIL_FARE} T¢ · ${bus?`autobus ${BUS_UPK} T¢/godz., przystanek ${STOP_UPK} T¢/godz.`:`pociąg ${TRAIN_UPK} T¢/godz.`} · mieszkańcy dojdą do ${bus?'przystanku':'dworca'} z ${bus?STOP_WALK:ST_WALK} pól. W ostatniej godzinie: ${fmt((hist.length?hist[hist.length-1][bus?'busPax':'railPax']:0)||0)} pasażerów, bilety +${fmt(hist.length?hist[hist.length-1].fareInc||0:0)} T¢.</small>`}
 if(linpEl){linpEl.addEventListener('pointerdown',()=>{linDown=performance.now()});addEventListener('pointerup',()=>{if(linDown){linDown=0;setTimeout(renderLines,0)}});
@@ -2843,6 +2854,10 @@ if(linpEl){linpEl.addEventListener('pointerdown',()=>{linDown=performance.now()}
     if(L){if(b.dataset.lcol!=null){L.col=LINE_COL[(LINE_COL.indexOf(L.col)+1)%LINE_COL.length];for(const c of cars)if(!c.dead&&c.kind==='bus'&&c.line===L.id&&c.mesh.userData.body)c.mesh.userData.body.material.color.set(L.col);
         for(const tr of trains)if(tr.line===L.id&&tr.body)tr.body.color.set(L.col);transVer++}
       else if(b.dataset.ledit!=null){lineEdit=lineEdit===L.id?null:L.id;lineDraft=null;transVer++}
+      else if(b.dataset.lst!=null){L.open=!(L.open||L.id===lineEdit);if(!L.open&&L.id===lineEdit){lineEdit=null;transVer++}}
+      else if(b.dataset.smv){const k=+b.dataset.si,j=k+(+b.dataset.smv);if(j>=0&&j<L.stops.length){[L.stops[k],L.stops[j]]=[L.stops[j],L.stops[k]];transVer++;L.open=true;
+          setHint(lineRoute(L)?`${L.name}: zmieniono kolejność – przystanek ${k+1} jest teraz ${j+1}.`:`${L.name}: w tej kolejności ${L.kind==='bus'?'autobus':'pociąg'} nie ma trasy – zmień kolejność.`,!lineRoute(L),true)}}
+      else if(b.dataset.sdel!=null){const k=+b.dataset.si;if(L.stops.length>2){L.stops.splice(k,1);transVer++;L.open=true;setHint(`${L.name}: usunięto ${L.kind==='bus'?'przystanek':'dworzec'} z linii.`,false,true)}}
       else if(b.dataset.lv){L.veh=Math.max(1,Math.min(L.kind==='bus'?BUS_MAX:TRAIN_MAX,L.veh+(+b.dataset.lv)))}
       else if(b.dataset.lon!=null){L.on=!L.on;transVer++}
       else if(b.dataset.ldel!=null){if(!L.del){L.del=true;setTimeout(()=>{L.del=false;renderLines()},3000)}else{delLine(L.id);setHint(`Usunięto: ${L.name}.`,false,true)}}}
@@ -2850,6 +2865,10 @@ if(linpEl){linpEl.addEventListener('pointerdown',()=>{linDown=performance.now()}
   linpEl.addEventListener('change',e=>{const inp=e.target.closest('[data-lname]');if(!inp)return;const L=lineOf(+inp.closest('[data-lid]').dataset.lid);if(L){L.name=inp.value.trim().slice(0,18)||L.name;save()}});
   linpEl.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'&&e.target.blur)e.target.blur()})}
 if(linBtn)linBtn.addEventListener('click',()=>selectTool(isLineT(tool)?'view':'busLine'));
+/* a stop is named after the nearest building beside it (a public one before houses) */
+function stopLabel(L,S){if(L.kind==='rail')return`Dworzec · pole ${S%N+1}, ${((S/N)|0)+1}`;const x=S%N,z=(S/N)|0;let best=null,bs=9;
+  for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const m=mainOf(idx(nx,nz)),c=grid[m];if(!c||DRIVE[c.t]||!DEF[c.t])continue;const sc=(HOUSING[c.t]?4:0)+Math.abs(dx)+Math.abs(dz);if(sc<bs){bs=sc;best=c.t}}
+  return`${best?'przy: '+DEF[best].name:'ulica'} · pole ${x+1}, ${z+1}`}
 function stopInfo(i){const q=paxQ.get(i)||[],ls=tLines.filter(L=>L.stops.includes(i));return` · <b>przystanek</b>${ls.length?' linii '+ls.map(L=>esc(L.name)).join(', '):' bez linii'} · czeka ${q.length}`}
 /* ---------- fire service: random fires by building group, spread to one neighbour at a time, trucks put them out, ruins after 6 h ---------- */
 const FIRE={fireS:{r:5,trucks:1,extra:1},fireB:{r:7,trucks:2,extra:2}};const isFireSt=t=>t==='fireS'||t==='fireB';const fireRad=c=>FIRE[c.t].r+(c.up2?3:0);
