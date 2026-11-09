@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.7.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.7.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -73,6 +73,13 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
 .tutInfo{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:30;width:min(420px,calc(100% - 32px));padding:16px 18px;display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:1.45;box-shadow:0 12px 40px rgba(0,0,0,.35)}.tutInfo>b{font-size:16px}.tutInfo .btn{align-self:flex-end;padding:8px 16px}
 .tutXP .insp .xp{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px;animation:tutPulse 1.2s ease-in-out infinite}.tutNeeds #stNeeds{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}.tutXP .tutInfo{top:150px;transform:translateX(-50%)}
 @media(min-width:900px){.tutNeeds .tutInfo{left:80px;transform:translateY(-50%)}}
+.tutPtr{position:fixed;z-index:40;width:36px;height:36px;pointer-events:none;display:grid;place-items:center}.tutPtr[hidden]{display:none}
+.tutPtr span{display:block;line-height:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.tutPtr[data-d=l] span{transform:rotate(180deg);animation:tutPtrL .8s ease-in-out infinite alternate}
+.tutPtr[data-d=u] span{transform:rotate(-90deg);animation:tutPtrU .8s ease-in-out infinite alternate}
+@keyframes tutPtrL{to{transform:rotate(180deg) translateX(-8px)}}@keyframes tutPtrU{to{transform:rotate(-90deg) translateX(-8px)}}
+.tutSug{width:100%;margin:0 0 8px;font-weight:600;outline:2px solid var(--accent,#e2643a);animation:tutPulse 1.2s ease-in-out infinite}
+.dep .dpr.tutHi{box-shadow:inset 0 0 0 2px var(--accent,#e2643a)}
 @keyframes tutPulse{50%{outline-color:transparent}}
 .msp .mrow{display:grid;grid-template-columns:34px 1fr;gap:4px 8px;padding:8px 0;border-top:1px solid var(--line)}.msp .mrow:first-of-type{border-top:0}
 .msp .md{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 14px var(--font-d);background:var(--chip);color:var(--muted);grid-row:span 2}
@@ -3929,7 +3936,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(c.t==='impDep'){c.dimp=c.dimp||{};const on=FR_GOODS.filter(k=>(c.dimp[k]||0)>0),tot=on.reduce((a,k)=>a+c.dimp[k]*depPrice(k),0);
     R('Zamówienia',on.length?`${on.length} ${on.length===1?'towar':on.length<5?'towary':'towarów'} · ok. ${fmt(Math.round(tot))} T¢/godz.`:'nic — ustaw ilości poniżej');R('Dostawa','co pełną godzinę, ciężarówką z granicy miasta');
     R('Ostatnia',c.dlast!=null?`${Math.max(0,Math.round(gameT-c.dlast))} min temu`:'jeszcze nie było');
-    pick=`<div class="dep">${FR_GOODS.map(k=>{const v=Math.min(DEP_MAX,c.dimp[k]||0);return`<div class="dpr${v?' on':''}"><div class="dpn"><b>${frName(k)}</b><small>${mw(Math.round(depPrice(k)*10)/10)} T¢/kg · w magazynach ${fmt(Math.round(have(k)))}</small></div><div class="stp"><button class="btn panel" data-dpn="${k}:-${DEP_STEP}"${v<=0?' disabled':''} aria-label="−${DEP_STEP} kg">−</button><b>${v} kg/godz.</b><button class="btn panel" data-dpn="${k}:${DEP_STEP}"${v>=DEP_MAX?' disabled':''} aria-label="+${DEP_STEP} kg">+</button></div></div>`}).join('')}<small class="dpnote">Krok ${DEP_STEP} kg, najwyżej ${DEP_MAX} kg/godz. każdego towaru.</small></div>`}
+    const sug=tutNow()==='dep';pick=(sug?`<button class="btn panel tutSug" id="depSug">Ustaw propozycję: po 5 kg/godz. nabiału, pieczywa, napojów, odzieży i kosmetyków</button>`:'')+`<div class="dep">${FR_GOODS.map(k=>{const v=Math.min(DEP_MAX,c.dimp[k]||0);return`<div class="dpr${v?' on':''}${sug&&TUT_DEP.includes(k)?' tutHi':''}"><div class="dpn"><b>${frName(k)}</b><small>${mw(Math.round(depPrice(k)*10)/10)} T¢/kg · w magazynach ${fmt(Math.round(have(k)))}</small></div><div class="stp"><button class="btn panel" data-dpn="${k}:-${DEP_STEP}"${v<=0?' disabled':''} aria-label="−${DEP_STEP} kg">−</button><b>${v} kg/godz.</b><button class="btn panel" data-dpn="${k}:${DEP_STEP}"${v>=DEP_MAX?' disabled':''} aria-label="+${DEP_STEP} kg">+</button></div></div>`}).join('')}<small class="dpnote">Krok ${DEP_STEP} kg, najwyżej ${DEP_MAX} kg/godz. każdego towaru.</small></div>`}
   if(c.t==='freightSt'){pick=frRamps(c).map((r0,r)=>{const cost=Math.round(r0.n*frPrice(r0.k)*(r0.m==='imp'?FR_IMP:FR_EXP));return`<div class="fr"><b>Rampa ${r+1}</b>
       <div class="chips">${[['off','Wyłączona'],['imp','Import'],['exp','Eksport']].map(([m,nm])=>`<button class="chipb" data-fm="${r}:${m}" aria-pressed="${r0.m===m}">${nm}</button>`).join('')}</div>
       <div class="chips">${FR_GOODS.map(k=>`<button class="chipb" data-fg="${r}:${k}" aria-pressed="${r0.k===k}">${frName(k)}</button>`).join('')}</div>
@@ -3989,6 +3996,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   for(const b of inspEl.querySelectorAll('[data-shn]'))b.onclick=()=>{const g=grid[i];g.shipN=Math.max(SHIP_NMIN,Math.min(SHIP_NMAX,(g.shipN||SHIP_N0)+ +b.dataset.shn));save();renderInsp()};
   for(const b of inspEl.querySelectorAll('[data-ship]'))b.onclick=()=>{const g=grid[i];g.ship=g.ship||[];const k=b.dataset.ship;g.ship=g.ship.includes(k)?g.ship.filter(x=>x!==k):[...g.ship,k];save();renderInsp()};
   {const sa=document.getElementById('shipAuto');if(sa)sa.onclick=()=>{const g=grid[i];g.shipAuto=!g.shipAuto;if(g.shipAuto&&g.shipAt==null)g.shipAt=gameT+SHIP_EVERY;save();renderInsp()};const sg=document.getElementById('shipGo');if(sg)sg.onclick=()=>{const g=grid[i];if(g.shipAt==null){g.shipAt=gameT+SHIP_EVERY;save();renderInsp()}}}
+  {const b=document.getElementById('depSug');if(b)b.onclick=()=>{const g=grid[i];if(!g)return;g.dimp=g.dimp||{};for(const k of TUT_DEP)g.dimp[k]=Math.max(g.dimp[k]||0,5);save();renderInsp()}}
   for(const b of inspEl.querySelectorAll('[data-dpn]'))b.onclick=()=>{const g=grid[i];if(!g)return;g.dimp=g.dimp||{};const[k,v]=b.dataset.dpn.split(':');g.dimp[k]=Math.max(0,Math.min(DEP_MAX,(g.dimp[k]||0)+(+v)));save();renderInsp()};
   const frSet=(a,f)=>{const[r,v]=a.split(':');const rs=frRamps(grid[i]);if(!rs[+r])return;f(rs[+r],v);save();renderInsp()};
   for(const b of inspEl.querySelectorAll('[data-fm]'))b.onclick=()=>frSet(b.dataset.fm,(r0,v)=>{r0.m=v});
@@ -4599,12 +4607,23 @@ const TUT=[
   ['Postaw sklep','Usługi → Sklep. Mieszkańcy kupują w nim towary z magazynu.',()=>grid.some(c=>c&&(c.t==='shop'||c.t==='supermarket')&&c.powered)],
   ['Ulepsz sklep','Stuknij sklep w Podglądzie i w „Opcjach i ulepszeniach” kup ulepszenie (np. Kasy SCO): obsłuży więcej klientów.',()=>grid.some(c=>c&&isShop(c.t)&&(c.up||c.up2))],
   ['Postaw magazyn spedycyjny','Przemysł → Magazyn spedycyjny. W nim ustawiasz, co i ile sprowadzać spoza miasta do magazynów (np. napoje czy odzież), czego miasto jeszcze samo nie produkuje.',()=>(counts.impDep||0)>0],
+  ['Wybierz towary do importu','Stuknij magazyn spedycyjny w Podglądzie i ustaw, co sprowadzać. Na start wystarczy po 5 kg/godz.: Nabiał, Pieczywo, Napoje, Odzież i Kosmetyki (warzywa dadzą farmy). Przycisk „Ustaw propozycję” zrobi to za ciebie.',()=>grid.some(c=>c&&c.t==='impDep'&&c.dimp&&FR_GOODS.some(k=>(c.dimp[k]||0)>0)),'dep'],
   ['Postaw wysypisko','Odpady → Wysypisko. Bez niego kosze się zapełnią i budynki staną.',()=>(counts.landfill||0)+(counts.incinerator||0)+(counts.recycler||0)>0],
-  ['Zobacz panel potrzeb','Stuknij kolorowe słupki potrzeb u góry ekranu (albo Gospodarka → Produkcja i potrzeby).',()=>!!(tut&&tut.needsSeen),'needs'],
+  ['Zobacz panel potrzeb','Stuknij Gospodarkę (przycisk po lewej, wskaże go strzałka), a potem zakładkę „Produkcja i potrzeby”.',()=>!!(tut&&tut.needsSeen),'needs'],
   ['Pierwsza sprzedaż w sklepie','Poczekaj, aż dostawczak przywiezie towar, a mieszkańcy zrobią zakupy.',()=>!!(tut&&tut.sold)]];
 /* tutorial explanations: the game pauses and a card explains what is highlighted */
 const tutNow=()=>{if(!tut||!tut.on)return null;const k=TUT.findIndex((s,j)=>!tut.done[j]);return k<0?null:TUT[k][3]||null};
-let tutInfoSp=null;
+let tutInfoSp=null;const TUT_DEP=['dairy','bread','drinks','clothes','cosmetics'];
+/* the tutorial arrow: points at the button to tap next (Economy → the Production and needs tab, the suggestion in the import depot) */
+function tutPtrTarget(){const w=tutNow(),info=document.getElementById('tutInfo');if(info&&!info.hidden)return null;
+  if(w==='needs'){const sb=document.getElementById('statsBtn');if(sb&&sb.getAttribute('aria-expanded')!=='true')return sb;const t=document.querySelector('#stats [data-st="prod"]');return t&&t.getAttribute('aria-pressed')!=='true'?t:null}
+  if(w==='dep'){const b=document.getElementById('depSug');return b&&b.offsetParent?b:null}return null}
+function tutPtrTick(){let el=document.getElementById('tutPtr');const t=tut&&tut.on?tutPtrTarget():null;if(!t){if(el)el.hidden=true;return}
+  if(!el){el=document.createElement('div');el.id='tutPtr';el.className='tutPtr';el.setAttribute('aria-hidden','true');el.innerHTML='<span><svg viewBox="0 0 36 36" width="36" height="36"><path d="M3 13h17V5l14 13-14 13v-8H3z" fill="var(--accent)" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/></svg></span>';document.body.appendChild(el)}
+  const r=t.getBoundingClientRect();if(!r.width){el.hidden=true;return}el.hidden=false;
+  if(r.left<innerWidth/3){el.dataset.d='l';el.style.left=(r.right+6)+'px';el.style.top=(r.top+r.height/2-18)+'px'}
+  else{el.dataset.d='u';el.style.left=(r.left+r.width/2-18)+'px';el.style.top=(r.bottom+4)+'px'}}
+let tutPtrT=0;
 function tutInfo(title,html,cls){const el=document.getElementById('tutInfo');if(!el)return;if(tutInfoSp==null)tutInfoSp=gameSpeed||1;setSpeed(0);if(cls)document.body.classList.add(cls);if(cls==='tutXP'){const x=document.querySelector('.insp .xp');if(x)x.scrollIntoView({block:'center'})}
   el.innerHTML=`<b>${title}</b><div>${html}</div><button class="btn panel" id="tutInfoOk">Rozumiem</button>`;el.hidden=false;
   document.getElementById('tutInfoOk').onclick=()=>{el.hidden=true;if(cls)document.body.classList.remove(cls);setSpeed(tutInfoSp||1);tutInfoSp=null}}
@@ -4878,7 +4897,7 @@ settleHour();cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=
   if(ring.visible&&!reduce)ring.material.opacity=0.65+0.35*Math.sin(time*4);
   if(hintTimer>0){hintTimer-=vdt;if(hintTimer<=0)setHint(toolHint())}
   saveRT+=rdt;if((saveReq&&saveRT>2)||(!paused&&saveRT>30))writeSave()
-  carLOD();seasonTick(rdt);sfxTick(rdt);hud();
+  carLOD();seasonTick(rdt);sfxTick(rdt);tutPtrT-=rdt;if(tutPtrT<=0){tutPtrT=0.15;tutPtrTick()}hud();
   if(!window.__drawn&&app.clientWidth>0&&app.clientHeight>0){
     const sz=renderer.getDrawingBufferSize(new THREE.Vector2());
     if(sz.x!==Math.round(app.clientWidth*renderer.getPixelRatio()))resize();
@@ -6601,7 +6620,11 @@ const LT_TR=[
 ["Każdy dom ma potrzeby: żywność, napoje, odzież i kosmetyki, meble i narzędzia, elektronikę i zabawki. Mają być spełniane w", "Every home has needs: food, drinks, clothing and cosmetics, furniture and tools, electronics and toys. They should be met as", "Jedes Haus hat Bedürfnisse: Essen, Getränke, Kleidung und Kosmetik, Möbel und Werkzeuge, Elektronik und Spielzeug. Sie sollen"],
 ["jak największym procencie – im więcej, tym lepiej", "fully as possible – the more, the better", "so weit wie möglich erfüllt sein – je mehr, desto besser"],
 [": wyższe zadowolenie, szybszy rozwój domów i więcej przychodów. Najważniejsze są żywność i napoje; poniżej 35% zadowolenie spada. Mieszkańcy kupują w sklepach to, czego im brakuje, więc dbaj, by sklepy i magazyny miały te towary.", ": higher happiness, faster growing homes and more income. Food and drinks matter most; below 35% happiness drops. Residents buy in shops what they lack, so make sure shops and warehouses have these goods.", ": höhere Zufriedenheit, schneller wachsende Häuser und mehr Einnahmen. Am wichtigsten sind Essen und Getränke; unter 35 % sinkt die Zufriedenheit. Einwohner kaufen in Läden, was ihnen fehlt, also sorge dafür, dass Läden und Lager diese Waren haben."],
-["Rozumiem", "Got it", "Verstanden"]
+["Rozumiem", "Got it", "Verstanden"],
+["Stuknij Gospodarkę (przycisk po lewej, wskaże go strzałka), a potem zakładkę „Produkcja i potrzeby”.", "Tap Economy (the button on the left, the arrow will point to it), then the “Production and needs” tab.", "Tippe auf Wirtschaft (die Schaltfläche links, der Pfeil zeigt darauf), dann auf den Reiter „Produktion und Bedürfnisse“."],
+["Wybierz towary do importu", "Choose goods to import", "Wähle Waren für den Import"],
+["Stuknij magazyn spedycyjny w Podglądzie i ustaw, co sprowadzać. Na start wystarczy po 5 kg/godz.: Nabiał, Pieczywo, Napoje, Odzież i Kosmetyki (warzywa dadzą farmy). Przycisk „Ustaw propozycję” zrobi to za ciebie.", "Tap the import depot in View mode and set what to bring in. To start, 5 kg/h each is enough: Dairy, Bread, Drinks, Clothing and Cosmetics (vegetables come from the farms). The “Apply suggestion” button does it for you.", "Tippe das Speditionslager in der Ansicht an und lege fest, was eingeführt wird. Für den Anfang reichen je 5 kg/Std.: Milchprodukte, Brot, Getränke, Kleidung und Kosmetik (Gemüse kommt von den Farmen). Die Schaltfläche „Vorschlag übernehmen“ erledigt das für dich."],
+["Ustaw propozycję: po 5 kg/godz. nabiału, pieczywa, napojów, odzieży i kosmetyków", "Apply suggestion: 5 kg/h each of dairy, bread, drinks, clothing and cosmetics", "Vorschlag übernehmen: je 5 kg/Std. Milchprodukte, Brot, Getränke, Kleidung und Kosmetik"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
