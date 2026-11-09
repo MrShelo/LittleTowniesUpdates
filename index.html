@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.6.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='6.6.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -243,6 +243,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .chipb[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
 .insp{max-height:min(62vh,560px);overflow:auto}
 .sw2{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0}
+.ffull{grid-column:1/-1}.whbar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--chip);margin:4px 0 6px}.whbar i{display:block;height:100%}
+.whl.whl2{display:grid;grid-template-columns:1fr;gap:5px}.whl.whl2 span{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2px 6px;white-space:normal;text-align:left;font-weight:500}.whl2 em{grid-column:1/-1;height:5px;border-radius:3px;background:var(--chip);overflow:hidden;display:block}.whl2 em i{display:block;height:100%}
 .whl{display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:3px;font-weight:500}.whl span{white-space:nowrap}.whl b{font-weight:700}
 .insp .up[disabled]{opacity:.55;cursor:default}
 .insp .facts .warnv{color:var(--warn)}
@@ -3043,6 +3045,9 @@ function spawnCommuter(h){const e=entryOf(h);if(e<0)return;const b=bfs(e);
   const low=stored()<matCap()*0.35;let types;const r=Math.random();
   const SH=['shop','shop1','bakery','supermarket','gallery','restaurant'];if((counts.factory+counts.smallfac+counts.factoryB+counts.mine+counts.mineB)&&(low||!(counts.shop||counts.gallery||counts.supermarket)))types=r<0.75?WORK_T:SH;else types=r<0.6?SH:WORK_T;
   if(types===SH&&Math.random()<1-0.6*buyMul()*(ordOn('consum')?1.1:1))return;
+  /* 6.6.2: residents go shopping only for what they need: a need above 95% is satisfied, and a shop with nothing needed is not visited */
+  if(types===SH){const H=needs(grid[h]);if(NEEDS.every(n=>H[n.k]>=NEED_FULL))return;const l=candidates(b,SH).filter(o=>{const d=grid[o.i];try{return sellsOf(d).some(k=>wantsGood(H,k))}catch(e){return true}});const t=pickWeighted(l);if(!t)return;
+    if(grid[t.i]&&grid[t.i].t==='shop1'&&Math.random()<1/3)return;cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3});return}
   const t=pickWeighted(candidates(b,types))||pickWeighted(candidates(b,['shop','supermarket','gallery',...WORK_T]));if(!t)return;
   if(grid[t.i]&&grid[t.i].t==='shop1'&&Math.random()<1/3)return;
   cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3})}
@@ -3125,12 +3130,12 @@ const shelfRoom=(s,k,extra=0)=>{const c=grid[s],m=VANINC.get(s);return shelfCap(
 const SCAP=c=>(c.up&&(c.t==='shop'||c.t==='supermarket')?1.5:1)*SCAP0(c)*(c.edu&&c.edu.tech?1:1);const SCAP0=c=>c.t==='shop1'?(c.up?50:35)+(c.up2?5:0)+(c.up3?10:0):c.t==='bakery'?22:c.t==='supermarket'?60+(c.up3?15:0):c.t==='gallery'?8*Math.max(1,c.stores.length)+20+(c.up?16:0):c.t==='restaurant'?(c.up?35:25):c.t==='shop'?30+(c.up2?10:0):0;
 const shelfTotal=c=>{let s=0;for(const k in c.shelf||{}){const v=c.shelf[k];if(Number.isFinite(v)&&v>0)s+=v}return s};
 const NEEDS=[{k:'food',name:'Żywność',goods:['veg','dairy','bread'],decay:0.08},{k:'drink',name:'Napoje',goods:['drinks'],decay:0.05},{k:'wear',name:'Odzież i kosmetyki',goods:['clothes','cosmetics'],decay:0.03},{k:'home',name:'Meble i narzędzia',goods:['furniture','tools'],decay:0.02},{k:'fun',name:'Elektronika i zabawki',goods:['electronics','toys'],decay:0.02}];
-const needOf=g=>NEEDS.find(n=>n.goods.includes(g));
+const needOf=g=>NEEDS.find(n=>n.goods.includes(g));const NEED_FULL=0.95;const wantsGood=(H,k)=>{const n=needOf(k);return!n||H[n.k]<NEED_FULL};
 /* homes use water per resident: an empty home uses none, a full block uses a lot */
 const WATER_PP=0.25,waterOf=c=>HLV[c.t]?popOf(c)*WATER_PP:WATER[c.t]*hMul(c);
 const needs=c=>{c.need=c.need||{};for(const n of NEEDS)if(c.need[n.k]==null)c.need[n.k]=0.7;return c.need};
 /* the shopper takes what their household lacks most; without a household it is random */
-function pickShelf(c,home){const l=sellsOf(c).filter(k=>(c.shelf[k]||0)>0);if(!l.length)return undefined;const H=home!=null&&grid[home]&&HLV[grid[home].t]?needs(grid[home]):null;
+function pickShelf(c,home){let l=sellsOf(c).filter(k=>(c.shelf[k]||0)>0);if(!l.length)return undefined;const H=home!=null&&grid[home]&&HLV[grid[home].t]?needs(grid[home]):null;if(H){l=l.filter(k=>wantsGood(H,k));if(!l.length)return undefined}
   if(!H)return l[(Math.random()*l.length)|0];let best=l[0],bv=9;const ok=BASIC.every(k=>H[k]>=0.5);for(const k of l){const n=needOf(k);const v=(n?H[n.k]+(BASIC.includes(n.k)?0:ok?0.1:0.6):1)+Math.random()*0.15;if(v<bv){bv=v;best=k}}return best}
 function needsHour(){for(const c of grid){if(!c||!HLV[c.t]||c.aband||!popOf(c))continue;const H=needs(c);for(const n of NEEDS)H[n.k]=Math.max(0,H[n.k]-n.decay*(n.k==='food'&&typeof ORD!=='undefined'&&ORD.health?1.5:1))}}
 const BASIC=['food','drink'],NEED_MIN=0.35;
@@ -3889,7 +3894,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
     R('Wydajność',`${mw(Math.round(FARM_RATE*cl.tiles.length*cl.mult*10)/10)} kg/godz.`);
     R('Do ciężarówki',`${mw(Math.round(cl.acc*10)/10)} / ${TRUCK_LOAD} kg`);R('Wyjazd',cl.hub>=0?'jest ulica przy multibloku':'brak ulicy przy żadnym polu',cl.hub>=0?'':'warnv')}
   if(isWH(c.t)){R('Zajęte',`${fmt(Math.round(whUsed(c)))} / ${fmt(whCap(c))} kg`+(whOn(c)?'':' · wyłączony: towar niedostępny'),whOn(c)?'':'warnv');const sh=whShare(i),ks=Object.keys(sh).filter(k=>sh[k]>=0.5).sort((a,b)=>sh[b]-sh[a]);const tot=ks.reduce((a,k)=>a+sh[k],0);
-    R('Przechowuje',!ks.length?'nic':`${fmt(Math.round(tot))} kg<div class="whl">${ks.map(k=>`<span><i class="sw2" style="background:${(GOODS[k]||GOODS.mat).col}"></i>${frName(k)} <b>${fmt(Math.round(sh[k]))}</b></span>`).join('')}</div>`)}
+    {const cap=Math.max(1,whCap(c));R('Przechowuje',!ks.length?'nic':`${fmt(Math.round(tot))} kg`);if(ks.length)rows.push({full:1,v:`<div class="whbar" title="${fmt(Math.round(tot))} / ${fmt(cap)} kg">${ks.map(k=>`<i style="width:${Math.max(0.6,sh[k]/cap*100)}%;background:${(GOODS[k]||GOODS.mat).col}"></i>`).join('')}</div><div class="whl whl2">${ks.map(k=>`<span><i class="sw2" style="background:${(GOODS[k]||GOODS.mat).col}"></i>${frName(k)} <b>${fmt(Math.round(sh[k]))} kg</b><em><i style="width:${Math.min(100,sh[k]/cap*100)}%;background:${(GOODS[k]||GOODS.mat).col}"></i></em></span>`).join('')}</div>`})}}
   if(c.t==='bank')R('Limit gotówki',`+${fmt(BANK_CAP*(c.up?2:1))} T¢`+(c.powered?'':' (nieaktywny)'));
   if(PARKS.includes(c.t)){const r=parkR(c);R('Zasięg',`${2*r+1}×${2*r+1}`);if(full)R('Stan','nie działa: pełno śmieci','warnv')}
   if(c.t==='wind'){if(c.wake)R('Sąsiednie wiatraki',`${c.wake} · −${c.wake} MW`,'warnv');R('Moc',`${Math.max(0,WIND_MW+(c.up2?3:0)-(c.wake||0))} MW`+(c.up?` + ${mw(Math.round(SOLAR_MW*dayF*10)/10)} MW z paneli`:''));R('Sieć',c.net>=0?'podłączony':'brak transformatora obok',c.net>=0?'':'warnv')}
@@ -3950,7 +3955,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(DEMAND[c.t]){const bad=!c.off&&!c.powered;tiles.push(sTile(bad?TW:'#f2c230',ICO_BOLT,'Prąd',c.off?'wyłączony':bad?'brak prądu':`${mw(DEMAND[c.t]*nightDem(c.t))} MW`,bad?(c.net>=0?'za mało mocy w sieci':UTIL_R[c.t]?'brak słupa w promieniu 2 pól':'brak słupa obok'):''))}
   if(WATER[c.t]){const w=c.water,bad=w!=='ok'||c.sewer;tiles.push(sTile(bad?TW:'#4aa3d8',ICO_DROP,HLV[c.t]?'Kanalizacja':'Woda',w==='ok'?`${mw(Math.round(waterOf(c)*10)/10)} m³/godz.`:w==='dirty'?'brudna woda':'brak wody',c.sewer?'ścieki się cofają':w==='dirty'?'z rzeki: mieszkańcy chorują':w!=='ok'?(c.wnet>=0?'za mało wody w sieci':'brak rury'):''))}
   if(TRASH[c.t]){const T=TRASH[c.t],fullT=c.trash>=T.cap;tiles.push(sTile(fullT?TW:'#e98a3a',ICO_BIN,'Śmieci',`${mw(Math.round(c.trash*10)/10)}/${T.cap} kg`,fullT?'pełny kosz':c.truckOn?'śmieciarka jedzie':c.want?'czeka na odbiór':''))}
-  const hide=new Set(tiles.length?['Prąd','Woda','Ścieki','Śmieci']:[]);const facts=rows.filter(r=>!hide.has(r.l)).map(r=>`<span>${r.l}</span><span class="${r.cls}">${r.v}</span>`).join('');
+  const hide=new Set(tiles.length?['Prąd','Woda','Ścieki','Śmieci']:[]);const facts=rows.filter(r=>!hide.has(r.l)).map(r=>r.full?`<div class="ffull">${r.v}</div><i hidden></i>`:`<span>${r.l}</span><span class="${r.cls}">${r.v}</span>`).join('');
   const svcS=(tiles.length?`<div class="tiles t3">${tiles.join('')}</div>`:'')+(HOUSING[c.t]&&facts?`<div class="facts">${facts}</div>`:'');
   const refund=Math.floor((DEF[c.t].cost+(c.pole?DEF.pole.cost:0))/2),armed=delArm&&delArm.i===i&&performance.now()-delArm.t<4000;
   const acts=`<div class="acts">${movable(c)?`<button class="act mv" id="inspMv"${money<moveCost(c)?' disabled':''}><b>Przenieś</b>${ICO_MOVE}<small>${fmt(moveCost(c))} T¢</small></button>`:''}${c.edge?'':`<button class="act del${armed?' armed':''}" id="inspDel"><b>${armed?'Na pewno?':'Wyburz'}</b>${ICO_DOZER}<small>${armed?'Stuknij ponownie':`Otrzymasz: ${fmt(refund)} T¢`}</small></button>`}</div>`;
