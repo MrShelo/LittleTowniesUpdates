@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.1.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.1.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -3797,8 +3797,9 @@ function terrainTick(dt){floodCheck-=dt;if(floodCheck>0)return;const step=2-floo
   const comp=new Int32Array(N*N).fill(-1),wet=i=>water[i]||fld[i];let ch=false,newFlood=false,landCh=false;
   for(let s0=0;s0<N*N;s0++){if(!wet(s0)||comp[s0]>=0)continue;const q=[s0];comp[s0]=s0;for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(wet(j)&&comp[j]<0){comp[j]=s0;q.push(j)}
     let L=0,edgeW=99,edge=false;for(const i of q){const x=i%N,z=(i/N)|0,b=x===0||z===0||x===N-1||z===N-1;const l=water[i]?wlv[i]:fld[i]-1;L=Math.max(L,l);if(b){edge=true;if(water[i])edgeW=Math.min(edgeW,wlv[i])}}
-    const setL=nl=>{for(const i of q){if(water[i]){const v=Math.max(hgt[i],nl);if(wlv[i]!==v){wlv[i]=v;ch=true}}else if(hgt[i]>=nl){fld[i]=0;ch=true;landCh=true}else if(fld[i]!==nl+1){fld[i]=nl+1;ch=true}}};
-    if(edge){riseAcc.delete(s0);const target=edgeW<99?edgeW:L;if(L>target)setL(L-1);continue}
+    const setL=(nl,low)=>{for(const i of q){if(water[i]){const v=low?Math.min(wlv[i],Math.max(hgt[i],nl)):Math.max(hgt[i],nl);if(wlv[i]!==v){wlv[i]=v;ch=true}}else if(hgt[i]>=nl){fld[i]=0;ch=true;landCh=true}else if(fld[i]!==nl+1){fld[i]=nl+1;ch=true}}};
+    const sea=mapType==='carib';/* 7.1.1: on the Caribbean the sea and its lagoons never rise (and an old rise drains back) */
+    if(edge||sea){riseAcc.delete(s0);const target=edgeW<99?edgeW:sea?0:L;if(L>target)setL(L-1,true);continue}
     /* trapped: rise, then spill over the lowest dry land beside the body */
     let acc=(riseAcc.get(s0)||0)+step;if(acc>=FLOOD_RISE&&L<H_MAX){acc=0;L++;setL(L);if(!floodWarned){floodWarned=true;const w=q.find(i=>water[i]);setHint('Woda bez ujścia podnosi się! Gdy przeleje się przez brzeg, zaleje teren. Otwórz jej drogę za mapę albo usyp wał.',true,true);hintEl.hidden=false;if(w>=0)float(w,'woda się podnosi','warn')}}riseAcc.set(s0,acc);
     for(const i of q)for(const j of nbrs(i))if(!water[j]&&!fld[j]&&hgt[j]<=L&&comp[j]<0){fld[j]=L+1;comp[j]=s0;ch=true;newFlood=true;landCh=true}}
@@ -4797,7 +4798,7 @@ function ovlVal(i){if(ovlMode==='med')return medCov[i]?1:0;if(ovlMode==='edu')re
 function floodRisk(){const out=new Uint8Array(N*N),comp=new Uint8Array(N*N),wet=i=>water[i]||fld[i];for(let i=0;i<N*N;i++)if(fld[i])out[i]=2;
   for(let s0=0;s0<N*N;s0++){if(!wet(s0)||comp[s0])continue;const q=[s0];comp[s0]=1;for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(wet(j)&&!comp[j]){comp[j]=1;q.push(j)}
     let L=0,edge=false;for(const i of q){const x=i%N,z=(i/N)|0;if(x===0||z===0||x===N-1||z===N-1)edge=true;L=Math.max(L,water[i]?wlv[i]:fld[i]-1)}
-    if(edge)continue;const LL=Math.min(H_MAX,L+2),seen=new Set(),Q=q.slice();for(let h=0;h<Q.length;h++)for(const j of nbrs(Q[h]))if(!wet(j)&&!seen.has(j)&&hgt[j]<=LL){seen.add(j);out[j]=1;Q.push(j)}}
+    if(edge||mapType==='carib')continue;const LL=Math.min(H_MAX,L+2),seen=new Set(),Q=q.slice();for(let h=0;h<Q.length;h++)for(const j of nbrs(Q[h]))if(!wet(j)&&!seen.has(j)&&hgt[j]<=LL){seen.add(j);out[j]=1;Q.push(j)}}
   return out}
 function drawOvl(){if(ovlMode==='none'){ovlMesh.count=0;return}let n=0;const col=new THREE.Color();let cov=null;if(ovlMode==='flood')cov=floodRisk();
   if(ovlMode==='police'||ovlMode==='fire'){cov=new Uint8Array(N*N);for(const st of ovlMode==='fire'?fireStations():stations()){const r=ovlMode==='fire'?fireRad(grid[st]):polRad(grid[st]),R=reachOf(st,r);for(let j=0;j<N*N;j++)if(R[j])cov[j]=1}}
