@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.2.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.3.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -108,6 +108,11 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
   padding-top:10px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .hud > *{pointer-events:auto}
+body.cine .hud,body.cine .dock,body.cine .rail,body.cine #tut,body.cine #tutInfo{opacity:0;pointer-events:none;transition:opacity .7s}
+.hud,.dock,.rail{transition:opacity .7s}
+#cineHint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);padding:8px 16px;border-radius:20px;background:rgba(0,0,0,.55);color:#fff;font:13px system-ui,sans-serif;opacity:0;pointer-events:none;z-index:9}
+body.cine #cineHint{animation:cineH 5s ease forwards}
+@keyframes cineH{0%{opacity:0}12%{opacity:1}75%{opacity:1}100%{opacity:0}}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .res{padding:6px 8px 7px;min-width:0;width:178px;flex:none;box-sizing:border-box;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:5px 7px}
 .res .ic{width:18px;height:18px;flex:none}
@@ -431,9 +436,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <div class="clock panel"><b id="clock">Dz. 1 · 06:00</b><small id="clockSub">Dzień · 1 min = 1 godz.</small></div>
     <div class="radio panel" id="radio"><button class="btn icon" id="rPlay" aria-label="Włącz radio" title="Radio"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><path d="M6 4.5l10 5.5-10 5.5z"/></svg></button><button class="btn" id="rSt" title="Zmień stację"><small>Radio</small><b id="rName">Nature FM</b></button><button class="btn icon" id="rNext" aria-label="Następna stacja" title="Następna stacja"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor"><path d="M3.5 5l7 5-7 5z"/><path d="M10 5l7 5-7 5z"/><rect x="16" y="5" width="1.8" height="10" rx=".6"/></svg></button></div>
     <div class="speed panel" role="group" aria-label="Tempo gry"><button class="btn icon" data-sp="0" aria-label="Pauza" title="Pauza (spacja)"><svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" fill="currentColor"><rect x="5" y="4.5" width="3.2" height="11" rx=".8"/><rect x="11.8" y="4.5" width="3.2" height="11" rx=".8"/></svg></button><button class="btn icon" data-sp="1" aria-label="Tempo ×1" title="Tempo ×1"><svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M6 4.5l10 5.5-10 5.5z"/></svg></button><button class="btn icon" data-sp="2" aria-label="Tempo ×2" title="Tempo ×2"><svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M2.5 5l7 5-7 5z"/><path d="M10 5l7 5-7 5z"/></svg></button></div>
+    <button class="btn icon panel" id="camBtn" aria-label="Kamera filmowa" title="Kamera filmowa (V)"><svg viewBox="0 0 20 20" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5.5" width="11" height="9" rx="2"/><path d="M13 9l5-2.5v7L13 11"/></svg></button>
     <button class="btn icon panel" id="optBtn" aria-label="Opcje i pauza" title="Opcje (Esc)"><svg viewBox="0 0 20 20" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/><circle cx="10" cy="10" r="5.6"/></svg></button>
   </div>
 </header>
+<div id="cineHint" aria-live="polite">Kamera filmowa · dowolny klawisz lub kliknięcie ją kończy</div>
 <footer class="dock">
   
   <div class="insp panel" id="insp" hidden aria-live="polite"></div>
@@ -3681,6 +3688,29 @@ function updateCamera(){const lim=HALF;cam.target.x=Math.max(-lim,Math.min(lim,c
   cam.phi=Math.max(0.3,Math.min(1.3,cam.phi));cam.radius=Math.max(6,Math.min(140,cam.radius));
   const s=Math.sin(cam.phi);camera.position.set(cam.target.x+cam.radius*s*Math.sin(cam.theta),cam.radius*Math.cos(cam.phi),cam.target.z+cam.radius*s*Math.cos(cam.theta));
   camera.lookAt(cam.target)}
+/* 7.3.0: cinematic camera: slow shots (orbits, push-ins, following a vehicle, wide views) with the interface hidden */
+const cine={on:false,t:0,dur:14,from:null,shot:null};
+function cineStart(){if(titleOpen||!menuEl.hidden)return;cine.on=true;cine.shot=null;cine.t=0;focus=null;camKeys.clear();document.body.classList.remove('cine');void document.body.offsetWidth;document.body.classList.add('cine')}
+function cineStop(){if(!cine.on)return;cine.on=false;document.body.classList.remove('cine')}
+function cineShot(){const bl=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&DEF[c.t]&&c.t!=='road')bl.push(i)}
+  const live=cars.filter(c=>c.mesh&&c.mesh.visible!==false&&c.mesh.parent),R=Math.random,pick=a=>a[(R()*a.length)|0],sgn=R()<0.5?-1:1,th=R()*6.28;
+  let kind=R()<0.3&&live.length?'car':pick(['orbit','orbit','push','wide']);if(!bl.length&&kind!=='car')kind=live.length?'car':'wide';
+  const sh={kind,th0:th,th1:th+sgn*(0.6+R()*0.6),dur:11+R()*6};
+  if(kind==='car'){sh.car=pick(live);sh.r0=8;sh.r1=10.5;sh.p0=1.05;sh.p1=0.9}
+  else{sh.i=bl.length?pick(bl):idx(N>>1,N>>1);
+    if(kind==='orbit'){sh.r0=10+R()*3;sh.r1=sh.r0-1.5;sh.p0=0.95;sh.p1=0.8}
+    else if(kind==='push'){sh.r0=19;sh.r1=9;sh.p0=1.1;sh.p1=0.85;sh.th1=th+sgn*0.3}
+    else{sh.r0=36;sh.r1=29;sh.p0=0.9;sh.p1=0.75;sh.dur=16+R()*4}}
+  return sh}
+function cineTick(dt){if(!cine.on||titleOpen||!menuEl.hidden)return;dt=Math.min(dt,0.1);
+  if(!cine.shot||cine.t>=cine.shot.dur){cine.shot=cineShot();cine.dur=cine.shot.dur;cine.t=0;cine.from={x:cam.target.x,z:cam.target.z,th:cam.theta,ph:cam.phi,r:cam.radius}}
+  const sh=cine.shot;cine.t+=dt;const u=Math.min(1,cine.t/sh.dur),e=u*u*(3-2*u);let sx,sz;
+  if(sh.car){if(!sh.car.mesh||!sh.car.mesh.parent||cars.indexOf(sh.car)<0){cine.t=sh.dur;return}sx=sh.car.mesh.position.x;sz=sh.car.mesh.position.z}else{sx=cx(sh.i);sz=cz(sh.i)}
+  const w0=Math.min(1,cine.t/3.5),w=w0*w0*(3-2*w0),L=(a,b,k)=>a+(b-a)*k,f=cine.from;
+  const th=L(sh.th0,sh.th1,u),ph=L(sh.p0,sh.p1,e),r=L(sh.r0,sh.r1,u);
+  cam.target.x=L(f.x,sx,w);cam.target.z=L(f.z,sz,w);cam.theta=L(f.th,th,w);cam.phi=L(f.ph,ph,w);cam.radius=L(f.r,r,w);updateCamera()}
+document.addEventListener('pointerdown',()=>cineStop(),true);document.addEventListener('wheel',()=>cineStop(),true);
+document.addEventListener('keydown',e=>{if(!cine.on||e.code==='KeyV'||/Shift|Control|Alt|Meta/.test(e.key))return;cineStop();if(e.code==='Escape')e.stopImmediatePropagation()},true);
 function pan(dx,dy){focus=null;if(tut&&tut.on&&Math.abs(dx)+Math.abs(dy)>2)tut.moved=(tut.moved||0)+Math.abs(dx)+Math.abs(dy);const k=cam.radius*0.0016;const rx=Math.cos(cam.theta),rz=-Math.sin(cam.theta);const fx=-Math.sin(cam.theta),fz=-Math.cos(cam.theta);
   cam.target.x+=(-dx*rx+dy*fx)*k;cam.target.z+=(-dx*rz+dy*fz)*k}
 
@@ -5093,13 +5123,14 @@ new ResizeObserver(resize).observe(app);resize();
 const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 let gameSpeed=1;function setSpeed(v){gameSpeed=v;for(const b of document.querySelectorAll('[data-sp]'))b.setAttribute('aria-pressed',String(+b.dataset.sp===v));document.getElementById('clockSub').textContent=clockSubText()}
 function clockSubText(){const se=`${SEASONS[seasonIdx()]} ${seasonDay()}/${SEASON_DAYS}`;return se+' · '+(gameSpeed===0?'Pauza':gameSpeed===2?'Tempo ×2':isNight()?'Noc · domy prąd ×0,8':'Dzień')}
-for(const b of document.querySelectorAll('[data-sp]'))b.addEventListener('click',()=>setSpeed(+b.dataset.sp));setSpeed(1);
+for(const b of document.querySelectorAll('[data-sp]'))b.addEventListener('click',()=>setSpeed(+b.dataset.sp));setSpeed(1);document.getElementById('camBtn').addEventListener('click',e=>{e.stopPropagation();cine.on?cineStop():cineStart()});
 addEventListener('keydown',e=>{if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.code==='Space'&&menuEl.hidden){e.preventDefault();setSpeed(gameSpeed===0?1:0)}});
 /* 6.2 keyboard: WASD move the camera, Q/E turn it, 0/1/2 game speed, Delete/Backspace demolition on/off, Esc closes the open window (or opens the pause menu) */
 const camKeys=new Set(),CAMK=['KeyW','KeyA','KeyS','KeyD','KeyQ','KeyE'];
 addEventListener('keydown',e=>{if(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(titleOpen||!menuEl.hidden||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.code;
   if(CAMK.includes(k)){camKeys.add(k);e.preventDefault();return}
   if(k==='Digit0'||k==='Numpad0')setSpeed(0);else if(k==='Digit1'||k==='Numpad1')setSpeed(1);else if(k==='Digit2'||k==='Numpad2')setSpeed(2);
+  else if(k==='KeyV'){e.preventDefault();cine.on?cineStop():cineStart()}
   else if(k==='Delete'||k==='Backspace'){e.preventDefault();if(lineConf)cancelLine();if(pendA>=0||moveSrc>=0)cancelFP();selectTool(tool==='bulldoze'?'view':'bulldoze')}});
 addEventListener('keyup',e=>camKeys.delete(e.code));addEventListener('blur',()=>camKeys.clear());
 function keyCam(rdt){if(!camKeys.size)return;if(titleOpen||!menuEl.hidden){camKeys.clear();return}const v=700*Math.min(rdt,0.05);let dx=0,dy=0;
@@ -5118,7 +5149,7 @@ function frame(now){requestAnimationFrame(frame);
   const rdt=Math.max(0,Math.min(0.05,(now-prev)/1000)),dt=paused?0:rdt*gameSpeed;prev=now;
   /* pause freezes the simulation only: building, its animations and everything decorative keep running on real time */
   const vdt=paused||titleOpen?rdt:dt;time+=vdt;const night=isNight();
-  if(titleOpen&&!reduce){cam.theta+=rdt*0.05;updateCamera()}else keyCam(rdt);msTick(rdt);
+  if(titleOpen&&!reduce){cam.theta+=rdt*0.05;updateCamera()}else{keyCam(rdt);cineTick(rdt)}msTick(rdt);
   supT+=dt;if(supT>0.5){supT=0;syncGoods();facTick(0.5);bakeTick(0.5);supplyShops();dispatchGarbage();visitorTick(0.5,night);pitTick(0.5)}if((depT=(depT||0)+rdt)>0.5){depT=0;depSync()}
   wasteAcc+=dt;if(wasteAcc>=0.25){wasteTick(wasteAcc,night);wasteAcc=0}shopTick(dt);farmTick(dt,night);
   for(let i=0;i<N*N;i++){const c=grid[i];const H=c&&HOUSING[c.t];if(!H||c.off)continue;xpTick(i,c,dt);abandonTick(i,c,dt);if(c.aband||!popOf(c))continue;c.timer-=dt;
@@ -6968,7 +6999,10 @@ const LT_TR=[
 ["Zasięg rozrywki +3 bloki po drogach i obręb +2", "Entertainment range +3 blocks along the roads and surround +2", "Unterhaltungsreichweite +3 Blöcke entlang der Straßen und Umfeld +2"],
 ["✓ Kino (rozrywka 17 bloków po drogach)", "✓ Cinema (entertainment 17 blocks along the roads)", "✓ Kino (Unterhaltung 17 Blöcke entlang der Straßen)"],
 ["{} bloków po drogach, obręb {}×{}", "{} blocks along the roads, surround {}×{}", "{} Blöcke entlang der Straßen, Umfeld {}×{}"],
-["zasięg {} bloków po drogach, obręb {}×{}, +1 zadowolenia", "range {} blocks along the roads, surround {}×{}, +1 happiness", "Reichweite {} Blöcke entlang der Straßen, Umfeld {}×{}, +1 Zufriedenheit"]
+["zasięg {} bloków po drogach, obręb {}×{}, +1 zadowolenia", "range {} blocks along the roads, surround {}×{}, +1 happiness", "Reichweite {} Blöcke entlang der Straßen, Umfeld {}×{}, +1 Zufriedenheit"],
+["Kamera filmowa", "Cinematic camera", "Kinokamera"],
+["Kamera filmowa (V)", "Cinematic camera (V)", "Kinokamera (V)"],
+["Kamera filmowa · dowolny klawisz lub kliknięcie ją kończy", "Cinematic camera · any key or click ends it", "Kinokamera · jede Taste oder jeder Klick beendet sie"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
