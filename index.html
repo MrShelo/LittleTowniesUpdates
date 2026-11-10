@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.0.9';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.1.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -396,7 +396,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="ovl panel" id="ovl" hidden role="group" aria-label="Nakładki"><b>Nakładki</b>
     <button class="chipb" data-ovl="police"><i style="background:#2f6fe0"></i>Zasięg policji</button><button class="chipb" data-ovl="fire"><i style="background:#e8641c"></i>Zasięg straży</button><button class="chipb" data-ovl="pol"><i style="background:#d9b02a"></i>Zanieczyszczenie</button>
     <button class="chipb" data-ovl="noise"><i style="background:#9a5bd6"></i>Hałas</button><button class="chipb" data-ovl="park"><i style="background:#3cae4f"></i>Zadowolenie z parków</button>
-    <button class="chipb" data-ovl="ent"><i style="background:#e0569a"></i>Zadowolenie z rozrywki</button><button class="chipb" data-ovl="med"><i style="background:#d63b3b"></i>Opieka medyczna</button><button class="chipb" data-ovl="edu"><i style="background:#e0b84a"></i>Szkoły</button><button class="chipb" data-ovl="under"><i style="background:#6f6a62"></i>Pod ziemią</button><button class="chipb" data-ovl="none">Wyłącz</button><small id="ovlNote"></small></div>
+    <button class="chipb" data-ovl="ent"><i style="background:#e0569a"></i>Zadowolenie z rozrywki</button><button class="chipb" data-ovl="med"><i style="background:#d63b3b"></i>Opieka medyczna</button><button class="chipb" data-ovl="edu"><i style="background:#e0b84a"></i>Szkoły</button><button class="chipb" data-ovl="flood"><i style="background:#d6a21f"></i>Zagrożenie powodziami</button><button class="chipb" data-ovl="under"><i style="background:#6f6a62"></i>Pod ziemią</button><button class="chipb" data-ovl="none">Wyłącz</button><small id="ovlNote"></small></div>
 <div id="app"></div>
 <header class="hud">
   <div class="res panel" id="r-money" title="Gotówka (T¢): stan / limit"><span class="ic tc" aria-hidden="true">T¢</span>
@@ -4791,11 +4791,17 @@ for(const r of document.querySelectorAll('.res')){const mv=()=>{if(r.hasAttribut
 const ovlMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(0.98,0.98).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.42,depthWrite:false}),N*N);
 ovlMesh.frustumCulled=false;ovlMesh.count=0;ovlMesh.renderOrder=3;colorBuf(ovlMesh,N*N,new THREE.Color('#ffffff'));scene.add(ovlMesh);let ovlMode='none',ovlT=0;
 const OVL={med:{c:['#d63b3b'],note:'Czerwone: zasięg klinik i szpitali. Chorzy stąd trafią na leczenie, gdy są wolne łóżka.'},edu:{c:['#e0b84a','#4a9a5a'],note:'Żółte: tylko podstawówka (+0,5 zadowolenia), zielone: podstawówka i szkoła średnia (+1).'},police:{c:['#2f6fe0'],note:'Niebieskie pola: zasięg komisariatów. Przestępstwa poza nim kończą się stratą.'},fire:{c:['#e8641c'],note:'Pomarańczowe pola: zasięg straży. Pożar poza nim po 6 godzinach zostawia zgliszcza.'},pol:{c:['#c9c23a','#e0962a'],note:'Żółte: lekki smog (−1 zadowolenia), pomarańczowe: silny (−2).'},
-  noise:{c:['#9a5bd6'],note:'Fioletowe: hałas wiatraków i transformatorów (−1 zadowolenia).'},park:{c:['#3cae4f'],note:'Zielone: dom tutaj ma +1 zadowolenia z parku.'},ent:{c:['#e0569a'],note:'Różowe: dom tutaj ma +1 zadowolenia z rozrywki.'},under:{c:['#6f6a62'],note:'Teren jest przezroczysty: widać rury, tunele i kable w tunelach.'}};
+  noise:{c:['#9a5bd6'],note:'Fioletowe: hałas wiatraków i transformatorów (−1 zadowolenia).'},park:{c:['#3cae4f'],note:'Zielone: dom tutaj ma +1 zadowolenia z parku.'},ent:{c:['#e0569a'],note:'Różowe: dom tutaj ma +1 zadowolenia z rozrywki.'},flood:{c:['#e8c43a','#d63b3b'],note:'Czerwone: teren zalany teraz. Żółte: woda bez ujścia zaleje go w ciągu najbliższej godziny (leży niżej niż poziom wody za dwa kroki).'},under:{c:['#6f6a62'],note:'Teren jest przezroczysty: widać rury, tunele i kable w tunelach.'}};
 function ovlVal(i){if(ovlMode==='med')return medCov[i]?1:0;if(ovlMode==='edu')return eduP[i]&&eduS[i]?2:eduP[i]||eduS[i]?1:0;if(ovlMode==='pol')return pol[i];if(ovlMode==='noise')return noiseCov[i]?1:0;if(ovlMode==='park')return parkCov[i]?1:0;if(ovlMode==='ent')return entCov[i]?1:0;return 0}
-function drawOvl(){if(ovlMode==='none'){ovlMesh.count=0;return}let n=0;const col=new THREE.Color();let cov=null;
+/* 7.1.0: flood threat: 2 = flooded now, 1 = dry land that a body of water with no outflow will reach within two rises (about an hour) */
+function floodRisk(){const out=new Uint8Array(N*N),comp=new Uint8Array(N*N),wet=i=>water[i]||fld[i];for(let i=0;i<N*N;i++)if(fld[i])out[i]=2;
+  for(let s0=0;s0<N*N;s0++){if(!wet(s0)||comp[s0])continue;const q=[s0];comp[s0]=1;for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(wet(j)&&!comp[j]){comp[j]=1;q.push(j)}
+    let L=0,edge=false;for(const i of q){const x=i%N,z=(i/N)|0;if(x===0||z===0||x===N-1||z===N-1)edge=true;L=Math.max(L,water[i]?wlv[i]:fld[i]-1)}
+    if(edge)continue;const LL=Math.min(H_MAX,L+2),seen=new Set(),Q=q.slice();for(let h=0;h<Q.length;h++)for(const j of nbrs(Q[h]))if(!wet(j)&&!seen.has(j)&&hgt[j]<=LL){seen.add(j);out[j]=1;Q.push(j)}}
+  return out}
+function drawOvl(){if(ovlMode==='none'){ovlMesh.count=0;return}let n=0;const col=new THREE.Color();let cov=null;if(ovlMode==='flood')cov=floodRisk();
   if(ovlMode==='police'||ovlMode==='fire'){cov=new Uint8Array(N*N);for(const st of ovlMode==='fire'?fireStations():stations()){const r=ovlMode==='fire'?fireRad(grid[st]):polRad(grid[st]),R=reachOf(st,r);for(let j=0;j<N*N;j++)if(R[j])cov[j]=1}}
-  for(let i=0;i<N*N;i++){const v=cov?cov[i]:ovlVal(i);if(!v||water[i])continue;dObj.position.set(cx(i),surfY(i)+0.075,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();ovlMesh.setMatrixAt(n,dObj.matrix);
+  for(let i=0;i<N*N;i++){const v=cov?cov[i]:ovlVal(i);if(!v||water[i])continue;dObj.position.set(cx(i),(fld[i]?lvY(fld[i]-1):surfY(i))+0.075,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();ovlMesh.setMatrixAt(n,dObj.matrix);
     const cs=OVL[ovlMode].c;col.set(cs[Math.min(cs.length,v)-1]);ovlMesh.setColorAt(n,col);n++}
   ovlMesh.count=n;ovlMesh.instanceMatrix.needsUpdate=true;if(ovlMesh.instanceColor)ovlMesh.instanceColor.needsUpdate=true}
 function setOvl(m){ovlMode=m;underOn=m==='under';setXray(underOn||(tool==='bulldoze'&&delMode==='pipe')||tool==='pipe'||tool==='pipeDel');for(const b of document.querySelectorAll('[data-ovl]'))b.setAttribute('aria-pressed',String(b.dataset.ovl===m));document.getElementById('ovlNote').textContent=m==='none'?'':OVL[m].note;
@@ -6935,7 +6941,9 @@ const LT_TR=[
 ["✓ Kino (rozrywka 6 pól po drogach)", "✓ Cinema (entertainment 6 blocks along the roads)", "✓ Kino (Unterhaltung 6 Blöcke entlang der Straßen)"],
 ["zasięg {} bloków po drogach, +1 zadowolenia", "range {} blocks along the roads, +1 happiness", "Reichweite {} Blöcke entlang der Straßen, +1 Zufriedenheit"],
 ["Rozrywka w zasięgu 12 pól po drogach (+1 zadowolenia). Gość przegrywa średnio ok. 130 T¢, ale co ósmy wygrywa i kasyno mu wypłaca. Drogie w utrzymaniu: 240 T¢/godz.", "Entertainment within 12 blocks along the roads (+1 happiness). A guest loses about 130 T¢ on average, but every eighth one wins and the casino pays out. Expensive to maintain: 240 T¢/h.", "Unterhaltung im Umkreis von 12 Blöcken entlang der Straßen (+1 Zufriedenheit). Ein Gast verliert im Schnitt etwa 130 T¢, aber jeder achte gewinnt und das Casino zahlt aus. Teuer im Unterhalt: 240 T¢/Std."],
-["Dwupiętrowy lokal, zasięg rozrywki 5 pól po drogach zamiast 3, kolejka 35 gości zamiast 25", "Two-storey venue, entertainment range 5 blocks along the roads instead of 3, a queue of 35 guests instead of 25", "Zweistöckiges Lokal, Unterhaltungsreichweite 5 Blöcke entlang der Straßen statt 3, Warteschlange von 35 statt 25 Gästen"]
+["Dwupiętrowy lokal, zasięg rozrywki 5 pól po drogach zamiast 3, kolejka 35 gości zamiast 25", "Two-storey venue, entertainment range 5 blocks along the roads instead of 3, a queue of 35 guests instead of 25", "Zweistöckiges Lokal, Unterhaltungsreichweite 5 Blöcke entlang der Straßen statt 3, Warteschlange von 35 statt 25 Gästen"],
+["Zagrożenie powodziami", "Flood threat", "Hochwassergefahr"],
+["Czerwone: teren zalany teraz. Żółte: woda bez ujścia zaleje go w ciągu najbliższej godziny (leży niżej niż poziom wody za dwa kroki).", "Red: land flooded now. Yellow: water with no outflow will flood it within the next hour (it lies below the water level two rises ahead).", "Rot: derzeit überflutetes Land. Gelb: Wasser ohne Abfluss überflutet es in der nächsten Stunde (liegt unter dem Wasserstand nach zwei Anstiegen)."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
