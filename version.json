@@ -1,1 +1,1 @@
-{"v": "7.0.7", "notes": "Zasięg usług (zdrowie, szkoły, policja, straż, służby drogowe) liczy się po drogach od wjazdu budynku: tyle bloków w każdą stronę, a co 4 odgałęzienia po drodze zasięg jest o blok krótszy. Podgląd zasięgu pokazuje pola, do których usługa dojedzie."}
+{"v": "7.0.8", "notes": "7.0.8: zasięg po drogach także dla rozrywki (restauracja 3/5, kino 6/8 z plakatami, teatr 9, kasyno 12) i sklepów (5/6); szkoły +75% zasięgu; dzietność i liczba uczniów −20%"}

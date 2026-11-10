@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.0.7';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.0.8';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -583,10 +583,10 @@ const DEF={
   recycler:{name:'Recykling',cost:700,desc:'Przerabia 10 kg odpadów na godz. na 5 kg materiałów (bufor 60 kg), 2 śmieciarki. Pobiera 1,5 MW.',sw:'#4f9a6a'},
   hvpole:{name:'Słup WN',cost:120,desc:'Wysokie napięcie: łączy się z innymi słupami WN, transformatorami i el. węglowymi w zasięgu 11×11 (po ulepszeniu 17×17). Nie z wiatrakami.',sw:'#8c959d',area:3},
   gallery:{name:'Galeria handlowa',cost:1500,desc:'Zajmuje 2×2 pola. W karcie galerii wykupujesz lokale (sklep 100 T¢): na parterze 4 (np. 3 sklepy i kino), po dobudowie piętra wszystkie. Galeria ma 960 miejsc na półkach, dzielonych po równo między towary jej sklepów. Ceny +25% i więcej klientów.',sw:'#d8c48a',size:4},
-  restaurant:{name:'Restauracja',cost:400,desc:'Rozrywka w zasięgu 3×3 (+1 zadowolenia). Zużywa jedzenie z magazynów, posiłek 30 T¢. Najtańsza w utrzymaniu.',sw:'#d9773a'},
-  cinema:{name:'Kino',cost:900,desc:'Rozrywka w zasięgu 5×5 (+1 zadowolenia). Bilet 30 T¢.',sw:'#7a2a3a'},
-  theater:{name:'Teatr',cost:1200,desc:'Rozrywka w zasięgu 5×5 (+1 zadowolenia). Bilet 40 T¢.',sw:'#b0303f'},
-  casino:{name:'Kasyno',cost:2000,desc:'Rozrywka w zasięgu 7×7 (+1 zadowolenia). Gość przegrywa średnio ok. 130 T¢, ale co ósmy wygrywa i kasyno mu wypłaca. Drogie w utrzymaniu: 240 T¢/godz.',sw:'#4a2f7a'},
+  restaurant:{name:'Restauracja',cost:400,desc:'Rozrywka w zasięgu 3 pól po drogach (+1 zadowolenia). Zużywa jedzenie z magazynów, posiłek 30 T¢. Najtańsza w utrzymaniu.',sw:'#d9773a'},
+  cinema:{name:'Kino',cost:900,desc:'Rozrywka w zasięgu 6 pól po drogach (+1 zadowolenia). Bilet 30 T¢.',sw:'#7a2a3a'},
+  theater:{name:'Teatr',cost:1200,desc:'Rozrywka w zasięgu 9 pól po drogach (+1 zadowolenia). Bilet 40 T¢.',sw:'#b0303f'},
+  casino:{name:'Kasyno',cost:2000,desc:'Rozrywka w zasięgu 12 pól po drogach (+1 zadowolenia). Gość przegrywa średnio ok. 130 T¢, ale co ósmy wygrywa i kasyno mu wypłaca. Drogie w utrzymaniu: 240 T¢/godz.',sw:'#4a2f7a'},
   hotelS:{name:'Mały hotel',cost:500,desc:'Ściąga przyjezdnych: +4 auta/godz. na każdym wjeździe, do +75% przy pełnej atrakcyjności (park, rozrywka, sklep obok). Nocleg 100 T¢. Utrzymanie 45 T¢/godz.',sw:'#c9a46a'},
   hotelB:{name:'Duży hotel',cost:5000,desc:'3×2 pola z podjazdem. +10 przyjezdnych/godz. na wjazd (do +75% przy pełnej atrakcyjności), nocleg 200 T¢, utrzymanie 130 T¢/godz. Można w nim otworzyć teatr, restaurację albo kasyno.',sw:'#a8844e',fw:3,fh:2},
   pipe:{name:'Rura',cost:5,desc:'Rura wodno-kanalizacyjna pod ziemią. Kładź ją pod budynkami i ulicami, a przez rzekę po moście, przeciągnij, by położyć kilka pól. Budynek łączy się, gdy rura leży pod nim albo tuż obok.',sw:'#3a8fd8',unit:'T¢/pole'},
@@ -624,10 +624,10 @@ const DEF={
   cemS:{name:'Mały cmentarz',cost:600,fw:1,fh:2,desc:'Zajmuje 1×2 pola. Miejsce dla 60 zmarłych.',sw:'#7e8a6a'},
   cemB:{name:'Duży cmentarz',cost:2500,fw:3,fh:3,desc:'Zajmuje 3×3 pola. 280 miejsc, z katakumbami 300.',sw:'#6a7658'},
   crem:{name:'Krematorium',cost:3000,size:4,desc:'Zajmuje 2×2 pola. 120 miejsc (z drugim piecem 160). Po 12 godz. prochy trafiają do urny i miejsce się zwalnia.',sw:'#8a7f78'},
-  schoolS:{name:'Mała szkoła podstawowa',cost:700,desc:'Dzieci 7–14 lat w zasięgu 9 pól chodzą do szkoły: +0,5 zadowolenia (z liceum lub technikum +1).',sw:'#e0b84a'},
-  school:{name:'Szkoła podstawowa',cost:1300,fw:1,fh:2,desc:'Zajmuje 1×2 pola. Zasięg 11 pól, +0,5 zadowolenia (z liceum lub technikum +1).',sw:'#d9a33a'},
-  lyceum:{name:'Liceum',cost:3200,fw:2,fh:3,desc:'Zajmuje 2×3 pola. Zasięg 11: młodzież 15–18 lat się uczy, zarobki (podatki i sprzedaż) +5%.',sw:'#b8573a'},
-  techn:{name:'Technikum',cost:3200,fw:2,fh:3,desc:'Zajmuje 2×3 pola. Zasięg 11: młodzież się uczy, fabryki i wytwórnie +5% produkcji, magazyny +5% pojemności.',sw:'#5a7a9a'},
+  schoolS:{name:'Mała szkoła podstawowa',cost:700,desc:'Dzieci 7–14 lat w zasięgu 16 pól chodzą do szkoły: +0,5 zadowolenia (z liceum lub technikum +1).',sw:'#e0b84a'},
+  school:{name:'Szkoła podstawowa',cost:1300,fw:1,fh:2,desc:'Zajmuje 1×2 pola. Zasięg 19 pól, +0,5 zadowolenia (z liceum lub technikum +1).',sw:'#d9a33a'},
+  lyceum:{name:'Liceum',cost:3200,fw:2,fh:3,desc:'Zajmuje 2×3 pola. Zasięg 19: młodzież 15–18 lat się uczy, zarobki (podatki i sprzedaż) +5%.',sw:'#b8573a'},
+  techn:{name:'Technikum',cost:3200,fw:2,fh:3,desc:'Zajmuje 2×3 pola. Zasięg 19: młodzież się uczy, fabryki i wytwórnie +5% produkcji, magazyny +5% pojemności.',sw:'#5a7a9a'},
   bakery:{name:'Piekarnia',cost:220,desc:'Sprzedaje pieczywo (ceny +25%). Sama piecze: 1 kg zboża z magazynów daje 3 bochenki na półce. Gdy brak zboża, bierze pieczywo z magazynu.',sw:'#d9a35a'},
   warehouseB:{name:'Wielki magazyn',cost:600,size:2,desc:'Zajmuje 2 pola, działa bez prądu. Własny zapas do 500 kg (2,5× magazyn). Ciężarówki zostawiają towar w magazynie, do którego przyjechały; sklepy i fabryki biorą z najbliższego, który go ma. Ulepszenie podwaja pojemność.',sw:'#b8864a'},
   factoryB:{name:'Duża fabryka',cost:700,size:2,desc:'Zajmuje 2 pola. Na start 1 linia ogólna; w karcie fabryki wykupujesz do 3 różnych linii (każda 400 T¢). Linie pracują po kolei.',sw:'#7b8696'},
@@ -729,7 +729,8 @@ const UPG={
   hydrogen:{name:'Drugi odwiert',cost:2000,upkeep:60,desc:'+30 MW (90 MW z czystą wodą)'},
   shop1:{name:'Dodatkowe piętro',cost:400,upkeep:10,desc:'50 klientów/godz. i 240 miejsc na półkach'},
   cemB:{name:'Katakumby',cost:1500,upkeep:15,desc:'Podziemne katakumby pod środkiem cmentarza: +20 miejsc (300)'},crem:{name:'Drugi piec kremacyjny',cost:2000,upkeep:40,desc:'Druga komora kremacyjna: 160 miejsc'},
-  restaurant:{name:'Wykwintna restauracja',cost:450,upkeep:15,desc:'Dwupiętrowy lokal, zasięg rozrywki 5×5 zamiast 3×3, kolejka 35 gości zamiast 25'}};
+  restaurant:{name:'Wykwintna restauracja',cost:450,upkeep:15,desc:'Dwupiętrowy lokal, zasięg rozrywki 5 pól po drogach zamiast 3, kolejka 35 gości zamiast 25'},
+  cinema:{name:'Plakaty reklamowe',cost:400,upkeep:10,desc:'Zasięg rozrywki 8 pól po drogach zamiast 6'}};
 const UPGF={factory:{name:'Filtry',cost:300,upkeep:15,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},factoryB:{name:'Filtry',cost:450,upkeep:20,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},smallfac:{name:'Filtry',cost:180,upkeep:10,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, wydajność −10%'},
   incinerator:{name:'Filtry',cost:500,upkeep:25,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, spalanie −10%'},coal:{name:'Filtry',cost:600,upkeep:30,desc:'Zanieczyszczenia o 1 pole mniej, biały dym, moc −10%'}};
 const OUT_R=25;
@@ -740,8 +741,10 @@ const WORK_T=['factory','smallfac','factoryB','mine','mineB'];const MINE_T={mine
 const isShop=t=>t==='bakery'||t==='shop1'||t==='shop'||t==='supermarket'||t==='gallery'||t==='restaurant';
 const FOOD=['veg','dairy','bread','drinks'];
 const PRICE={cinema:30,theater:40,casino:150,restaurant:30,hotelS:100,hotelB:200};
-const ENT_R={cinema:2,theater:2,casino:3,restaurant:1};
-const entR=c=>!c?0:c.t==='restaurant'&&c.up?2:ENT_R[c.t]||(c.t==='gallery'&&c.cinema?2:0)||(c.t==='hotelB'&&c.attr?ENT_R[c.attr]:0);
+const ENT_R={cinema:6,theater:9,casino:12,restaurant:3};
+const entR=c=>!c?0:c.t==='restaurant'&&c.up?5:c.t==='cinema'&&c.up?8:ENT_R[c.t]||(c.t==='gallery'&&c.cinema?6:0)||(c.t==='hotelB'&&c.attr?ENT_R[c.attr]:0);
+/* 7.0.8: shops reach along the roads too: small ones 5 blocks, big ones (supermarket, gallery) 6 */
+const shopR=t=>t==='supermarket'||t==='gallery'?6:5;
 const SERVICES=['bakery','shop1','shop','supermarket','gallery','restaurant','cinema','theater','casino','hotelS','hotelB'];
 const CINEMA_COST=400,ATTR_COST=600;
 const FP0=t=>!DEF[t]?null:DEF[t].size===2?[2,1]:DEF[t].size===4?[2,2]:DEF[t].fw?[DEF[t].fw,DEF[t].fh]:null;
@@ -938,7 +941,7 @@ function showArea(i,r,flash,kind='green',fp=null,T=null){reachMesh.count=0;
 /* reach of service buildings that keep it outside DEF (health, education, police, fire, shops, entertainment, road service) */
 const SHOPS_R=new Set(['shop','shop1','bakery','gallery','supermarket']);
 function svcRange(t,c){if(MED[t])return MED[t].r;if(EDU[t])return EDU[t].r;if(POL[t])return c?polRad(c):POL[t].r;if(FIRE[t])return c?fireRad(c):FIRE[t].r;
-  if(t==='heliB')return HELI_R;if(t==='roadSvc')return SVC_R;if(ENT_R[t])return c?entR(c):ENT_R[t];if(SHOPS_R.has(t))return SHOP_R;return 0}
+  if(t==='heliB')return HELI_R;if(t==='roadSvc')return SVC_R;if(ENT_R[t])return c?entR(c):ENT_R[t];if(SHOPS_R.has(t))return shopR(t);return 0}
 const rangeKind=t=>POL[t]?'pol':'green',rangeFP=t=>SHOPS_R.has(t)||ENT_R[t]?null:FP(t);
 function toolRange(t){const d=DEF[t];return(d&&(d.r||d.area))||svcRange(t)}
 const ring=new THREE.Mesh(new THREE.RingGeometry(0.5,0.6,40),new THREE.MeshBasicMaterial({color:'#f07a4f',side:THREE.DoubleSide,depthWrite:false,transparent:true}));
@@ -1109,7 +1112,7 @@ const ABAND_T=[360,1440,2880];
 const AGE_H=1/24,STAGES=[[0,'Dzieci',7],[7,'Uczniowie podstawówki',15],[15,'Uczniowie liceum/technikum',19],[19,'Dorośli',65],[65,'Seniorzy',200]];
 const stageOf=a=>a<7?0:a<15?1:a<19?2:a<65?3:4;
 function newPerson(a){return{a,s:0,si:0,sk:0,h:0,hi:-1}}
-function seedPeople(c,frac){const n=Math.round(residents(c)*frac);c.pp=[];for(let k=0;k<n;k++){const r=Math.random();c.pp.push(newPerson(r<0.2?rnd(0,7):r<0.33?rnd(7,15):r<0.4?rnd(15,19):r<0.88?rnd(19,64):rnd(65,80)))}c.lastBuy=gameT}
+function seedPeople(c,frac){const n=Math.round(residents(c)*frac);c.pp=[];for(let k=0;k<n;k++){const r=Math.random();c.pp.push(newPerson(r<0.16?rnd(0,7):r<0.264?rnd(7,15):r<0.32?rnd(15,19):r<0.88?rnd(19,64):rnd(65,80)))}c.lastBuy=gameT}
 function sickFactors(i){const c=grid[i],ts=tilesOf(i);return{water:c.water==='ok',power:!!c.powered,air:!ts.some(k=>pol[k]),park:ts.some(k=>parkCov[k]),med:ts.some(k=>medCov[k])}}
 function sickChance(i){const f=sickFactors(i);return Math.max(0,0.2-0.04*Object.values(f).filter(Boolean).length)*(ordOn('health')?0.7:1)}
 function medFor(i){const ts=tilesOf(i);let best=-1,room=0;for(let j=0;j<N*N;j++){const m=grid[j];if(!m||!MED[m.t]||m.off||!m.powered)continue;const r=MED[m.t].r;
@@ -1142,7 +1145,7 @@ function lifeHour(i,c,six){if(!c.pp||c.aband)return;const cap=residents(c),h=c.h
   if(six&&!safe){const sick=c.pp.filter(q=>q.s===1).length;for(let k=0;k<sick;k++)if(Math.random()<0.4){const hs=healthy();if(hs.length){const q=hs[(Math.random()*hs.length)|0];q.s=1;q.si++;q.sk=0}}}
   for(const q of c.pp)if(q.s===1){const m=medFor(i);if(m<0)break;q.s=2;q.h=8;q.hi=m;grid[m].pat=(grid[m].pat||0)+1}
   const adults=c.pp.filter(q=>q.a>=19&&q.a<65).length;
-  if(c.pp.length<cap&&adults>=2&&Math.random()<0.04){c.pp.push(newPerson(0));cur.births=(cur.births||0)+1}
+  if(c.pp.length<cap&&adults>=2&&Math.random()<0.032){c.pp.push(newPerson(0));cur.births=(cur.births||0)+1}
   if(c.pp.length<cap&&h>=3&&Math.random()<0.3*(ordOn('tour')?0.25:1))c.pp.push(newPerson(rnd(20,40)));
   if(h<=1&&c.pp.length&&Math.random()<0.08)c.pp.splice((Math.random()*c.pp.length)|0,1);
   if(c.pp.length>cap)c.pp.length=cap}
@@ -2597,7 +2600,7 @@ const edgeOuts=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].edgeOut
 function hotelStars(i){const c=grid[i];if(!c||(c.t!=='hotelS'&&c.t!=='hotelB'))return 0;const ts=tilesOf(i);return(ts.some(k=>parkCov[k])?1:0)+((c.t==='hotelB'&&c.attr)||ts.some(k=>entCov[k])?1:0)+(ts.some(k=>shopCov[k])?1:0)}
 /* ---------- police: patrols, crimes, bank robberies ---------- */
 const POL={policeS:{r:5,patrol:2,cells:10},policeB:{r:8,patrol:4,cells:25}};const polRad=c=>POL[c.t].r+(c.up2?3:0)+(ordOn('police')?3:0);const isPolice=t=>t==='policeS'||t==='policeB';
-const MED={clinic:{r:9,cap:35},hosp:{r:11,cap:100},hospC:{r:13,cap:300}},DCARE={cemS:60,cemB:280,crem:120},EDU={schoolS:{r:9,k:'p'},school:{r:11,k:'p'},lyceum:{r:11,k:'s',lyc:1},techn:{r:11,k:'s',tech:1}};
+const MED={clinic:{r:9,cap:35},hosp:{r:11,cap:100},hospC:{r:13,cap:300}},DCARE={cemS:60,cemB:280,crem:120},EDU={schoolS:{r:16,k:'p'},school:{r:19,k:'p'},lyceum:{r:19,k:'s',lyc:1},techn:{r:19,k:'s',tech:1}};
 const dCap=c=>DCARE[c.t]+(c.t==='cemB'&&c.up?20:0)+(c.t==='crem'&&c.up?40:0),medCap=c=>MED[c.t].cap;
 let crimes=[],crimeSeq=0,crimeT=40,heistT=240;const pinG=new THREE.ConeGeometry(0.12,0.3,8).rotateX(Math.PI);pinG.userData.keep=true;
 const matPin=new THREE.MeshBasicMaterial({color:'#ff3b30'}),matPinH=new THREE.MeshBasicMaterial({color:'#ffcc00'});
@@ -3599,7 +3602,7 @@ function xrayNew(g){if(!xray)return;const set=new Set();xrayMats(g,true,set);for
 /* ---------- environment & happiness ----------
    Pollution (Chebyshev distance): factory 1 = yellow, 2 = yellow-green; coal plant 1 = yellow, 2–3 = yellow-green.
    House: 3 base, +1 shop within 5 tiles, +1 park in its range, −1 / −2 for the tile's pollution, −1 without power; clamped 1–5. */
-const roadRangeT=t=>!!(MED[t]||EDU[t]||POL[t]||FIRE[t]||t==='roadSvc');
+const roadRangeT=t=>!!(MED[t]||EDU[t]||POL[t]||FIRE[t]||t==='roadSvc'||ENT_R[t]||SHOPS_R.has(t)||t==='hotelB');
 /* the tiles a service reaches: along the roads from its entrances, one block per road tile, and every 4 side branches passed cost one more block;
    the tiles around a reached road are covered */
 function reachFrom(tiles,R,sp=1){const out=new Uint8Array(N*N);for(const t of tiles)out[t]=1;const own=new Set(tiles),dist=new Map(),H=[];
@@ -3621,9 +3624,9 @@ function computeEnv(){eduP.fill(0);eduS.fill(0);lycCov.fill(0);techCov.fill(0);m
   for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off)continue;
     if(noisy(c))stamp(noiseCov,i,1,1,true);
     {const pr=polR(c);if(pr)stamp(pol,i,pr,d=>d===0?0:d===1?2:1,true)}
-    if(c.t==='shop'||c.t==='shop1'||c.t==='bakery'||c.t==='gallery'||c.t==='supermarket')stamp(shopCov,i,SHOP_R,1,true);
+    if(SHOPS_R.has(c.t)){const cv=reachOf(i,shopR(c.t));for(let j=0;j<N*N;j++)if(cv[j])shopCov[j]=1}
     if(c.crowd)stamp(crowdCov,i,SHOP_R,1,true);
-    {const er=entR(c);if(er)for(const t of tilesOf(i))stamp(entCov,t,er,1,true)}
+    {const er=entR(c);if(er){const cv=reachOf(i,er);for(let j=0;j<N*N;j++)if(cv[j])entCov[j]=1}}
     if(EDU[c.t]&&c.powered!==false){const E=EDU[c.t],cov=reachOf(i,E.r),A=E.k==='p'?eduP:eduS;for(let j=0;j<N*N;j++)if(cov[j]){A[j]=1;if(E.lyc)lycCov[j]=1;if(E.tech)techCov[j]=1}}
     if(MED[c.t]){const cov=reachOf(i,MED[c.t].r);for(let j=0;j<N*N;j++)if(cov[j])medCov[j]=1}
     if(false);
@@ -4014,7 +4017,7 @@ let buyLock=0;const lockBuy=()=>{buyLock=performance.now()+500;inspEl.classList.
 function openHouse(i){lockBuy();if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;
   if(tut&&tut.on&&grid[i]&&HLV[grid[i].t]&&tutNow()==='house'&&!tut.houseSeen){tut.houseSeen=true;setTimeout(()=>tutInfo('Dom zdobywa doświadczenie','Podświetlony pasek to <b>doświadczenie</b> domu. Budynki mieszkalne zdobywają je same, tym szybciej, im <b>wyższe zadowolenie</b> mieszkańców (przy zadowoleniu 0 stoją w miejscu). Gdy pasek się zapełni, dom możesz rozbudować na wyższy poziom: więcej mieszkańców, podatków i zakupów.','tutXP'),300)}inspI=i;inspEl.hidden=false;hintEl.hidden=true;document.body&&document.body.classList.add('inspOn');ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
   const c=grid[i];area.visible=reachHide();areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='heliB'?HELI_R:c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold','green',null,c.t);
-  else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');else if(c&&svcRange(c.t,c))showArea(i,svcRange(c.t,c),'hold',rangeKind(c.t),rangeFP(c.t),c.t);renderInsp()}
+  else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold','green',null,c.t);else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');else if(c&&svcRange(c.t,c))showArea(i,svcRange(c.t,c),'hold',rangeKind(c.t),rangeFP(c.t),c.t);renderInsp()}
 /* the card refreshes twice a second; a refresh between pressing and releasing a button would swallow the click, so it waits while a finger or the mouse is down on the card */
 let inspDown=0,inspRel=0;inspEl.addEventListener('pointerdown',()=>{inspDown=performance.now()},true);
 for(const ty of['pointerup','pointercancel'])addEventListener(ty,()=>{if(inspDown){inspDown=0;inspRel=performance.now()+150}},true);
@@ -4048,7 +4051,7 @@ function toggleOff(i){if(grid[i]&&grid[i].ruin)return;const c=grid[i];if(!c||DRI
 function buyUpgrade(i,slot='up'){const c=grid[i],U=c&&(slot==='up'?UPG:slot==='up2'?UPG2:slot==='up3'?UPG3:UPGF)[c.t];if(!U||c[slot])return;if(c.t==='incinerator'&&slot==='up2'&&!c.tiles)return;if(c.t==='incinerator'&&slot==='up2'&&!c.up){setHint('Najpierw dokup drugi komin.',true,true);hintEl.hidden=false;return}
   if(money<U.cost){setHint(`Brakuje ${fmt(U.cost-money)} T¢ na ulepszenie.`,true,true);hintEl.hidden=false;return}
   spend(U.cost);c[slot]=true;if(slot==='up2'){if(!isWH(c.t))addUpgrade2Visual(c)}else if(slot==='filt')filterVisual(c);else if(slot!=='up3')addUpgradeVisual(c);if(c.t==='coal'){c.gstock=c.gstock||0;c.gin=c.gin||0;c.gtrucks=c.gtrucks||0}
-  powerDirty=true;envDirty=true;if(c.t==='hvpole'||c.t==='transformer')topoDirty=true;float(i,U.name,'neutral');save();renderInsp();if(DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,areaOf(i,c),inspI===i?'hold':true)}
+  powerDirty=true;envDirty=true;if(c.t==='hvpole'||c.t==='transformer')topoDirty=true;float(i,U.name,'neutral');save();renderInsp();if(DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,areaOf(i,c),inspI===i?'hold':true);else if(entR(c)&&!c.tiles)showArea(i,entR(c),inspI===i?'hold':true,'green',null,c.t)}
 const areaOf=(i,c)=>DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='heliB'?HELI_R:c.t==='hvpole'?hvR(i):DEF[c.t].area;
 /* the next building type (in build-menu order) that exists on the map */
 const TYPE_ORDER=CATS.flatMap(c=>c.tools).filter(t=>!DRIVE[t]&&t!=='pole'&&t!=='poleline'&&t!=='pipe'&&t!=='pipeDel');
@@ -4127,14 +4130,14 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
     R('Stan',!c.stores.length?'pusta: wykup pierwszy sklep':full?'zamknięta: pełno śmieci':!c.powered?'zamknięta: brak prądu':'otwarta',!c.stores.length||full||!c.powered?'warnv':'');
     pick=`<div class="chips">${Object.keys(SPECS).filter(k=>k!=='mall').map(k=>{const own=c.stores.includes(k),dis=!own&&(c.stores.length>=STORE_MAX||galFull(c)||money<STORE_COST);
       return`<button class="chipb" data-buy="${k}" aria-pressed="${own}"${dis?' disabled style="opacity:.5"':''}><i style="background:${SPECS[k].col}"></i>${own?'✓ ':'+ '}${SPECS[k].name}${own?'':` · ${STORE_COST} T¢`}</button>`}).join('')}
-      <button class="chipb" data-cinema="1" aria-pressed="${!!c.cinema}"${!c.cinema&&(money<CINEMA_COST||galFull(c))?' disabled style="opacity:.5"':''}><i style="background:#7a2a3a"></i>${c.cinema?'✓ Kino (rozrywka 5×5)':`+ Kino · ${CINEMA_COST} T¢`}</button></div>`}
+      <button class="chipb" data-cinema="1" aria-pressed="${!!c.cinema}"${!c.cinema&&(money<CINEMA_COST||galFull(c))?' disabled style="opacity:.5"':''}><i style="background:#7a2a3a"></i>${c.cinema?'✓ Kino (rozrywka 6 pól po drogach)':`+ Kino · ${CINEMA_COST} T¢`}</button></div>`}
   if(c.t==='bakery'){R('Półki',`${c.shelf.bread||0}/${slotsOf(c)} bochenków`+(c.incoming?` (+${c.incoming} w drodze)`:''));R('Wypiek',`1 kg zboża → 3 bochenki · zboże w magazynach ${fmt(goods.grain)}`,goods.grain<1?'warnv':'');R('Cena',`${priceAt(c,'bread')} T¢`)}
   if(c.t==='restaurant'){R('Półki z jedzeniem',`${shelfTotal(c)}/${slotsOf(c)} · po ${shelfCap(c)} na towar`+(c.incoming?` (+${c.incoming} w drodze)`:''));for(const k of FOOD)R(`<span class="sw2" style="background:${GOODS[k].col}"></span>${GOODS[k].name}`,`${c.shelf[k]||0} szt. · mag. ${fmt(goods[k])}`);R('Posiłek',`${PRICE.restaurant} T¢`)}
-  if(entR(c))R('Rozrywka',`zasięg ${2*entR(c)+1}×${2*entR(c)+1}, +1 zadowolenia`);
+  if(entR(c))R('Rozrywka',`zasięg ${entR(c)} bloków po drogach, +1 zadowolenia`);
   if(c.t==='cinema'||c.t==='theater'||c.t==='casino')R(c.t==='casino'?'Stawka':'Bilet',c.t==='casino'?`${PRICE.casino} T¢ (wygrane gości: −150…−600 T¢)`:`${PRICE[c.t]} T¢`);
   if(MED[c.t])R('Pacjenci',`${c.pat||0} / ${medCap(c)} · zasięg ${MED[c.t].r} pól od budynku`,(c.pat||0)>=medCap(c)?'warnv':'');
   if(DCARE[c.t]){const used=(c.bodies||0)+(c.urn?c.urn.length:0);R('Miejsca',`${used} / ${dCap(c)}`+(c.inbound?` (+${c.inbound} w drodze)`:''),used>=dCap(c)?'warnv':'');if(c.t==='crem'&&c.urn&&c.urn.length)R('Najbliższa urna',`za ${Math.max(1,Math.round((Math.min(...c.urn)-gameT)/60))} godz.`)}
-  if(EDU[c.t]){let n=0;const r=EDU[c.t].r,ts=tilesOf(i);for(let j=0;j<N*N;j++){const h=grid[j];if(!h||!h.pp)continue;if(!tilesOf(j).some(k=>ts.some(t=>Math.abs(t%N-k%N)<=r&&Math.abs(((t/N)|0)-((k/N)|0))<=r)))continue;for(const q of h.pp){const s=stageOf(q.a);if(EDU[c.t].k==='p'?s===1:s===2)n++}}R('Uczniowie w zasięgu',`${n}`);R('Zasięg',`${r} pól od budynku`);if(EDU[c.t].lyc)R('Bonus','zarobki w zasięgu +5%');if(EDU[c.t].tech)R('Bonus','fabryki, wytwórnie +5%, magazyny +5%')}
+  if(EDU[c.t]){let n=0;const r=EDU[c.t].r,cvE=reachOf(i,r);for(let j=0;j<N*N;j++){const h=grid[j];if(!h||!h.pp)continue;if(!tilesOf(j).some(k=>cvE[k]))continue;for(const q of h.pp){const s=stageOf(q.a);if(EDU[c.t].k==='p'?s===1:s===2)n++}}R('Uczniowie w zasięgu',`${n}`);R('Zasięg',`${r} pól od budynku`);if(EDU[c.t].lyc)R('Bonus','zarobki w zasięgu +5%');if(EDU[c.t].tech)R('Bonus','fabryki, wytwórnie +5%, magazyny +5%')}
   if(c.t==='prison'){const j=c.jail||[],w=j.filter(q=>q.w).length;R('Więźniowie',`${j.length} / ${prisonCap(c)}`+(c.inbound?` (+${c.inbound} w drodze)`:''),j.length>=prisonCap(c)?'warnv':'');R('Koszt',`${JAIL_FEE} T¢/godz. za więźnia: ${fmt(JAIL_FEE*j.length)} T¢/godz.`);
     R('Pracujący',c.up2?`${w} · ${fmt(j.reduce((a,q)=>a+(q.w||0),0))} T¢/godz.`:'dobuduj blok pracy');if(j.length){const nx=Math.min(...j.map(q=>q.rel));R('Najbliższe wyjście',`za ${Math.max(1,Math.round((nx-gameT)/60))} godz. gry`)}}
   if(c.t==='wind'){R('Moc',c.net<0?'niepodłączony: postaw transformator obok':`${mw(Math.round((c.windMW||0)*10)/10)} MW`,c.net<0?'warnv':'');if(c.wake)R('Cień innych wiatraków',`−${c.wake} MW`,'warnv');if(c.up)R('Panele słoneczne',`+${mw(Math.round(SOLAR_MW*dayF*10)/10)} MW teraz`)}
@@ -6916,7 +6919,20 @@ const LT_TR=[
 ["Wysokość wyrównania", "Levelling height", "Einebnungshöhe"],
 ["<b>Wyrównaj teren</b> · stuknij pole, z którego pobrać wysokość.", "<b>Level terrain</b> · tap the tile to take the height from.", "<b>Gelände einebnen</b> · tippe das Feld an, dessen Höhe übernommen werden soll."],
 ["<b>Wyrównaj teren</b> · wysokość wzorcowa: poziom {}. Przeciągnij po terenie.", "<b>Level terrain</b> · target height: level {}. Drag over the ground.", "<b>Gelände einebnen</b> · Zielhöhe: Stufe {}. Ziehe über das Gelände."],
-["<b>Wyrównaj teren</b> · wysokość wzorcowa: poziom {}. Teraz stuknij lub przeciągnij po polach do wyrównania.", "<b>Level terrain</b> · target height: level {}. Now tap or drag over the tiles to level.", "<b>Gelände einebnen</b> · Zielhöhe: Stufe {}. Tippe oder ziehe jetzt über die Felder."]
+["<b>Wyrównaj teren</b> · wysokość wzorcowa: poziom {}. Teraz stuknij lub przeciągnij po polach do wyrównania.", "<b>Level terrain</b> · target height: level {}. Now tap or drag over the tiles to level.", "<b>Gelände einebnen</b> · Zielhöhe: Stufe {}. Tippe oder ziehe jetzt über die Felder."],
+["Dzieci 7–14 lat w zasięgu 16 pól chodzą do szkoły: +0,5 zadowolenia (z liceum lub technikum +1).", "Children aged 7–14 within 16 tiles go to school: +0.5 happiness (+1 with a lyceum or technical school).", "Kinder von 7–14 Jahren im Bereich von 16 Feldern gehen zur Schule: +0,5 Zufriedenheit (mit Lyzeum oder Technikum +1)."],
+["Zajmuje 1×2 pola. Zasięg 19 pól, +0,5 zadowolenia (z liceum lub technikum +1).", "Takes 1×2 tiles. Range 19 tiles, +0.5 happiness (+1 with a lyceum or technical school).", "Belegt 1×2 Felder. Bereich 19 Felder, +0,5 Zufriedenheit (mit Lyzeum oder Technikum +1)."],
+["Zajmuje 2×3 pola. Zasięg 19: młodzież 15–18 lat się uczy, zarobki (podatki i sprzedaż) +5%.", "Takes 2×3 tiles. Range 19: teenagers aged 15–18 study, earnings (taxes and sales) +5%.", "Belegt 2×3 Felder. Bereich 19: Jugendliche von 15–18 Jahren lernen, Einnahmen (Steuern und Verkäufe) +5%."],
+["Zajmuje 2×3 pola. Zasięg 19: młodzież się uczy, fabryki i wytwórnie +5% produkcji, magazyny +5% pojemności.", "Takes 2×3 tiles. Range 19: teenagers study, factories and workshops +5% output, warehouses +5% capacity.", "Belegt 2×3 Felder. Bereich 19: Jugendliche lernen, Fabriken und Werkstätten +5% Produktion, Lager +5% Kapazität."],
+["Rozrywka w zasięgu 3 pól po drogach (+1 zadowolenia). Zużywa jedzenie z magazynów, posiłek 30 T¢. Najtańsza w utrzymaniu.", "Entertainment within 3 blocks along the roads (+1 happiness). Uses food from warehouses, meal 30 T¢. Cheapest to maintain.", "Unterhaltung im Umkreis von 3 Blöcken entlang der Straßen (+1 Zufriedenheit). Verbraucht Essen aus den Lagern, Mahlzeit 30 T¢. Am günstigsten im Unterhalt."],
+["Rozrywka w zasięgu 6 pól po drogach (+1 zadowolenia). Bilet 30 T¢.", "Entertainment within 6 blocks along the roads (+1 happiness). Ticket 30 T¢.", "Unterhaltung im Umkreis von 6 Blöcken entlang der Straßen (+1 Zufriedenheit). Ticket 30 T¢."],
+["Rozrywka w zasięgu 9 pól po drogach (+1 zadowolenia). Bilet 40 T¢.", "Entertainment within 9 blocks along the roads (+1 happiness). Ticket 40 T¢.", "Unterhaltung im Umkreis von 9 Blöcken entlang der Straßen (+1 Zufriedenheit). Ticket 40 T¢."],
+["Plakaty reklamowe", "Advertising posters", "Werbeplakate"],
+["Zasięg rozrywki 8 pól po drogach zamiast 6", "Entertainment range 8 blocks along the roads instead of 6", "Unterhaltungsreichweite 8 Blöcke entlang der Straßen statt 6"],
+["✓ Kino (rozrywka 6 pól po drogach)", "✓ Cinema (entertainment 6 blocks along the roads)", "✓ Kino (Unterhaltung 6 Blöcke entlang der Straßen)"],
+["zasięg {} bloków po drogach, +1 zadowolenia", "range {} blocks along the roads, +1 happiness", "Reichweite {} Blöcke entlang der Straßen, +1 Zufriedenheit"],
+["Rozrywka w zasięgu 12 pól po drogach (+1 zadowolenia). Gość przegrywa średnio ok. 130 T¢, ale co ósmy wygrywa i kasyno mu wypłaca. Drogie w utrzymaniu: 240 T¢/godz.", "Entertainment within 12 blocks along the roads (+1 happiness). A guest loses about 130 T¢ on average, but every eighth one wins and the casino pays out. Expensive to maintain: 240 T¢/h.", "Unterhaltung im Umkreis von 12 Blöcken entlang der Straßen (+1 Zufriedenheit). Ein Gast verliert im Schnitt etwa 130 T¢, aber jeder achte gewinnt und das Casino zahlt aus. Teuer im Unterhalt: 240 T¢/Std."],
+["Dwupiętrowy lokal, zasięg rozrywki 5 pól po drogach zamiast 3, kolejka 35 gości zamiast 25", "Two-storey venue, entertainment range 5 blocks along the roads instead of 3, a queue of 35 guests instead of 25", "Zweistöckiges Lokal, Unterhaltungsreichweite 5 Blöcke entlang der Straßen statt 3, Warteschlange von 35 statt 25 Gästen"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
