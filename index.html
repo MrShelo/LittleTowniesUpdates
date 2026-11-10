@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.0.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.0.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -558,8 +558,8 @@ const DEF={
   tenement:{name:'Kamienica',cost:300,desc:'3 rodziny: 2× więcej kursów niż dom. Podstawa zadowolenia 3.',sw:'#b9785a'},
   block:{name:'Tani blok',cost:450,desc:'Zajmuje 2 pola. 18 mieszkańców (po rozbudowie do 54), 3× więcej kursów. Ciasno: podstawa zadowolenia 2.',sw:'#c9c6bd',size:2},
   modern:{name:'Apartamentowiec',cost:2500,desc:'Zajmuje 2 pola. Nowoczesny, 3,5× więcej kursów. Podstawa zadowolenia 4.',sw:'#7fb6cf',size:2},
-  road2:{name:'Dwujezdniowa',cost:25,desc:'2 pasy w każdą stronę, auta jadą 1,4× szybciej i same wybierają luźniejszy pas. Postaw na zwykłej ulicy, by ją poszerzyć (płacisz różnicę).',sw:'#383d44'},
-  road3:{name:'Trzyjezdniowa',cost:45,desc:'3 pasy w każdą stronę, auta jadą 1,8× szybciej i same wybierają luźniejszy pas.',sw:'#30353b'},
+  road2:{name:'Dwujezdniowa',cost:25,desc:'2 pasy w każdą stronę, auta jadą 1,1× szybciej i same wybierają luźniejszy pas. Postaw na zwykłej ulicy, by ją poszerzyć (płacisz różnicę).',sw:'#383d44'},
+  road3:{name:'Trzyjezdniowa',cost:45,desc:'3 pasy w każdą stronę, auta jadą 1,25× szybciej i same wybierają luźniejszy pas.',sw:'#30353b'},
   roundabout:{name:'Rondo',cost:80,desc:'Płynny przejazd przez skrzyżowanie (1,2× szybciej), auta objeżdżają wysepkę. Postaw na istniejącej ulicy.',sw:'#5f9b4a'},
   smallfac:{name:'Mała fabryka',cost:180,desc:'Połowa produkcji zwykłej fabryki (2 kg na partię), 40% taniej. Tylko linia ogólna: zabawki i kosmetyki z materiałów, a odzież, meble, elektronikę, narzędzia i napoje tylko wtedy, gdy w magazynach jest ich surowiec. Można dokupić nową technologię (+50%).',sw:'#a8b0bb'},
   factory:{name:'Fabryka',cost:300,desc:'Dwie zmiany pracowników + 2 kg materiałów z magazynu = ciężarówka z 5 kg towarów ogólnych. Z materiałów robi zabawki i kosmetyki; odzież, meble, elektronikę, narzędzia i napoje tylko z ich surowca, jeśli leży w magazynach (bawełna, drewno, chalkopiryt, warzywa). Ulepszenie odblokowuje wybór produktu i +50%.',sw:'#8d97a6'},
@@ -570,7 +570,7 @@ const DEF={
   farmgrain:{name:'Pole zboża',cost:120,desc:'Zboże dla piekarni, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).',sw:'#e3c35a',farm:'grain'},
   farmcotton:{name:'Plantacja bawełny',cost:180,desc:'Krzewy bawełny: bawełna dla fabryk odzieży, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).',sw:'#f1efe6',farm:'cotton'},
   farmwood:{name:'Farma drzew',cost:160,desc:'Szkółka i wyrąb: drewno na meble i dla elektrowni na biomasę, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).',sw:'#3f7a3a',farm:'wood'},
-  highway:{name:'Autostrada',cost:25,desc:'Auta jadą 2,2× szybciej. Bez słupów, budynki nie mają z niej wjazdu.',sw:'#2a2e35'},
+  highway:{name:'Autostrada',cost:25,desc:'Auta jadą 1,5× szybciej. Bez słupów, budynki nie mają z niej wjazdu.',sw:'#2a2e35'},
   tunnel:{name:'Tunel',cost:120,desc:'Droga pod wzniesieniem. Zaczyna się przy końcu drogi u stóp wzgórza i biegnie płasko na jej wysokości; nad tunelem musi być co najmniej półtora poziomu terenu. Na tunelu postawisz słup (kabel pod sufitem) i położysz rurę.',sw:'#6f6a62'},
   tUp:{name:'Podnieś teren',cost:30,desc:'Podnosi pole o pół poziomu (najwyżej do poziomu 10). Przeciągnij, by podnieść kilka pól. Na zajętym polu nie zadziała.',sw:'#9a8a62',unit:'T¢/pole'},
   tDown:{name:'Obniż teren',cost:30,desc:'Obniża pole o pół poziomu. Pole obniżone do poziomu wody obok rzeki zamienia się w wodę.',sw:'#7a6a52',unit:'T¢/pole'},
@@ -660,7 +660,7 @@ const STREET={road:1,road2:1,road3:1};
 const POLEABLE={road:1,road2:1,road3:1,roundabout:1,bridge:1,tunnel:1};
 /* traffic: lanes per direction, speed factor; cars keep distance and plain junctions admit as many cars as they have lanes */
 const LANES={road:1,road2:2,road3:3,roundabout:1,highway:2,bridge:1,tunnel:1};
-const SPEED={road:1,road2:1.4,road3:1.8,roundabout:1.2,highway:2.2,bridge:1,tunnel:1};
+const SPEED={road:1,road2:1.1,road3:1.25,roundabout:1,highway:1.5,bridge:1,tunnel:1};
 const RANK={road:1,roundabout:1,road2:2,road3:3,highway:4};
 const OFFS={1:[0.19],2:[0.12,0.32],3:[0.09,0.22,0.36]};
 const CAR_GAP=0.42,ROUND_CAP=4;
@@ -794,7 +794,7 @@ g2.fillStyle='#7cc24a';g2.fillRect(0,0,N*32,N*32);
 const gc=document.createElement('canvas');gc.width=gc.height=N*32;g2=gc.getContext('2d');
 const water=new Uint8Array(N*N);
 /* 7.0: terrain height of every tile in half-steps (see buildLand), flooded land and the current water level */
-const H_LAND=4,H_MAX=20,hgt=new Uint8Array(N*N).fill(4),fld=new Uint8Array(N*N),wlv=new Uint8Array(N*N),wKnown=new Uint8Array(N*N);
+const H_LAND=4,H_MAX=20,H_CAP=40,hgt=new Uint8Array(N*N).fill(4),fld=new Uint8Array(N*N),wlv=new Uint8Array(N*N),wKnown=new Uint8Array(N*N);
 /* ore deposits under the grass: 0 none, 1 coal, 2 chalcopyrite */
 const dep=new Uint8Array(N*N);
 const DEP={1:{k:'coal',name:'Złoże węgla',col:'#38332f',spot:'#1f1c1a'},2:{k:'chalco',name:'Złoże chalkopirytu',col:'#a9843f',spot:'#5c9a80'}};
@@ -807,7 +807,7 @@ function paintGround(pol){let SK=0;try{SK=snowOn()?3:seasonIdx()===2?2:seasonIdx
   if(SK===3){g2.fillStyle='rgba(240,245,249,.8)';g2.fillRect(0,0,N*32,N*32)}
   /* 7.0: higher ground turns darker and rocky, the highest peaks keep snow all year */
   for(let i=0;i<N*N;i++){const h=hgt[i];if(water[i]||h<=H_LAND+4)continue;const x=(i%N)*32,z=((i/N)|0)*32;
-    if(h>=H_MAX-3&&mapType!=='carib'){g2.fillStyle='rgba(244,247,250,.92)';g2.fillRect(x,z,32,32);continue}
+    if(h>=H_MAX-3+(mapType==='tundra'?10:0)&&mapType!=='carib'){g2.fillStyle='rgba(244,247,250,.92)';g2.fillRect(x,z,32,32);continue}
     const r=Math.min(1,(h-H_LAND-4)/8);g2.fillStyle=mapType==='carib'&&h>=H_MAX-5?`rgba(70,58,52,${0.55+0.35*r})`:`rgba(108,100,88,${0.18+0.62*r})`;g2.fillRect(x,z,32,32);
     if(r>0.35){g2.fillStyle='rgba(90,84,76,.35)';g2.fillRect(x+((i*7)%22),z+((i*13)%24),6,4);g2.fillRect(x+((i*11)%20),z+((i*5)%22),4,3)}}
   for(let i=0;i<N*N;i++){if(!water[i])continue;const x=i%N,z=(i/N)|0;g2.fillStyle='#3d82b5';g2.fillRect(x*32,z*32,32,32);
@@ -1991,7 +1991,7 @@ function genRivers(avoid,type=mapType){water.fill(0);
 /* ---------- 7.0: mountains ----------
    Every river gets a mountain range along one of its sides only (a few tiles away, so the banks stay buildable); the Caribbean always has a volcano on its biggest island */
 const hgtStr=()=>{let o='';for(let i=0;i<N*N;i++)o+=String.fromCharCode(48+hgt[i]);return o};
-function hgtLoad(s){hgt.fill(H_LAND);fld.fill(0);let ok=false;if(typeof s.hg==='string'&&s.hg.length===N*N){for(let i=0;i<N*N;i++)hgt[i]=Math.max(0,Math.min(H_MAX,s.hg.charCodeAt(i)-48));ok=true}else for(let i=0;i<N*N;i++)hgt[i]=water[i]?0:H_LAND;
+function hgtLoad(s){hgt.fill(H_LAND);fld.fill(0);let ok=false;if(typeof s.hg==='string'&&s.hg.length===N*N){for(let i=0;i<N*N;i++)hgt[i]=Math.max(0,Math.min(H_CAP,s.hg.charCodeAt(i)-48));ok=true}else for(let i=0;i<N*N;i++)hgt[i]=water[i]?0:H_LAND;
   for(let i=0;i<N*N;i++){wlv[i]=hgt[i];wKnown[i]=water[i]}if(Array.isArray(s.wv))for(const[i,v]of s.wv)if(water[i])wlv[i]=v;if(Array.isArray(s.fl))for(const[i,v]of s.fl)if(!water[i])fld[i]=v;return ok}
 function noise2(G){const g=[];for(let k=0;k<(G+1)*(G+1);k++)g.push(Math.random());const sm=t=>t*t*(3-2*t);return(x,z)=>{const fx=x/N*G,fz=z/N*G,ix=Math.min(G-1,Math.floor(fx)),iz=Math.min(G-1,Math.floor(fz)),tx=sm(fx-ix),tz=sm(fz-iz),a=g[iz*(G+1)+ix],b=g[iz*(G+1)+ix+1],c=g[(iz+1)*(G+1)+ix],d=g[(iz+1)*(G+1)+ix+1];return a+(b-a)*tx+(c-a)*tz+(a-b-c+d)*tx*tz}}
 function genHeights(type=mapType){hgt.fill(H_LAND);fld.fill(0);for(let i=0;i<N*N;i++){wKnown[i]=water[i];wlv[i]=0;if(water[i])hgt[i]=0}if(window.__testUnlock&&!window.__testHills)return;
@@ -2010,13 +2010,23 @@ function genHeights(type=mapType){hgt.fill(H_LAND);fld.fill(0);for(let i=0;i<N*N
   const run=(i,dx,dz)=>{let k=0,x=i%N,z=(i/N)|0;for(;;){x+=dx;z+=dz;if(x<0||z<0||x>=N||z>=N||!water[idx(x,z)])break;k++}return k};
   const comp=new Int32Array(N*N).fill(-1);let nc=0;for(let i=0;i<N*N;i++){if(!water[i]||comp[i]>=0)continue;const qq=[i];comp[i]=nc;for(let h=0;h<qq.length;h++)for(const j of nbrs(qq[h]))if(water[j]&&comp[j]<0){comp[j]=nc;qq.push(j)}nc++}
   const sideH=[],sideV=[];for(let k=0;k<nc;k++){sideH.push(Math.random()<0.5?1:-1);sideV.push(Math.random()<0.5?1:-1)}
-  const n1=noise2(7),n2=noise2(19),gap=fj?1:3,W=fj?10:9,A0=fj?13:10;
+  /* each river's main direction (principal axis of its tiles); the range goes on one side of it, across that direction */
+  const pca=[];{const S=[];for(let k=0;k<nc;k++)S.push([0,0,0,0,0,0]);for(let i=0;i<N*N;i++){if(comp[i]<0)continue;const a=S[comp[i]],x=i%N,z=(i/N)|0;a[0]++;a[1]+=x;a[2]+=z;a[3]+=x*x;a[4]+=z*z;a[5]+=x*z}
+    for(let k=0;k<nc;k++){const[n,sx,sz,sxx,szz,sxz]=S[k],mx=sx/n,mz=sz/n,cxx=sxx/n-mx*mx,czz=szz/n-mz*mz,cxz=sxz/n-mx*mz,tr=cxx+czz,det=cxx*czz-cxz*cxz,l1=tr/2+Math.sqrt(Math.max(0,tr*tr/4-det)),l2=tr-l1;
+      let ux=cxz,uz=l1-cxx;if(Math.abs(ux)+Math.abs(uz)<1e-6){ux=cxx>=czz?1:0;uz=cxx>=czz?0:1}const L=Math.hypot(ux,uz),sg=Math.random()<0.5?1:-1;pca.push({long:l1>4*Math.max(1e-6,l2),nx:-uz/L*sg,nz:ux/L*sg})}}
+  const n1=noise2(7),n2=noise2(19),gap=fj?1:3,W=fj?10:9,A0=fj?22:10,CAP=fj?H_CAP:H_MAX;
   for(let i=0;i<N*N;i++){if(water[i]||d[i]<=gap)continue;const w=src[i],x=i%N,z=(i/N)|0,wx=w%N,wz=(w/N)|0;
-    const ew=run(w,1,0)+run(w,-1,0)>=run(w,0,1)+run(w,0,-1);/* an east-west river: the range is north or south of it */
-    const sg=ew?sideH[comp[w]]:sideV[comp[w]],off=ew?z-wz:x-wx;if(Math.sign(off)!==sg)continue;
+    /* the side is taken across the river's main direction (a long river), or across the local stretch (a crossing of rivers) */
+    const P=pca[comp[w]];let side;if(P.long)side=(x-wx)*P.nx+(z-wz)*P.nz;else{const ew=run(w,1,0)+run(w,-1,0)>=run(w,0,1)+run(w,0,-1);side=ew?(z-wz)*sideH[comp[w]]:(x-wx)*sideV[comp[w]]}
+    if(side<=0)continue;
     const t=(d[i]-gap)/W;if(t>=1.35)continue;const prof=Math.pow(Math.sin(Math.PI*Math.min(1,t/1.35)),0.7),A=A0*(0.55+0.7*n1(x,z));
-    const h=H_LAND+Math.round(prof*A+2.2*(n2(x,z)-0.5));if(h-H_LAND>=2&&h>hgt[i])hgt[i]=Math.min(H_MAX,h)}
+    const h=H_LAND+Math.round(prof*A+2.2*(n2(x,z)-0.5));if(h-H_LAND>=2&&h>hgt[i])hgt[i]=Math.min(CAP,h)}
   /* no thin ridges: a raised tile needs raised neighbours on two sides; single spikes are cut down */
+  /* no notches: a dip up to five tiles wide between higher ground on both sides is filled up */
+  const hAt=(x,z)=>x<0||z<0||x>=N||z>=N||water[idx(x,z)]?0:hgt[idx(x,z)];
+  for(let pass=0;pass<3;pass++)for(let i=0;i<N*N;i++){if(water[i])continue;const x=i%N,z=(i/N)|0;let best=hgt[i];
+    for(const[dx,dz]of[[1,0],[0,1],[1,1],[1,-1]]){const a=Math.max(hAt(x-dx,z-dz),hAt(x-2*dx,z-2*dz),hAt(x-3*dx,z-3*dz)),b=Math.max(hAt(x+dx,z+dz),hAt(x+2*dx,z+2*dz),hAt(x+3*dx,z+3*dz)),m=Math.min(a,b);if(m>best)best=m}
+    if(best>hgt[i])hgt[i]=best}
   for(let pass=0;pass<2;pass++)for(let i=0;i<N*N;i++){if(water[i]||hgt[i]<=H_LAND)continue;const up=nbrs(i).filter(j=>!water[j]&&hgt[j]>H_LAND).length;if(up<2){hgt[i]=H_LAND;continue}let m=0;for(const j of nbrs(i))m=Math.max(m,water[j]?0:hgt[j]);if(hgt[i]>m+2)hgt[i]=m+2}}
 const bfsCache=new Map();
 const factories=new Set();
@@ -2467,7 +2477,7 @@ function updateCar(c,dt){
     if(pt&&!(c.kind==='fire'&&c.phase==='go')){startAnim(c,[c.mesh.position.x,c.mesh.position.z],pt,true,()=>{if(!c.dead)arrive(c)});return}
     arrive(c);return}
   if(!isDrive(p[c.seg+1])){removeCar(c);return}
-  if(c.walk)return placeCar(c);const L=laneN(T.k),wx=L>=3?0.7:L===2?0.82:1;c.mesh.scale.set(c.grow*wx,c.grow,c.grow);
+  if(c.walk)return placeCar(c);c.mesh.scale.setScalar(c.grow);
   placeCar(c)}
 function goBack(c,from,to){const s=entryOf(from),e=entryOf(to);if(s<0||e<0)return removeCar(c);
   const b=bfs(s);if(b.dist[e]<0)return removeCar(c);
@@ -3163,17 +3173,19 @@ function makeRailEntries(){if(grid.some(c=>c&&c.edge&&c.t==='rail'))return;const
     if(tiles.some(t=>grid[t]||water[t]||[...nbrs(t)].some(j=>grid[j]&&grid[j].edge)))continue;
     if(tries<60&&tiles.some(t=>hgt[t]!==H_LAND))continue;for(const t of tiles)if(hgt[t]!==H_LAND){hgt[t]=H_LAND;landDirty=true}
     for(const t of tiles){addCell(t,'rail',false);grid[t].edge=true}break}}
-function spawnCommuter(h){const e=entryOf(h);if(e<0)return;const b=bfs(e);
-  if(Math.random()<0.15){const l=candidates(b,SERVICES).filter(o=>entR(grid[o.i])>0);const t=pickWeighted(l);if(t){cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3});return}}
+/* 7.0.1: who goes out: a random resident at home; pupils (7–18) and seniors (65+) never drive, they walk all the way */
+function onFoot(h){const c=grid[h];if(!c||!c.pp||!c.pp.length)return false;const q=c.pp[(Math.random()*c.pp.length)|0];const st=stageOf(q.a);return st===1||st===2||st===4}
+function spawnCommuter(h){const e=entryOf(h);if(e<0)return;const b=bfs(e);const foot=onFoot(h);
+  if(Math.random()<0.15){const l=candidates(b,SERVICES).filter(o=>entR(grid[o.i])>0);const t=pickWeighted(l);if(t){cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3,foot});return}}
   const low=stored()<matCap()*0.35;let types;const r=Math.random();
   const SH=['shop','shop1','bakery','supermarket','gallery','restaurant'];if((counts.factory+counts.smallfac+counts.factoryB+counts.mine+counts.mineB)&&(low||!(counts.shop||counts.gallery||counts.supermarket)))types=r<0.75?WORK_T:SH;else types=r<0.6?SH:WORK_T;
   if(types===SH&&Math.random()<1-0.6*buyMul()*(ordOn('consum')?1.1:1))return;
   /* 6.6.2: residents go shopping only for what they need: a need above 95% is satisfied, and a shop with nothing needed is not visited */
   if(types===SH){const H=needs(grid[h]);if(NEEDS.every(n=>H[n.k]>=NEED_FULL))return;const l=candidates(b,SH).filter(o=>{const d=grid[o.i];try{return sellsOf(d).some(k=>wantsGood(H,k))}catch(e){return true}});const t=pickWeighted(l);if(!t)return;
-    if(grid[t.i]&&grid[t.i].t==='shop1'&&Math.random()<1/3)return;cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3});return}
+    if(grid[t.i]&&grid[t.i].t==='shop1'&&Math.random()<1/3)return;cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3,foot});return}
   const t=pickWeighted(candidates(b,types))||pickWeighted(candidates(b,['shop','supermarket','gallery',...WORK_T]));if(!t)return;
   if(grid[t.i]&&grid[t.i].t==='shop1'&&Math.random()<1/3)return;
-  cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3})}
+  cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3,foot})}
 /* short trips (up to 8 tiles) are walked along the pavement instead of driven */
 /* longer trips: most residents within 16 tiles also walk (6.3: more often than before), so there are fewer cars and more people on the pavements */
 const WALK_FAR=16,WALK_FAR_P=0.8;
@@ -3183,7 +3195,8 @@ function sideOf(b,r,d){if(b==null||b<0||!grid[b])return 0;const m=grid[b].t==='p
 function walkPlan(p,from,to){if(p.length<2)return{s0:1,flip:-1};const L=p.length,d0=[Math.sign(cx(p[1])-cx(p[0])),Math.sign(cz(p[1])-cz(p[0]))],d1=[Math.sign(cx(p[L-1])-cx(p[L-2])),Math.sign(cz(p[L-1])-cz(p[L-2]))];
   let s0=sideOf(from,p[0],d0)||0;const s1=sideOf(to,p[L-1],d1);if(!s0)s0=s1||1;if(!s1||s1===s0)return{s0,flip:-1};
   const k=p.findIndex(j=>grid[j]&&grid[j].cross);return k<0?null:{s0,flip:k}}
-function goTrip(kind,b,t,o){if(kind==='commuter'&&tLines.length){const tp=planTrip(b,t.e),near=t.d<=WALK_FAR;
+function goTrip(kind,b,t,o){if(o&&o.foot){delete o.foot;const path=pathTo(b,t.e),pl=walkPlan(path,o.home,t.i)||{s0:1,flip:-1};const v=createCar('walker',path,Object.assign({walk:true,side:pl.s0,flip:pl.flip},o));v.kind=kind;v.speed=0.5;cur.walks=(cur.walks||0)+1;return v}
+  if(kind==='commuter'&&tLines.length){const tp=planTrip(b,t.e),near=t.d<=WALK_FAR;
     if(tp&&tp.cost<t.d*(near?0.85:1.1)&&(near||Math.random()<TRANSIT_P))return startTransit(kind,b,t,o,tp)}
   if(t.d<=WALK_MAX||(kind==='commuter'&&t.d<=WALK_FAR&&Math.random()<WALK_FAR_P)){const path=pathTo(b,t.e),pl=walkPlan(path,o&&o.home,t.i);
     if(pl){const v=createCar('walker',path,Object.assign({walk:true,side:pl.s0,flip:pl.flip},o));v.kind=kind;v.speed=0.5;cur.walks=(cur.walks||0)+1;return v}}return createCar(kind,pathTo(b,t.e),o)}
@@ -3619,7 +3632,7 @@ const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(ne
 function tileAt(px,py){const r=renderer.domElement.getBoundingClientRect();ndc.set(((px-r.left)/r.width)*2-1,-((py-r.top)/r.height)*2+1);
   ray.setFromCamera(ndc,camera);const o=ray.ray.origin,d=ray.ray.direction;if(d.y>-1e-4)return -1;
   /* 7.0: march down the ray from just above the highest mountain until it dips under the ground of the tile below it */
-  const yT=lvY(H_MAX)+0.15,yB=WATER_Y-0.05,t0=Math.max(0,(o.y-yT)/-d.y),t1=(o.y-yB)/-d.y,step=0.04/Math.max(0.15,Math.hypot(d.x,d.z));let last=-1;
+  const yT=lvY(H_CAP)+0.15,yB=WATER_Y-0.05,t0=Math.max(0,(o.y-yT)/-d.y),t1=(o.y-yB)/-d.y,step=0.04/Math.max(0.15,Math.hypot(d.x,d.z));let last=-1;
   for(let t=t0;t<=t1;t+=step){const px=o.x+d.x*t,py=o.y+d.y*t,pz=o.z+d.z*t,x=Math.floor(px+HALF),z=Math.floor(pz+HALF);if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);last=i;if(py<=surfY(i))return i}
   hit.set(o.x+d.x*t1,yB,o.z+d.z*t1);const x=Math.floor(hit.x+HALF),z=Math.floor(hit.z+HALF);if(x<0||z<0||x>=N||z>=N)return last;return idx(x,z)}
 /* tapping a building picks the building that is actually under the finger (its walls and roof too), not the ground tile behind it */
@@ -3915,8 +3928,8 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
   else{const no=!DRIVE[c.t]&&!NOROAD[c.t]&&entryOf(i)<0?' · <b>brak dojazdu</b>':'';
     const pwr=DEMAND[c.t]?(c.powered?` · zasilany (${mw(DEMAND[c.t])} MW)`:` · <b>bez prądu</b> (${mw(DEMAND[c.t])} MW)`):'';
     const jn='';
-    s={road2:'<b>Dwujezdniowa</b> · 2 pasy w każdą stronę, 1,4× szybciej'+jn,road3:'<b>Trzyjezdniowa</b> · 3 pasy w każdą stronę, 1,8× szybciej'+jn,roundabout:'<b>Rondo</b> · płynny przejazd, 1,2× szybciej',
-      highway:'<b>Autostrada</b> · auta jadą tu 2,2× szybciej'+jn,bridge:`<b>Most</b> · jak ${DEF[c.bt||'road'].name.toLowerCase()}: ${laneN(i)} ${laneN(i)>1?'pasy':'pas'} w każdą stronę`,
+    s={road2:'<b>Dwujezdniowa</b> · 2 pasy w każdą stronę, 1,1× szybciej'+jn,road3:'<b>Trzyjezdniowa</b> · 3 pasy w każdą stronę, 1,25× szybciej'+jn,roundabout:'<b>Rondo</b> · płynny przejazd, 1,2× szybciej',
+      highway:'<b>Autostrada</b> · auta jadą tu 1,5× szybciej'+jn,bridge:`<b>Most</b> · jak ${DEF[c.bt||'road'].name.toLowerCase()}: ${laneN(i)} ${laneN(i)>1?'pasy':'pas'} w każdą stronę`,
       lpole:`<b>Słup</b> · połączenia: ${links(i).length} · zasila budynki obok`,
       hvpole:`<b>Słup WN${c.up?' (wyższy)':''}</b> · połączenia w zasięgu ${c.up?'17×17':'11×11'}: ${links(i).length}`,road:(c.pole?'<b>Jednojezdniowa ze słupem</b> · przewodzi prąd':'<b>Jednojezdniowa</b> · dodaj słup, by poprowadzić prąd')+jn,
       wind:'<b>Wiatrak</b> · '+(c.net>=0?`${windMW(i)} MW do sieci`:'<b>niepodłączony</b>: postaw obok transformator')+` · ${UPKEEP.wind} T¢/godz.`,
@@ -4291,7 +4304,7 @@ policeB:'<path d="M2.5 17.5V7l7.5-4 7.5 4v10.5"/><path d="M10 7.5l.9 1.8 2 .3-1.
 suitcase:'<rect x="2.5" y="6.5" width="15" height="10.5" rx="1.6"/><path d="M7 6.5V4.6a1.1 1.1 0 0 1 1.1-1.1h3.8A1.1 1.1 0 0 1 13 4.6v1.9M2.5 11h15M8.5 11v1.6h3V11"/>',
 waste:'<path d="M3.5 5.5h13M8 5.5v-2h4v2M5 5.5l1 11h8l1-11"/><path d="M8.5 8.5v5M11.5 8.5v5"/>'};
 const svgI=(k,sz)=>`<svg viewBox="0 0 20 20" width="${sz}" height="${sz}" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICO[k]||''}</svg>`;
-const CAT_ICO=['road','taxi','house','factory','farmgrain','shop','theater','suitcase','shield','fireS','cross','book','energy','park1','waste','water','cityHall'];
+const CAT_ICO=['road','tUp','taxi','house','factory','farmgrain','shop','theater','suitcase','shield','fireS','cross','book','energy','park1','waste','water','cityHall'];
 function icoInk(hex){if(!/^#[0-9a-f]{6}$/i.test(hex))return'#ffffff';const v=[1,3,5].map(k=>parseInt(hex.substr(k,2),16)/255).map(c=>c<=0.04?c/12.92:Math.pow((c+0.055)/1.055,2.4));
   return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2]>0.42?'#26302f':'#ffffff'}
 function mkTool(t){const b=document.createElement('button');b.className='tool';b.type='button';b.id='tool-'+t;
@@ -5151,7 +5164,7 @@ const LT_TR=[
 ["Farma drzew", "Tree farm", "Baumfarm"],
 ["Szkółka i wyrąb: drewno na meble i dla elektrowni na biomasę, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).", "Nursery and logging: wood for furniture and for biomass power plants, 2 kg/h. Multiblock: +10% for each further field next to it (up to +100%).", "Baumschule und Holzeinschlag: Holz für Möbel und Biomassekraftwerke, 2 kg/Std. Multiblock: +10 % pro weiterem Feld daneben (bis +100 %)."],
 ["Autostrada", "Highway", "Autobahn"],
-["Auta jadą 2,2× szybciej. Bez słupów, budynki nie mają z niej wjazdu.", "Cars drive 2.2× faster. No poles, buildings have no access from it.", "Autos fahren 2,2× schneller. Keine Masten, Gebäude haben keine Zufahrt."],
+["Auta jadą 1,5× szybciej. Bez słupów, budynki nie mają z niej wjazdu.", "Cars drive 1.5× faster. No poles, buildings have no access from it.", "Autos fahren 1,5× schneller. Keine Masten, Gebäude haben keine Zufahrt."],
 ["Most", "Bridge", "Brücke"],
 ["Przejazd przez wodę, tylko w linii prostej. Przejmuje pasy i prędkość najlepszej drogi na swoich końcach.", "Crossing over water, only in a straight line. Takes the lanes and speed of the best road at its ends.", "Überquerung von Wasser, nur geradeaus. Übernimmt Spuren und Tempo der besten Straße an ihren Enden."],
 ["Wysypisko", "Landfill", "Mülldeponie"],
@@ -5828,10 +5841,10 @@ const LT_TR=[
 ["· zasilany ({} MW)", "· powered ({} MW)", "· mit Strom ({} MW)"],
 ["bez prądu", "no power", "ohne Strom"],
 ["({} MW)", "({} MW)", "({} MW)"],
-["· 2 pasy w każdą stronę, 1,4× szybciej", "· 2 lanes each way, 1.4× faster", "· 2 Spuren je Richtung, 1,4× schneller"],
-["· 3 pasy w każdą stronę, 1,8× szybciej", "· 3 lanes each way, 1.8× faster", "· 3 Spuren je Richtung, 1,8× schneller"],
+["· 2 pasy w każdą stronę, 1,1× szybciej", "· 2 lanes each way, 1.1× faster", "· 2 Spuren je Richtung, 1,1× schneller"],
+["· 3 pasy w każdą stronę, 1,25× szybciej", "· 3 lanes each way, 1.25× faster", "· 3 Spuren je Richtung, 1,25× schneller"],
 ["· płynny przejazd, 1,2× szybciej", "· smooth flow, 1.2× faster", "· flüssige Fahrt, 1,2× schneller"],
-["· auta jadą tu 2,2× szybciej", "· cars drive 2.2× faster here", "· Autos fahren hier 2,2× schneller"],
+["· auta jadą tu 1,5× szybciej", "· cars drive 1.5× faster here", "· Autos fahren hier 1,5× schneller"],
 ["· jak {}: {} {} w każdą stronę", "· like {}: {} {} each way", "· wie {}: {} {} je Richtung"],
 ["· połączenia: {} · zasila budynki obok", "· connections: {} · powers buildings next to it", "· Verbindungen: {} · versorgt Gebäude daneben"],
 ["Słup WN{}", "HV pylon{}", "HS-Mast{}"],
@@ -6732,8 +6745,8 @@ const LT_TR=[
 ["Wersja {}", "Version {}", "Version {}"],
 ["1 rodzina. Podstawa zadowolenia 3. Musi stać przy ulicy.", "1 family. Base happiness 3. Must stand by a street.", "1 Familie. Grundzufriedenheit 3. Muss an einer Straße stehen."],
 ["3 rodziny: 2× więcej kursów niż dom. Podstawa zadowolenia 3.", "3 families: 2× more trips than a house. Base happiness 3.", "3 Familien: 2× mehr Fahrten als ein Haus. Grundzufriedenheit 3."],
-["2 pasy w każdą stronę, auta jadą 1,4× szybciej i same wybierają luźniejszy pas. Postaw na zwykłej ulicy, by ją poszerzyć (płacisz różnicę).", "2 lanes each way, cars drive 1.4× faster and pick the freer lane themselves. Place it on an ordinary street to widen it (you pay the difference).", "2 Spuren je Richtung, Autos fahren 1,4× schneller und wählen selbst die freiere Spur. Auf eine normale Straße setzen, um sie zu verbreitern (du zahlst die Differenz)."],
-["3 pasy w każdą stronę, auta jadą 1,8× szybciej i same wybierają luźniejszy pas.", "3 lanes each way, cars drive 1.8× faster and pick the freer lane themselves.", "3 Spuren je Richtung, Autos fahren 1,8× schneller und wählen selbst die freiere Spur."],
+["2 pasy w każdą stronę, auta jadą 1,1× szybciej i same wybierają luźniejszy pas. Postaw na zwykłej ulicy, by ją poszerzyć (płacisz różnicę).", "2 lanes each way, cars drive 1.1× faster and pick the freer lane themselves. Place it on an ordinary street to widen it (you pay the difference).", "2 Spuren je Richtung, Autos fahren 1,1× schneller und wählen selbst die freiere Spur. Auf eine normale Straße setzen, um sie zu verbreitern (du zahlst die Differenz)."],
+["3 pasy w każdą stronę, auta jadą 1,25× szybciej i same wybierają luźniejszy pas.", "3 lanes each way, cars drive 1.25× faster and pick the freer lane themselves.", "3 Spuren je Richtung, Autos fahren 1,25× schneller und wählen selbst die freiere Spur."],
 ["80 miejsc na półkach, dzielonych po równo między sprzedawane towary. Na start wielobranżowy (wszystko), w karcie sklepu zmienisz go na specjalistyczny z cenami +25%. Furgonetki dowożą towar z magazynów.", "80 shelf places, split equally between the goods sold. A general store to start (everything); in the shop card you can turn it into a specialty shop with prices +25%. Vans bring goods from the warehouses.", "80 Regalplätze, gleich auf die verkauften Waren verteilt. Zu Beginn ein Gemischtwarenladen (alles); in der Ladenkarte machst du daraus ein Fachgeschäft mit Preisen +25 %. Lieferwagen bringen Ware aus dem Lager."],
 ["300 kg odpadów na pole. Pola obok siebie łączą się w multiblok z jednym biurem przy ulicy: wspólna pojemność i więcej śmieciarek. Mocno brudzi okolicę.", "300 kg of waste per tile. Tiles next to each other join into a multiblock with one office by the street: shared capacity and more garbage trucks. Heavily pollutes the area.", "300 kg Abfall pro Feld. Felder nebeneinander bilden einen Multiblock mit einem Büro an der Straße: gemeinsame Kapazität und mehr Müllwagen. Verschmutzt die Umgebung stark."],
 ["1 pole. Spala 40 kg odpadów na godz. (bufor 60 kg). Można dokupić drugi komin: 80 kg/godz. Pobiera 1 MW i dymi.", "1 tile. Burns 40 kg of waste per hour (buffer 60 kg). A second chimney can be bought: 80 kg/h. Uses 1 MW and smokes.", "1 Feld. Verbrennt 40 kg Abfall pro Std. (Puffer 60 kg). Zweiter Schornstein zukaufbar: 80 kg/Std. Verbraucht 1 MW und raucht."],
