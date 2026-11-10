@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='6.7.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.0.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -396,7 +396,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="ovl panel" id="ovl" hidden role="group" aria-label="Nakładki"><b>Nakładki</b>
     <button class="chipb" data-ovl="police"><i style="background:#2f6fe0"></i>Zasięg policji</button><button class="chipb" data-ovl="fire"><i style="background:#e8641c"></i>Zasięg straży</button><button class="chipb" data-ovl="pol"><i style="background:#d9b02a"></i>Zanieczyszczenie</button>
     <button class="chipb" data-ovl="noise"><i style="background:#9a5bd6"></i>Hałas</button><button class="chipb" data-ovl="park"><i style="background:#3cae4f"></i>Zadowolenie z parków</button>
-    <button class="chipb" data-ovl="ent"><i style="background:#e0569a"></i>Zadowolenie z rozrywki</button><button class="chipb" data-ovl="med"><i style="background:#d63b3b"></i>Opieka medyczna</button><button class="chipb" data-ovl="edu"><i style="background:#e0b84a"></i>Szkoły</button><button class="chipb" data-ovl="none">Wyłącz</button><small id="ovlNote"></small></div>
+    <button class="chipb" data-ovl="ent"><i style="background:#e0569a"></i>Zadowolenie z rozrywki</button><button class="chipb" data-ovl="med"><i style="background:#d63b3b"></i>Opieka medyczna</button><button class="chipb" data-ovl="edu"><i style="background:#e0b84a"></i>Szkoły</button><button class="chipb" data-ovl="under"><i style="background:#6f6a62"></i>Pod ziemią</button><button class="chipb" data-ovl="none">Wyłącz</button><small id="ovlNote"></small></div>
 <div id="app"></div>
 <header class="hud">
   <div class="res panel" id="r-money" title="Gotówka (T¢): stan / limit"><span class="ic tc" aria-hidden="true">T¢</span>
@@ -496,7 +496,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <span class="mapsH">Światy</span>
   <button class="btn panel mbtn mapb" data-map="carib"><b>Karaiby</b><small>Archipelag: kilka dużych i wiele małych wysp z plażami i palmami, droga startowa wjeżdża mostem</small></button>
   <button class="btn panel mbtn mapb" data-map="bigriver"><b>Wielka rzeka</b><small>Szeroka rzeka przez całą mapę z piaszczystymi wyspami</small></button>
-  <button class="btn panel mbtn mapb" data-map="tundra"><b>Tundra</b><small>Ciemna trawa, tylko drzewa iglaste i trzy wąskie rzeki</small></button>
+  <button class="btn panel mbtn mapb" data-map="tundra"><b>Fiordy</b><small>Szerokie fiordy pod stromymi górami, ciemna trawa i drzewa iglaste</small></button>
   <button class="btn panel mbtn" id="mapsNo">Anuluj</button>
 </section></div>
 <div class="menuBg" id="menu" hidden><section class="menu panel" role="dialog" aria-modal="true" aria-labelledby="menuT">
@@ -571,6 +571,10 @@ const DEF={
   farmcotton:{name:'Plantacja bawełny',cost:180,desc:'Krzewy bawełny: bawełna dla fabryk odzieży, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).',sw:'#f1efe6',farm:'cotton'},
   farmwood:{name:'Farma drzew',cost:160,desc:'Szkółka i wyrąb: drewno na meble i dla elektrowni na biomasę, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).',sw:'#3f7a3a',farm:'wood'},
   highway:{name:'Autostrada',cost:25,desc:'Auta jadą 2,2× szybciej. Bez słupów, budynki nie mają z niej wjazdu.',sw:'#2a2e35'},
+  tunnel:{name:'Tunel',cost:120,desc:'Droga pod wzniesieniem. Zaczyna się przy końcu drogi u stóp wzgórza i biegnie płasko na jej wysokości; nad tunelem musi być co najmniej półtora poziomu terenu. Na tunelu postawisz słup (kabel pod sufitem) i położysz rurę.',sw:'#6f6a62'},
+  tUp:{name:'Podnieś teren',cost:30,desc:'Podnosi pole o pół poziomu (najwyżej do poziomu 10). Przeciągnij, by podnieść kilka pól. Na zajętym polu nie zadziała.',sw:'#9a8a62',unit:'T¢/pole'},
+  tDown:{name:'Obniż teren',cost:30,desc:'Obniża pole o pół poziomu. Pole obniżone do poziomu wody obok rzeki zamienia się w wodę.',sw:'#7a6a52',unit:'T¢/pole'},
+  tLevel:{name:'Wyrównaj teren',cost:30,desc:'Stuknij pole o wybranej wysokości, potem przeciągnij po innych: dostaną tę samą wysokość. 30 T¢ za każde pół poziomu różnicy.',sw:'#b8a878',unit:'T¢/pół poziomu'},
   bridge:{name:'Most',cost:60,desc:'Przejazd przez wodę, tylko w linii prostej. Przejmuje pasy i prędkość najlepszej drogi na swoich końcach.',sw:'#b9b7ae'},
   landfill:{name:'Wysypisko',cost:200,desc:'300 kg odpadów na pole. Pola obok siebie łączą się w multiblok z jednym biurem przy ulicy: wspólna pojemność i więcej śmieciarek. Mocno brudzi okolicę.',sw:'#7d6a4f'},
   incS:{name:'Mała spalarnia',cost:900,desc:'1 pole. Spala 40 kg odpadów na godz. (bufor 60 kg). Można dokupić drugi komin: 80 kg/godz. Pobiera 1 MW i dymi.',sw:'#a39890'},
@@ -640,23 +644,23 @@ const DEF={
   lpole:{name:'Słup',cost:30,desc:'Słup na trawie.',sw:'#8a6a4a'},
   poleDel:{name:'Usuń słup',cost:0,lbl:'zwrot 50%',desc:'Zdejmuje słup z ulicy (ulica zostaje) albo usuwa słup z trawy. Zwraca połowę ceny.',sw:'#b5533c'},
   poleline:{name:'Linia słupów',cost:30,desc:'Stuknij ulicę: słupy staną na całym prostym odcinku, 30 T¢ za sztukę.',sw:'repeating-linear-gradient(90deg,#8a6a4a 0 4px,transparent 4px 8px)',unit:'T¢/szt.'},
-  wind:{name:'Wiatrak',cost:400,desc:'Daje 6 MW. Postaw obok transformatora.',sw:'#e9eef1'},
+  wind:{name:'Wiatrak',cost:400,desc:'Daje 2–10 MW: im wyżej stoi, tym więcej (2 MW na zwykłym terenie, 10 MW na najwyższych szczytach). Postaw obok transformatora.',sw:'#e9eef1'},
   transformer:{name:'Transformator',cost:150,desc:'Łączy elektrownie ze słupami, także po przekątnej. Ulepszenie: zasięg 5×5.',sw:'#5f7d70'},
   coal:{name:'El. węglowa',cost:800,desc:'Daje 20 MW, spala 1 kg węgla co 8 min (węgiel z kopalni na złożu; gdy go brak, kupuje spoza miasta po 24 T¢/kg). Włącza się, gdy wiatraki nie wystarczają.',sw:'#5a4a44'},
   biomass:{name:'El. na biomasę',cost:1000,size:2,desc:'Zajmuje 2×1 pola. 30 MW z drewna (z farmy drzew; gdy go brak, kupuje spoza miasta po 16 T¢/kg): spala 1 kg co 8 min, gdy wiatraki i inne źródła nie wystarczają. Dymi o połowę słabiej niż węglowa. Ulepszenie „Drugi komin”: +20 MW. Łączy się przez transformator obok albo słup WN.',sw:'#6d7f4a'},
-  fill:{name:'Zasypanie rzeki',cost:200,desc:'Zamienia jedno pole rzeki przy brzegu w ląd. Rzeki nie da się przeciąć ani zasypać do końca: pole musi mieć wodę z co najmniej dwóch stron.',sw:'#a8875a',unit:'T¢/pole'},
+  fill:{name:'Zasypanie rzeki',cost:200,desc:'Zamienia pole wody przy brzegu w ląd. Uwaga: woda odcięta od ujścia za mapę zacznie się podnosić i może zalać okolicę.',sw:'#a8875a',unit:'T¢/pole'},
 };
 const DEMAND={pitS:1,pitB:2,cityHall:2,shipC:1.5,roadSvc:1,heliB:2,taxi:0.5,trainSt:2,freightSt:2.5,fireS:1,fireB:2.5,clinic:1.5,hosp:4,hospC:9,crem:3,schoolS:0.8,school:1.5,lyceum:3,techn:4,bankG:4,shop1:1,prison:3,policeS:1,policeB:2.5,bakery:0.6,factoryB:3.5,mine:1,mineB:3,supermarket:2.5,smallfac:1,pump:1,pumpB:2.5,tower:0.5,treatment:2,restaurant:0.8,cinema:1.5,theater:1.5,casino:3,hotelS:1,hotelB:3,gallery:3,tenement:1.2,block:2,modern:2.5,house:0.5,factory:2,shop:1,bank:5,incinerator:1,recycler:1.5};
 const WHCAP={warehouse:200,smallwh:150,warehouseB:500};
 const isWH=t=>t==='warehouse'||t==='smallwh'||t==='warehouseB';const WH_T=['warehouse','smallwh','warehouseB'];
 const UTIL_R={pump:2,pumpB:2,tower:2,treatment:2};
 const NOROAD={rail:1,lpole:1,hydro:1,hydrogen:1,pump:1,pumpB:1,tower:1,outlet:1,treatment:1,farmveg:1,farmdairy:1,farmgrain:1,farmcotton:1,farmwood:1,biomass:1,wind:1,transformer:1,coal:1,park1:1,park2:1,park3:1,hvpole:1};
-const DRIVE={road:1,road2:1,road3:1,roundabout:1,highway:1,bridge:1};
+const DRIVE={road:1,road2:1,road3:1,roundabout:1,highway:1,bridge:1,tunnel:1};
 const STREET={road:1,road2:1,road3:1};
-const POLEABLE={road:1,road2:1,road3:1,roundabout:1,bridge:1};
+const POLEABLE={road:1,road2:1,road3:1,roundabout:1,bridge:1,tunnel:1};
 /* traffic: lanes per direction, speed factor; cars keep distance and plain junctions admit as many cars as they have lanes */
-const LANES={road:1,road2:2,road3:3,roundabout:1,highway:2,bridge:1};
-const SPEED={road:1,road2:1.4,road3:1.8,roundabout:1.2,highway:2.2,bridge:1};
+const LANES={road:1,road2:2,road3:3,roundabout:1,highway:2,bridge:1,tunnel:1};
+const SPEED={road:1,road2:1.4,road3:1.8,roundabout:1.2,highway:2.2,bridge:1,tunnel:1};
 const RANK={road:1,roundabout:1,road2:2,road3:3,highway:4};
 const OFFS={1:[0.19],2:[0.12,0.32],3:[0.09,0.22,0.36]};
 const CAR_GAP=0.42,ROUND_CAP=4;
@@ -695,7 +699,7 @@ const TIER={0:{trips:3,work:0.4,name:'Zrozpaczeni'},7:{trips:15,work:1.9,name:'B
 const HCOL={0:'#8a2a2a',1:'#d4483a',2:'#e58a3a',3:'#d9b23a',4:'#7dbb4a',5:'#2f9e5a',6:'#1f8a8a',7:'#2a7fb8',8:'#5a5fd0'};const HMAX=8;
 const SHOP_R=5;
 /* road upkeep is per 12 game hours: 1 T¢ per plain road tile, more for bigger roads */
-const ROAD_UPK={road:1,road2:2,road3:3,roundabout:2,highway:4,bridge:5},ROAD_PER=12;
+const ROAD_UPK={road:1,road2:2,road3:3,roundabout:2,highway:4,bridge:5,tunnel:6},ROAD_PER=12;
 const UPKEEP={biomass:90,pitS:30,pitB:60,cityHall:200,shipC:150,roadSvc:90,heliB:600,taxi:120,trainSt:180,freightSt:240,fireS:122,fireB:284,clinic:180,hosp:400,hospC:1100,cemS:50,cemB:80,crem:200,schoolS:90,school:160,lyceum:360,techn:400,policeS:144,policeB:336,prison:150,hydro:20,hydrogen:300,pump:25,pumpB:50,tower:20,outlet:10,treatment:80,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:5,wind:30,coal:125,park1:20,park2:50,park3:90,landfill:30,incinerator:120,recycler:70,factory:100,smallfac:50,factoryB:120,mine:25,mineB:90,warehouse:10,smallwh:5,warehouseB:20,bank:50,bankG:200,incS:60};
 /* waste: houses and parks fill steadily, factories per truck produced, shops per sale; pickup is due every ~6 h (work) or ~12 h (homes, parks) ±15% */
 const TRASH={supermarket:{cap:50,per:0.15,every:6},smallfac:{cap:24,per:0.3,every:6},house:{cap:18,rate:1,every:12},tenement:{cap:36,rate:2.5,every:12},block:{cap:60,rate:5,every:12},modern:{cap:60,rate:4,every:12},park1:{cap:10,rate:0.5,every:12},park2:{cap:10,rate:0.5,every:12},park3:{cap:10,rate:0.5,every:12},
@@ -752,8 +756,8 @@ const facCap=c=>FAC[c.t].cap*(c.t==='landfill'?(c.lfN||1):c.t==='incinerator'&&!
 const facTrucks=c=>c.t==='landfill'?Math.min(4,1+Math.ceil((c.lfN||1)/2)):FAC[c.t].trucks;
 const parkR=c=>DEF[c.t].r+(c.up?1:0);
 const PARKS=['park1','park2','park3'];
-const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','crosswalk']},{name:'Transport',tools:['busStop','busLine','rail','trainSt','railLine','taxi','freightSt','shipC']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','pitS','pitB','warehouse','smallwh','warehouseB','impDep']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain','farmcotton','farmwood']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','transformer','hvpole','wind','coal','biomass','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','roadSvc']},{name:'Woda',tools:['pipe','tower','pump','pumpB','treatment','outlet','fill']},{name:'Urzędowe',tools:['cityHall']}];
-const WIND_MW=6, COAL_MW=20, COAL_BURN=8, BIO_MW=30, BIO_UP=20, BIO_BURN=8;
+const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','tunnel','crosswalk']},{name:'Teren',tools:['tUp','tDown','tLevel','fill']},{name:'Transport',tools:['busStop','busLine','rail','trainSt','railLine','taxi','freightSt','shipC']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','pitS','pitB','warehouse','smallwh','warehouseB','impDep']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain','farmcotton','farmwood']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','transformer','hvpole','wind','coal','biomass','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','roadSvc']},{name:'Woda',tools:['pipe','tower','pump','pumpB','treatment','outlet']},{name:'Urzędowe',tools:['cityHall']}];
+const WIND_MW=2,windMW=i=>window.__testUnlock&&!window.__testHills?6:Math.max(2,Math.min(10,hgt[i]/2)), COAL_MW=20, COAL_BURN=8, BIO_MW=30, BIO_UP=20, BIO_BURN=8;
 const TOOLS=['view','bulldoze','road','pole','poleline','poleDel','house','factory','warehouse','impDep','shop','bank','wind','transformer','coal','park1','park2','park3','smallwh'];
 const BASE_MONEY=4000, BANK_CAP=6000, WH_CAP=60, SALE=25, TRUCK_LOAD=4, MAX_CARS=400, PEOPLE_CARS=340;
 
@@ -789,16 +793,23 @@ const gbase=document.createElement('canvas');gbase.width=gbase.height=N*32;let g
 g2.fillStyle='#7cc24a';g2.fillRect(0,0,N*32,N*32);
 const gc=document.createElement('canvas');gc.width=gc.height=N*32;g2=gc.getContext('2d');
 const water=new Uint8Array(N*N);
+/* 7.0: terrain height of every tile in half-steps (see buildLand), flooded land and the current water level */
+const H_LAND=4,H_MAX=20,hgt=new Uint8Array(N*N).fill(4),fld=new Uint8Array(N*N),wlv=new Uint8Array(N*N),wKnown=new Uint8Array(N*N);
 /* ore deposits under the grass: 0 none, 1 coal, 2 chalcopyrite */
 const dep=new Uint8Array(N*N);
 const DEP={1:{k:'coal',name:'Złoże węgla',col:'#38332f',spot:'#1f1c1a'},2:{k:'chalco',name:'Złoże chalkopirytu',col:'#a9843f',spot:'#5c9a80'}};
 /* pollution overlay: 1 = yellow-green, 2 = yellow */
 let groundSig=-1;
-function paintGround(pol){let SK=0;try{SK=snowOn()?3:seasonIdx()===2?2:seasonIdx()===1?1:0}catch(e){}{let h=N+SK*7919;for(let i=0;i<N*N;i++)h=(Math.imul(h,31)+(pol?pol[i]:0)*5+water[i]*3+dep[i]*11)|0;try{calcBeach();if(beachMap)for(let i=0;i<N*N;i++)if(beachMap[i])h=(Math.imul(h,7)+i)|0}catch(e){}if(h===groundSig&&gtex)return;groundSig=h}
+function paintGround(pol){let SK=0;try{SK=snowOn()?3:seasonIdx()===2?2:seasonIdx()===1?1:0}catch(e){}{let h=N+SK*7919;for(let i=0;i<N*N;i++)h=(Math.imul(h,31)+(pol?pol[i]:0)*5+water[i]*3+dep[i]*11+hgt[i]*17)|0;try{calcBeach();if(beachMap)for(let i=0;i<N*N;i++)if(beachMap[i])h=(Math.imul(h,7)+i)|0}catch(e){}if(h===groundSig&&gtex)return;groundSig=h}
   g2.drawImage(gbase,0,0);
   if(SK===1){g2.fillStyle='rgba(235,215,90,.08)';g2.fillRect(0,0,N*32,N*32)}else if(SK===2){g2.fillStyle='rgba(205,128,45,.22)';g2.fillRect(0,0,N*32,N*32)}
   for(let i=0;i<N*N;i++){const d=dep[i];if(!d||water[i])continue;const D=DEP[d],x=(i%N)*32,z=((i/N)|0)*32;g2.fillStyle=D.col;g2.globalAlpha=0.8;g2.beginPath();g2.ellipse(x+16,z+16,14,12,(i%5)*0.6,0,Math.PI*2);g2.fill();g2.globalAlpha=1;g2.fillStyle=D.spot;for(let k=0;k<7;k++){g2.beginPath();g2.arc(x+7+((i*7+k*13)%19),z+7+((i*11+k*5)%19),1.8+(k%3)*0.6,0,Math.PI*2);g2.fill()}}let bm=null;try{calcBeach();bm=beachMap}catch(e){}if(bm){for(let i=0;i<N*N;i++)if(bm[i]){const x=i%N,z=(i/N)|0;g2.fillStyle='#e9d8a4';g2.fillRect(x*32,z*32,32,32);g2.fillStyle='rgba(255,250,225,.35)';g2.fillRect(x*32+((i*7)%20),z*32+((i*13)%22),5,3)}}
   if(SK===3){g2.fillStyle='rgba(240,245,249,.8)';g2.fillRect(0,0,N*32,N*32)}
+  /* 7.0: higher ground turns darker and rocky, the highest peaks keep snow all year */
+  for(let i=0;i<N*N;i++){const h=hgt[i];if(water[i]||h<=H_LAND+4)continue;const x=(i%N)*32,z=((i/N)|0)*32;
+    if(h>=H_MAX-3&&mapType!=='carib'){g2.fillStyle='rgba(244,247,250,.92)';g2.fillRect(x,z,32,32);continue}
+    const r=Math.min(1,(h-H_LAND-4)/8);g2.fillStyle=mapType==='carib'&&h>=H_MAX-5?`rgba(70,58,52,${0.55+0.35*r})`:`rgba(108,100,88,${0.18+0.62*r})`;g2.fillRect(x,z,32,32);
+    if(r>0.35){g2.fillStyle='rgba(90,84,76,.35)';g2.fillRect(x+((i*7)%22),z+((i*13)%24),6,4);g2.fillRect(x+((i*11)%20),z+((i*5)%22),4,3)}}
   for(let i=0;i<N*N;i++){if(!water[i])continue;const x=i%N,z=(i/N)|0;g2.fillStyle='#3d82b5';g2.fillRect(x*32,z*32,32,32);
     g2.fillStyle='rgba(224,206,150,.95)';
     for(const[dx,dz]of[[0,1],[1,0],[0,-1],[-1,0]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N||water[nz*N+nx])continue;
@@ -814,14 +825,52 @@ gtex=new THREE.CanvasTexture(gc);gtex.anisotropy=Math.min(8,renderer.capabilitie
 const ground=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshLambertMaterial({map:gtex}));ground.receiveShadow=true;ground.frustumCulled=false;scene.add(ground);
 const banks=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshLambertMaterial({color:'#8f7350',side:THREE.DoubleSide}));banks.receiveShadow=true;banks.frustumCulled=false;scene.add(banks);
 const WATER_Y=-0.25,BED_Y=-0.42,LOW_DROP=0.15*-BED_Y;
-function buildLand(){const P=[],U=[],I=[],BP=[],BI=[];
-  for(let i=0;i<N*N;i++){const x=i%N,z=(i/N)|0,x0=x-HALF,z0=z-HALF;
-    if(!water[i]){const b=P.length/3;P.push(x0,0.001,z0, x0,0.001,z0+1, x0+1,0.001,z0+1, x0+1,0.001,z0);
-      U.push(x/N,1-z/N, x/N,1-(z+1)/N, (x+1)/N,1-(z+1)/N, (x+1)/N,1-z/N);I.push(b,b+1,b+2,b,b+2,b+3);continue}
-    /* vertical bank wall on every edge where water meets land or the map border */
-    for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N||water[nz*N+nx])continue;
-      let ax,az,bx,bz;if(dx===1){ax=bx=x0+1;az=z0;bz=z0+1}else if(dx===-1){ax=bx=x0;az=z0;bz=z0+1}else if(dz===1){az=bz=z0+1;ax=x0;bx=x0+1}else{az=bz=z0;ax=x0;bx=x0+1}
-      const b=BP.length/3;BP.push(ax,BED_Y,az, bx,BED_Y,bz, bx,0.001,bz, ax,0.001,az);BI.push(b,b+1,b+2,b,b+2,b+3)}}
+/* ---------- 7.0: terrain heights ----------
+   Every tile has one height in half-steps (half a level): the river is level 0, ordinary land level 2, mountains up to level 10.
+   A half-step is as tall as the drop behind a dam. Between tiles of different height the ground shows a steep earth bank.
+   For a water tile the height is its water surface. A straight road or track joining a tile half a step higher becomes a ramp. */
+const HS=LOW_DROP;
+const lvY=h=>(h-H_LAND)*HS,wSurfY=i=>WATER_Y+wlv[i]*HS,bedY=i=>WATER_Y+hgt[i]*HS-0.17;
+/* a water slab from the bed (base level) up to the current surface, lowered by drop */
+function wSlab(i,drop){const sy=(0.18+(wlv[i]-hgt[i])*HS)/0.18,top=WATER_Y+wlv[i]*HS-drop;dObj.rotation.set(0,0,0);dObj.scale.set(1,sy,1);dObj.position.set(cx(i),top-WATER_Y*sy,cz(i));dObj.updateMatrix()}
+/* road / track surface height in half-steps: a bridge keeps the height of its banks, a tunnel its own */
+const rh=i=>{const c=grid[i];return c&&(c.t==='bridge'||c.t==='tunnel')?(c.th??H_LAND):hgt[i]};
+const netK=i=>{const c=grid[i];if(!c)return 0;if(DRIVE[c.t])return 1;if(c.t==='rail')return 2;return 0};
+/* two neighbouring road (or track) tiles are joined only when they are at most half a step apart */
+const linkH=(i,j)=>Math.abs(rh(i)-rh(j))<=1;
+const cornH=new Float32Array(N*N*4);let landDirty=true;
+function rampOf(i){const c=grid[i],n=netK(i);if(!n||c.t==='bridge'||c.t==='tunnel'||c.t==='roundabout'||c.tiles)return null;const x=i%N,z=(i/N)|0,h=rh(i);let ax=0,az=0,dh=false;const e={};
+  for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(netK(j)!==n&&!(n===2&&grid[j]&&(grid[j].rail||isStationT(grid[j].t)))&&!(n===1&&grid[j]&&grid[j].t==='rail'&&grid[i].rail))continue;if(!linkH(i,j))continue;
+    if(dx)ax++;else az++;if(rh(j)!==h){dh=true;e[dx+','+dz]=(h+rh(j))/2}}
+  if(!dh||(ax&&az))return null;return{alongX:!!ax,a:ax?(e['-1,0']??h):(e['0,-1']??h),b:ax?(e['1,0']??h):(e['0,1']??h)}}
+function calcCorners(){for(let i=0;i<N*N;i++){const k=i*4;if(water[i]){const y=bedY(i);cornH[k]=cornH[k+1]=cornH[k+2]=cornH[k+3]=y;continue}
+    const r=rampOf(i);if(!r){const y=lvY(hgt[i]);cornH[k]=cornH[k+1]=cornH[k+2]=cornH[k+3]=y;continue}
+    const a=lvY(r.a),b=lvY(r.b);/* corners: (x0,z0) (x0,z0+1) (x0+1,z0+1) (x0+1,z0) */
+    if(r.alongX){cornH[k]=a;cornH[k+1]=a;cornH[k+2]=b;cornH[k+3]=b}else{cornH[k]=a;cornH[k+1]=b;cornH[k+2]=b;cornH[k+3]=a}}}
+/* height of the ground (or road) under a world point */
+function gY(x,z){const fx=x+HALF,fz=z+HALF,X=Math.max(0,Math.min(N-1,Math.floor(fx))),Z=Math.max(0,Math.min(N-1,Math.floor(fz))),i=Z*N+X,c=grid[i];
+  if(c&&(c.t==='bridge'||c.t==='tunnel'))return lvY(rh(i));if(water[i])return fld[i]?lvY(fld[i]-1):0;
+  const u=Math.max(0,Math.min(1,fx-X)),v=Math.max(0,Math.min(1,fz-Z)),k=i*4;return (cornH[k]*(1-u)+cornH[k+3]*u)*(1-v)+(cornH[k+1]*(1-u)+cornH[k+2]*u)*v}
+const tYi=i=>water[i]?0:lvY(hgt[i]);
+/* the top of a tile as seen from above (for picking) */
+const surfY=i=>{const c=grid[i];if(c&&c.t==='bridge')return lvY(rh(i))+0.05;if(water[i])return wSurfY(i);const k=i*4;return Math.max(cornH[k],cornH[k+1],cornH[k+2],cornH[k+3],fld[i]?lvY(fld[i]-1):-9)};
+/* the two ends of a tile edge, seen from tile i: [corner A, corner B] indices */
+const EDGE_C={'1,0':[3,2],'-1,0':[0,1],'0,1':[1,2],'0,-1':[0,3]};
+function buildLand(){calcCorners();landDirty=false;const P=[],U=[],I=[],BP=[],BI=[];
+  const wall=(ax,az,bx,bz,a0,a1,b0,b1)=>{if(a1-a0<1e-4&&b1-b0<1e-4)return;const b=BP.length/3;BP.push(ax,a0,az, bx,b0,bz, bx,b1,bz, ax,a1,az);BI.push(b,b+1,b+2,b,b+2,b+3)};
+  for(let i=0;i<N*N;i++){const x=i%N,z=(i/N)|0,x0=x-HALF,z0=z-HALF,k=i*4;
+    if(!water[i]){const b=P.length/3;P.push(x0,cornH[k]+0.001,z0, x0,cornH[k+1]+0.001,z0+1, x0+1,cornH[k+2]+0.001,z0+1, x0+1,cornH[k+3]+0.001,z0);
+      U.push(x/N,1-z/N, x/N,1-(z+1)/N, (x+1)/N,1-(z+1)/N, (x+1)/N,1-z/N);I.push(b,b+1,b+2,b,b+2,b+3)}
+    /* banks: every edge where this tile stands higher than its neighbour (or the map border) gets an earth wall down to it */
+    for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz,[ca,cb]=EDGE_C[dx+','+dz];let ax,az,bx,bz;
+      if(dx===1){ax=bx=x0+1;az=z0;bz=z0+1}else if(dx===-1){ax=bx=x0;az=z0;bz=z0+1}else if(dz===1){az=bz=z0+1;ax=x0;bx=x0+1}else{az=bz=z0;ax=x0;bx=x0+1}
+      const ta=cornH[k+ca]+0.001,tb=cornH[k+cb]+0.001;let na,nb;
+      if(nx<0||nz<0||nx>=N||nz>=N){na=nb=water[i]?0.001:Math.min(0,ta-0.002);if(water[i]){wall(ax,az,bx,bz,cornH[k+ca],0.001,cornH[k+cb],0.001);continue}}
+      else{const j=idx(nx,nz),kj=j*4,[ja,jb]=EDGE_C[(-dx)+','+(-dz)];na=cornH[kj+ja]+0.001;nb=cornH[kj+jb]+0.001;
+        if(water[i]&&!water[j]){wall(ax,az,bx,bz,cornH[k+ca],na,cornH[k+cb],nb);continue}if(water[i]&&water[j]&&cornH[kj+ja]>cornH[k+ca]+1e-4){wall(ax,az,bx,bz,cornH[k+ca],na,cornH[k+cb],nb);continue}if(water[i]||water[j])continue}
+      /* a tunnel mouth: the bank keeps an opening above the road for the portal */
+      if(grid[i]&&grid[i].t==='tunnel'&&nx>=0&&nz>=0&&nx<N&&nz<N){const j=idx(nx,nz);if(grid[j]&&DRIVE[grid[j].t]&&grid[j].t!=='tunnel'&&linkH(i,j)){const o=lvY(rh(i))+0.22;na=Math.max(na,o);nb=Math.max(nb,o)}}
+      if(ta>na+1e-4||tb>nb+1e-4)wall(ax,az,bx,bz,Math.min(na,ta),ta,Math.min(nb,tb),tb)}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));g.setIndex(I);g.computeVertexNormals();
   ground.geometry.dispose();ground.geometry=g;
   const w=new THREE.BufferGeometry();w.setAttribute('position',new THREE.Float32BufferAttribute(BP,3));w.setIndex(BI);w.computeVertexNormals();
@@ -872,7 +921,7 @@ function frameAt(x,z,size,w,m){for(const[dx,dz,sx,sz]of[[0,-1,size+w,w],[0,1,siz
 function frameRect(x,z,sx,sz,w,m){for(const[dx,dz,a,b]of[[0,-1,sx+w,w],[0,1,sx+w,w],[-1,0,w,sz+w],[1,0,w,sz+w]]){const q=new THREE.Mesh(abG,m);q.scale.set(a,1,b);q.position.set(x+dx*sx/2,0.075,z+dz*sz/2);areaB.add(q)}}
 /* fp: footprint [w,h] of the building — its reach counts from every tile it covers */
 function showArea(i,r,flash,kind='green',fp=null){const fw=fp?fp[0]:1,fh=fp?fp[1]:1,x=cx(i)+(fw-1)/2,z=cz(i)+(fh-1)/2;
-  area.visible=true;area.position.set(x,0.055,z);area.scale.set(2*r+fw,2*r+fh,1);areaT=flash==='hold'?1e9:flash?1.6:0;
+  area.visible=true;area.position.set(x,tYi(i)+0.055,z);areaB.position.y=tYi(i);area.scale.set(2*r+fw,2*r+fh,1);areaT=flash==='hold'?1e9:flash?1.6:0;
   const col=AREA_COL[kind];area.material.color.set(col[0]);area.material.opacity=kind==='noise'?0.42:0.3;abM.color.set(col[1]);
   const k=i+'|'+r+'|'+kind+'|'+fw+'x'+fh;if(areaB.userData.k!==k){areaB.userData.k=k;areaB.clear();frameRect(x,z,2*r+fw,2*r+fh,0.08,abM);frameRect(x,z,fw,fh,0.06,abT)}}
 /* reach of service buildings that keep it outside DEF (health, education, police, fire, shops, entertainment, road service) */
@@ -1060,8 +1109,8 @@ const firstDay=()=>gameT<1440;
 /* ---------- milestones: the number of people living in the city unlocks buildings, services and hazards (no money, just an order) ---------- */
 const MS=[{name:'Osada',pop:0},{name:'Wioska',pop:15},{name:'Mała wieś',pop:100},{name:'Miasteczko',pop:250},{name:'Małe miasto',pop:500},{name:'Miasto',pop:900},{name:'Duże miasto',pop:1500},{name:'Aglomeracja',pop:2500},{name:'Metropolia',pop:4000}];
 const MS_OF={};[
- 'road crosswalk house pole poleline poleDel transformer wind pipe pipeDel pump tower outlet shop smallfac smallwh impDep mine farmveg farmgrain landfill park1',
- 'tenement roadSvc farmdairy factory warehouse restaurant park2 bridge coal pitS farmcotton farmwood',
+ 'road crosswalk tUp tDown tLevel house pole poleline poleDel transformer wind pipe pipeDel pump tower outlet shop smallfac smallwh impDep mine farmveg farmgrain landfill park1',
+ 'tenement roadSvc farmdairy factory warehouse restaurant park2 bridge tunnel coal pitS farmcotton farmwood',
  'road2 clinic cemS schoolS hvpole incS shop1 pitB fill',
  'block supermarket hotelS cinema hydro treatment school recycler taxi shipC pumpB biomass policeS',
  'road3 roundabout factoryB warehouseB bank theater crem park3 rail trainSt freightSt heliB cityHall fireS busStop busLine railLine',
@@ -1672,7 +1721,7 @@ function wire(a,b,sag=0.07){const pts=[];for(let k=0;k<=10;k++){const u=k/10;pts
 
 /* ---------- state ---------- */
 let grid=new Array(N*N).fill(null);
-let counts={impDep:0,cityHall:0,shipC:0,roadSvc:0,heliB:0,rail:0,taxi:0,trainSt:0,freightSt:0,fireS:0,fireB:0,clinic:0,hosp:0,hospC:0,cemS:0,cemB:0,crem:0,schoolS:0,school:0,lyceum:0,techn:0,bankG:0,shop1:0,prison:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,pumpB:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,farmcotton:0,farmwood:0,pitS:0,pitB:0,biomass:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
+let counts={tunnel:0,tUp:0,tDown:0,tLevel:0,impDep:0,cityHall:0,shipC:0,roadSvc:0,heliB:0,rail:0,taxi:0,trainSt:0,freightSt:0,fireS:0,fireB:0,clinic:0,hosp:0,hospC:0,cemS:0,cemB:0,crem:0,schoolS:0,school:0,lyceum:0,techn:0,bankG:0,shop1:0,prison:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,pumpB:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,farmcotton:0,farmwood:0,pitS:0,pitB:0,biomass:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
 const pw={bank:0,matCap:0,dem:0,cap:0,ok:0,happy:0,dist:[0,0,0,0,0,0,0]};
 let envDirty=true;const eduP=new Uint8Array(N*N),eduS=new Uint8Array(N*N),lycCov=new Uint8Array(N*N),techCov=new Uint8Array(N*N),medCov=new Uint8Array(N*N);const crowdCov=new Uint8Array(N*N),noiseCov=new Uint8Array(N*N),entCov=new Uint8Array(N*N),pol=new Uint8Array(N*N),shopCov=new Uint8Array(N*N),parkCov=new Uint8Array(N*N);
 const winds=new Set(),bolts=new Set();
@@ -1740,7 +1789,7 @@ function imDel(m,key){const S=m.userData.slot,k=S.get(key);if(k===undefined)retu
   S.delete(key);K.length=last;m.count=last}
 const DECO_M=[dTr,dPi,dBl,dPT,dPC,dPy,dSt];
 for(const m of DECO_M){m.castShadow=true;m.frustumCulled=false;imInit(m);scene.add(m)}
-function setDeco(i){const T=themeOf();dObj.position.set(cx(i)+rnd(-.18,.18),0,cz(i)+rnd(-.18,.18));dObj.rotation.set(0,rnd(0,6.28),0);dObj.scale.setScalar(rnd(0.75,1.1));
+function setDeco(i){const T=themeOf();dObj.position.set(cx(i)+rnd(-.18,.18),tYi(i),cz(i)+rnd(-.18,.18));dObj.rotation.set(0,rnd(0,6.28),0);dObj.scale.setScalar(rnd(0.75,1.1));
   for(const m of DECO_M)imDel(m,i);let use;const r=Math.random();
   if(T.trees==='palm'&&(beachMap[i]||r<0.7)){dObj.rotation.set(rnd(-0.18,0.18),rnd(0,6.28),rnd(-0.18,0.18));dObj.scale.setScalar(rnd(0.85,1.25));use=[dPT,dPC]}
   else if(T.trees==='conifer')use=r<0.4?[dTr,dPi]:r<0.7?[dTr,dPy]:[dTr,dSt];
@@ -1757,11 +1806,11 @@ const BLC=['#5ea838','#6cb640','#7dc44c','#4e9a32'].map(c=>new THREE.Color(c)),F
 gBl.setColorAt(0,BLC[0]);gFh.setColorAt(0,FLC[0]);for(const m of[gBl,gSt,gSm,gFh])imInit(m);
 function groundDeco(i,on){const x0=cx(i),z0=cz(i);if(on&&beachMap[i])on=false;
   for(let t=0;t<2;t++){const tx=x0+rnd(-0.38,0.38),tz=z0+rnd(-0.38,0.38);for(let k=0;k<3;k++){const s2=t*3+k;
-    if(on){dObj.position.set(tx+rnd(-0.03,0.03),0,tz+rnd(-0.03,0.03));dObj.rotation.set(rnd(-0.35,0.35),rnd(0,6.28),rnd(-0.35,0.35));dObj.scale.set(1,rnd(0.6,1.4),1);dObj.updateMatrix();imSet(gBl,i*BL+s2,dObj.matrix,BLC[(Math.random()*4)|0])}
+    if(on){dObj.position.set(tx+rnd(-0.03,0.03),tYi(i),tz+rnd(-0.03,0.03));dObj.rotation.set(rnd(-0.35,0.35),rnd(0,6.28),rnd(-0.35,0.35));dObj.scale.set(1,rnd(0.6,1.4),1);dObj.updateMatrix();imSet(gBl,i*BL+s2,dObj.matrix,BLC[(Math.random()*4)|0])}
     else imDel(gBl,i*BL+s2)}}
-  if(on&&Math.random()<0.07){dObj.position.set(x0+rnd(-0.35,0.35),0.01,z0+rnd(-0.35,0.35));dObj.rotation.set(rnd(0,3),rnd(0,6.28),0);const sc=rnd(0.6,1.4);dObj.scale.set(sc,sc*0.55,sc*rnd(0.8,1.2));dObj.updateMatrix();imSet(gSt,i,dObj.matrix)}else imDel(gSt,i);
-  if(on&&!themeOf().noFlowers&&Math.random()<0.08){const fx=x0+rnd(-0.35,0.35),fz=z0+rnd(-0.35,0.35);dObj.position.set(fx,0,fz);dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();imSet(gSm,i,dObj.matrix);
-    dObj.position.set(fx,0.085,fz);dObj.updateMatrix();imSet(gFh,i,dObj.matrix,FLC[(Math.random()*5)|0])}else{imDel(gSm,i);imDel(gFh,i)}
+  if(on&&Math.random()<0.07){dObj.position.set(x0+rnd(-0.35,0.35),tYi(i)+0.01,z0+rnd(-0.35,0.35));dObj.rotation.set(rnd(0,3),rnd(0,6.28),0);const sc=rnd(0.6,1.4);dObj.scale.set(sc,sc*0.55,sc*rnd(0.8,1.2));dObj.updateMatrix();imSet(gSt,i,dObj.matrix)}else imDel(gSt,i);
+  if(on&&!themeOf().noFlowers&&Math.random()<0.08){const fx=x0+rnd(-0.35,0.35),fz=z0+rnd(-0.35,0.35),fy=tYi(i);dObj.position.set(fx,fy,fz);dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();imSet(gSm,i,dObj.matrix);
+    dObj.position.set(fx,fy+0.085,fz);dObj.updateMatrix();imSet(gFh,i,dObj.matrix,FLC[(Math.random()*5)|0])}else{imDel(gSm,i);imDel(gFh,i)}
   gdUpd=true}
 function seedGround(){for(let i=0;i<N*N;i++)groundDeco(i,!grid[i]&&!water[i])}
 function seedDeco(){seedGround();const pr=themeOf().trees==='palm'?0.14:themeOf().trees==='conifer'?0.13:0.1;for(let i=0;i<N*N;i++){if(grid[i]||water[i]||dep[i]||deco.has(i)||Math.random()>(beachMap[i]?pr*1.6:pr))continue;setDeco(i)}}
@@ -1778,7 +1827,7 @@ function genDeposits(){dep.fill(0);const per=Math.max(4,Math.round(N*N/650));
     for(const t of tl)clearDeco(t);n++}
   depDirty=true;envDirty=true}
 function depSync(){const L=[];for(let i=0;i<N*N;i++)if(dep[i]&&!water[i]&&!grid[i])L.push(i);const sig=L.join(',');if(!depDirty&&sig===depSig)return;depDirty=false;depSig=sig;
-  let n=0;for(const i of L){const r=seeded(i+7);for(let k=0;k<3&&n<1200;k++){dObj.position.set(cx(i)+(r()-0.5)*0.62,0.03,cz(i)+(r()-0.5)*0.62);dObj.rotation.set(r()*3,r()*3,r()*3);const sc=0.6+r()*0.8;dObj.scale.set(sc,sc*0.7,sc);dObj.updateMatrix();depR.setMatrixAt(n,dObj.matrix);depR.setColorAt(n,DEPC[dep[i]][k%2]);n++}}
+  let n=0;for(const i of L){const r=seeded(i+7);for(let k=0;k<3&&n<1200;k++){dObj.position.set(cx(i)+(r()-0.5)*0.62,tYi(i)+0.03,cz(i)+(r()-0.5)*0.62);dObj.rotation.set(r()*3,r()*3,r()*3);const sc=0.6+r()*0.8;dObj.scale.set(sc,sc*0.7,sc);dObj.updateMatrix();depR.setMatrixAt(n,dObj.matrix);depR.setColorAt(n,DEPC[dep[i]][k%2]);n++}}
   depR.count=n;depR.instanceMatrix.needsUpdate=true;if(depR.instanceColor)depR.instanceColor.needsUpdate=true}
 /* water: shiny instanced slabs over the painted river bed */
 /* flowing water: a tileable streak texture scrolled along each river's direction (one mesh for east-west, one for north-south stretches) */
@@ -1857,16 +1906,16 @@ const damLv=i=>Math.min(3,damRank[i]),damDn=i=>damSealed[i]?Math.min(3,damRank[i
 function damFit(i){const c=grid[i];const d=c&&c.t==='hydro'&&c.model&&c.model.userData.dam;if(!d)return;
   const h0=WATER_Y-LOW_DROP-BED_Y-0.02,lwD=WATER_Y-LOW_DROP*Math.max(1,damDn(i)),h=Math.max(0.004,lwD-BED_Y-0.02);d.st.scale.y=h/h0;d.st.position.y=BED_Y+h/2;
   const dy=lwD-(WATER_Y-LOW_DROP),vis=lwD>BED_Y+0.03;for(const[o,y0]of d.fl){o.position.y=y0+dy;o.visible=vis}}
-function applyWaterLevels(){for(const[i,[m,k]]of wIdx){dObj.position.set(cx(i),-LOW_DROP*(grid[i]&&grid[i].t==='hydro'?damLv(i):Math.min(3,lowW[i])),cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();m.setMatrixAt(k,dObj.matrix)}
-  for(const m of[waterMesh,waterMeshV])m.instanceMatrix.needsUpdate=true;for(const b of wBlocks)b.y=-LOW_DROP*(grid[b.i]&&grid[b.i].t==='hydro'?damLv(b.i):Math.min(3,lowW[b.i]));for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].t==='hydro')damFit(i)}
-function applyWater(){riverDirt.fill(0);riverDirty.fill(0);let nh=0,nv=0;wIdx.clear();const run=(i,dx,dz)=>{let k=0,x=i%N,z=(i/N)|0;for(;;){x+=dx;z+=dz;if(x<0||z<0||x>=N||z>=N||!water[idx(x,z)])break;k++}return k};
-  for(let i=0;i<N*N;i++)if(water[i]){dObj.position.set(cx(i),0,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();
+function applyWaterLevels(){for(const[i,[m,k]]of wIdx){wSlab(i,LOW_DROP*(grid[i]&&grid[i].t==='hydro'?damLv(i):Math.min(3,lowW[i])));m.setMatrixAt(k,dObj.matrix)}
+  for(const m of[waterMesh,waterMeshV])m.instanceMatrix.needsUpdate=true;for(const b of wBlocks)b.y=wlv[b.i]*HS-LOW_DROP*(grid[b.i]&&grid[b.i].t==='hydro'?damLv(b.i):Math.min(3,lowW[b.i]));for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].t==='hydro')damFit(i)}
+function applyWater(){for(let i=0;i<N*N;i++){if(water[i]&&!wKnown[i]){hgt[i]=0;wlv[i]=0;wKnown[i]=1;fld[i]=0}else if(!water[i]){if(wKnown[i]&&hgt[i]<H_LAND){hgt[i]=H_LAND;landDirty=true}wKnown[i]=0}if(water[i]&&wlv[i]<hgt[i])wlv[i]=hgt[i]}riverDirt.fill(0);riverDirty.fill(0);let nh=0,nv=0;wIdx.clear();const run=(i,dx,dz)=>{let k=0,x=i%N,z=(i/N)|0;for(;;){x+=dx;z+=dz;if(x<0||z<0||x>=N||z>=N||!water[idx(x,z)])break;k++}return k};
+  for(let i=0;i<N*N;i++)if(water[i]){wSlab(i,0);
     const h=run(i,1,0)+run(i,-1,0),v=run(i,0,1)+run(i,0,-1);if(h>=v){wIdx.set(i,[waterMesh,nh]);waterMesh.setMatrixAt(nh++,dObj.matrix)}else{wIdx.set(i,[waterMeshV,nv]);waterMeshV.setMatrixAt(nv++,dObj.matrix)}clearDeco(i);groundDeco(i,false)}
   computeFlow();buildCurrent(i=>(run(i,1,0)+run(i,-1,0))>=(run(i,0,1)+run(i,0,-1))?0:1);tickCurrent(0);paintRiver();
   waterMesh.count=nh;waterMeshV.count=nv;riverSig='';lowSig='';waterMesh.instanceMatrix.needsUpdate=true;waterMeshV.instanceMatrix.needsUpdate=true;envDirty=true;buildLand();bridgeDirty=true}
 /* rivers: meandering 2–3 tile wide bands from edge to edge; tiles in avoid stay dry (retry) */
 /* map types: standard (1–3 narrow rivers), big (two wide rivers), islands (a wide river splitting into branches around islands, plus a tributary) */
-const MAPS={standard:'Standard',big:'Dwie duże rzeki',islands:'Wyspy',lake:'Duże jezioro',carib:'Karaiby',bigriver:'Wielka rzeka',tundra:'Tundra'};let mapType='standard';
+const MAPS={standard:'Standard',big:'Dwie duże rzeki',islands:'Wyspy',lake:'Duże jezioro',carib:'Karaiby',bigriver:'Wielka rzeka',tundra:'Fiordy'};let mapType='standard';
 /* world themes: grass and tree colours, beaches, which trees grow */
 const THEMES={std:{grass:'#7cc24a',blades:['#5ea838','#6cb640','#7dc44c','#4e9a32'],pine:'#3d7a3c',blob:'#5d9e43',trees:'mixed'},
   carib:{grass:'#83c94e',blades:['#6cbf45','#7fcc52','#8fd65d','#62b33f'],pine:'#3d7a3c',blob:'#4fa53f',trees:'palm',beach:true},
@@ -1917,8 +1966,8 @@ function genRivers(avoid,type=mapType){water.fill(0);
       for(let tt=t;tt<Math.min(N-2,t+L);tt++){const k=(tt-t+0.5)/L,wid=hw*Math.sin(Math.PI*k),c=cs[tt]+off;for(let u=Math.round(c-wid);u<=Math.round(c+wid);u++){if(u<0||u>=N)continue;const i=vert?idx(u,tt):idx(tt,u);
         const lo=cs[tt]-Math.floor(wv[tt]/2);if(u>lo+1&&u<lo+wv[tt]-2)water[i]=0}}t+=L+((rnd(3,9))|0)}
     return}
-  /* tundra: three narrow rivers running the same way */
-  if(type==='tundra'){const vert=Math.random()<0.5,used=[];for(let k=0;k<3;k++)for(let a=0;a<60;a++){const c0=rnd(9,N-9);if(used.some(u=>Math.abs(u-c0)<18))continue;used.push(c0);paintPath(riverPath(vert,c0,rnd(2,5),rnd(0.05,0.11),rnd(0,6.28),4),vert,2);break}
+  /* 7.0 fjords (the old tundra): three wide arms of the sea running the same way, twice as wide as the old rivers */
+  if(type==='tundra'){const vert=Math.random()<0.5,used=[];for(let k=0;k<3;k++)for(let a=0;a<60;a++){const c0=rnd(9,N-9);if(used.some(u=>Math.abs(u-c0)<22))continue;used.push(c0);paintPath(riverPath(vert,c0,rnd(2,5),rnd(0.05,0.11),rnd(0,6.28),4),vert,4);break}
     return}
   const one=(w,dmax=5,Amax=7)=>{for(let a=0;a<80;a++){const vert=Math.random()<0.5,cs=riverPath(vert,rnd(8,N-8),rnd(2,Amax),rnd(0.05,0.13),rnd(0,6.28),dmax),cells=[];paintPath(cs,vert,w,0,N-1,0,cells);
       if(avoid&&cells.some(i=>avoid[i]))continue;for(const i of cells)water[i]=1;return vert}};
@@ -1939,6 +1988,36 @@ function genRivers(avoid,type=mapType){water.fill(0);
         for(let u=lo;u<=hi;u++){if(u<0||u>=N)continue;const i=vert?idx(t2,u):idx(u,t2);if(water[i]&&k>2)hit=true;water[i]=1}if(hit)break}}
     return}
   const n=1+(Math.random()<0.55?1:0)+(Math.random()<0.25?1:0);for(let k=0;k<n;k++)one(Math.random()<0.5?1:2)}
+/* ---------- 7.0: mountains ----------
+   Every river gets a mountain range along one of its sides only (a few tiles away, so the banks stay buildable); the Caribbean always has a volcano on its biggest island */
+const hgtStr=()=>{let o='';for(let i=0;i<N*N;i++)o+=String.fromCharCode(48+hgt[i]);return o};
+function hgtLoad(s){hgt.fill(H_LAND);fld.fill(0);let ok=false;if(typeof s.hg==='string'&&s.hg.length===N*N){for(let i=0;i<N*N;i++)hgt[i]=Math.max(0,Math.min(H_MAX,s.hg.charCodeAt(i)-48));ok=true}else for(let i=0;i<N*N;i++)hgt[i]=water[i]?0:H_LAND;
+  for(let i=0;i<N*N;i++){wlv[i]=hgt[i];wKnown[i]=water[i]}if(Array.isArray(s.wv))for(const[i,v]of s.wv)if(water[i])wlv[i]=v;if(Array.isArray(s.fl))for(const[i,v]of s.fl)if(!water[i])fld[i]=v;return ok}
+function noise2(G){const g=[];for(let k=0;k<(G+1)*(G+1);k++)g.push(Math.random());const sm=t=>t*t*(3-2*t);return(x,z)=>{const fx=x/N*G,fz=z/N*G,ix=Math.min(G-1,Math.floor(fx)),iz=Math.min(G-1,Math.floor(fz)),tx=sm(fx-ix),tz=sm(fz-iz),a=g[iz*(G+1)+ix],b=g[iz*(G+1)+ix+1],c=g[(iz+1)*(G+1)+ix],d=g[(iz+1)*(G+1)+ix+1];return a+(b-a)*tx+(c-a)*tz+(a-b-c+d)*tx*tz}}
+function genHeights(type=mapType){hgt.fill(H_LAND);fld.fill(0);for(let i=0;i<N*N;i++){wKnown[i]=water[i];wlv[i]=0;if(water[i])hgt[i]=0}if(window.__testUnlock&&!window.__testHills)return;
+  const fj=type==='tundra';
+  if(type==='carib'){/* the volcano: on the biggest island, as far from the sea as it gets */
+    const d=new Int16Array(N*N).fill(-1),q=[];for(let i=0;i<N*N;i++)if(water[i]){d[i]=0;q.push(i)}for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(d[j]<0){d[j]=d[q[h]]+1;q.push(j)}
+    let best=-1;for(let i=0;i<N*N;i++){const x=i%N,z=(i/N)|0;if(x<6||z<6||x>N-7||z>N-7)continue;if(best<0||d[i]>d[best])best=i}
+    if(best>=0){const R=Math.max(4,Math.min(10,d[best]+2)),bx=best%N,bz=(best/N)|0,top=H_MAX-(R<6?4:0);
+      for(let z=bz-R-1;z<=bz+R+1;z++)for(let x=bx-R-1;x<=bx+R+1;x++){if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);if(water[i]||d[i]<2)continue;const r=Math.hypot(x-bx,z-bz);if(r>R)continue;
+        /* a cone with a steep top and a crater in the middle */
+        let h=H_LAND+Math.round((top-H_LAND)*Math.pow(1-r/R,0.85));if(r<0.8&&R>=5)h-=3;hgt[i]=Math.max(hgt[i],Math.min(H_MAX,h))}}
+    return}
+  /* distance to the nearest water, which water tile it is, and whether that stretch runs east-west */
+  const d=new Int16Array(N*N).fill(-1),src=new Int32Array(N*N).fill(-1),q=[];for(let i=0;i<N*N;i++)if(water[i]){d[i]=0;src[i]=i;q.push(i)}
+  if(!q.length)return;for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(d[j]<0){d[j]=d[q[h]]+1;src[j]=src[q[h]];q.push(j)}
+  const run=(i,dx,dz)=>{let k=0,x=i%N,z=(i/N)|0;for(;;){x+=dx;z+=dz;if(x<0||z<0||x>=N||z>=N||!water[idx(x,z)])break;k++}return k};
+  const comp=new Int32Array(N*N).fill(-1);let nc=0;for(let i=0;i<N*N;i++){if(!water[i]||comp[i]>=0)continue;const qq=[i];comp[i]=nc;for(let h=0;h<qq.length;h++)for(const j of nbrs(qq[h]))if(water[j]&&comp[j]<0){comp[j]=nc;qq.push(j)}nc++}
+  const sideH=[],sideV=[];for(let k=0;k<nc;k++){sideH.push(Math.random()<0.5?1:-1);sideV.push(Math.random()<0.5?1:-1)}
+  const n1=noise2(7),n2=noise2(19),gap=fj?1:3,W=fj?10:9,A0=fj?13:10;
+  for(let i=0;i<N*N;i++){if(water[i]||d[i]<=gap)continue;const w=src[i],x=i%N,z=(i/N)|0,wx=w%N,wz=(w/N)|0;
+    const ew=run(w,1,0)+run(w,-1,0)>=run(w,0,1)+run(w,0,-1);/* an east-west river: the range is north or south of it */
+    const sg=ew?sideH[comp[w]]:sideV[comp[w]],off=ew?z-wz:x-wx;if(Math.sign(off)!==sg)continue;
+    const t=(d[i]-gap)/W;if(t>=1.35)continue;const prof=Math.pow(Math.sin(Math.PI*Math.min(1,t/1.35)),0.7),A=A0*(0.55+0.7*n1(x,z));
+    const h=H_LAND+Math.round(prof*A+2.2*(n2(x,z)-0.5));if(h-H_LAND>=2&&h>hgt[i])hgt[i]=Math.min(H_MAX,h)}
+  /* no thin ridges: a raised tile needs raised neighbours on two sides; single spikes are cut down */
+  for(let pass=0;pass<2;pass++)for(let i=0;i<N*N;i++){if(water[i]||hgt[i]<=H_LAND)continue;const up=nbrs(i).filter(j=>!water[j]&&hgt[j]>H_LAND).length;if(up<2){hgt[i]=H_LAND;continue}let m=0;for(const j of nbrs(i))m=Math.max(m,water[j]?0:hgt[j]);if(hgt[i]>m+2)hgt[i]=m+2}}
 const bfsCache=new Map();
 const factories=new Set();
 let cars=[];
@@ -2020,11 +2099,25 @@ const idx=(x,z)=>z*N+x;
 const cx=i=>(i%N)-HALF+0.5, cz=i=>((i/N)|0)-HALF+0.5;
 const isRoad=i=>i>=0&&!!grid[i]&&!!STREET[grid[i].t];
 const tilesOfX=0;const tilesOf=i=>grid[i]&&grid[i].tiles||[i];
-const isDrive=i=>i>=0&&!!grid[i]&&!!DRIVE[grid[i].t];
+const isDrive=i=>i>=0&&!!grid[i]&&!!DRIVE[grid[i].t]&&!fld[i];
+/* 7.0: a road tile sits at its height; a straight one joining a tile half a step higher is tilted into a ramp */
+/* a new bridge or tunnel tile takes the height of the road or bridge it continues, else of the land beside it */
+let deckNext=null;function deckH(i,t){if(deckNext!=null){const v=deckNext;deckNext=null;return v}let best=-1;for(const j of nbrs(i)){const c=grid[j];if(c&&(c.t===t||(t==='bridge'&&c.t==='tunnel')||(t==='tunnel'&&c.t==='bridge')))return c.th??H_LAND;if(c&&DRIVE[c.t]&&best<0)best=rh(j)}
+  if(best>=0)return best;if(t==='bridge'){let m=-1;for(const j of nbrs(i))if(!water[j])m=Math.max(m,hgt[j]);return m>=0?m:H_LAND}return hgt[i]}
+const TUNM={wall:M('#8d8a83'),dark:M('#24262a'),cable:M('#2b2b2b')};
+function tunnelLook(g,i,alongX,conns){const H=0.19;
+  for(const o of[-0.47,0.47])g.add(alongX?box(1,H,0.04,TUNM.wall,0,0,o):box(0.04,H,1,TUNM.wall,o,0,0));g.add(box(1,0.03,1,TUNM.wall,0,H,0));
+  /* a portal where the tunnel meets the open road */
+  const x=i%N,z=(i/N)|0;for(const[dx,dz]of conns){const j=idx(x+dx,z+dz);if(grid[j]&&grid[j].t==='tunnel')continue;const hgtTop=Math.max(0.24,lvY(hgt[i])-lvY(rh(i))+0.01);
+    const P=0.5,top=0.26;if(dx){g.add(box(0.07,top,0.1,TUNM.wall,dx*P,0,-0.46));g.add(box(0.07,top,0.1,TUNM.wall,dx*P,0,0.46));g.add(box(0.07,0.06,1.02,TUNM.wall,dx*P,0.2,0));g.add(box(0.02,0.2,0.84,TUNM.dark,dx*(P-0.04),0,0))}
+    else{g.add(box(0.1,top,0.07,TUNM.wall,-0.46,0,dz*P));g.add(box(0.1,top,0.07,TUNM.wall,0.46,0,dz*P));g.add(box(1.02,0.06,0.07,TUNM.wall,0,0.2,dz*P));g.add(box(0.84,0.2,0.02,TUNM.dark,0,0,dz*(P-0.04)))}}}
+function tunnelCable(g,i){const x=i%N,z=(i/N)|0;g.add(box(0.03,0.03,0.03,TUNM.cable,0.3,0.16,0.3));for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(!isLV(j))continue;g.add(dx?box(0.5,0.012,0.012,TUNM.cable,0.3+dx*0.25,0.165,0.3):box(0.012,0.012,0.5,TUNM.cable,0.3,0.165,0.3+dz*0.25))}}
+function roadTilt(i,c){const g=c.group,r=rampOf(i);g.rotation.x=g.rotation.z=0;g.scale.x=g.scale.z=1;
+  if(!r){g.position.y=lvY(rh(i));return}const a=lvY(r.a),b=lvY(r.b),t=Math.atan(b-a);g.position.y=(a+b)/2;if(r.alongX){g.rotation.z=t;g.scale.x=1/Math.cos(t)}else{g.rotation.x=-t;g.scale.z=1/Math.cos(t)}}
 const effType=i=>{const c=grid[i];return!c?'road':c.t==='bridge'?(c.bt||'road'):c.t};
 const stepCost=i=>grid[i]?1/(SPEED[effType(i)]||1):1;
 const tileY=()=>0.04;
-function entryOf(i){for(const k of tilesOf(i)){const x=k%N,z=(k/N)|0;for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(isRoad(j))return j}}return -1}
+function entryOf(i){for(const k of tilesOf(i))if(fld[k])return -1;for(const k of tilesOf(i)){const x=k%N,z=(k/N)|0;for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(isRoad(j)&&rh(j)===hgt[k])return j}}return -1}
 
 /* fastest route (Dijkstra): a highway tile costs half a normal tile */
 function hpush(H,d,i){H.push([d,i]);let k=H.length-1;while(k>0){const p=(k-1)>>1;if(H[p][0]<=H[k][0])break;[H[p],H[k]]=[H[k],H[p]];k=p}}
@@ -2033,7 +2126,7 @@ function hpop(H){const top=H[0],last=H.pop();if(H.length){H[0]=last;let k=0;for(
 function bfs(s){let c=bfsCache.get(s);if(c)return c;
   const dist=new Float64Array(N*N).fill(-1),prev=new Int32Array(N*N).fill(-1);dist[s]=0;const H=[[0,s]];
   while(H.length){const[d,i]=hpop(H);if(d>dist[i]+1e-6)continue;const x=i%N,z=(i/N)|0;
-    for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(j===s||!isDrive(j))continue;
+    for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(j===s||!isDrive(j)||!linkH(i,j))continue;
       const nd=d+(stepCost(i)+stepCost(j))/2;if(dist[j]<0||nd<dist[j]-1e-6){dist[j]=nd;prev[j]=i;hpush(H,nd,j)}}}
   c={dist,prev};bfsCache.set(s,c);return c}
 function pathTo(b,e){const r=[];let i=e;while(i!==-1){r.push(i);i=b.prev[i]}return r.reverse()}
@@ -2071,8 +2164,8 @@ function rebuildBridges(){bridgeTypes();for(const o of[...bridgeDeco.children]){
     const run=[i];for(;;){const k=run[run.length-1],kx=k%N,kz=(k/N)|0,nx=vert?kx:kx+1,nz=vert?kz+1:kz;if(nx>=N||nz>=N||!isBridge(idx(nx,nz)))break;run.push(idx(nx,nz))}
     const L=run.length;if(L<3)continue;
     /* along = travel axis, side = across the deck */
-    const P=(t,side,y)=>{const a=cx(run[0])+(vert?0:-0.5),b=cz(run[0])+(vert?-0.5:0);return vert?new THREE.Vector3(a+side,y,b+t):new THREE.Vector3(a+t,y,b+side)};
-    for(let k=1;k<L-1;k++){const pr=new THREE.Mesh(pierG,mat.concrete);const c=run[k];pr.position.set(cx(c),(BED_Y-0.06)/2,cz(c));pr.scale.y=-0.06-BED_Y;
+    const Y0=lvY(rh(run[0])),P=(t,side,y)=>{const a=cx(run[0])+(vert?0:-0.5),b=cz(run[0])+(vert?-0.5:0);y+=Y0;return vert?new THREE.Vector3(a+side,y,b+t):new THREE.Vector3(a+t,y,b+side)};
+    for(let k=1;k<L-1;k++){const pr=new THREE.Mesh(pierG,mat.concrete);const c=run[k],pb=water[c]?bedY(c):lvY(hgt[c]),pt=Y0-0.06;pr.position.set(cx(c),(pb+pt)/2,cz(c));pr.scale.y=Math.max(0.01,pt-pb);
       if(vert)pr.rotation.y=Math.PI/2;pr.castShadow=true;bridgeDeco.add(pr)}
     for(const side of[-0.47,0.47]){
       if(L<=5){const H=0.38,step=0.5,n=Math.round(L/step);
@@ -2093,15 +2186,15 @@ const POLE_P=0.455;
 const WALK_W=0.08,WALK_H=0.022;const GW={x:new THREE.BoxGeometry(1,WALK_H,WALK_W).translate(0,0.04+WALK_H/2,0),z:new THREE.BoxGeometry(WALK_W,WALK_H,1).translate(0,0.04+WALK_H/2,0),c:new THREE.BoxGeometry(WALK_W,WALK_H,WALK_W).translate(0,0.04+WALK_H/2,0),
   ex:new THREE.BoxGeometry(1,0.006,0.012).translate(0,0.04+WALK_H+0.003,0),ez:new THREE.BoxGeometry(0.012,0.006,1).translate(0,0.04+WALK_H+0.003,0)};for(const k in GW)GW[k].userData.keep=true;
 const matWalk=M('#cdc9bf'),matCurb=M('#ecebe6');
-function addSidewalks(g,x,z){const P=0.5-WALK_W/2,open=(dx,dz)=>{const nx=x+dx,nz=z+dz;return nx<0||nz<0||nx>=N||nz>=N?false:!isDrive(idx(nx,nz))};
+function addSidewalks(g,x,z){const P=0.5-WALK_W/2,me=idx(x,z),open=(dx,dz)=>{const nx=x+dx,nz=z+dz;return nx<0||nz<0||nx>=N||nz>=N?false:!isDrive(idx(nx,nz))||!linkH(me,idx(nx,nz))};
   for(const[dx,dz]of DIRS){if(!open(dx,dz))continue;const m=new THREE.Mesh(dx?GW.z:GW.x,matWalk);m.position.set(dx*P,0,dz*P);m.receiveShadow=true;g.add(m);
     const e=new THREE.Mesh(dx?GW.ez:GW.ex,matCurb);e.position.set(dx*(0.5-WALK_W),0,dz*(0.5-WALK_W));g.add(e)}
-  for(const[sx,sz]of[[1,1],[1,-1],[-1,1],[-1,-1]]){if(open(sx,0)||open(0,sz))continue;const nx=x+sx,nz=z+sz;if(nx>=0&&nz>=0&&nx<N&&nz<N&&isDrive(idx(nx,nz)))continue;
+  for(const[sx,sz]of[[1,1],[1,-1],[-1,1],[-1,-1]]){if(open(sx,0)||open(0,sz))continue;const nx=x+sx,nz=z+sz;if(nx>=0&&nz>=0&&nx<N&&nz<N&&isDrive(idx(nx,nz))&&linkH(me,idx(nx,nz)))continue;
     const m=new THREE.Mesh(GW.c,matWalk);m.position.set(sx*P,0,sz*P);m.receiveShadow=true;g.add(m)}}
 function rebuildRoad(i){const c=grid[i];if(!c||!DRIVE[c.t])return;const g=c.group;
   while(g.children.length>1){const o=g.children[g.children.length-1];g.remove(o);if(o.userData.baked)o.geometry.dispose()}
   const et=effType(i),x=i%N,z=(i/N)|0,hw=et==='highway',br=c.t==='bridge',y=hw?0.051:0.046;let n=0,ax=false,az=false;
-  const conns=[];for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N&&isDrive(idx(nx,nz)))conns.push([dx,dz])}
+  const conns=[];for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N&&isDrive(idx(nx,nz))&&linkH(i,idx(nx,nz)))conns.push([dx,dz])}
   const junction=conns.length>=3&&c.t!=='roundabout';
   const corner=conns.length===2&&conns[0][0]*conns[1][0]+conns[0][1]*conns[1][1]===0&&c.t!=='roundabout';
   for(const[dx,dz]of conns){n++;if(dx)ax=true;else az=true;
@@ -2117,9 +2210,11 @@ function rebuildRoad(i){const c=grid[i];if(!c||!DRIVE[c.t])return;const g=c.grou
   if(c.t==='roundabout'){g.add(new THREE.Mesh(G.curb,mat.white));const is=new THREE.Mesh(G.island,mat.parkG);is.receiveShadow=true;g.add(is);
     const r=new THREE.Mesh(G.rring,mat.dash);r.position.y=0.047;g.add(r);parkTree(g,0,0,0.3);g.children[g.children.length-1].position.y=0.12}
   else if(n===0){const d=new THREE.Mesh(G.dot,hw?mat.yellow:mat.dash);d.position.y=y;g.add(d)}
+  if(c.t==='tunnel'){const alongX=ax||!az;tunnelLook(g,i,alongX,conns)}
   if(br){const alongX=ax||!az;for(const o of[-0.47,0.47]){const r=new THREE.Mesh(alongX?G.railX:G.railZ,mat.white);r.position.set(alongX?0:o,0.075,alongX?o:0);r.castShadow=true;g.add(r)}}
   if(c.edgeOut){const pst=box(0.04,0.34,0.04,mat.wood,-0.42,0,0.42);g.add(pst);const brd=box(0.34,0.16,0.03,mat.signB,-0.42,0.28,0.42);g.add(brd);g.add(box(0.26,0.03,0.035,mat.white,-0.42,0.35,0.42))}
-  if(c.pole&&POLEABLE[c.t]){const P=POLE_P,H=0.88;
+  if(c.pole&&c.t==='tunnel'){tunnelCable(g,i)}
+  else if(c.pole&&POLEABLE[c.t]){const P=POLE_P,H=0.88;
     const pl=new THREE.Mesh(G.pole,mat.wood);pl.position.set(P,0,P);pl.castShadow=true;g.add(pl);
     const arm=new THREE.Mesh(G.arm,mat.wood);arm.position.set(P,H-0.04,P);arm.rotation.y=Math.PI/4;g.add(arm);
     const lamp=new THREE.Mesh(G.lamp,mat.lamp);lamp.position.set(P-0.07,H-0.07,P-0.07);g.add(lamp);
@@ -2129,7 +2224,7 @@ function rebuildRoad(i){const c=grid[i];if(!c||!DRIVE[c.t])return;const g=c.grou
       else if(nb.t==='transformer'&&trafoPole(idx(nx,nz))===i)g.add(wire(top,new THREE.Vector3(dx,0.52,dz)));}
     for(const[dx,dz]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const nb=grid[idx(nx,nz)];
       if(nb&&nb.t==='transformer'&&trafoPole(idx(nx,nz))===i)g.add(wire(top,new THREE.Vector3(dx,0.52,dz)))}}
-  bakeModel(g,true)}
+  roadTilt(i,c);bakeModel(g,true)}
 /* a transformer draws one line, to its nearest pole (straight neighbours first) */
 const isLV=i=>{const c=grid[i];return !!c&&((POLEABLE[c.t]&&!!c.pole)||c.t==='lpole')};const poleOff=i=>grid[i]&&grid[i].t==='lpole'?0:POLE_P;
 function trafoPole(t){let best=-1,bd=9;for(const j of nbrs8(t)){if(!isLV(j))continue;const d=Math.abs(j%N-t%N)+Math.abs(((j/N)|0)-((t/N)|0));if(d<bd||(d===bd&&j<best)){bd=d;best=j}}return best}
@@ -2147,7 +2242,7 @@ function refreshBuilding(i){const c=grid[i];if(!c||DRIVE[c.t])return;if(c.t==='p
     c.model.rotation.y=Math.atan2(alongX?sg:0,alongX?0:sg);damFit(i);return}
     if(c.t==='pump'||c.t==='outlet'){c.marker.visible=false;const w=nearWater(i);if(w>=0)c.model.rotation.y=Math.atan2(cx(w)-cx(i),cz(w)-cz(i));return}
   if(c.t==='pumpB'){c.marker.visible=false;const ts=tilesOf(i),vert=ts.length>1&&ts[1]%N===ts[0]%N,w=nearWater(i);if(w>=0){const gp=c.group.position;const dx=cx(w)-gp.x,dz=cz(w)-gp.z;c.model.rotation.y=vert?(dx>0?Math.PI/2:-Math.PI/2):(dz>0?0:Math.PI)}return}
-  if(c.t==='rail'){c.marker.visible=false;railModel(i,c);return}
+  if(c.t==='rail'){c.marker.visible=false;railModel(i,c);roadTilt(i,c);return}
   if(NOROAD[c.t]){c.marker.visible=false;return}const e=entryOf(i);
   if(c.t==='landfill'){c.marker.visible=false;c.model.rotation.y=(c.rot||0)*Math.PI/2;const d=c.model.userData.deco;if(d)d.rotation.y=(e>=0?Math.atan2(cx(e)-cx(i),cz(e)-cz(i)):0)-c.model.rotation.y;return}
   c.marker.visible=e<0;
@@ -2161,10 +2256,11 @@ function roadBase(t){return t==='highway'?[G.hwBase,mat.road]:t==='bridge'?[G.de
 let mvNext=null;
 function addCell(i,t,anim=true,second=-1){whDirty=true;const extra=Array.isArray(second)?second:(second>=0?[second]:[]);
   clearDeco(i);groundDeco(i,false);
-  const g=new THREE.Group();g.position.set(cx(i),0,cz(i));
+  const g=new THREE.Group();g.position.set(cx(i),tYi(i),cz(i));
   const cell={t,group:g,work:0,timer:1+Math.random()*3,mv:mvNext!=null?mvNext:Math.random()};mvNext=null;
   if(extra.length){cell.tiles=[i,...extra];cell.vert=extra.length===1&&Math.abs(extra[0]-i)===N;let sx=cx(i),sz=cz(i);
-    for(const e of extra){clearDeco(e);groundDeco(e,false);grid[e]={t:'part',main:i};sx+=cx(e);sz+=cz(e)}g.position.set(sx/(extra.length+1),0,sz/(extra.length+1))}
+    for(const e of extra){clearDeco(e);groundDeco(e,false);grid[e]={t:'part',main:i};sx+=cx(e);sz+=cz(e)}g.position.set(sx/(extra.length+1),tYi(i),sz/(extra.length+1))}
+  if(t==='bridge'||t==='tunnel')cell.th=deckH(i,t);
   if(DRIVE[t]){const[bg,bm]=roadBase(t);const s=new THREE.Mesh(bg,bm);s.receiveShadow=true;s.castShadow=t==='bridge';g.add(s)}
   else{const model=t==='park3'&&!extra.length?buildPark(3):t==='incinerator'&&!extra.length?applyOvr('incS',buildIncinerator(),cell.mv):applyOvr(HBUILD[t]&&!MODEL_OVR[t]?t+'@0':t,BUILD[t](),cell.mv);if(cell.vert)model.rotation.y=Math.PI/2;
     if(extra.length>1){const xs=[i,...extra].map(k=>k%N),zs=[i,...extra].map(k=>(k/N)|0);if(Math.max(...zs)-Math.min(...zs)>Math.max(...xs)-Math.min(...xs))model.rotation.y=Math.PI/2}g.add(model);cell.model=model;cell.marker=markerMesh();g.add(cell.marker);
@@ -2184,7 +2280,7 @@ function addCell(i,t,anim=true,second=-1){whDirty=true;const extra=Array.isArray
   if(cell.model)bakeModel(cell.model);
   scene.add(g);grid[i]=cell;counts[t]++;
   if(t==='rail'||t==='trainSt'||t==='freightSt'){railVer++;railRefreshNear(i)}
-  if(DRIVE[t]){roadVer++;bfsCache.clear();bridgeDirty=true}if(t==='hvpole'||t==='transformer'||GEN_W[t])topoDirty=true;
+  if(DRIVE[t]||t==='rail'){roadVer++;bfsCache.clear();bridgeDirty=true;landDirty=true}if(t==='hvpole'||t==='transformer'||GEN_W[t])topoDirty=true;
   refreshAround(i);for(const e of extra)refreshAround(e);powerDirty=true;envDirty=true;
   xrayNew(g);
   if(anim){if(!DRIVE[t]&&cell.model&&t!=='lpole'&&t!=='hvpole'&&t!=='rail')startConstruction(cell);else{g.scale.setScalar(0.5);popping.push({g,t:0})}}
@@ -2193,7 +2289,7 @@ function removeCell(i){let c=grid[i];if(!c)return;if(c.t==='part'){i=c.main;c=gr
   c.group.traverse(o=>{if(o.geometry&&!o.geometry.userData.keep)o.geometry.dispose()});
   if(c.t==='bridge'&&pipe[i]){pipe[i]=0}
   if(c.railFx){scene.remove(c.railFx);c.railFx=null}if(c.crossFx){scene.remove(c.crossFx);c.crossFx=null}if(c.busFx){scene.remove(c.busFx);c.busFx=null}if(c.bus||c.t==='trainSt'){const S=i;setTimeout(()=>{if(!grid[S]||!(grid[S].bus||grid[S].t==='trainSt'))stopGone(S)},0)}if(c.rail||c.t==='rail'||c.t==='trainSt'||c.t==='freightSt'){railVer++;setTimeout(railRefreshAll,0)}
-  counts[c.t]--;grid[i]=null;if(DRIVE[c.t]){roadVer++;bfsCache.clear();bridgeDirty=true}if(c.t==='hvpole'||c.t==='transformer'||GEN_W[c.t])topoDirty=true;
+  counts[c.t]--;grid[i]=null;if(DRIVE[c.t]||c.t==='rail'){roadVer++;bfsCache.clear();bridgeDirty=true;landDirty=true}if(c.t==='hvpole'||c.t==='transformer'||GEN_W[c.t])topoDirty=true;
   farmDirty=true;
   if(c.tiles)for(const j of c.tiles)if(j!==i){grid[j]=null;refreshAround(j);groundDeco(j,!water[j])}
   groundDeco(i,!water[i]);refreshAround(i);powerDirty=true;envDirty=true;whDirty=true;
@@ -2256,7 +2352,7 @@ function seasonLook(){const T=themeOf(),si=seasonIdx(),sn=snowOn(),C=c=>new THRE
   pineM.color.copy(sn?C(T.pine).lerp(C('#dfe8ea'),0.4):C(T.pine));blobM.color.copy(sn?C(T.blob).lerp(C('#e4ecef'),0.55):si===2?C(T.blob).lerp(C('#d07a28'),0.6):si===1?C(T.blob).lerp(C('#6f9a2e'),0.15):C(T.blob));
   groundSig=-1;envDirty=true}
 function updateSnowRoads(){snowRoad.fill(0);let n=0;if(!snowOn()){snowM.count=0;return}const bases=svcBases(),m=new THREE.Matrix4();
-  for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!DRIVE[c.t]||c.t==='bridge')continue;if(bases.some(b=>svcCover(b,i)))continue;snowRoad[i]=1;m.makeTranslation(cx(i),0.064,cz(i));snowM.setMatrixAt(n++,m)}
+  for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!DRIVE[c.t]||c.t==='bridge')continue;if(bases.some(b=>svcCover(b,i)))continue;snowRoad[i]=1;m.makeTranslation(cx(i),0.064+lvY(rh(i)),cz(i));snowM.setMatrixAt(n++,m)}
   snowM.count=n;snowM.instanceMatrix.needsUpdate=true}
 function seasonTick(rdt){const si=seasonIdx()*2+(snowOn()?1:0);if(si!==seasonSeen){const first=seasonSeen<0;seasonSeen=si;seasonLook();updateSnowRoads();
     if(!first&&!titleOpen){const s=seasonIdx();setHint(s===3?(snowOn()?'Nadeszła zima: spadł śnieg. Na ulicach bez służb drogowych auta jadą wolniej.':'Nadeszła zima – na Karaibach bez śniegu.'):s===0?'Nadeszła wiosna.':s===1?'Nadeszło lato.':'Nadeszła jesień.',false,true);hintEl.hidden=false}}
@@ -2343,6 +2439,8 @@ function bldPoint(b,road){const c=grid[b];if(b==null||b<0||!c||DRIVE[c.t]||road=
   if(m.tiles){for(const k of m.tiles)if(nbrs(k).includes(road)){t=k;break}}else if(!nbrs(t).includes(road))return null;return[cx(t)+(cx(road)-cx(t))*0.12,cz(t)+(cz(road)-cz(t))*0.12]}
 function startAnim(c,from,to,enter,done){c.anim={fx:from[0],fz:from[1],tx:to[0],tz:to[1],u:0,dur:Math.min(0.6,Math.max(0.25,Math.hypot(to[0]-from[0],to[1]-from[1])/Math.max(0.6,c.speed*0.7))),enter,done};c.mesh.position.set(from[0],0.04,from[1])}
 function exitFrom(c,b){const pt=bldPoint(b,c.path[0]);if(!pt)return;const to=[c.mesh.position.x,c.mesh.position.z];startAnim(c,pt,to,false,null);c.rot=null}
+/* 7.0: lift a moving thing to the ground under it; the placement code keeps writing its flat height, so the lift is added on top of whatever it wrote */
+function liftY(m){if(!m)return;const p=m.position,u=m.userData;const base=(u.gyF!=null&&p.y===u.gyF)?u.gyB:p.y,h=gY(p.x,p.z);u.gyB=base;p.y=u.gyF=base+h}
 function updateCar(c,dt){
   if(c.hold)return;
   if(c.dwell>0){c.dwell-=dt;return}
@@ -2533,10 +2631,12 @@ function shipRun(i){const c=grid[i];if(!c)return;if(c.shipM==='imp')return shipI
 function shipTick(dt){if(!dt)return;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t!=='shipC'||c.off||!c.powered||c.shipAt==null)continue;if(gameT>=c.shipAt){shipRun(i);c.shipAt=c.shipAuto?gameT+SHIP_EVERY:null}}}
 /* pedestrian crossings: only on straight stretches of an ordinary street */
 const roadNbrs=i=>nbrs(i).filter(j=>grid[j]&&DRIVE[grid[j].t]);
-function crossOK(i){const c=grid[i];if(!c||!STREET[c.t]||c.edge||c.rail)return false;const n=roadNbrs(i);if(n.length!==2)return false;const[a,b]=n;return a%N===b%N||((a/N)|0)===((b/N)|0)}
+function crossOK(i){const c=grid[i];if(!c||!STREET[c.t]||c.edge||c.rail||rampOf(i))return false;const n=roadNbrs(i);if(n.length!==2)return false;const[a,b]=n;return a%N===b%N||((a/N)|0)===((b/N)|0)}
+/* 7.0: crossings, stops and level crossings sit on the road at its height and tilt */
+function fxOnRoad(g,i){const c=grid[i];if(!c||!c.group)return;g.position.y=c.group.position.y;g.rotation.x=c.group.rotation.x;g.rotation.z=c.group.rotation.z}
 function drawCross(i){const c=grid[i];if(!c)return;if(c.crossFx){scene.remove(c.crossFx);c.crossFx=null}if(!c.cross)return;const n=roadNbrs(i),alongX=n.length&&((n[0]/N)|0)===((i/N)|0);const g=new THREE.Group(),w=M('#f4f6f8');
   for(let k=-3;k<=3;k++){const b=alongX?box(0.3,0.006,0.065,w,0,0.043,k*0.12):box(0.065,0.006,0.3,w,k*0.12,0.043,0);b.castShadow=false;b.receiveShadow=true;g.add(b)}
-  const px=alongX?0.42:0.44,pz=alongX?0.44:0.42;g.add(box(0.02,0.36,0.02,mat.steel,px,0.03,pz));g.add(box(0.1,0.1,0.01,M('#2f6fe0'),px,0.36,pz));g.position.set(cx(i),0,cz(i));scene.add(g);c.crossFx=g}
+  const px=alongX?0.42:0.44,pz=alongX?0.44:0.42;g.add(box(0.02,0.36,0.02,mat.steel,px,0.03,pz));g.add(box(0.1,0.1,0.01,M('#2f6fe0'),px,0.36,pz));g.position.set(cx(i),0,cz(i));fxOnRoad(g,i);scene.add(g);c.crossFx=g}
 /* ---------- litter on the streets (communal tax above 5%) and smog dirt on parks and farms; road services clean both ---------- */
 const SVC_R=10,litM=[M('#c9b26a'),M('#7a8a9a'),M('#b8453a')];
 function setLitter(i,n){const c=grid[i];if(!c||!DRIVE[c.t])return;c.litter=Math.max(0,Math.min(3,n));if(c.litFx){c.group.remove(c.litFx);c.litFx=null}if(!c.litter)return;const g=new THREE.Group();
@@ -2585,7 +2685,7 @@ function drawCrossing(i){const c=grid[i];if(!c)return;if(c.railFx){scene.remove(
     const yaw=new THREE.Group();yaw.position.set(px,0.22,pz);yaw.rotation.y=Math.atan2(rz*s2,-rx*s2);const arm=new THREE.Group();
     arm.add(box(0.44,0.022,0.022,barM.red,0.22,-0.011,0));for(const u of[0.1,0.3])arm.add(box(0.06,0.024,0.024,barM.white,u,-0.012,0));yaw.add(arm);g.add(yaw);c.bars.push(arm)}
   const a0=c.barA==null?1.35:c.barA;for(const b of c.bars)b.rotation.z=a0;
-  g.position.set(cx(i),0,cz(i));scene.add(g);c.railFx=g}
+  g.position.set(cx(i),0,cz(i));fxOnRoad(g,i);scene.add(g);c.railFx=g}
 function railRefreshNear(i){const set=new Set([i,...nbrs(i)]);for(const t of tilesOf(mainOf(i)))for(const j of nbrs(t))set.add(j);for(const j of set){const g=grid[j];if(!g)continue;if(g.t==='rail')refreshBuilding(j);else if(g.rail)drawCrossing(j)}}
 function railRefreshAll(){for(let j=0;j<N*N;j++){const g=grid[j];if(!g)continue;if(g.t==='rail')refreshBuilding(j);else if(g.rail)drawCrossing(j)}}
 /* a station's platform track is part of the line: trains can run through it from one end to the other */
@@ -2626,7 +2726,8 @@ function spawnTrain(st,kind,path){const p=path||railPath(st);if(!p||!p.length)re
   for(const q of parts)g.add(q);scene.add(g);const tr={st,kind,p,u:path?-0.6:0,phase:path?'thru':'in',wait:0,g,parts};trains.push(tr);placeTrain(tr);return tr}
 /* along the track a train goes from tile edge to tile edge: straight across, or a quarter circle where the track turns */
 const tDir=(a,b)=>[Math.sign(cx(b)-cx(a)),Math.sign(cz(b)-cz(a))];
-function trainPos(tr,u){const p=tr.p,L=p.length;const yOf=j=>water[j]?0.06:grid[j]&&grid[j].t==='part'||grid[j]&&isStationT(grid[j].t)?0.03:0.01;
+function trainPos(tr,u){const P=trainPos0(tr,u);P.y+=gY(P.x,P.z);return P}
+function trainPos0(tr,u){const p=tr.p,L=p.length;const yOf=j=>water[j]?0.06:grid[j]&&grid[j].t==='part'||grid[j]&&isStationT(grid[j].t)?0.03:0.01;
   if(L<2)return{x:cx(p[0]),z:cz(p[0]),y:yOf(p[0]),rot:null};
   if(u<0){const d=tDir(p[0],p[1]);return{x:cx(p[0])+d[0]*u,z:cz(p[0])+d[1]*u,y:yOf(p[0]),rot:Math.atan2(d[0],d[1])}}
   if(u>L-1){const d=tDir(p[L-2],p[L-1]),t=u-(L-1);return{x:cx(p[L-1])+d[0]*t,z:cz(p[L-1])+d[1]*t,y:yOf(p[L-1]),rot:Math.atan2(d[0],d[1])}}
@@ -2707,7 +2808,7 @@ const LINE_COL=['#e0402b','#2f6fe0','#2f9e5a','#e0a91c','#9a5bd6','#e07b1a','#1f
 let tLines=[],lineSeq=0,lineEdit=null,lineDraft=null,transVer=0;const paxQ=new Map();
 const lineOf=id=>tLines.find(L=>L.id===id)||null,isLineT=t=>t==='busLine'||t==='railLine',escA=s=>esc(s).replace(/"/g,'&quot;');
 /* where a stop may stand: an ordinary street, straight, with no junction, zebra crossing, level crossing or bend */
-function stopWhy(i){const c=grid[i];if(!c||!DRIVE[c.t])return'Przystanek stawia się na ulicy.';if(!STREET[c.t])return'Przystanek stawia się na zwykłej ulicy – nie na rondzie, autostradzie ani moście.';
+function stopWhy(i){const c=grid[i];if(!c||!DRIVE[c.t])return'Przystanek stawia się na ulicy.';if(rampOf(i))return'Przystanek stawia się na płaskim odcinku, nie na podjeździe.';if(!STREET[c.t])return'Przystanek stawia się na zwykłej ulicy – nie na rondzie, autostradzie ani moście.';
   if(c.edge)return'Nie na drodze wjazdowej do miasta.';if(c.rail)return'Nie na przejeździe kolejowym.';if(c.cross)return'Nie na przejściu dla pieszych.';
   if(roadNbrs(i).length>2)return'Nie na skrzyżowaniu – postaw go na prostym odcinku ulicy.';if(!crossOK(i))return'Tylko na prostym odcinku – nie na zakręcie ani na końcu ulicy.';return null}
 const stopAxOf=i=>{const c=grid[i];if(c&&c.busAx!=null)return c.busAx;const n=roadNbrs(i);return n.length?axOf(i,n[0]):0};
@@ -2725,7 +2826,7 @@ function stopModel(ax,s,ppl){if(!stopM.blue){stopM.blue=M('#2f8fd8');stopM.glass
   const pp=[];if(ppl)for(let k=0;k<5;k++){const p=new THREE.Group();p.add(box(0.04,0.075,0.032,WALKC[(k*3+1)%WALKC.length],0,y0,0));p.add(box(0.032,0.032,0.032,SKIN[k%SKIN.length],0,y0+0.075,0));
     p.position.set([-0.32,-0.38,0.37,-0.44,0.43][k],0,0.455);p.rotation.y=Math.PI+(k%2?0.4:-0.3);p.visible=false;q.add(p);pp.push(p)}
   if(s<0)q.rotation.y=Math.PI;g.add(q);if(ax===1)g.rotation.y=Math.PI/2;g.userData.ppl=pp;return g}
-function drawStop(i){const c=grid[i];if(!c)return;if(c.busFx){scene.remove(c.busFx);c.busFx=null}if(!c.bus)return;const g=stopModel(stopAxOf(i),c.bus,true);g.position.set(cx(i),0,cz(i));scene.add(g);c.busFx=g;stopVis(i)}
+function drawStop(i){const c=grid[i];if(!c)return;if(c.busFx){scene.remove(c.busFx);c.busFx=null}if(!c.bus)return;const g=stopModel(stopAxOf(i),c.bus,true);g.position.set(cx(i),0,cz(i));fxOnRoad(g,i);scene.add(g);c.busFx=g;stopVis(i)}
 function stopVis(i){const c=grid[i];if(!c||!c.busFx)return;const n=(paxQ.get(i)||[]).length;c.busFx.userData.ppl.forEach((p,k)=>p.visible=k<Math.min(5,Math.ceil(n/3)))}
 let stopGhost=null,stopGhostK='';
 function showStopGhost(i){const ok=i>=0&&(!stopWhy(i)||!!(grid[i]&&grid[i].bus));if(!ok||tool!=='busStop'){if(stopGhost)stopGhost.visible=false;return ok}const ax=stopAxOf(i),s=sideAt(i,ax),k=ax+':'+s;
@@ -3049,7 +3150,10 @@ function makeEntries(){if(grid.some(c=>c&&c.edge&&DRIVE[c.t]))return makeRailEnt
   for(const side of[0,1])for(let tries=0;tries<80;tries++){const p=Math.round(N/2+(Math.random()*2-1)*Math.min(26,4+tries/2));if(p<2||p>N-3)continue;
     const tiles=[];for(let d=0;d<ENTRY_LEN;d++){const a=side?N-1-d:d;tiles.push(vert?idx(p,a):idx(a,p))}
     if(tiles.some(t=>grid[t]||water[t]))continue;
-    tiles.forEach((t,k)=>{addCell(t,'road',false);grid[t].edge=true;if(k===0)grid[t].edgeOut=true;rebuildRoad(t)});break}makeRailEntries()}
+    /* 7.0: flat ground preferred; later tries go through the hills: high ground becomes a tunnel, low bumps are levelled */
+    if(tries<45&&tiles.some(t=>hgt[t]!==H_LAND))continue;
+    for(const t of tiles)if(hgt[t]!==H_LAND&&hgt[t]<H_LAND+3){hgt[t]=H_LAND;landDirty=true}
+    tiles.forEach((t,k)=>{const tun=hgt[t]>=H_LAND+3;if(tun)deckNext=H_LAND;addCell(t,tun?'tunnel':'road',false);grid[t].edge=true;if(k===0)grid[t].edgeOut=true;rebuildRoad(t)});break}makeRailEntries()}
 /* entry tracks at two other map edges: a station connected to them gets trains with tourists */
 function makeRailEntries(){if(grid.some(c=>c&&c.edge&&c.t==='rail'))return;const roadSides=new Set();for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!c.edge||!DRIVE[c.t])continue;const x=i%N,z=(i/N)|0;roadSides.add(z===0?0:z===N-1?1:x===0?2:x===N-1?3:-1)}
   let sides=[0,1,2,3].filter(k=>!roadSides.has(k));if(sides.length<2)sides=[0,1,2,3];sides=sides.sort(()=>Math.random()-0.5).slice(0,2);
@@ -3057,6 +3161,7 @@ function makeRailEntries(){if(grid.some(c=>c&&c.edge&&c.t==='rail'))return;const
   for(const side of sides)for(let tries=0;tries<80;tries++){const p=Math.round(N/2+(Math.random()*2-1)*Math.min(26,4+tries/2));if(p<2||p>N-3)continue;
     const tiles=[];for(let d=0;d<RAIL_LEN;d++){const a=side===1||side===3?N-1-d:d;tiles.push(side<2?idx(p,a):idx(a,p))}
     if(tiles.some(t=>grid[t]||water[t]||[...nbrs(t)].some(j=>grid[j]&&grid[j].edge)))continue;
+    if(tries<60&&tiles.some(t=>hgt[t]!==H_LAND))continue;for(const t of tiles)if(hgt[t]!==H_LAND){hgt[t]=H_LAND;landDirty=true}
     for(const t of tiles){addCell(t,'rail',false);grid[t].edge=true}break}}
 function spawnCommuter(h){const e=entryOf(h);if(e<0)return;const b=bfs(e);
   if(Math.random()<0.15){const l=candidates(b,SERVICES).filter(o=>entR(grid[o.i])>0);const t=pickWeighted(l);if(t){cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3});return}}
@@ -3324,7 +3429,7 @@ function links(a){const t=grid[a].t;
   const o=(isTrafo(a)&&grid[a].up?inRange(a,2,j=>conductive(j)&&!isHV(j)):nbrs8(a).filter(j=>conductive(j)&&!isHV(j)&&(orth(a,j)||isTrafo(a)||isTrafo(j))));
   if(!isTrafo(a))for(const j of inRange(a,2,j=>isTrafo(j)&&grid[j].up&&!o.includes(j)))o.push(j);
   if(t==='transformer')for(const j of inRange(a,HV_MAX,j=>isHV(j)&&hvReach(j,a)))o.push(j);return o}
-const topY=i=>{const t=grid[i].t;return t==='hvpole'?(grid[i].up?1.62:1.32):t==='transformer'?0.5:0.62};
+const topY=i=>{const t=grid[i].t;return(t==='hvpole'?(grid[i].up?1.62:1.32):t==='transformer'?0.5:0.62)+tYi(i)};
 function rebuildHV(){for(const m of hvWires.children)m.geometry.dispose();hvWires.clear();
   for(let i=0;i<N*N;i++){if(!isHV(i))continue;const A=new THREE.Vector3(cx(i),topY(i),cz(i));
     for(const j of inRange(i,HV_MAX,j=>(isHV(j)&&j>i&&(hvReach(i,j)||hvReach(j,i)))||((isTrafo(j)||(grid[j]&&(grid[j].t==='coal'||grid[j].t==='biomass')))&&hvReach(i,j)))){const B=new THREE.Vector3(cx(j),topY(j),cz(j));hvWires.add(wire(A,B,0.06*A.distanceTo(B)))}}
@@ -3332,12 +3437,12 @@ function rebuildHV(){for(const m of hvWires.children)m.geometry.dispose();hvWire
       let tiles=tilesOf(i);if(c.t==='hydro'){const cl=[i];done.add(i);for(let h=0;h<cl.length;h++)for(const j of nbrs(cl[h]))if(grid[j]&&grid[j].t==='hydro'&&!done.has(j)){done.add(j);cl.push(j)}tiles=cl.sort((a,b)=>a-b)}
       let hit=null;for(const t of tiles){for(const j of nbrs8(t))if(isTrafo(j)){hit=[t,j];break}if(hit)break}
       if(!hit)for(const t of tiles){const r=inRange(t,2,j=>isTrafo(j)&&grid[j].up);if(r.length){hit=[t,r[0]];break}}if(!hit)continue;
-      const[t,j]=hit,A=new THREE.Vector3(cx(j),0.52,cz(j)),B=new THREE.Vector3(cx(t)+(cx(j)-cx(t))*0.3,GEN_W[c.t],cz(t)+(cz(j)-cz(t))*0.3);hvWires.add(wire(A,B,0.05))}}
+      const[t,j]=hit,A=new THREE.Vector3(cx(j),0.52+tYi(j),cz(j)),B=new THREE.Vector3(cx(t)+(cx(j)-cx(t))*0.3,GEN_W[c.t]+tYi(t),cz(t)+(cz(j)-cz(t))*0.3);hvWires.add(wire(A,B,0.05))}}
   /* an upgraded transformer reaches poles within 5×5: one line to the nearest pole of every pole group in reach */
   for(let i=0;i<N*N;i++){if(!isTrafo(i)||!grid[i].up)continue;const near=inRange(i,2,j=>isLV(j)),inNear=new Set(near),seen=new Set();
     const flood=j0=>{const q=[j0];seen.add(j0);for(let h=0;h<q.length;h++)for(const k of nbrs(q[h]))if(inNear.has(k)&&!seen.has(k)){seen.add(k);q.push(k)}};
     const tp=trafoPole(i);if(tp>=0)flood(tp);near.sort((a,b)=>cheb(a,i)-cheb(b,i)||a-b);
-    for(const j of near){if(seen.has(j))continue;flood(j);const o=poleOff(j);hvWires.add(wire(new THREE.Vector3(cx(i),0.52,cz(i)),new THREE.Vector3(cx(j)+o,0.85,cz(j)+o),0.08))}}
+    for(const j of near){if(seen.has(j))continue;flood(j);const o=poleOff(j);hvWires.add(wire(new THREE.Vector3(cx(i),0.52+tYi(i),cz(i)),new THREE.Vector3(cx(j)+o,0.85+(grid[j]&&grid[j].group?grid[j].group.position.y:tYi(j)),cz(j)+o),0.08))}}
   topoSig=powerSig();topoDirty=false}
 let topoSig='';const powerSig=()=>{let a=0,b=0;for(let i=0;i<N*N;i++){if(isLV(i))a+=i+1;else if(isTrafo(i))b+=(i+1)*(grid[i].up?2:1)}return a+'|'+b};
 /* 6.1.12: at night everything runs as by day; only homes draw less power (80%), and solar panels give nothing */
@@ -3354,7 +3459,7 @@ function computePower(dt){if(topoDirty||powerSig()!==topoSig)rebuildHV();compute
     if(k<0&&c.t!=='wind'){const h=inRange(i,HV_MAX,j=>isHV(j)&&hvReach(j,i));if(h.length)k=comp[h[0]]}c.net=k;gens.push(i)}
   {const seen=new Set();for(const i of gens){if(grid[i].t!=='hydro'||seen.has(i))continue;const cl=[i];seen.add(i);for(let h=0;h<cl.length;h++)for(const j of nbrs(cl[h]))if(grid[j]&&grid[j].t==='hydro'&&!grid[j].off&&!seen.has(j)){seen.add(j);cl.push(j)}
     const k=cl.map(j=>grid[j].net).find(v=>v>=0);for(const j of cl){grid[j].net=k===undefined?-1:k;grid[j].damN=cl.length}}}
-  for(const i of gens){const c=grid[i];if(c.t==='wind'&&c.net>=0){c.wake=nbrs8(i).filter(j=>grid[j]&&grid[j].t==='wind').length;const mwv=Math.max(0,WIND_MW+(c.up2?3:0)-c.wake)+(c.up?SOLAR_MW*dayF:0);c.windMW=mwv;sup[c.net]+=mwv;cap+=mwv}}
+  for(const i of gens){const c=grid[i];if(c.t==='wind'&&c.net>=0){c.wake=nbrs8(i).filter(j=>grid[j]&&grid[j].t==='wind').length;const mwv=Math.max(0,windMW(i)+(c.up2?3:0)-c.wake)+(c.up?SOLAR_MW*dayF:0);c.windMW=mwv;sup[c.net]+=mwv;cap+=mwv}}
   for(const i of gens){const c=grid[i];c.mw=0;if(c.net<0)continue;if(c.t==='hydro'){c.mw=water[i]?(damSealed[i]?Math.round(12*Math.pow(DAM_EFF,damRank[i])*10)/10:0):nearWater(i)>=0?15:0;sup[c.net]+=c.mw;cap+=c.mw}
     if(c.t==='hydrogen'){if(c.model)c.model.userData.off=!(c.water==='ok'||c.water==='dirty');c.mw=(c.water==='ok'?60:c.water==='dirty'?30:0)+(c.up&&c.water==='ok'?30:c.up&&c.water==='dirty'?15:0);sup[c.net]+=c.mw;cap+=c.mw}}
   /* fuel plants: coal burns mined coal, the biomass plant burns wood; both start only when the rest of the network falls short */
@@ -3428,20 +3533,22 @@ let taps=[];const TAPG={x:new THREE.BoxGeometry(1,0.04,0.05),z:new THREE.BoxGeom
 function buildTaps(){taps=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||DRIVE[c.t]||!WATER[c.t]||!(c.wnet>=0))continue;
     for(const t of tilesOf(i))for(const j of nbrs(t))if(pipe[j]&&grid[j]&&DRIVE[grid[j].t]){taps.push([i,t,j]);break}}}
 function drawTaps(){const L=0.75;for(const[i,t,j]of taps){const c=grid[i],m=PM[c.water==='ok'?'ok':c.water==='dirty'?'dirty':'none'],dx=Math.sign(cx(t)-cx(j)),dz=Math.sign(cz(t)-cz(j));
-    const a=new THREE.Mesh(dx?TAPG.x:TAPG.z,m);a.scale.set(dx?L:1,1,dz?L:1);a.position.set(cx(j)+dx*L/2,0.05,cz(j)+dz*L/2);a.renderOrder=5;pipeG.add(a);
-    const e=new THREE.Mesh(TAPG.end,m);e.position.set(cx(j)+dx*L,0.06,cz(j)+dz*L);e.renderOrder=5;pipeG.add(e)}}
-let xray=false;const pipeG=new THREE.Group();pipeG.visible=false;scene.add(pipeG);
+    const a=new THREE.Mesh(dx?TAPG.x:TAPG.z,m);a.scale.set(dx?L:1,1,dz?L:1);a.position.set(cx(j)+dx*L/2,pipeY(j)-0.01,cz(j)+dz*L/2);a.renderOrder=5;pipeG.add(a);
+    const e=new THREE.Mesh(TAPG.end,m);e.position.set(cx(j)+dx*L,pipeY(j),cz(j)+dz*L);e.renderOrder=5;pipeG.add(e)}}
+var underOn=false;let xray=false;const pipeG=new THREE.Group();pipeG.visible=false;scene.add(pipeG);
 const PG={node:new THREE.BoxGeometry(0.2,0.08,0.2),ax:new THREE.BoxGeometry(1,0.06,0.09),az:new THREE.BoxGeometry(0.09,0.06,1)};for(const k in PG)PG[k].userData.keep=true;
 const PM={ok:new THREE.MeshBasicMaterial({color:'#3aa0f0'}),dirty:new THREE.MeshBasicMaterial({color:'#8a7a4a'}),none:new THREE.MeshBasicMaterial({color:'#9aa3a8'})};
+const pipeY=i=>{const c=grid[i];return(c&&(c.t==='tunnel'||c.t==='bridge')?lvY(rh(i)):water[i]?0:Math.min(...[0,1,2,3].map(k=>cornH[i*4+k])))+0.06};
 function buildPipes(comp,S){pipeG.clear();const st=k=>k<0?'none':S[k].clean>0.01?'ok':S[k].dirty>0.01?'dirty':'none';
-  for(let i=0;i<N*N;i++){if(!pipe[i])continue;const m=PM[st(comp[i])],x=i%N,z=(i/N)|0;const n=new THREE.Mesh(PG.node,m);n.position.set(cx(i),0.06,cz(i));n.renderOrder=5;pipeG.add(n);
-    if(x<N-1&&pipe[i+1]){const a=new THREE.Mesh(PG.ax,m);a.position.set(cx(i)+0.5,0.06,cz(i));a.renderOrder=5;pipeG.add(a)}
-    if(z<N-1&&pipe[i+N]){const a=new THREE.Mesh(PG.az,m);a.position.set(cx(i),0.06,cz(i)+0.5);a.renderOrder=5;pipeG.add(a)}}drawTaps()}
+  for(let i=0;i<N*N;i++){if(!pipe[i])continue;const m=PM[st(comp[i])],x=i%N,z=(i/N)|0;const n=new THREE.Mesh(PG.node,m),py=pipeY(i);n.position.set(cx(i),py,cz(i));n.renderOrder=5;pipeG.add(n);
+    if(x<N-1&&pipe[i+1]){const a=new THREE.Mesh(PG.ax,m);a.position.set(cx(i)+0.5,(py+pipeY(i+1))/2,cz(i));a.renderOrder=5;pipeG.add(a)}
+    if(z<N-1&&pipe[i+N]){const a=new THREE.Mesh(PG.az,m);a.position.set(cx(i),(py+pipeY(i+N))/2,cz(i)+0.5);a.renderOrder=5;pipeG.add(a)}}drawTaps()}
 function xrayMats(root,on,set){root.traverse(o=>{if(!o.material||o.isLine)return;for(const m of Array.isArray(o.material)?o.material:[o.material])set.add(m)})}
 function setXray(on){if(on===xray)return;xray=on;const set=new Set();for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.group)xrayMats(c.group,on,set)}
   xrayMats(bridgeDeco,on,set);for(const m of[dTr,dPi,dBl,gBl,gSt,gSm,gFh])set.add(m.material);
   for(const m of set){if(on){if(!m.userData.xo)m.userData.xo={t:m.transparent,o:m.opacity,d:m.depthWrite};m.transparent=true;m.opacity=Math.min(m.userData.xo.o,0.22);m.depthWrite=false}
     else if(m.userData.xo){m.transparent=m.userData.xo.t;m.opacity=m.userData.xo.o;m.depthWrite=m.userData.xo.d;delete m.userData.xo}m.needsUpdate=true}
+  for(const m of[ground.material,banks.material]){m.transparent=on;m.opacity=on?0.3:1;m.depthWrite=!on;m.needsUpdate=true}
   pipeG.visible=on;if(on)computeWater()}
 function xrayNew(g){if(!xray)return;const set=new Set();xrayMats(g,true,set);for(const m of set){if(!m.userData.xo)m.userData.xo={t:m.transparent,o:m.opacity,d:m.depthWrite};m.transparent=true;m.opacity=Math.min(m.userData.xo.o,0.22);m.depthWrite=false;m.needsUpdate=true}}
 
@@ -3510,8 +3617,11 @@ function pan(dx,dy){focus=null;if(tut&&tut.on&&Math.abs(dx)+Math.abs(dy)>2)tut.m
 
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3();
 function tileAt(px,py){const r=renderer.domElement.getBoundingClientRect();ndc.set(((px-r.left)/r.width)*2-1,-((py-r.top)/r.height)*2+1);
-  ray.setFromCamera(ndc,camera);if(!ray.ray.intersectPlane(plane,hit))return -1;
-  const x=Math.floor(hit.x+HALF),z=Math.floor(hit.z+HALF);if(x<0||z<0||x>=N||z>=N)return -1;return idx(x,z)}
+  ray.setFromCamera(ndc,camera);const o=ray.ray.origin,d=ray.ray.direction;if(d.y>-1e-4)return -1;
+  /* 7.0: march down the ray from just above the highest mountain until it dips under the ground of the tile below it */
+  const yT=lvY(H_MAX)+0.15,yB=WATER_Y-0.05,t0=Math.max(0,(o.y-yT)/-d.y),t1=(o.y-yB)/-d.y,step=0.04/Math.max(0.15,Math.hypot(d.x,d.z));let last=-1;
+  for(let t=t0;t<=t1;t+=step){const px=o.x+d.x*t,py=o.y+d.y*t,pz=o.z+d.z*t,x=Math.floor(px+HALF),z=Math.floor(pz+HALF);if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);last=i;if(py<=surfY(i))return i}
+  hit.set(o.x+d.x*t1,yB,o.z+d.z*t1);const x=Math.floor(hit.x+HALF),z=Math.floor(hit.z+HALF);if(x<0||z<0||x>=N||z>=N)return last;return idx(x,z)}
 /* tapping a building picks the building that is actually under the finger (its walls and roof too), not the ground tile behind it */
 const shown=o=>{for(;o;o=o.parent)if(!o.visible)return false;return true};
 function pickAt(px,py){const g=tileAt(px,py);const gs=[],own=new Map();
@@ -3542,7 +3652,7 @@ el.addEventListener('pointermove',e=>{
   if(mode==='pending'&&Math.hypot(p.x-p.sx,p.y-p.sy)>7){
     if(p.btn===2||p.shift)mode='rotate';else if(p.btn===1)mode='pan';
     else if(((buildMode==='line'&&MODE_OK(tool))||roadMode())&&moveSrc<0){if(lineConf)cancelLine(true);mode='line';lineA=tileAt(p.sx,p.sy);lineB=lineA;showLine()}
-    else if(STREET[tool]||tool==='crosswalk'||tool==='rail'||tool==='highway'||tool==='bridge'||tool==='hydro'||tool==='fill'||tool==='pole'||tool==='poleDel'||tool==='pipe'||tool==='pipeDel'||tool==='bulldoze'){mode='paint';lastPaint=-1;paintAt(p.sx,p.sy)}else mode='pan'}
+    else if(STREET[tool]||tool==='crosswalk'||tool==='rail'||tool==='highway'||tool==='bridge'||tool==='tunnel'||tool==='tUp'||tool==='tDown'||tool==='tLevel'||tool==='hydro'||tool==='fill'||tool==='pole'||tool==='poleDel'||tool==='pipe'||tool==='pipeDel'||tool==='bulldoze'){mode='paint';lastPaint=-1;paintAt(p.sx,p.sy)}else mode='pan'}
   if(mode==='rotate'){cam.theta-=dx*0.008;cam.phi-=dy*0.006;if(tut&&tut.on)tut.turned=(tut.turned||0)+Math.abs(dx)}
   else if(mode==='pan')pan(dx,dy);
   else if(mode==='paint')paintAt(e.clientX,e.clientY);
@@ -3603,21 +3713,68 @@ let paintPrev=-1;function paintAt(x,y){const i=tileAt(x,y);if(i<0||i===lastPaint
 function hover(x,y){if(lineConf)return;if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{hover(x,y)}finally{tool=sv}return}const i=tileAt(x,y);if(!areaT)area.visible=false;hoverI=i;showGhost1(i);
   if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,grid[i].t==='rail'?'Tory wjazdowe · połącz z nimi dworzec, a pociągi przywiozą turystów':'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
   const ar=toolRange(tool);if(ar)showArea(i,ar,false,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool));
-  hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;
+  hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;hl.position.y=surfY(i)+0.06;
   const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='busStop')ok=showStopGhost(i)&&(!!grid[i].bus||money>=DEF.busStop.cost);else if(isLineT(tool))ok=lineStopAt(i,tool==='busLine')>=0;else if(tool==='crosswalk')ok=crossOK(i)&&!grid[i].cross&&!grid[i].bus&&money>=DEF.crosswalk.cost;else if(tool==='crossDel')ok=!!grid[i]&&(!!grid[i].cross||!!grid[i].bus);else if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c?!railNearWhy(i):(!!STREET[c.t]&&!c.rail&&!c.edge&&!crossWhy(i)))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
   else if(STREET[tool]||tool==='roundabout'){const c=grid[i];ok=c&&c.t==='rail'&&STREET[tool]?!water[i]&&!c.edge&&money>=DEF[tool].cost:c?(STREET[c.t]||c.t==='roundabout')&&c.t!==tool&&money>=DEF[tool].cost-DEF[c.t].cost:!water[i]&&money>=DEF[tool].cost&&tool!=='roundabout'}
   else if(tool==='bulldoze')ok=!!grid[i];else if(tool==='poleline')ok=!!grid[i]&&!!STREET[grid[i].t]&&money>=DEF.pole.cost;else if(tool==='pole')ok=money>=DEF.pole.cost&&((!grid[i]&&!water[i])||(!!grid[i]&&!!POLEABLE[grid[i].t]&&!grid[i].pole));else if(tool==='poleDel')ok=isLV(i);else if(FP(tool)){const x=i%N,z=(i/N)|0,[fw,fh]=FP(tool);ok=x<=N-fw&&z<=N-fh&&money>=DEF[tool].cost;if(ok)for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++){const j=idx(x+dx,z+dz);if(grid[j]||water[j])ok=false}}
   else if(tool==='fill')ok=fillOK(i)&&money>=DEF.fill.cost;else ok=!grid[i]&&money>=DEF[tool].cost&&(tool==='pitS'?!water[i]&&!!dep[i]:tool==='bridge'?!!water[i]&&straightOK(i):tool==='hydro'?!!water[i]:!water[i]);
   hl.material.color.set(tool==='bulldoze'?(ok?'#e0402b':'#ffffff'):(ok?'#ffffff':'#e0402b'))}
 
+/* ---------- 7.0: water with no way out rises ----------
+   Water and flooded land form connected bodies. A body reaching the map edge drains there and keeps (or goes back to) the level of the water at the edge.
+   A body cut off from the edge rises half a step every FLOOD_RISE game minutes and floods the dry land beside it that it overtops, one ring at a time.
+   Flooded tiles stop the buildings and roads on them until the water goes down. */
+const FLOOD_RISE=30;let floodCheck=0;const riseAcc=new Map();let floodWarned=false;
+const fldMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,0.02,1).translate(0,-0.01,0),new THREE.MeshPhongMaterial({color:'#4a93c6',transparent:true,opacity:0.82,shininess:80,specular:'#bfe3f7'}),N*N);fldMesh.count=0;fldMesh.frustumCulled=false;fldMesh.receiveShadow=true;scene.add(fldMesh);
+function drawFlood(){let n=0;for(let i=0;i<N*N;i++){if(!fld[i])continue;dObj.position.set(cx(i),lvY(fld[i]-1)+0.002,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();fldMesh.setMatrixAt(n++,dObj.matrix)}fldMesh.count=n;fldMesh.instanceMatrix.needsUpdate=true}
+function terrainTick(dt){floodCheck-=dt;if(floodCheck>0)return;const step=2-floodCheck;floodCheck=2;
+  const comp=new Int32Array(N*N).fill(-1),wet=i=>water[i]||fld[i];let ch=false,newFlood=false,landCh=false;
+  for(let s0=0;s0<N*N;s0++){if(!wet(s0)||comp[s0]>=0)continue;const q=[s0];comp[s0]=s0;for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(wet(j)&&comp[j]<0){comp[j]=s0;q.push(j)}
+    let L=0,edgeW=99,edge=false;for(const i of q){const x=i%N,z=(i/N)|0,b=x===0||z===0||x===N-1||z===N-1;const l=water[i]?wlv[i]:fld[i]-1;L=Math.max(L,l);if(b){edge=true;if(water[i])edgeW=Math.min(edgeW,wlv[i])}}
+    const setL=nl=>{for(const i of q){if(water[i]){const v=Math.max(hgt[i],nl);if(wlv[i]!==v){wlv[i]=v;ch=true}}else if(hgt[i]>=nl){fld[i]=0;ch=true;landCh=true}else if(fld[i]!==nl+1){fld[i]=nl+1;ch=true}}};
+    if(edge){riseAcc.delete(s0);const target=edgeW<99?edgeW:L;if(L>target)setL(L-1);continue}
+    /* trapped: rise, then spill over the lowest dry land beside the body */
+    let acc=(riseAcc.get(s0)||0)+step;if(acc>=FLOOD_RISE&&L<H_MAX){acc=0;L++;setL(L);if(!floodWarned){floodWarned=true;const w=q.find(i=>water[i]);setHint('Woda bez ujścia podnosi się! Gdy przeleje się przez brzeg, zaleje teren. Otwórz jej drogę za mapę albo usyp wał.',true,true);hintEl.hidden=false;if(w>=0)float(w,'woda się podnosi','warn')}}riseAcc.set(s0,acc);
+    for(const i of q)for(const j of nbrs(i))if(!water[j]&&!fld[j]&&hgt[j]<=L&&comp[j]<0){fld[j]=L+1;comp[j]=s0;ch=true;newFlood=true;landCh=true}}
+  if(!ch)return;if(newFlood){setHint('Powódź! Woda zalała teren: budynki i drogi pod wodą nie działają, dopóki nie opadnie.',true,true);hintEl.hidden=false}
+  applyWaterLevels();drawFlood();if(landCh){bfsCache.clear();roadVer++;powerDirty=true;envDirty=true}save()}
+/* ---------- 7.0: slopes, terrain tools and tunnels ---------- */
+let lastSlopeWhy='';
+/* a road (track) tile is fine when it runs straight or stands on flat ground: junctions and bends need all their joined neighbours at the same height */
+function slopeBad(k){const n=netK(k);if(!n)return null;const x=k%N,z=(k/N)|0,h=rh(k);let ax=0,az=0,dh=false,steep=false;
+  for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(netK(j)!==n)continue;const d=Math.abs(rh(j)-h);if(d>1)continue;if(dx)ax++;else az++;if(d)dh=true}
+  if(dh&&(ax&&az||grid[k].t==='roundabout'))return'Na zboczu droga biegnie tylko prosto: skrzyżowania i zakręty wymagają płaskiego terenu. Wyrównaj teren.';return null}
+function slopeWhy(i,t){if(fld[i])return'To pole jest zalane.';const was=grid[i];if(was&&was.t!=='rail')return null;grid[i]={t,th:t==='bridge'?deckH(i,'bridge'):undefined};deckNext=null;let why=null;
+  try{why=slopeBad(i);if(!why)for(const j of nbrs(i))if(netK(j)===netK(i)&&(why=slopeBad(j)))break;
+    if(!why&&paintPrev>=0&&j2adj(paintPrev,i)&&netK(paintPrev)===netK(i)&&!linkH(i,paintPrev))why='Za stromo: droga pokona najwyżej pół poziomu na jednym polu. Wyrównaj teren albo poprowadź tunel.'}finally{grid[i]=was}return why}
+/* raise, lower, level */
+let levelH=null;
+function terraform(i,painting){const c=grid[i];
+  if(tool==='tLevel'&&levelH==null){if(water[i]){if(!painting)setHint('Wysokość wzorcową wskaż na lądzie.',true,true);return}levelH=hgt[i];setHint(`<b>Wyrównaj teren</b> · wysokość wzorcowa: poziom ${mw(levelH/2)}. Teraz stuknij lub przeciągnij po polach do wyrównania (stuknij narzędzie ponownie, by wybrać inną wysokość).`,false,true);hintEl.hidden=false;if(painting)lastPaint=i;return}
+  if(water[i]){if(tool==='tUp'){fillRiver(i,painting);return}if(!painting)setHint('Pole wody: zasyp je albo podnieś od brzegu.',true,true);return}
+  if(c&&!(c.t==='lpole')){if(!painting)setHint('Na zajętym polu nie zmienisz terenu: najpierw je wyburz.',true,true);return}
+  if(c&&c.t==='lpole'){if(!painting)setHint('Najpierw usuń słup.',true,true);return}
+  const h0=hgt[i],h1=tool==='tUp'?Math.min(H_MAX,h0+1):tool==='tDown'?Math.max(0,h0-1):levelH;if(h1===h0)return;
+  const cost=DEF[tool].cost*Math.abs(h1-h0);if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢.`,true,true);return}
+  spend(cost);setH(i,h1);save()}
+function setH(i,h){hgt[i]=h;fld[i]=0;landDirty=true;groundSig=-1;envDirty=true;
+  /* dug down to the water beside it: the tile becomes water */
+  const w=nbrs(i).filter(j=>water[j]);if(w.length&&h<=Math.max(...w.map(j=>wlv[j]))){water[i]=1;wKnown[i]=1;wlv[i]=Math.max(h,...w.map(j=>wlv[j]));clearDeco(i);applyWater()}
+  for(const j of[i,...nbrs(i)])if(grid[j]){if(DRIVE[grid[j].t])rebuildRoad(j);else refreshBuilding(j)}floodCheck=0;groundDeco(i,!grid[i]&&!water[i]);redecoY(i)}
+/* a tree or rocks standing on a tile move with its height */
+function redecoY(i){if(deco.has(i)){clearDeco(i);setDeco(i)}}
+/* tunnels: from the end of a road at the foot of a hill, straight on at the road's height, under enough ground */
+function placeTunnel(i,painting){const c=grid[i];if(c){if(!painting)setHint('To pole jest już zajęte.',true,true);return}if(water[i]){if(!painting)setHint('Pod wodą tunelu nie zbudujesz: postaw most.',true,true);return}
+  let th=null;for(const j of nbrs(i)){const g=grid[j];if(g&&g.t==='tunnel'){th=g.th;break}}if(th==null)for(const j of nbrs(i)){const g=grid[j];if(g&&DRIVE[g.t]&&g.t!=='bridge'){th=rh(j);break}}
+  if(th==null){if(!painting)setHint('Tunel zaczyna się przy końcu drogi, u stóp wzniesienia.',true,true);return}
+  if(hgt[i]<th+3){if(!painting)setHint('Tu jest za nisko na tunel: nad nim musi być co najmniej półtora poziomu terenu. Postaw zwykłą drogę.',true,true);return}
+  if(money<DEF.tunnel.cost){setHint(`Brakuje ${fmt(DEF.tunnel.cost-money)} T¢ na tunel.`,true,true);return}
+  spend(DEF.tunnel.cost);deckNext=th;addCell(i,'tunnel',false);clearDeco(i);save()}
 /* filling a river tile: only at the bank, with water on two sides, and never cutting the river in two */
-function fillOK(i){if(i<0||!water[i]||grid[i])return false;let w=0,land=0;for(const j of nbrs(i)){if(water[j])w++;else land++}if(!land||w<2)return false;
-  water[i]=0;const ws=nbrs(i).filter(j=>water[j]),seen=new Uint8Array(N*N),q=[ws[0]];seen[ws[0]]=1;
-  for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(water[j]&&!seen[j]){seen[j]=1;q.push(j)}
-  water[i]=1;return ws.every(j=>seen[j])}
-function fillRiver(i,painting){if(!fillOK(i)){if(!painting)setHint(!water[i]?'Zasypać można tylko pole rzeki przy brzegu.':grid[i]?'Tu stoi most albo tama.':'Tego pola nie zasypiesz: rzeka musi płynąć dalej. Pole musi leżeć przy brzegu i mieć wodę z co najmniej dwóch stron.',true,true);return}
+function fillOK(i){if(i<0||!water[i]||grid[i])return false;return nbrs(i).some(j=>!water[j])||nbrs(i).length<4}
+function fillRiver(i,painting){if(!fillOK(i)){if(!painting)setHint(!water[i]?'Zasypać można tylko pole wody.':grid[i]?'Tu stoi most albo tama.':'Zasypuj od brzegu: to pole nie dotyka lądu.',true,true);return}
   if(money<DEF.fill.cost){setHint(`Brakuje ${fmt(DEF.fill.cost-money)} T¢.`,true,true);return}
-  spend(DEF.fill.cost);water[i]=0;riverDirt[i]=0;riverDirty[i]=0;applyWater();powerDirty=true;bfsCache.clear();refreshAround(i);for(const j of nbrs(i))refreshAround(j);groundDeco(i,true);float(i,'zasypano','neutral');save()}
+  spend(DEF.fill.cost);water[i]=0;hgt[i]=Math.max(H_LAND,...nbrs(i).filter(j=>!water[j]).map(j=>Math.min(hgt[j],H_LAND)));wlv[i]=0;fld[i]=0;riverDirt[i]=0;riverDirty[i]=0;applyWater();landDirty=true;floodCheck=0;powerDirty=true;bfsCache.clear();refreshAround(i);for(const j of nbrs(i))refreshAround(j);groundDeco(i,true);float(i,'zasypano','neutral');save()}
 /* ---------- actions ---------- */
 let pendA=-1;const j2adj=(a,b)=>Math.abs(a-b)===N||(Math.abs(a-b)===1&&((a/N)|0)===((b/N)|0));
 const sel=new THREE.Mesh(new THREE.PlaneGeometry(0.96,0.96),new THREE.MeshBasicMaterial({color:'#f07a4f',transparent:true,opacity:.5,depthWrite:false}));
@@ -3631,7 +3788,7 @@ const fpCost=()=>moveSrc>=0?moveCost(grid[moveSrc]):DEF[tool].cost;
 const moveCost=c=>Math.floor(DEF[c.t].cost/2);
 const movable=c=>!!c&&!DRIVE[c.t]&&c.t!=='part'&&c.t!=='hydro'&&!!BUILD[c.t];
 function fpTiles(i){const[fw,fh]=curFP(),x=i%N,z=(i/N)|0;if(x>N-fw||z>N-fh)return null;const t=[];for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++)t.push(idx(x+dx,z+dz));return t}
-function fpOK(t,T){return!!t&&t.every(freeFor)&&(T!=='pitB'||(!!dep[t[0]]&&t.every(j=>dep[j]===dep[t[0]])))&&(T!=='pitS'||!!dep[t[0]])&&(!(T==='pump'||T==='outlet')||nbrs(t[0]).some(k=>water[k]))&&(T!=='pumpB'||t.every(j=>nbrs(j).some(k=>water[k])))}
+function fpOK(t,T){return!!t&&t.every(freeFor)&&t.every(j=>hgt[j]===hgt[t[0]]&&!fld[j])&&(T!=='pitB'||(!!dep[t[0]]&&t.every(j=>dep[j]===dep[t[0]])))&&(T!=='pitS'||!!dep[t[0]])&&(!(T==='pump'||T==='outlet')||nbrs(t[0]).some(k=>water[k]))&&(T!=='pumpB'||t.every(j=>nbrs(j).some(k=>water[k])))}
 /* see-through copy of the building that follows the placement preview */
 let ghost=null,ghostT='';
 function ghostFor(T){const sm=moveSrc>=0&&grid[moveSrc]&&!grid[moveSrc].tiles&&(T==='park3'||T==='incinerator'),GK=T+(sm?':1':'');if(ghost&&ghostT===GK)return ghost;
@@ -3642,11 +3799,11 @@ function ghostFor(T){const sm=moveSrc>=0&&grid[moveSrc]&&!grid[moveSrc].tiles&&(
   ghost=new THREE.Group();ghost.add(m);ghost.renderOrder=5;scene.add(ghost);ghostT=GK;return ghost}
 const faceRoad=i=>{const e=nbrs(i).find(k=>grid[k]&&DRIVE[grid[k].t]);return e!=null&&e>=0?Math.atan2(cx(e)-cx(i),cz(e)-cz(i)):0};
 function updateGhost(){if(lineConf&&pendA<0){sel.visible=false;if(ghost)ghost.visible=false;return}const F=curFP();if(pendA<0||!F){sel.visible=false;placeEl.hidden=true;if(ghost)ghost.visible=false;if(areaT>=1e9&&inspI<0){area.visible=false;areaT=0}return}const[fw,fh]=F,T=curT(),t=fpTiles(pendA);
-  const ok=fpOK(t,T),cost=fpCost(),afford=money>=cost;sel.visible=true;sel.scale.set(fw,fh,1);sel.position.set(cx(pendA)+(fw-1)/2,0.065,cz(pendA)+(fh-1)/2);
+  const ok=fpOK(t,T),cost=fpCost(),afford=money>=cost;sel.visible=true;sel.scale.set(fw,fh,1);sel.position.set(cx(pendA)+(fw-1)/2,tYi(pendA)+0.065,cz(pendA)+(fh-1)/2);
   sel.material.color.set(ok&&afford?'#3fbf5a':'#e0402b');placeEl.hidden=false;hintEl.hidden=true;
   {const ar=toolRange(T);if(ar)showArea(pendA,ar,'hold',rangeKind(T),DEF[T]&&(DEF[T].r||DEF[T].area)?null:[fw,fh])}
-  try{const g=ghostFor(T);g.visible=true;g.position.set(cx(pendA)+(fw-1)/2,0,cz(pendA)+(fh-1)/2);g.rotation.y=FP0(T)?rotIdx*Math.PI/2:faceRoad(pendA)}catch(e){}
-  document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?(T==='pitB'||T==='pitS'?'oba pola muszą leżeć na tym samym złożu':'musi stać przy rzece'):'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:`${fmt(cost)} T¢`}`;
+  try{const g=ghostFor(T);g.visible=true;g.position.set(cx(pendA)+(fw-1)/2,tYi(pendA),cz(pendA)+(fh-1)/2);g.rotation.y=FP0(T)?rotIdx*Math.PI/2:faceRoad(pendA)}catch(e){}
+  document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?(!t.every(j=>hgt[j]===hgt[t[0]])?'teren nierówny: wyrównaj go':T==='pitB'||T==='pitS'?'oba pola muszą leżeć na tym samym złożu':'musi stać przy rzece'):'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:`${fmt(cost)} T¢`}`;
   document.getElementById('pOk').disabled=!(ok&&afford)}
 function placeFP(){if(pendA<0)return;const T=curT(),t=fpTiles(pendA),cost=fpCost();if(!fpOK(t,T)||money<cost)return updateGhost();
   const a=pendA;pendA=-1;lockBuy();
@@ -3659,7 +3816,7 @@ function cancelFP(){pendA=-1;const mv=moveSrc>=0;moveSrc=-1;updateGhost();hintEl
 let rot1=null,hoverI=-1;
 function rotate1(){rot1=rot1===null?0:rot1>=3?null:rot1+1;setHint(`<b>${DEF[tool].name}</b> · obrót: ${rot1===null?'auto (frontem do ulicy)':rot1*90+'°'} (R)`,false,true);hintEl.hidden=false;if(hoverI>=0)showGhost1(hoverI)}
 function showGhost1(i){if(pendA>=0||moveSrc>=0)return;if(i<0||!BUILD[tool]||DRIVE[tool]||FP(tool)||grid[i]||water[i]){if(ghost&&pendA<0)ghost.visible=false;return}
-  try{const g=ghostFor(tool);g.visible=true;g.position.set(cx(i),0,cz(i));g.rotation.y=rot1!=null?rot1*Math.PI/2:faceRoad(i)}catch(e){}}
+  try{const g=ghostFor(tool);g.visible=true;g.position.set(cx(i),tYi(i),cz(i));g.rotation.y=rot1!=null?rot1*Math.PI/2:faceRoad(i)}catch(e){}}
 function rotateBuilding(i){const c=grid[i];if(!c||DRIVE[c.t]||c.t==='hydro')return;
   if(!c.tiles){const cur0=c.rot1!=null?c.rot1:((Math.round((c.model?c.model.rotation.y:0)/(Math.PI/2))%4)+4)%4;c.rot1=(cur0+1)%4}
   else{const sq=c.tiles.length===4||c.tiles.length===1;const cur0=c.rot!=null?c.rot:((Math.round(c.model.rotation.y/(Math.PI/2))%4)+4)%4;c.rot=(cur0+(sq?1:2))%4}
@@ -3693,6 +3850,8 @@ function apply(i,painting){
   if(tool==='hydro'&&!grid[i]){if(!water[i]){if(!painting)setHint('Tamę stawia się na wodzie, w poprzek rzeki.',true,true);return}
 }
   if(tool==='fill'){fillRiver(i,painting);return}
+  if(tool==='tUp'||tool==='tDown'||tool==='tLevel'){terraform(i,painting);return}
+  if(tool==='tunnel'){placeTunnel(i,painting);return}
   if(tool==='pitS'&&!grid[i]&&!water[i]&&!dep[i]){if(!painting)setHint('Kopalnię stawia się na złożu: ciemne łaty to węgiel, złotawe to chalkopiryt.',true,true);return}
   if((tool==='pump'||tool==='outlet')&&!grid[i]&&!water[i]){let near=false;for(const k of nbrs(i))if(water[k])near=true;if(!near){setHint(`${DEF[tool].name} musi stać tuż przy rzece.`,true,true);return}}
   if(tool==='bulldoze'&&grid[i]&&grid[i].t==='part')i=grid[i].main;
@@ -3707,7 +3866,7 @@ function apply(i,painting){
   if(tool==='crossDel'&&c&&c.bus&&!c.cross){c.bus=0;c.busAx=null;drawStop(i);stopGone(i);const n=addMoney(Math.floor(DEF.busStop.cost/2));cur.refund+=n;save();return}
   if(tool==='crossDel'){if(!c||!c.cross){if(!painting)setHint('Tu nie ma przejścia ani przystanku.',true,true);return}c.cross=false;drawCross(i);const n=addMoney(Math.floor(DEF.crosswalk.cost/2));cur.refund+=n;save();return}
   if(tool==='rail'){if(c&&c.t==='rail')return;if(c&&(!STREET[c.t]||c.rail||c.edge)){if(!painting)setHint(c.rail?'Tu już są tory.':'Tory przejdą tylko przez zwykłą ulicę (przejazd kolejowy) albo wolne pole i wodę.',true,true);return}
-    {const why=c?crossWhy(i,painting?paintPrev:-1):railNearWhy(i);if(why){if(!painting)setHint(why,true,true);return}}
+    {const why=c?crossWhy(i,painting?paintPrev:-1):railNearWhy(i)||slopeWhy(i,'rail');if(why){if(!painting)setHint(why,true,true);return}}
     if(money<DEF.rail.cost){setHint(`Brakuje ${fmt(DEF.rail.cost-money)} T¢ na tory.`,true,true);return}spend(DEF.rail.cost);
     if(c){c.rail=true;railVer++;drawCrossing(i);railRefreshNear(i)}else addCell(i,'rail',false);save();return}
   if(tool==='cityHall'&&counts.cityHall>0){setHint('W mieście może stać tylko jeden urząd.',true,true);hintEl.hidden=false;return}
@@ -3742,7 +3901,7 @@ function apply(i,painting){
   if(tool==='bridge'&&!water[i]){if(!painting)setHint('Most stawia się na wodzie.',true,true);return}
   if(tool!=='bridge'&&tool!=='hydro'&&water[i]){if(!painting)setHint('Na wodzie zbudujesz tylko most.',true,true);return}
   if(tool==='bridge'&&!straightOK(i)){setHint('Most musi iść prosto: bez zakrętów (L) i rozgałęzień (T).',true,true);return}
-  if(DRIVE[tool]){const why=roadNearWhy(i);if(why){if(!painting)setHint(why,true,true);return}}
+  if(DRIVE[tool]){const why=roadNearWhy(i)||slopeWhy(i,tool);if(why){if(!painting||why!==lastSlopeWhy)setHint(why,true,true);lastSlopeWhy=why;return}}
   const cost=DEF[tool].cost;
   if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢ na: ${DEF[tool].name.toLowerCase()}.`,true,true);return}
   spend(cost);lockBuy();addCell(i,tool==='incS'?'incinerator':tool);if(rot1!=null&&grid[i]&&!grid[i].tiles){grid[i].rot1=rot1;refreshBuilding(i)}if(DEF[tool].r||DEF[tool].area)showArea(i,DEF[tool].r||DEF[tool].area,true);else if(svcRange(tool))showArea(i,svcRange(tool,grid[i]),true,rangeKind(tool),rangeFP(tool));
@@ -3760,7 +3919,7 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
       highway:'<b>Autostrada</b> · auta jadą tu 2,2× szybciej'+jn,bridge:`<b>Most</b> · jak ${DEF[c.bt||'road'].name.toLowerCase()}: ${laneN(i)} ${laneN(i)>1?'pasy':'pas'} w każdą stronę`,
       lpole:`<b>Słup</b> · połączenia: ${links(i).length} · zasila budynki obok`,
       hvpole:`<b>Słup WN${c.up?' (wyższy)':''}</b> · połączenia w zasięgu ${c.up?'17×17':'11×11'}: ${links(i).length}`,road:(c.pole?'<b>Jednojezdniowa ze słupem</b> · przewodzi prąd':'<b>Jednojezdniowa</b> · dodaj słup, by poprowadzić prąd')+jn,
-      wind:'<b>Wiatrak</b> · '+(c.net>=0?`${WIND_MW} MW do sieci`:'<b>niepodłączony</b>: postaw obok transformator')+` · ${UPKEEP.wind} T¢/godz.`,
+      wind:'<b>Wiatrak</b> · '+(c.net>=0?`${windMW(i)} MW do sieci`:'<b>niepodłączony</b>: postaw obok transformator')+` · ${UPKEEP.wind} T¢/godz.`,
       transformer:`<b>Transformator</b> · łączy elektrownie obok (też po skosie) ze słupami · ${UPKEEP.transformer} T¢/godz.`,
       coal:'<b>El. węglowa</b> · '+(c.net<0?'<b>niepodłączona</b>: postaw obok transformator':c.running?`pracuje, ${COAL_MW} MW`:'czeka: wiatraki wystarczają albo brak węgla')+` · ${UPKEEP.coal} T¢/godz.`,house:'<b>Rezydencja</b>',factory:`<b>Fabryka</b> · zmiany do kolejnej ciężarówki: ${c.work}/2`,
       bakery:`<b>Piekarnia</b> · ${c.shelf?c.shelf.bread||0:0} bochenków`,gallery:'<b>Galeria handlowa</b>',restaurant:'<b>Restauracja</b>',cinema:'<b>Kino</b>',theater:'<b>Teatr</b>',casino:'<b>Kasyno</b>',hotelS:'<b>Mały hotel</b>',hotelB:'<b>Duży hotel</b>',tenement:'<b>Kamienica</b>',block:'<b>Tani blok</b>',modern:'<b>Apartamentowiec</b>',
@@ -3919,7 +4078,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
     {const cap=Math.max(1,whCap(c));R('Przechowuje',!ks.length?'nic':`${fmt(Math.round(tot))} kg`);if(ks.length)rows.push({full:1,v:`<div class="whbar" title="${fmt(Math.round(tot))} / ${fmt(cap)} kg">${ks.map(k=>`<i style="width:${Math.max(0.6,sh[k]/cap*100)}%;background:${(GOODS[k]||GOODS.mat).col}"></i>`).join('')}</div><div class="whl whl2">${ks.map(k=>`<span><i class="sw2" style="background:${(GOODS[k]||GOODS.mat).col}"></i>${frName(k)} <b>${fmt(Math.round(sh[k]))} kg</b><em><i style="width:${Math.min(100,sh[k]/cap*100)}%;background:${(GOODS[k]||GOODS.mat).col}"></i></em></span>`).join('')}</div>`})}}
   if(c.t==='bank')R('Limit gotówki',`+${fmt(BANK_CAP*(c.up?2:1))} T¢`+(c.powered?'':' (nieaktywny)'));
   if(PARKS.includes(c.t)){const r=parkR(c);R('Zasięg',`${2*r+1}×${2*r+1}`);if(full)R('Stan','nie działa: pełno śmieci','warnv')}
-  if(c.t==='wind'){if(c.wake)R('Sąsiednie wiatraki',`${c.wake} · −${c.wake} MW`,'warnv');R('Moc',`${Math.max(0,WIND_MW+(c.up2?3:0)-(c.wake||0))} MW`+(c.up?` + ${mw(Math.round(SOLAR_MW*dayF*10)/10)} MW z paneli`:''));R('Sieć',c.net>=0?'podłączony':'brak transformatora obok',c.net>=0?'':'warnv')}
+  if(c.t==='wind'){if(c.wake)R('Sąsiednie wiatraki',`${c.wake} · −${c.wake} MW`,'warnv');R('Moc',`${Math.max(0,windMW(i)+(c.up2?3:0)-(c.wake||0))} MW`+(c.up?` + ${mw(Math.round(SOLAR_MW*dayF*10)/10)} MW z paneli`:''));R('Sieć',c.net>=0?'podłączony':'brak transformatora obok',c.net>=0?'':'warnv')}
   if(c.t==='hydro'&&water[i])R('Przepływ',damSealed[i]?(damRank[i]?`zatamowany · ${damRank[i]+1}. tama w kaskadzie: mniej wody, wydajność ${Math.round(Math.pow(DAM_EFF,damRank[i])*100)}%`:'zatamowany, turbiny pracują'):'woda omija tamę: zatamuj całą szerokość koryta (a poniżej połączenia rzek każdą rzekę, która tu wpływa)',damSealed[i]?'':'warnv');
   if(c.t==='hydro'){R('Tama',`${c.damN||1} ${(c.damN||1)===1?'segment':'segmenty'} · ${mw((c.damN||1)*(c.mw||0))} MW razem`);R('Moc segmentu',c.net<0?'niepodłączona: transformator obok albo słup WN':`${c.mw||0} MW`,c.net<0?'warnv':'')}
   if(PARKS.includes(c.t)||isFarm(c.t))R('Zabrudzenie smogiem',`${Math.round((c.dirt||0)*100)}%`+((c.dirt||0)>=0.5?(isFarm(c.t)?' · plony słabsze':' · park nie daje zadowolenia'):'')+(svcBases().some(b=>svcCover(b,i))?' · w zasięgu służb':' · poza zasięgiem służb drogowych'),(c.dirt||0)>=0.5?'warnv':'');
@@ -4052,7 +4211,7 @@ road2:'<path d="M5 2.5L3.5 17.5M15 2.5l1.5 15"/><path d="M9.2 3v14.5M10.8 3v14.5
 road3:'<path d="M4 2.5L2.5 17.5M16 2.5l1.5 15"/><path d="M9.3 3v14.5M10.7 3v14.5M6.7 4v2M6.4 9v2M6.1 14v2M13.3 4v2M13.6 9v2M13.9 14v2"/>',
 roundabout:'<circle cx="10" cy="10" r="6.5"/><circle cx="10" cy="10" r="2.3"/><path d="M15.2 6.2l.4-2.6M15.2 6.2l-2.6-.3"/>',
 highway:'<path d="M7 2.5L3 17.5M13 2.5l4 15"/><path d="M7.4 11l2.6-2.6 2.6 2.6M7.4 15l2.6-2.6 2.6 2.6"/>',
-bridge:'<path d="M2 8h16M3 8v5M17 8v5"/><path d="M5 13a5 5 0 0 1 10 0"/><path d="M2 16.5c1.5-1 2.5-1 4 0s2.5 1 4 0 2.5-1 4 0 2.5 1 4 0"/>',
+tunnel:'<path d="M2 16.5h16"/><path d="M4.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5"/><path d="M7.5 16.5V11.5a2.5 2.5 0 0 1 5 0v5"/>',tUp:'<path d="M2 16.5h16"/><path d="M3.5 16.5l4-6 3 3 2-2 4 5"/><path d="M14 2.5v5M11.8 4.6L14 2.5l2.2 2.1"/>',tDown:'<path d="M2 16.5h16"/><path d="M3.5 16.5l4-6 3 3 2-2 4 5"/><path d="M14 2.5v5M11.8 5.4L14 7.5l2.2-2.1"/>',tLevel:'<path d="M2 16.5h16"/><path d="M3 12.5h14"/><path d="M6 12.5V9M10 12.5V7M14 12.5V9"/>',bridge:'<path d="M2 8h16M3 8v5M17 8v5"/><path d="M5 13a5 5 0 0 1 10 0"/><path d="M2 16.5c1.5-1 2.5-1 4 0s2.5 1 4 0 2.5-1 4 0 2.5 1 4 0"/>',
 pole:'<path d="M10 3v14.5M5 5.5h10M7 8.5h6"/>',
 poleline:'<path d="M4.5 4v13.5M15.5 4v13.5M2 5.5h5M13 5.5h5"/><path d="M4.5 6c3.7 2.2 7.3 2.2 11 0"/>',
 poleDel:'<path d="M8 3v14.5M3.5 5.5h9M5.5 8.5h5"/><path d="M12.5 11.5l5 5M17.5 11.5l-5 5"/>',
@@ -4151,14 +4310,14 @@ const BMODES=[['one','Pojedynczo: po postawieniu wraca do podglądu','<rect x="6
 const DMODES=[['all','Wyburzaj wszystko','<path d="M4.5 4.5l11 11M15.5 4.5l-11 11"/>'],['pipe','Usuwaj tylko rury (zwrot 2 T¢)',null],['power','Usuwaj tylko słupy (zwrot 50%)',null],['cross','Usuwaj tylko przejścia dla pieszych i przystanki','<path d="M3 5.5h14M3 14.5h14M6 7v6M10 7v6M14 7v6"/>']];
 function renderModes(){const box=document.getElementById('msub');const del=tool==='bulldoze';const L=del?DMODES:BMODES;
   box.innerHTML=L.map(([k,tt,ic])=>`<button type="button" data-m="${k}" title="${tt}" aria-label="${tt}" aria-pressed="${del?delMode===k:ALONG[tool]?(alongOn?k==='road':k==='many'):buildMode===k}" ${!del&&tool!=='view'&&!(k==='road'?!!ALONG[tool]:ALONG[tool]?k==='many':MODE_OK(tool))?'disabled':''}><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ic||ICO[DELT[k]]}</svg></button>`).join('');
-  for(const b of box.querySelectorAll('button'))b.onclick=()=>{if(del){delMode=b.dataset.m;setXray(delMode==='pipe');document.getElementById('hazard').hidden=false;setHint(toolHint())}else if(ALONG[tool]){alongOn=b.dataset.m==='road'?!alongOn:false;if(lineConf||lineA>=0)cancelLine(true);try{localStorage.setItem('lt-along',alongOn?'1':'0')}catch(e){}setHint(toolHint())}else if(b.dataset.m!=='road'){buildMode=b.dataset.m;try{localStorage.setItem('lt-bmode',buildMode)}catch(e){}setHint(toolHint())}renderModes()}}
+  for(const b of box.querySelectorAll('button'))b.onclick=()=>{if(del){delMode=b.dataset.m;setXray(delMode==='pipe'||underOn);document.getElementById('hazard').hidden=false;setHint(toolHint())}else if(ALONG[tool]){alongOn=b.dataset.m==='road'?!alongOn:false;if(lineConf||lineA>=0)cancelLine(true);try{localStorage.setItem('lt-along',alongOn?'1':'0')}catch(e){}setHint(toolHint())}else if(b.dataset.m!=='road'){buildMode=b.dataset.m;try{localStorage.setItem('lt-bmode',buildMode)}catch(e){}setHint(toolHint())}renderModes()}}
 CATS.forEach((c,k)=>{const b=document.createElement('button');b.type='button';b.className='cat';b.innerHTML=svgI(CAT_ICO[k],14)+`<span>${c.name}</span>`;b.setAttribute('role','tab');
   b.addEventListener('click',()=>showCat(k));catsEl.append(b);catBtns.push(b);for(const t of c.tools)toolsEl.append(mkTool(t))});
 function showCat(k){if(catBtns[k]&&catBtns[k].hidden){k=catBtns.findIndex(b=>!b.hidden);if(k<0)k=0}curCat=k;catBtns.forEach((b,j)=>b.setAttribute('aria-selected',String(j===k)));
   CATS.forEach((c,j)=>c.tools.forEach(t=>toolBtns[t].hidden=j!==k||!unlocked(t)));toolsEl.scrollLeft=0}
 /* a category tab exists only once something in it is unlocked */
 function refreshLocks(){CATS.forEach((c,k)=>{catBtns[k].hidden=!c.tools.some(unlocked)});showCat(curCat);if(linBtn)linBtn.hidden=!unlocked('busLine')}
-function selectTool(t){if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel');pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=false;for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
+function selectTool(t){if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel'||underOn);if(t==='tLevel')levelH=null;pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=false;for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
   const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);if(t==='bulldoze'&&delMode==='pipe')setXray(true);setHint(toolHint());if(lmsg)setHint(lmsg,true,true);hl.visible=false;renderModes();
   if(linpEl){linpEl.hidden=!isLineT(t);if(linBtn)linBtn.setAttribute('aria-expanded',String(isLineT(t)));renderLines()}}
 showCat(0);
@@ -4548,14 +4707,14 @@ for(const r of document.querySelectorAll('.res')){const mv=()=>{if(r.hasAttribut
 const ovlMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(0.98,0.98).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.42,depthWrite:false}),N*N);
 ovlMesh.frustumCulled=false;ovlMesh.count=0;ovlMesh.renderOrder=3;colorBuf(ovlMesh,N*N,new THREE.Color('#ffffff'));scene.add(ovlMesh);let ovlMode='none',ovlT=0;
 const OVL={med:{c:['#d63b3b'],note:'Czerwone: zasięg klinik i szpitali. Chorzy stąd trafią na leczenie, gdy są wolne łóżka.'},edu:{c:['#e0b84a','#4a9a5a'],note:'Żółte: tylko podstawówka (+0,5 zadowolenia), zielone: podstawówka i szkoła średnia (+1).'},police:{c:['#2f6fe0'],note:'Niebieskie pola: zasięg komisariatów. Przestępstwa poza nim kończą się stratą.'},fire:{c:['#e8641c'],note:'Pomarańczowe pola: zasięg straży. Pożar poza nim po 6 godzinach zostawia zgliszcza.'},pol:{c:['#c9c23a','#e0962a'],note:'Żółte: lekki smog (−1 zadowolenia), pomarańczowe: silny (−2).'},
-  noise:{c:['#9a5bd6'],note:'Fioletowe: hałas wiatraków i transformatorów (−1 zadowolenia).'},park:{c:['#3cae4f'],note:'Zielone: dom tutaj ma +1 zadowolenia z parku.'},ent:{c:['#e0569a'],note:'Różowe: dom tutaj ma +1 zadowolenia z rozrywki.'}};
+  noise:{c:['#9a5bd6'],note:'Fioletowe: hałas wiatraków i transformatorów (−1 zadowolenia).'},park:{c:['#3cae4f'],note:'Zielone: dom tutaj ma +1 zadowolenia z parku.'},ent:{c:['#e0569a'],note:'Różowe: dom tutaj ma +1 zadowolenia z rozrywki.'},under:{c:['#6f6a62'],note:'Teren jest przezroczysty: widać rury, tunele i kable w tunelach.'}};
 function ovlVal(i){if(ovlMode==='med')return medCov[i]?1:0;if(ovlMode==='edu')return eduP[i]&&eduS[i]?2:eduP[i]||eduS[i]?1:0;if(ovlMode==='pol')return pol[i];if(ovlMode==='noise')return noiseCov[i]?1:0;if(ovlMode==='park')return parkCov[i]?1:0;if(ovlMode==='ent')return entCov[i]?1:0;return 0}
 function drawOvl(){if(ovlMode==='none'){ovlMesh.count=0;return}let n=0;const col=new THREE.Color();let cov=null;
   if(ovlMode==='police'||ovlMode==='fire'){cov=new Uint8Array(N*N);for(const st of ovlMode==='fire'?fireStations():stations()){const r=ovlMode==='fire'?fireRad(grid[st]):polRad(grid[st]);for(const t of tilesOf(st)){const x=t%N,z=(t/N)|0;for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)cov[idx(nx,nz)]=1}}}}
-  for(let i=0;i<N*N;i++){const v=cov?cov[i]:ovlVal(i);if(!v||water[i])continue;dObj.position.set(cx(i),0.075,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();ovlMesh.setMatrixAt(n,dObj.matrix);
+  for(let i=0;i<N*N;i++){const v=cov?cov[i]:ovlVal(i);if(!v||water[i])continue;dObj.position.set(cx(i),surfY(i)+0.075,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();ovlMesh.setMatrixAt(n,dObj.matrix);
     const cs=OVL[ovlMode].c;col.set(cs[Math.min(cs.length,v)-1]);ovlMesh.setColorAt(n,col);n++}
   ovlMesh.count=n;ovlMesh.instanceMatrix.needsUpdate=true;if(ovlMesh.instanceColor)ovlMesh.instanceColor.needsUpdate=true}
-function setOvl(m){ovlMode=m;for(const b of document.querySelectorAll('[data-ovl]'))b.setAttribute('aria-pressed',String(b.dataset.ovl===m));document.getElementById('ovlNote').textContent=m==='none'?'':OVL[m].note;
+function setOvl(m){ovlMode=m;underOn=m==='under';setXray(underOn||(tool==='bulldoze'&&delMode==='pipe')||tool==='pipe'||tool==='pipeDel');for(const b of document.querySelectorAll('[data-ovl]'))b.setAttribute('aria-pressed',String(b.dataset.ovl===m));document.getElementById('ovlNote').textContent=m==='none'?'':OVL[m].note;
   document.getElementById('ovlBtn').classList.toggle('on',m!=='none');drawOvl()}
 for(const b of document.querySelectorAll('[data-ovl]'))b.addEventListener('click',()=>setOvl(b.dataset.ovl));
 const TAXUI=[['house','Domy jednorodzinne',10,20,1,'%'],['tenement','Kamienice',10,20,1,'%'],['block','Tanie bloki',10,20,1,'%'],['modern','Apartamentowce',10,20,1,'%'],['buy','Od zakupów',0,40,1,'%'],['tour','Turystyczny',0,20,1,' T¢/os.'],['util','Komunalny',0,20,1,'%']];
@@ -4700,7 +4859,7 @@ let saveReq=false,saveRT=0;
 function save(){if(window.__testUnlock||saveBlocked||window.__LT_EDITOR)return writeSave();saveReq=true}
 function writeSave(){saveReq=false;saveRT=0;if(saveBlocked||window.__LT_EDITOR)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
   const old=localStorage.getItem(KEY);if(old)localStorage.setItem(KEY+'-prev',old);
-  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,taxes:TAX,ord:ORD,loan,pend:[Math.round(pendIn),Math.round(pendOut)],sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),bus:[...grid.keys()].filter(i=>grid[i]&&grid[i].bus).map(i=>[i,grid[i].bus,stopAxOf(i)]),tl:tLines.map(L=>({id:L.id,kind:L.kind,name:L.name,col:L.col,stops:[...L.stops],veh:L.veh,on:L.on?1:0})),tls:lineSeq,litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),dep:[...dep.keys()].filter(i=>dep[i]).map(i=>[i,dep[i]]),ms:msLevel,n:N,whst:1,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
+  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,taxes:TAX,ord:ORD,loan,pend:[Math.round(pendIn),Math.round(pendOut)],sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),bus:[...grid.keys()].filter(i=>grid[i]&&grid[i].bus).map(i=>[i,grid[i].bus,stopAxOf(i)]),tl:tLines.map(L=>({id:L.id,kind:L.kind,name:L.name,col:L.col,stops:[...L.stops],veh:L.veh,on:L.on?1:0})),tls:lineSeq,litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),dep:[...dep.keys()].filter(i=>dep[i]).map(i=>[i,dep[i]]),hg:hgtStr(),wv:[...wlv.keys()].filter(i=>water[i]&&wlv[i]!==hgt[i]).map(i=>[i,wlv[i]]),fl:[...fld.keys()].filter(i=>fld[i]).map(i=>[i,fld[i]]),ms:msLevel,n:N,whst:1,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
 function load(){if(loadKey(KEY))return true;if(oldSave){try{const r=localStorage.getItem(KEY);if(r&&!localStorage.getItem(KEY+'-pre4'))localStorage.setItem(KEY+'-pre4',r)}catch(e){}saveBlocked=true;return false}if(loadKey(KEY+'-prev')){setHint('Ostatni zapis był uszkodzony, wczytano poprzedni.',true,true);return true}
   let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
   if(raw){saveBlocked=true;try{localStorage.setItem(KEY+'-broken',raw)}catch(e){}setHint('Nie udało się wczytać zapisu. Kopia jest bezpieczna i gra jej nie nadpisze. Tylko „Zresetuj miasto” zaczyna od nowa.',true,true);hintTimer=12}
@@ -4739,7 +4898,7 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
   mapType=MAPS[s.map]?s.map:'standard';applyTheme();
   if(Array.isArray(s.water)){water.fill(0);for(const i of s.water)water[i]=1}
   else{const av=new Uint8Array(N*N);for(const[i]of s.cells){const x=i%N,z=(i/N)|0;for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)av[idx(nx,nz)]=1}}genRivers(av)}
-  applyWater();
+  hgtLoad(s);applyWater();drawFlood();
   for(const[i,t,p]of s.cells)if(DRIVE[t]){try{addCell(i,t,false);if(p)grid[i].pole=true}catch(e){console.warn('pole zapisu pominięte',i,t,e)}}
   for(const row of s.cells)if(!DRIVE[row[1]])try{placeRow(row)}catch(e){console.warn('budynek z zapisu pominięty',row[0],row[1],e)}
   for(let i=0;i<N*N;i++)rebuildRoad(i);money=s.money||0;mapType=MAPS[s.map]?s.map:'standard';diff=DIFF[s.diff]?s.diff:'old';taxRate=s.tax>=10&&s.tax<=20?s.tax:12;ORD={};if(s.ord&&typeof s.ord==='object')for(const o of ORDS)if(s.ord[o.k])ORD[o.k]=1;TAX={...TAX0};if(s.taxes&&typeof s.taxes==='object'){for(const k in TAX0)if(Number.isFinite(s.taxes[k]))TAX[k]=s.taxes[k]}else for(const k of['house','tenement','block','modern'])TAX[k]=taxRate;loan=s.loan&&LOANS[s.loan.k]?s.loan:null;pendIn=s.pend?+s.pend[0]||0:0;pendOut=s.pend?+s.pend[1]||0:0;imports={};if(s.imports)for(const k in s.imports)imports[k]=(s.gameT||gameT)+s.imports[k];tut=s.tut&&s.tut.on?s.tut:null;matl=0;for(const k in goods)goods[k]=0;const POOL=s.whst?null:Object.assign({mat:s.matl||0},s.goods||{});
@@ -4754,7 +4913,7 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
   if(s.gameT)gameT=s.gameT;if(s.cur)cur=Object.assign(L0(),s.cur);if(!window.__testUnlock)msLevel=Math.max(0,Math.min(MS.length-1,s.ms|0));if(typeof s.name==='string'&&s.name.trim())cityName=s.name.trim().slice(0,24);for(const[i,a]of loadShip)if(grid[i])grid[i].shipAt=gameT+a;loadShip=[];for(const[i,a]of loadFires){if(!grid[i])continue;if(a<0)makeRuin(i,true);else startFire(i,a)}loadFires=[];whDirty=true;if(POOL)spreadPool(POOL);syncGoods();try{fixDeep();for(const h of hist)for(const k in h)if(typeof h[k]==='number'&&!Number.isFinite(h[k]))h[k]=0}catch(e){}if(Array.isArray(s.hist))hist=s.hist;if(Array.isArray(s.dep)){dep.fill(0);for(const[i,k]of s.dep)if(i>=0&&i<N*N&&DEP[k])dep[i]=k;depDirty=true;envDirty=true}else genDeposits();return true}catch(e){console.error('wczytywanie',K,e);try{clearCity()}catch(_){}return false}}
 function clearCity(){tLines=[];paxQ.clear();lineDraft=null;lineEdit=null;transVer++;for(const cr of crimes)cr.pin.remove();crimes=[];for(const f of fires){scene.remove(f.fx);if(f.spray)scene.remove(f.spray);f.pin.remove()}fires=[];for(const h of helis){scene.remove(h.m)}helis=[];for(const tr of trains)scene.remove(tr.g);trains=[];for(const C of constructs){C.cell.group.remove(C.sc,C.cr)}constructs.length=0;for(const c of cars)scene.remove(c.mesh);cars=[];resMap.clear();for(let i=0;i<N*N;i++)if(grid[i])removeCell(i);
   for(const f of floats)f.el.remove();floats=[]}
-function preset(type,d){if(type&&MAPS[type])mapType=type;applyTheme();if(d&&DIFF[d])diff=d;pipe.fill(0);money=startCash();pendIn=0;pendOut=0;matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);applyWater();makeEntries();genDeposits()}
+function preset(type,d){if(type&&MAPS[type])mapType=type;applyTheme();if(d&&DIFF[d])diff=d;pipe.fill(0);money=startCash();pendIn=0;pendOut=0;matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);genHeights();applyWater();drawFlood();riseAcc.clear();floodWarned=false;makeEntries();genDeposits()}
 /* ---------- main menu: continue / new game / options / exit, with a small town turning slowly behind it ---------- */
 let titleOpen=false;const titleEl=document.getElementById('title');document.getElementById('tVer').textContent=LT_VERSION;
 const hasSave=()=>{if(oldSave||saveBlocked)return false;try{return!!localStorage.getItem(KEY)}catch(e){return true}};
@@ -4870,7 +5029,8 @@ function frame(now){requestAnimationFrame(frame);
   wasteAcc+=dt;if(wasteAcc>=0.25){wasteTick(wasteAcc,night);wasteAcc=0}shopTick(dt);farmTick(dt,night);
   for(let i=0;i<N*N;i++){const c=grid[i];const H=c&&HOUSING[c.t];if(!H||c.off)continue;xpTick(i,c,dt);abandonTick(i,c,dt);if(c.aband||!popOf(c))continue;c.timer-=dt;
     if(c.timer<=0){const iv=60/(TIER[c.happy??3].trips*H.trips*hMul(c));c.timer+=iv;if(c.timer<=0)c.timer=iv;if(cars.length<PEOPLE_CARS)spawnCommuter(i)}}
-  buildOcc();for(const c of cars)if(!c.dead)updateCar(c,dt);
+  if(landDirty)buildLand();terrainTick(dt);
+  buildOcc();for(const c of cars)if(!c.dead){updateCar(c,dt);liftY(c.mesh)}
   if(cars.some(c=>c.dead))cars=cars.filter(c=>!c.dead);
   constructTick(paused&&!titleOpen?rdt:dt);shipTick(dt);policeTick(dt,night);svcTick(dt);fireTick(dt);heliTick(dt);transportTick(dt);transitTick(dt);riverTick(dt);tutTick(Math.max(dt,0.016));ovlTick(Math.max(dt,0.016));
   for(let k=popping.length-1;k>=0;k--){const p=popping[k];p.t+=vdt*5;const s=p.t>=1?1:0.5+0.5*Math.sin(p.t*Math.PI/2)*1.08;p.g.scale.setScalar(Math.min(s,1.05));if(p.t>=1){p.g.scale.setScalar(1);popping.splice(k,1)}}
@@ -6630,7 +6790,42 @@ const LT_TR=[
 ["Stuknij Gospodarkę (przycisk po lewej, wskaże go strzałka), a potem zakładkę „Produkcja i potrzeby”.", "Tap Economy (the button on the left, the arrow will point to it), then the “Production and needs” tab.", "Tippe auf Wirtschaft (die Schaltfläche links, der Pfeil zeigt darauf), dann auf den Reiter „Produktion und Bedürfnisse“."],
 ["Wybierz towary do importu", "Choose goods to import", "Wähle Waren für den Import"],
 ["Stuknij magazyn spedycyjny w Podglądzie i ustaw, co sprowadzać. Na start wystarczy po 5 kg/godz.: Nabiał, Pieczywo, Napoje, Odzież i Kosmetyki (warzywa dadzą farmy). Przycisk „Ustaw propozycję” zrobi to za ciebie.", "Tap the import depot in View mode and set what to bring in. To start, 5 kg/h each is enough: Dairy, Bread, Drinks, Clothing and Cosmetics (vegetables come from the farms). The “Apply suggestion” button does it for you.", "Tippe das Speditionslager in der Ansicht an und lege fest, was eingeführt wird. Für den Anfang reichen je 5 kg/Std.: Milchprodukte, Brot, Getränke, Kleidung und Kosmetik (Gemüse kommt von den Farmen). Die Schaltfläche „Vorschlag übernehmen“ erledigt das für dich."],
-["Ustaw propozycję: po 5 kg/godz. nabiału, pieczywa, napojów, odzieży i kosmetyków", "Apply suggestion: 5 kg/h each of dairy, bread, drinks, clothing and cosmetics", "Vorschlag übernehmen: je 5 kg/Std. Milchprodukte, Brot, Getränke, Kleidung und Kosmetik"]
+["Ustaw propozycję: po 5 kg/godz. nabiału, pieczywa, napojów, odzieży i kosmetyków", "Apply suggestion: 5 kg/h each of dairy, bread, drinks, clothing and cosmetics", "Vorschlag übernehmen: je 5 kg/Std. Milchprodukte, Brot, Getränke, Kleidung und Kosmetik"],
+["Fiordy", "Fjords", "Fjorde"],
+["Szerokie fiordy pod stromymi górami, ciemna trawa i drzewa iglaste", "Wide fjords under steep mountains, dark grass and conifers", "Breite Fjorde unter steilen Bergen, dunkles Gras und Nadelbäume"],
+["Teren", "Terrain", "Gelände"],
+["Tunel", "Tunnel", "Tunnel"],
+["Droga pod wzniesieniem. Zaczyna się przy końcu drogi u stóp wzgórza i biegnie płasko na jej wysokości; nad tunelem musi być co najmniej półtora poziomu terenu. Na tunelu postawisz słup (kabel pod sufitem) i położysz rurę.", "A road under high ground. It starts at the end of a road at the foot of a hill and runs level at that road's height; there must be at least one and a half levels of ground above it. On a tunnel you can put a pole (a cable under the ceiling) and lay a pipe.", "Eine Straße unter einer Anhöhe. Sie beginnt am Ende einer Straße am Fuß eines Hügels und verläuft eben auf deren Höhe; darüber müssen mindestens anderthalb Stufen Gelände liegen. Im Tunnel kannst du einen Mast (Kabel unter der Decke) setzen und ein Rohr verlegen."],
+["Podnieś teren", "Raise terrain", "Gelände anheben"],
+["Podnosi pole o pół poziomu (najwyżej do poziomu 10). Przeciągnij, by podnieść kilka pól. Na zajętym polu nie zadziała.", "Raises a tile by half a level (up to level 10). Drag to raise several tiles. Does not work on an occupied tile.", "Hebt ein Feld um eine halbe Stufe an (höchstens bis Stufe 10). Ziehen, um mehrere Felder anzuheben. Auf einem belegten Feld geht es nicht."],
+["Obniż teren", "Lower terrain", "Gelände absenken"],
+["Obniża pole o pół poziomu. Pole obniżone do poziomu wody obok rzeki zamienia się w wodę.", "Lowers a tile by half a level. A tile lowered to the water level next to a river turns into water.", "Senkt ein Feld um eine halbe Stufe ab. Ein Feld, das neben einem Fluss bis auf Wasserhöhe abgesenkt wird, wird zu Wasser."],
+["Wyrównaj teren", "Level terrain", "Gelände einebnen"],
+["Stuknij pole o wybranej wysokości, potem przeciągnij po innych: dostaną tę samą wysokość. 30 T¢ za każde pół poziomu różnicy.", "Tap a tile at the height you want, then drag over others: they get the same height. 30 T¢ for every half level of difference.", "Tippe ein Feld mit der gewünschten Höhe an und ziehe dann über andere: Sie bekommen dieselbe Höhe. 30 T¢ pro halbe Stufe Unterschied."],
+["T¢/pół poziomu", "T¢/half level", "T¢/halbe Stufe"],
+["Zamienia pole wody przy brzegu w ląd. Uwaga: woda odcięta od ujścia za mapę zacznie się podnosić i może zalać okolicę.", "Turns a water tile at the bank into land. Careful: water cut off from its way off the map starts to rise and may flood the area.", "Verwandelt ein Wasserfeld am Ufer in Land. Achtung: Wasser ohne Abfluss aus der Karte beginnt zu steigen und kann die Umgebung überfluten."],
+["Daje 2–10 MW: im wyżej stoi, tym więcej (2 MW na zwykłym terenie, 10 MW na najwyższych szczytach). Postaw obok transformatora.", "Gives 2–10 MW: the higher it stands, the more (2 MW on ordinary ground, 10 MW on the highest peaks). Build it next to a transformer.", "Liefert 2–10 MW: je höher, desto mehr (2 MW auf normalem Gelände, 10 MW auf den höchsten Gipfeln). Neben einen Transformator setzen."],
+["Pod ziemią", "Underground", "Unter der Erde"],
+["Teren jest przezroczysty: widać rury, tunele i kable w tunelach.", "The ground is see-through: pipes, tunnels and the cables in tunnels show.", "Das Gelände ist durchsichtig: Rohre, Tunnel und die Kabel in Tunneln sind zu sehen."],
+["teren nierówny: wyrównaj go", "uneven ground: level it", "unebenes Gelände: ebne es ein"],
+["Na zboczu droga biegnie tylko prosto: skrzyżowania i zakręty wymagają płaskiego terenu. Wyrównaj teren.", "On a slope a road only runs straight: junctions and bends need flat ground. Level the terrain.", "Am Hang verläuft eine Straße nur gerade: Kreuzungen und Kurven brauchen ebenes Gelände. Ebne das Gelände ein."],
+["Za stromo: droga pokona najwyżej pół poziomu na jednym polu. Wyrównaj teren albo poprowadź tunel.", "Too steep: a road climbs at most half a level per tile. Level the terrain or build a tunnel.", "Zu steil: Eine Straße überwindet höchstens eine halbe Stufe pro Feld. Ebne das Gelände ein oder baue einen Tunnel."],
+["To pole jest zalane.", "This tile is flooded.", "Dieses Feld ist überflutet."],
+["<b>Wyrównaj teren</b> · wysokość wzorcowa: poziom {}. Teraz stuknij lub przeciągnij po polach do wyrównania (stuknij narzędzie ponownie, by wybrać inną wysokość).", "<b>Level terrain</b> · target height: level {}. Now tap or drag over the tiles to level (tap the tool again to pick another height).", "<b>Gelände einebnen</b> · Zielhöhe: Stufe {}. Tippe oder ziehe jetzt über die Felder (tippe das Werkzeug erneut an, um eine andere Höhe zu wählen)."],
+["Wysokość wzorcową wskaż na lądzie.", "Pick the target height on land.", "Wähle die Zielhöhe auf Land."],
+["Pole wody: zasyp je albo podnieś od brzegu.", "A water tile: fill it in or raise it from the bank.", "Ein Wasserfeld: Schütte es zu oder hebe es vom Ufer aus an."],
+["Na zajętym polu nie zmienisz terenu: najpierw je wyburz.", "You cannot change the ground of an occupied tile: demolish it first.", "Auf einem belegten Feld lässt sich das Gelände nicht ändern: zuerst abreißen."],
+["Najpierw usuń słup.", "Remove the pole first.", "Entferne zuerst den Mast."],
+["Pod wodą tunelu nie zbudujesz: postaw most.", "You cannot build a tunnel under water: build a bridge.", "Unter Wasser geht kein Tunnel: Baue eine Brücke."],
+["Tunel zaczyna się przy końcu drogi, u stóp wzniesienia.", "A tunnel starts at the end of a road, at the foot of high ground.", "Ein Tunnel beginnt am Ende einer Straße, am Fuß einer Anhöhe."],
+["Tu jest za nisko na tunel: nad nim musi być co najmniej półtora poziomu terenu. Postaw zwykłą drogę.", "Too low for a tunnel here: there must be at least one and a half levels of ground above it. Build an ordinary road.", "Hier ist es zu niedrig für einen Tunnel: Darüber müssen mindestens anderthalb Stufen Gelände liegen. Baue eine normale Straße."],
+["Brakuje {} T¢ na tunel.", "{} T¢ short for the tunnel.", "Es fehlen {} T¢ für den Tunnel."],
+["Zasypać można tylko pole wody.", "Only a water tile can be filled in.", "Zuschütten lässt sich nur ein Wasserfeld."],
+["Zasypuj od brzegu: to pole nie dotyka lądu.", "Fill in from the bank: this tile does not touch land.", "Schütte vom Ufer aus zu: Dieses Feld grenzt nicht an Land."],
+["Woda bez ujścia podnosi się! Gdy przeleje się przez brzeg, zaleje teren. Otwórz jej drogę za mapę albo usyp wał.", "Water with no way out is rising! When it spills over the bank, it will flood the land. Open its way off the map or build up an embankment.", "Wasser ohne Abfluss steigt! Wenn es über das Ufer tritt, überflutet es das Land. Öffne ihm den Weg aus der Karte oder schütte einen Damm auf."],
+["woda się podnosi", "water is rising", "Wasser steigt"],
+["Powódź! Woda zalała teren: budynki i drogi pod wodą nie działają, dopóki nie opadnie.", "Flood! Water has covered the land: buildings and roads under water do not work until it goes down.", "Hochwasser! Wasser hat das Land überflutet: Gebäude und Straßen unter Wasser funktionieren nicht, bis es zurückgeht."],
+["Przystanek stawia się na płaskim odcinku, nie na podjeździe.", "A stop goes on a flat stretch, not on a ramp.", "Eine Haltestelle kommt auf ein ebenes Stück, nicht auf eine Rampe."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
