@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.0.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.0.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2369,7 +2369,7 @@ function carMesh0(kind){const g=new THREE.Group();
 const LOD_R=30,LOD_MAX=1500,lodGeo=new THREE.BoxGeometry(1,1,1);lodGeo.translate(0,0.5,0);
 const lodM=new THREE.InstancedMesh(lodGeo,new THREE.MeshLambertMaterial({color:'#ffffff'}),LOD_MAX);lodM.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 lodM.setColorAt(0,new THREE.Color('#ffffff'));lodM.instanceColor.setUsage(THREE.DynamicDrawUsage);lodM.count=0;lodM.frustumCulled=false;lodM.castShadow=false;lodM.receiveShadow=false;scene.add(lodM);/* colours first: three sizes the colour buffer from count */
-const LOD_SZ={bus:[0.22,0.2,0.62],truck:[0.22,0.2,0.46],garbage:[0.22,0.2,0.42],semi:[0.22,0.22,0.68],fire:[0.22,0.17,0.42],van:[0.2,0.18,0.34],hearse:[0.2,0.15,0.36],sweeper:[0.2,0.15,0.3]},LOD_DEF=[0.2,0.15,0.34];
+const LOD_SZ={bus:[0.22,0.2,0.62],truck:[0.22,0.2,0.46],garbage:[0.22,0.2,0.42],semi:[0.22,0.22,0.68],fire:[0.22,0.17,0.42],van:[0.2,0.18,0.34],hearse:[0.2,0.15,0.36],sweeper:[0.2,0.15,0.3]},LOD_DEF=[0.2*0.75,0.15*0.75,0.34*0.75];for(const k in LOD_SZ)LOD_SZ[k]=LOD_SZ[k].map(v=>v*0.75);
 let lodOn=false;const lodA=new THREE.Matrix4(),lodS=new THREE.Matrix4(),lodC=new THREE.Color();
 /* seasons: tint of grass blades and trees, snowfall, snow on roads that no road service clears; snowy roads slow cars down */
 let seasonSeen=-1;const snowRoad=new Uint8Array(N*N);let snowT=0;
@@ -2396,8 +2396,10 @@ function carLOD(){const on=cam.radius>LOD_R;
     m.updateMatrix();const z=LOD_SZ[c.kind]||LOD_DEF;lodS.makeScale(z[0],z[1],z[2]);lodA.multiplyMatrices(m.matrix,lodS);lodM.setMatrixAt(n,lodA);
     if(!c.lodCol){const b=m.children.find(o=>o.isMesh&&o.material&&o.material.color);c.lodCol=b?'#'+b.material.color.getHexString():'#cfcfcf'}lodC.set(c.lodCol);lodM.setColorAt(n,lodC);n++}
   lodM.count=n;lodM.instanceMatrix.needsUpdate=true;if(lodM.instanceColor)lodM.instanceColor.needsUpdate=true}
+/* 7.0.6: every vehicle is 25% smaller, one scale that fits all roads */
+const CAR_S=0.75;function carSmall(g,kind){if(kind==='walker')return g;for(const ch of g.children){ch.position.multiplyScalar(CAR_S);ch.scale.multiplyScalar(CAR_S)}return g}
 function createCar(kind,path,o){const c=Object.assign({kind,path,seg:0,dist:0,phase:'go',speed:kind==='sweeper'?1.0:kind==='hearse'?1.2:kind==='police'?1.8:kind==='fire'?2.2:kind==='taxi'?1.7:kind==='visitor'?1.6:kind==='truck'?1.05:kind==='garbage'?1.1:kind==='van'?1.3:kind==='semi'?1.0:kind==='bus'?1.25:1.5+Math.random()*0.3,
-  mesh:carMesh(kind,o),rot:null,grow:0,li:(Math.random()*3)|0,id:++carSeq,res:-1,inRes:false,wait:0,ghost:0,vOff:null,lnSeg:-1},o);if(path.length>1){c.li=pickLane(c,path[0],path[1])}c.lp=c.ln=c.li;cars.push(c);placeCar(c);if(o&&o.home!=null)exitFrom(c,o.home);return c}
+  mesh:carSmall(carMesh(kind,o),kind),rot:null,grow:0,li:(Math.random()*3)|0,id:++carSeq,res:-1,inRes:false,wait:0,ghost:0,vOff:null,lnSeg:-1},o);if(path.length>1){c.li=pickLane(c,path[0],path[1])}c.lp=c.ln=c.li;cars.push(c);placeCar(c);if(o&&o.home!=null)exitFrom(c,o.home);return c}
 function removeCar(c){releaseRes(c);if(c.kind==='hearse'&&c.load){const h=grid[c.dest],d=grid[c.home];if(c.phase==='go'){if(h){h.dead=(h.dead||0)+c.load;h.hearse=false}if(d)d.inbound=Math.max(0,(d.inbound||0)-c.load)}else hearseDeliver(c);c.load=0}if(c.pass&&c.pass.length){const pr=grid[c.dest];if(pr&&pr.inbound)pr.inbound=Math.max(0,pr.inbound-c.pass.length);const st=grid[c.home];if(st&&st.jail)st.jail.push(...c.pass);c.pass=[]}if(c.kind==='garbage')releaseG(c);
   if(isDeliv(c.kind)&&!c.delivered){c.delivered=true;const d=grid[c.shop??c.dest];if(d&&isShop(d.t))d.incoming=Math.max(0,d.incoming-c.load);for(const k in c.items)addGood(k,c.items[k],c.home)}
   c.dead=true;scene.remove(c.mesh);disposeTree(c.mesh)}
