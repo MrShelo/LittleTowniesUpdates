@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.0.8';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.0.9';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -931,7 +931,7 @@ function reachHide(){if(reachMesh)reachMesh.count=0;return false}
 var reachMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(0.96,0.96).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:'#5fd84a',transparent:true,opacity:0.38,depthWrite:false}),N*N);reachMesh.count=0;reachMesh.frustumCulled=false;reachMesh.renderOrder=3;scene.add(reachMesh);
 function showArea(i,r,flash,kind='green',fp=null,T=null){reachMesh.count=0;
   if(T&&roadRangeT(T)&&r){const fw0=fp?fp[0]:1,fh0=fp?fp[1]:1,c=grid[i];const ts=c&&c.t===T?tilesOf(i):[];if(!ts.length)for(let dz=0;dz<fh0;dz++)for(let dx=0;dx<fw0;dx++){const x=i%N+dx,z=((i/N)|0)+dz;if(x<N&&z<N)ts.push(idx(x,z))}
-    const cov=c&&c.t===T?reachOf(i,r):reachFrom(ts,r,reachSp(T));let n=0;for(let j=0;j<N*N;j++){if(!cov[j])continue;dObj.position.set(cx(j),surfY(j)+0.07,cz(j));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();reachMesh.setMatrixAt(n++,dObj.matrix)}
+    const cov=c&&c.t===T?reachOf(i,r):reachFrom(ts,r,reachSp(T),sqOf(T,ts.length));let n=0;for(let j=0;j<N*N;j++){if(!cov[j])continue;dObj.position.set(cx(j),surfY(j)+0.07,cz(j));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();reachMesh.setMatrixAt(n++,dObj.matrix)}
     reachMesh.instanceMatrix.needsUpdate=true;reachMesh.material.color.set(AREA_COL[kind][0]);area.visible=false;reachMesh.count=n;areaB.clear();areaB.userData.k='';areaT=flash==='hold'?1e9:flash?1.6:0;
     const x=cx(i)+(fw0-1)/2,z=cz(i)+(fh0-1)/2;areaB.position.y=tYi(i);frameRect(x,z,fw0,fh0,0.06,abT);return}
   const fw=fp?fp[0]:1,fh=fp?fp[1]:1,x=cx(i)+(fw-1)/2,z=cz(i)+(fh-1)/2;
@@ -3605,17 +3605,20 @@ function xrayNew(g){if(!xray)return;const set=new Set();xrayMats(g,true,set);for
 const roadRangeT=t=>!!(MED[t]||EDU[t]||POL[t]||FIRE[t]||t==='roadSvc'||ENT_R[t]||SHOPS_R.has(t)||t==='hotelB');
 /* the tiles a service reaches: along the roads from its entrances, one block per road tile, and every 4 side branches passed cost one more block;
    the tiles around a reached road are covered */
-function reachFrom(tiles,R,sp=1){const out=new Uint8Array(N*N);for(const t of tiles)out[t]=1;const own=new Set(tiles),dist=new Map(),H=[];
+function reachFrom(tiles,R,sp=1,sq=0){const out=new Uint8Array(N*N);for(const t of tiles)out[t]=1;const own=new Set(tiles),dist=new Map(),H=[];
   for(const t of tiles)for(const j of nbrs(t))if(!own.has(j)&&isDrive(j)&&!dist.has(j)){dist.set(j,0);hpush(H,0,j)}
   const deg=j=>{let n=0;for(const k of nbrs(j))if(isDrive(k)&&linkH(j,k))n++;return n};
   while(H.length){const[d,i]=hpop(H);if(d>dist.get(i)+1e-9)continue;out[i]=1;{const x=i%N,z=(i/N)|0;for(let dz=-sp;dz<=sp;dz++)for(let dx=-sp;dx<=sp;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)out[idx(nx,nz)]=1}}
     for(const k of nbrs(i)){if(!isDrive(k)||!linkH(i,k))continue;const nd=d+1+0.25*Math.max(0,deg(k)-2);if(nd>R+1e-9)continue;if(!dist.has(k)||nd<dist.get(k)-1e-9){dist.set(k,nd);hpush(H,nd,k)}}}
+  /* 7.0.8: besides the roads, health, schools, police and fire also cover a square around the building: 5 tiles (small), 6 (big) */
+  if(sq)for(const t of tiles){const x=t%N,z=(t/N)|0;for(let dz=-sq;dz<=sq;dz++)for(let dx=-sq;dx<=sq;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)out[idx(nx,nz)]=1}}
   /* a building touching a reached tile is covered as a whole */
   for(let j=0;j<N*N;j++){if(!out[j])continue;const c=grid[j];if(c&&c.t==='part'&&grid[c.main]&&grid[c.main].tiles)for(const t of grid[c.main].tiles)out[t]=1;else if(c&&c.tiles)for(const t of c.tiles)out[t]=1}
   return out}
 const reachC=new Map();let reachVer=-1;
-function reachOf(i,R){if(grid[i]&&grid[i].t==='part')i=grid[i].main;const v=roadVer+'|'+gridVer();if(v!==reachVer){reachC.clear();reachVer=v}const sp=reachSp(grid[i]&&grid[i].t),k=i+'|'+R+'|'+sp;let o=reachC.get(k);if(!o){o=reachFrom(tilesOf(i),R,sp);reachC.set(k,o)}return o}
+function reachOf(i,R){if(grid[i]&&grid[i].t==='part')i=grid[i].main;const v=roadVer+'|'+gridVer();if(v!==reachVer){reachC.clear();reachVer=v}const ts0=tilesOf(i),sp=reachSp(grid[i]&&grid[i].t),sq=sqOf(grid[i]&&grid[i].t,ts0.length),k=i+'|'+R+'|'+sp+'|'+sq;let o=reachC.get(k);if(!o){o=reachFrom(ts0,R,sp,sq);reachC.set(k,o)}return o}
 /* fire crews and road crews also work a little off the road (two tiles), the others serve the tiles along it */
+const sqOf=(t,n)=>MED[t]||EDU[t]||POL[t]||FIRE[t]?(n>=4?6:5):0;
 const reachSp=t=>FIRE[t]||t==='roadSvc'?2:1;
 const gridVer=()=>gridVerN;
 function computeEnv(){eduP.fill(0);eduS.fill(0);lycCov.fill(0);techCov.fill(0);medCov.fill(0);crowdCov.fill(0);pol.fill(0);entCov.fill(0);noiseCov.fill(0);shopCov.fill(0);parkCov.fill(0);
