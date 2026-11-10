@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.0.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.0.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -572,10 +572,10 @@ const DEF={
   farmwood:{name:'Farma drzew',cost:160,desc:'Szkółka i wyrąb: drewno na meble i dla elektrowni na biomasę, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).',sw:'#3f7a3a',farm:'wood'},
   highway:{name:'Autostrada',cost:25,desc:'Auta jadą 1,5× szybciej. Bez słupów, budynki nie mają z niej wjazdu.',sw:'#2a2e35'},
   tunnel:{name:'Tunel',cost:120,desc:'Droga pod wzniesieniem. Zaczyna się przy końcu drogi u stóp wzgórza i biegnie płasko na jej wysokości; nad tunelem musi być co najmniej półtora poziomu terenu. Na tunelu postawisz słup (kabel pod sufitem) i położysz rurę.',sw:'#6f6a62'},
-  tUp:{name:'Podnieś teren',cost:30,desc:'Podnosi pole o pół poziomu (najwyżej do poziomu 10). Przeciągnij, by podnieść kilka pól. Na zajętym polu nie zadziała.',sw:'#9a8a62',unit:'T¢/pole'},
-  tDown:{name:'Obniż teren',cost:30,desc:'Obniża pole o pół poziomu. Pole obniżone do poziomu wody obok rzeki zamienia się w wodę.',sw:'#7a6a52',unit:'T¢/pole'},
-  tSmooth:{name:'Wygładź teren',cost:30,desc:'Łagodzi skoki: każde pole pod pędzlem zbliża się do średniej wysokości sąsiadów. 30 T¢ za każde pół poziomu zmiany.',sw:'#8fa06a',unit:'T¢/pół poziomu'},
-  tLevel:{name:'Wyrównaj teren',cost:30,desc:'Ustaw wysokość przyciskami − i + albo pobierz ją z pola pipetą, potem przeciągnij po terenie: pola dostaną tę wysokość. 30 T¢ za każde pół poziomu różnicy.',sw:'#b8a878',unit:'T¢/pół poziomu'},
+  tUp:{name:'Podnieś teren',cost:5,desc:'Podnosi pole o pół poziomu (najwyżej do poziomu 10). Przeciągnij, by podnieść kilka pól. Na zajętym polu nie zadziała.',sw:'#9a8a62',unit:'T¢/pole'},
+  tDown:{name:'Obniż teren',cost:5,desc:'Obniża pole o pół poziomu. Pole obniżone do poziomu wody obok rzeki zamienia się w wodę.',sw:'#7a6a52',unit:'T¢/pole'},
+  tSmooth:{name:'Wygładź teren',cost:5,desc:'Łagodzi skoki: każde pole pod pędzlem zbliża się do średniej wysokości sąsiadów. 5 T¢ za każde pół poziomu zmiany.',sw:'#8fa06a',unit:'T¢/pół poziomu'},
+  tLevel:{name:'Wyrównaj teren',cost:5,desc:'Ustaw wysokość przyciskami − i + albo pobierz ją z pola pipetą, potem przeciągnij po terenie: pola dostaną tę wysokość. 5 T¢ za każde pół poziomu różnicy.',sw:'#b8a878',unit:'T¢/pół poziomu'},
   bridge:{name:'Most',cost:60,desc:'Przejazd przez wodę, tylko w linii prostej. Przejmuje pasy i prędkość najlepszej drogi na swoich końcach.',sw:'#b9b7ae'},
   landfill:{name:'Wysypisko',cost:200,desc:'300 kg odpadów na pole. Pola obok siebie łączą się w multiblok z jednym biurem przy ulicy: wspólna pojemność i więcej śmieciarek. Mocno brudzi okolicę.',sw:'#7d6a4f'},
   incS:{name:'Mała spalarnia',cost:900,desc:'1 pole. Spala 40 kg odpadów na godz. (bufor 60 kg). Można dokupić drugi komin: 80 kg/godz. Pobiera 1 MW i dymi.',sw:'#a39890'},
@@ -6836,7 +6836,7 @@ const LT_TR=[
 ["Obniż teren", "Lower terrain", "Gelände absenken"],
 ["Obniża pole o pół poziomu. Pole obniżone do poziomu wody obok rzeki zamienia się w wodę.", "Lowers a tile by half a level. A tile lowered to the water level next to a river turns into water.", "Senkt ein Feld um eine halbe Stufe ab. Ein Feld, das neben einem Fluss bis auf Wasserhöhe abgesenkt wird, wird zu Wasser."],
 ["Wyrównaj teren", "Level terrain", "Gelände einebnen"],
-["Stuknij pole o wybranej wysokości, potem przeciągnij po innych: dostaną tę samą wysokość. 30 T¢ za każde pół poziomu różnicy.", "Tap a tile at the height you want, then drag over others: they get the same height. 30 T¢ for every half level of difference.", "Tippe ein Feld mit der gewünschten Höhe an und ziehe dann über andere: Sie bekommen dieselbe Höhe. 30 T¢ pro halbe Stufe Unterschied."],
+["Stuknij pole o wybranej wysokości, potem przeciągnij po innych: dostaną tę samą wysokość. 5 T¢ za każde pół poziomu różnicy.", "Tap a tile at the height you want, then drag over others: they get the same height. 5 T¢ for every half level of difference.", "Tippe ein Feld mit der gewünschten Höhe an und ziehe dann über andere: Sie bekommen dieselbe Höhe. 5 T¢ pro halbe Stufe Unterschied."],
 ["T¢/pół poziomu", "T¢/half level", "T¢/halbe Stufe"],
 ["Zamienia pole wody przy brzegu w ląd. Uwaga: woda odcięta od ujścia za mapę zacznie się podnosić i może zalać okolicę.", "Turns a water tile at the bank into land. Careful: water cut off from its way off the map starts to rise and may flood the area.", "Verwandelt ein Wasserfeld am Ufer in Land. Achtung: Wasser ohne Abfluss aus der Karte beginnt zu steigen und kann die Umgebung überfluten."],
 ["Daje 2–10 MW: im wyżej stoi, tym więcej (2 MW na zwykłym terenie, 10 MW na najwyższych szczytach). Postaw obok transformatora.", "Gives 2–10 MW: the higher it stands, the more (2 MW on ordinary ground, 10 MW on the highest peaks). Build it next to a transformer.", "Liefert 2–10 MW: je höher, desto mehr (2 MW auf normalem Gelände, 10 MW auf den höchsten Gipfeln). Neben einen Transformator setzen."],
@@ -6862,8 +6862,8 @@ const LT_TR=[
 ["Powódź! Woda zalała teren: budynki i drogi pod wodą nie działają, dopóki nie opadnie.", "Flood! Water has covered the land: buildings and roads under water do not work until it goes down.", "Hochwasser! Wasser hat das Land überflutet: Gebäude und Straßen unter Wasser funktionieren nicht, bis es zurückgeht."],
 ["Przystanek stawia się na płaskim odcinku, nie na podjeździe.", "A stop goes on a flat stretch, not on a ramp.", "Eine Haltestelle kommt auf ein ebenes Stück, nicht auf eine Rampe."],
 ["Wygładź teren", "Smooth terrain", "Gelände glätten"],
-["Łagodzi skoki: każde pole pod pędzlem zbliża się do średniej wysokości sąsiadów. 30 T¢ za każde pół poziomu zmiany.", "Softens steps: every tile under the brush moves towards the average height of its neighbours. 30 T¢ for every half level of change.", "Mildert Stufen: Jedes Feld unter dem Pinsel nähert sich der mittleren Höhe seiner Nachbarn. 30 T¢ pro halbe Stufe Änderung."],
-["Ustaw wysokość przyciskami − i + albo pobierz ją z pola pipetą, potem przeciągnij po terenie: pola dostaną tę wysokość. 30 T¢ za każde pół poziomu różnicy.", "Set the height with − and + or pick it from a tile with the eyedropper, then drag over the ground: the tiles get that height. 30 T¢ for every half level of difference.", "Stelle die Höhe mit − und + ein oder nimm sie mit der Pipette von einem Feld, dann ziehe über das Gelände: Die Felder bekommen diese Höhe. 30 T¢ pro halbe Stufe Unterschied."],
+["Łagodzi skoki: każde pole pod pędzlem zbliża się do średniej wysokości sąsiadów. 5 T¢ za każde pół poziomu zmiany.", "Softens steps: every tile under the brush moves towards the average height of its neighbours. 5 T¢ for every half level of change.", "Mildert Stufen: Jedes Feld unter dem Pinsel nähert sich der mittleren Höhe seiner Nachbarn. 5 T¢ pro halbe Stufe Änderung."],
+["Ustaw wysokość przyciskami − i + albo pobierz ją z pola pipetą, potem przeciągnij po terenie: pola dostaną tę wysokość. 5 T¢ za każde pół poziomu różnicy.", "Set the height with − and + or pick it from a tile with the eyedropper, then drag over the ground: the tiles get that height. 5 T¢ for every half level of difference.", "Stelle die Höhe mit − und + ein oder nimm sie mit der Pipette von einem Feld, dann ziehe über das Gelände: Die Felder bekommen diese Höhe. 5 T¢ pro halbe Stufe Unterschied."],
 ["poz. {}", "lvl {}", "Stufe {}"],
 ["1 pole", "1 tile", "1 Feld"],
 ["Pędzel", "Brush", "Pinsel"],
