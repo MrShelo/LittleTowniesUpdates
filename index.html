@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.0.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.0.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -795,7 +795,7 @@ g2.fillStyle='#7cc24a';g2.fillRect(0,0,N*32,N*32);
 const gc=document.createElement('canvas');gc.width=gc.height=N*32;g2=gc.getContext('2d');
 const water=new Uint8Array(N*N);
 /* 7.0: terrain height of every tile in half-steps (see buildLand), flooded land and the current water level */
-const H_LAND=4,H_MAX=20,H_CAP=40,hgt=new Uint8Array(N*N).fill(4),fld=new Uint8Array(N*N),wlv=new Uint8Array(N*N),wKnown=new Uint8Array(N*N);
+const H_LAND=4,H_MAX=20,H_CAP=40,H_TOP=90,hgt=new Uint8Array(N*N).fill(4),fld=new Uint8Array(N*N),wlv=new Uint8Array(N*N),wKnown=new Uint8Array(N*N);
 /* ore deposits under the grass: 0 none, 1 coal, 2 chalcopyrite */
 const dep=new Uint8Array(N*N);
 const DEP={1:{k:'coal',name:'Złoże węgla',col:'#38332f',spot:'#1f1c1a'},2:{k:'chalco',name:'Złoże chalkopirytu',col:'#a9843f',spot:'#5c9a80'}};
@@ -1856,6 +1856,17 @@ for(const m of[wbL,wbD]){m.frustumCulled=false;m.count=0;scene.add(m)}
 let wBlocks=[];
 /* river flow: in every body of water the source is the map-edge mouth nearest the top-left corner; flowD = steps downstream from it */
 const flowD=new Int32Array(N*N).fill(-1);
+/* 7.0.5: on the sea (Caribbean) the water drifts in one direction across the map and follows the coast: it slides along the shore and past the mouths of bays */
+const seaAx=new Int8Array(N*N),seaSg=new Int8Array(N*N);let seaOn=false;
+function seaFlow(){seaOn=mapType==='carib';if(!seaOn)return;const dl=new Int16Array(N*N).fill(-1),q=[];for(let i=0;i<N*N;i++)if(!water[i]){dl[i]=0;q.push(i)}for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(dl[j]<0){dl[j]=dl[q[h]]+1;q.push(j)}
+  const big=Math.max(...dl),D=(x,z)=>x<0||z<0||x>=N||z>=N?big:dl[idx(x,z)]<0?big:dl[idx(x,z)];
+  let r=0;for(let i=0;i<N*N;i++)r=(r*31+(water[i]?i:0))%997;const ang=(r/997)*Math.PI*2,gx=Math.cos(ang),gz=Math.sin(ang);
+  let vx=new Float32Array(N*N),vz=new Float32Array(N*N);
+  for(let i=0;i<N*N;i++){if(!water[i])continue;const x=i%N,z=(i/N)|0;let nx=D(x+1,z)-D(x-1,z),nz=D(x,z+1)-D(x,z-1);const L=Math.hypot(nx,nz);
+    let ux=gx,uz=gz;if(L>1e-6){nx/=L;nz/=L;const dot=gx*nx+gz*nz;let tx=gx-dot*nx,tz=gz-dot*nz;const T=Math.hypot(tx,tz);if(T<1e-3){tx=-nz;tz=nx}else{tx/=T;tz/=T}const w=Math.max(0,Math.min(1,1-(dl[i]-1)/4));ux=gx*(1-w)+tx*w;uz=gz*(1-w)+tz*w}
+    vx[i]=ux;vz[i]=uz}
+  for(let pass=0;pass<3;pass++){const ax2=new Float32Array(N*N),az2=new Float32Array(N*N);for(let i=0;i<N*N;i++){if(!water[i])continue;let sx=vx[i]*2,sz=vz[i]*2;for(const j of nbrs(i))if(water[j]){sx+=vx[j];sz+=vz[j]}ax2[i]=sx;az2[i]=sz}vx=ax2;vz=az2}
+  for(let i=0;i<N*N;i++){if(!water[i])continue;seaAx[i]=Math.abs(vx[i])>=Math.abs(vz[i])?0:1;seaSg[i]=(seaAx[i]?vz[i]:vx[i])>=0?1:-1}}
 function computeFlow(){flowD.fill(-1);const seen=new Uint8Array(N*N);
   for(let s0=0;s0<N*N;s0++){if(!water[s0]||seen[s0])continue;const comp=[s0];seen[s0]=1;for(let h=0;h<comp.length;h++)for(const j of nbrs(comp[h]))if(water[j]&&!seen[j]){seen[j]=1;comp.push(j)}
     const onEdge=i=>{const x=i%N,z=(i/N)|0;return x===0||z===0||x===N-1||z===N-1};
@@ -1865,7 +1876,7 @@ function computeFlow(){flowD.fill(-1);const seen=new Uint8Array(N*N);
       if(m.size===edge.length&&comp.length>edge.length*6){const d=new Map(src.map(i=>[i,0])),q2=[...src];let far=src[0];for(let h=0;h<q2.length;h++)for(const j of nbrs(q2[h]))if(water[j]&&!d.has(j)){d.set(j,d.get(q2[h])+1);q2.push(j);if(d.get(j)>d.get(far))far=j}src=[far]}}
     const q=[...src];for(const i of src)flowD[i]=0;for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(water[j]&&flowD[j]<0){flowD[j]=flowD[q[h]]+1;q.push(j)}}}
 /* direction (+1 / −1 along the tile's axis) in which the water runs downstream */
-function flowSign(i,ax){const x=i%N,z=(i/N)|0,f=(dx,dz)=>{const nx=x+dx,nz=z+dz;return nx>=0&&nz>=0&&nx<N&&nz<N&&water[idx(nx,nz)]?flowD[idx(nx,nz)]:-1};
+function flowSign(i,ax){if(seaOn&&water[i])return seaSg[i];const x=i%N,z=(i/N)|0,f=(dx,dz)=>{const nx=x+dx,nz=z+dz;return nx>=0&&nz>=0&&nx<N&&nz<N&&water[idx(nx,nz)]?flowD[idx(nx,nz)]:-1};
   const p=ax?f(0,1):f(1,0),m=ax?f(0,-1):f(-1,0);if(p<0&&m<0)return 1;if(p<0)return m>flowD[i]?-1:1;if(m<0)return p>flowD[i]?1:-1;return p>=m?1:-1}
 function buildCurrent(axisOf){wBlocks=[];for(let i=0;i<N*N;i++){if(!water[i])continue;const ax=axisOf(i);
   const sg=flowSign(i,ax);for(let k=0;k<WB_PER;k++)wBlocks.push({i,sg,x:cx(i),z:cz(i),ax,ph:Math.random(),lat:rnd(-0.38,0.38),len:rnd(0.1,0.28),w:rnd(0.05,0.1),h:rnd(0.015,0.03),dark:Math.random()<0.45,sp:rnd(0.18,0.3)})}}
@@ -1912,9 +1923,10 @@ function damFit(i){const c=grid[i];const d=c&&c.t==='hydro'&&c.model&&c.model.us
 function applyWaterLevels(){for(const[i,[m,k]]of wIdx){wSlab(i,LOW_DROP*(grid[i]&&grid[i].t==='hydro'?damLv(i):Math.min(3,lowW[i])));m.setMatrixAt(k,dObj.matrix)}
   for(const m of[waterMesh,waterMeshV])m.instanceMatrix.needsUpdate=true;for(const b of wBlocks)b.y=wlv[b.i]*HS-LOW_DROP*(grid[b.i]&&grid[b.i].t==='hydro'?damLv(b.i):Math.min(3,lowW[b.i]));for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].t==='hydro')damFit(i)}
 function applyWater(){for(let i=0;i<N*N;i++){if(water[i]&&!wKnown[i]){hgt[i]=0;wlv[i]=0;wKnown[i]=1;fld[i]=0}else if(!water[i]){if(wKnown[i]&&hgt[i]<H_LAND){hgt[i]=H_LAND;landDirty=true}wKnown[i]=0}if(water[i]&&wlv[i]<hgt[i])wlv[i]=hgt[i]}riverDirt.fill(0);riverDirty.fill(0);let nh=0,nv=0;wIdx.clear();const run=(i,dx,dz)=>{let k=0,x=i%N,z=(i/N)|0;for(;;){x+=dx;z+=dz;if(x<0||z<0||x>=N||z>=N||!water[idx(x,z)])break;k++}return k};
+  seaFlow();const axOf=i=>seaOn?seaAx[i]:(run(i,1,0)+run(i,-1,0))>=(run(i,0,1)+run(i,0,-1))?0:1;
   for(let i=0;i<N*N;i++)if(water[i]){wSlab(i,0);
-    const h=run(i,1,0)+run(i,-1,0),v=run(i,0,1)+run(i,0,-1);if(h>=v){wIdx.set(i,[waterMesh,nh]);waterMesh.setMatrixAt(nh++,dObj.matrix)}else{wIdx.set(i,[waterMeshV,nv]);waterMeshV.setMatrixAt(nv++,dObj.matrix)}clearDeco(i);groundDeco(i,false)}
-  computeFlow();buildCurrent(i=>(run(i,1,0)+run(i,-1,0))>=(run(i,0,1)+run(i,0,-1))?0:1);tickCurrent(0);paintRiver();
+    if(axOf(i)===0){wIdx.set(i,[waterMesh,nh]);waterMesh.setMatrixAt(nh++,dObj.matrix)}else{wIdx.set(i,[waterMeshV,nv]);waterMeshV.setMatrixAt(nv++,dObj.matrix)}clearDeco(i);groundDeco(i,false)}
+  computeFlow();buildCurrent(axOf);tickCurrent(0);paintRiver();
   waterMesh.count=nh;waterMeshV.count=nv;riverSig='';lowSig='';waterMesh.instanceMatrix.needsUpdate=true;waterMeshV.instanceMatrix.needsUpdate=true;envDirty=true;buildLand();bridgeDirty=true}
 /* rivers: meandering 2–3 tile wide bands from edge to edge; tiles in avoid stay dry (retry) */
 /* map types: standard (1–3 narrow rivers), big (two wide rivers), islands (a wide river splitting into branches around islands, plus a tributary) */
@@ -1994,18 +2006,22 @@ function genRivers(avoid,type=mapType){water.fill(0);
 /* ---------- 7.0: mountains ----------
    Every river gets a mountain range along one of its sides only (a few tiles away, so the banks stay buildable); the Caribbean always has a volcano on its biggest island */
 const hgtStr=()=>{let o='';for(let i=0;i<N*N;i++)o+=String.fromCharCode(48+hgt[i]);return o};
-function hgtLoad(s){hgt.fill(H_LAND);fld.fill(0);let ok=false;if(typeof s.hg==='string'&&s.hg.length===N*N){for(let i=0;i<N*N;i++)hgt[i]=Math.max(0,Math.min(H_CAP,s.hg.charCodeAt(i)-48));ok=true}else for(let i=0;i<N*N;i++)hgt[i]=water[i]?0:H_LAND;
+function hgtLoad(s){hgt.fill(H_LAND);fld.fill(0);let ok=false;if(typeof s.hg==='string'&&s.hg.length===N*N){for(let i=0;i<N*N;i++)hgt[i]=Math.max(0,Math.min(H_TOP,s.hg.charCodeAt(i)-48));ok=true}else for(let i=0;i<N*N;i++)hgt[i]=water[i]?0:H_LAND;
   for(let i=0;i<N*N;i++){wlv[i]=hgt[i];wKnown[i]=water[i]}if(Array.isArray(s.wv))for(const[i,v]of s.wv)if(water[i])wlv[i]=v;if(Array.isArray(s.fl))for(const[i,v]of s.fl)if(!water[i])fld[i]=v;return ok}
 function noise2(G){const g=[];for(let k=0;k<(G+1)*(G+1);k++)g.push(Math.random());const sm=t=>t*t*(3-2*t);return(x,z)=>{const fx=x/N*G,fz=z/N*G,ix=Math.min(G-1,Math.floor(fx)),iz=Math.min(G-1,Math.floor(fz)),tx=sm(fx-ix),tz=sm(fz-iz),a=g[iz*(G+1)+ix],b=g[iz*(G+1)+ix+1],c=g[(iz+1)*(G+1)+ix],d=g[(iz+1)*(G+1)+ix+1];return a+(b-a)*tx+(c-a)*tz+(a-b-c+d)*tx*tz}}
+/* gentle rolling ground: patches up to two levels higher, at least `gap` tiles from the water */
+function rollHills(d,gap){const a=noise2(5),b=noise2(11);for(let i=0;i<N*N;i++){if(water[i]||d[i]<=gap)continue;const x=i%N,z=(i/N)|0,v=0.65*a(x,z)+0.35*b(x,z),fade=Math.min(1,(d[i]-gap)/3);
+  const h=H_LAND+Math.round(Math.max(0,v-0.42)*16*fade);if(h>hgt[i])hgt[i]=Math.min(H_LAND+5,h)}}
 function genHeights(type=mapType){hgt.fill(H_LAND);fld.fill(0);for(let i=0;i<N*N;i++){wKnown[i]=water[i];wlv[i]=0;if(water[i])hgt[i]=0}if(window.__testUnlock&&!window.__testHills)return;
   const fj=type==='tundra';
   if(type==='carib'){/* the volcano: on the biggest island, as far from the sea as it gets */
     const d=new Int16Array(N*N).fill(-1),q=[];for(let i=0;i<N*N;i++)if(water[i]){d[i]=0;q.push(i)}for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(d[j]<0){d[j]=d[q[h]]+1;q.push(j)}
     let best=-1;for(let i=0;i<N*N;i++){const x=i%N,z=(i/N)|0;if(x<6||z<6||x>N-7||z>N-7)continue;if(best<0||d[i]>d[best])best=i}
-    if(best>=0){const R=Math.max(4,Math.min(10,d[best]+2)),bx=best%N,bz=(best/N)|0,top=H_MAX-(R<6?4:0);
-      for(let z=bz-R-1;z<=bz+R+1;z++)for(let x=bx-R-1;x<=bx+R+1;x++){if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);if(water[i]||d[i]<2)continue;const r=Math.hypot(x-bx,z-bz);if(r>R)continue;
-        /* a cone with a steep top and a crater in the middle */
-        let h=H_LAND+Math.round((top-H_LAND)*Math.pow(1-r/R,0.85));if(r<0.8&&R>=5)h-=3;hgt[i]=Math.max(hgt[i],Math.min(H_MAX,h))}}
+    rollHills(d,2);
+    if(best>=0){const R=Math.max(4,Math.min(6.5,d[best]+1.5)),bx=best%N,bz=(best/N)|0,top=H_TOP-8,n=noise2(18);
+      const Ri=Math.ceil(R);for(let z=bz-Ri-1;z<=bz+Ri+1;z++)for(let x=bx-Ri-1;x<=bx+Ri+1;x++){if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);if(water[i]||d[i]<2)continue;const r=Math.hypot(x-bx,z-bz);if(r>R)continue;
+        /* a sharp cone: gentle foot, very steep top, jagged sides and a crater */
+        const k=1-r/R,rg=1-Math.abs(2*n(x,z)-1);let h=H_LAND+Math.round((top-H_LAND)*Math.pow(k,1.6)*(0.82+0.25*rg));if(r<0.8&&R>=5)h-=12;hgt[i]=Math.max(hgt[i],Math.min(H_TOP,h))}}
     return}
   /* distance to the nearest water, which water tile it is, and whether that stretch runs east-west */
   const d=new Int16Array(N*N).fill(-1),src=new Int32Array(N*N).fill(-1),q=[];for(let i=0;i<N*N;i++)if(water[i]){d[i]=0;src[i]=i;q.push(i)}
@@ -2017,7 +2033,8 @@ function genHeights(type=mapType){hgt.fill(H_LAND);fld.fill(0);for(let i=0;i<N*N
   const pca=[];{const S=[];for(let k=0;k<nc;k++)S.push([0,0,0,0,0,0]);for(let i=0;i<N*N;i++){if(comp[i]<0)continue;const a=S[comp[i]],x=i%N,z=(i/N)|0;a[0]++;a[1]+=x;a[2]+=z;a[3]+=x*x;a[4]+=z*z;a[5]+=x*z}
     for(let k=0;k<nc;k++){const[n,sx,sz,sxx,szz,sxz]=S[k],mx=sx/n,mz=sz/n,cxx=sxx/n-mx*mx,czz=szz/n-mz*mz,cxz=sxz/n-mx*mz,tr=cxx+czz,det=cxx*czz-cxz*cxz,l1=tr/2+Math.sqrt(Math.max(0,tr*tr/4-det)),l2=tr-l1;
       let ux=cxz,uz=l1-cxx;if(Math.abs(ux)+Math.abs(uz)<1e-6){ux=cxx>=czz?1:0;uz=cxx>=czz?0:1}const L=Math.hypot(ux,uz),sg=Math.random()<0.5?1:-1;pca.push({long:l1>4*Math.max(1e-6,l2),nx:-uz/L*sg,nz:ux/L*sg})}}
-  const n1=noise2(7),n2=noise2(19),n3=noise2(12),n4=noise2(26),gap=fj?1:3,W=fj?10:9,A0=fj?22:10,CAP=fj?H_CAP:H_MAX;
+  if(type==='bigriver')rollHills(d,2);
+  const n1=noise2(7),n2=noise2(19),n3=noise2(12),n4=noise2(26),gap=fj?1:3,W=fj?10:type==='bigriver'?11:9,A0=fj?22:type==='bigriver'?15:10,CAP=fj?H_CAP:H_MAX;
   for(let i=0;i<N*N;i++){if(water[i]||d[i]<=gap)continue;const w=src[i],x=i%N,z=(i/N)|0,wx=w%N,wz=(w/N)|0;
     /* the side is taken across the river's main direction (a long river), or across the local stretch (a crossing of rivers) */
     const P=pca[comp[w]];let side;if(P.long)side=(x-wx)*P.nx+(z-wz)*P.nz;else{const ew=run(w,1,0)+run(w,-1,0)>=run(w,0,1)+run(w,0,-1);side=ew?(z-wz)*sideH[comp[w]]:(x-wx)*sideV[comp[w]]}
@@ -3636,7 +3653,7 @@ const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(ne
 function tileAt(px,py){const r=renderer.domElement.getBoundingClientRect();ndc.set(((px-r.left)/r.width)*2-1,-((py-r.top)/r.height)*2+1);
   ray.setFromCamera(ndc,camera);const o=ray.ray.origin,d=ray.ray.direction;if(d.y>-1e-4)return -1;
   /* 7.0: march down the ray from just above the highest mountain until it dips under the ground of the tile below it */
-  const yT=lvY(H_CAP)+0.15,yB=WATER_Y-0.05,t0=Math.max(0,(o.y-yT)/-d.y),t1=(o.y-yB)/-d.y,step=0.04/Math.max(0.15,Math.hypot(d.x,d.z));let last=-1;
+  const yT=lvY(H_TOP)+0.15,yB=WATER_Y-0.05,t0=Math.max(0,(o.y-yT)/-d.y),t1=(o.y-yB)/-d.y,step=0.04/Math.max(0.15,Math.hypot(d.x,d.z));let last=-1;
   for(let t=t0;t<=t1;t+=step){const px=o.x+d.x*t,py=o.y+d.y*t,pz=o.z+d.z*t,x=Math.floor(px+HALF),z=Math.floor(pz+HALF);if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);last=i;if(py<=surfY(i))return i}
   hit.set(o.x+d.x*t1,yB,o.z+d.z*t1);const x=Math.floor(hit.x+HALF),z=Math.floor(hit.z+HALF);if(x<0||z<0||x>=N||z>=N)return last;return idx(x,z)}
 /* tapping a building picks the building that is actually under the finger (its walls and roof too), not the ground tile behind it */
