@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.0.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.0.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -143,7 +143,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .hint.warn{color:var(--warn);border-color:var(--warn)}
 .build{justify-self:center;max-width:100%;min-width:0;display:grid;gap:6px;padding:6px}
 .dockRow{justify-self:center;display:flex;gap:6px;align-items:stretch;max-width:100%;min-width:0}.dockRow .build{min-width:0}
-.modeP{display:grid;gap:5px;padding:6px;align-content:space-between;flex:0 0 auto}.modeP .mrow{display:flex;gap:4px}.modeP .msub{display:flex;gap:4px;justify-content:center}
+.modeP{display:grid;gap:5px;padding:6px;align-content:space-between;flex:0 0 auto}.modeP .mrow{display:flex;gap:4px}.modeP .msub{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;align-items:center}.msub .mlb{min-width:40px;text-align:center;font:700 12px var(--font-d,inherit);white-space:nowrap}.msub .mbr{flex-basis:100%;height:0}.msub.terr button{font:700 16px var(--font-d,inherit);color:var(--fg)}
 .msub button{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);display:grid;place-items:center;cursor:pointer;padding:0}.msub button svg{width:17px;height:17px}.msub button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}.msub button:disabled{opacity:.3;cursor:default}
 @media (max-width:700px){.modeP .tool .ct{display:none}.modeP .tool .nm{font-size:12px}.dockRow{gap:4px}}
 @media (max-width:560px){.dockRow{flex-direction:column;align-items:stretch;width:100%}.modeP{display:flex;align-items:center;justify-content:space-between;padding:4px 6px}.modeP .mrow .tool{padding:4px 8px 4px 5px}.msub button{width:32px;height:28px}}
@@ -574,7 +574,8 @@ const DEF={
   tunnel:{name:'Tunel',cost:120,desc:'Droga pod wzniesieniem. Zaczyna się przy końcu drogi u stóp wzgórza i biegnie płasko na jej wysokości; nad tunelem musi być co najmniej półtora poziomu terenu. Na tunelu postawisz słup (kabel pod sufitem) i położysz rurę.',sw:'#6f6a62'},
   tUp:{name:'Podnieś teren',cost:30,desc:'Podnosi pole o pół poziomu (najwyżej do poziomu 10). Przeciągnij, by podnieść kilka pól. Na zajętym polu nie zadziała.',sw:'#9a8a62',unit:'T¢/pole'},
   tDown:{name:'Obniż teren',cost:30,desc:'Obniża pole o pół poziomu. Pole obniżone do poziomu wody obok rzeki zamienia się w wodę.',sw:'#7a6a52',unit:'T¢/pole'},
-  tLevel:{name:'Wyrównaj teren',cost:30,desc:'Stuknij pole o wybranej wysokości, potem przeciągnij po innych: dostaną tę samą wysokość. 30 T¢ za każde pół poziomu różnicy.',sw:'#b8a878',unit:'T¢/pół poziomu'},
+  tSmooth:{name:'Wygładź teren',cost:30,desc:'Łagodzi skoki: każde pole pod pędzlem zbliża się do średniej wysokości sąsiadów. 30 T¢ za każde pół poziomu zmiany.',sw:'#8fa06a',unit:'T¢/pół poziomu'},
+  tLevel:{name:'Wyrównaj teren',cost:30,desc:'Ustaw wysokość przyciskami − i + albo pobierz ją z pola pipetą, potem przeciągnij po terenie: pola dostaną tę wysokość. 30 T¢ za każde pół poziomu różnicy.',sw:'#b8a878',unit:'T¢/pół poziomu'},
   bridge:{name:'Most',cost:60,desc:'Przejazd przez wodę, tylko w linii prostej. Przejmuje pasy i prędkość najlepszej drogi na swoich końcach.',sw:'#b9b7ae'},
   landfill:{name:'Wysypisko',cost:200,desc:'300 kg odpadów na pole. Pola obok siebie łączą się w multiblok z jednym biurem przy ulicy: wspólna pojemność i więcej śmieciarek. Mocno brudzi okolicę.',sw:'#7d6a4f'},
   incS:{name:'Mała spalarnia',cost:900,desc:'1 pole. Spala 40 kg odpadów na godz. (bufor 60 kg). Można dokupić drugi komin: 80 kg/godz. Pobiera 1 MW i dymi.',sw:'#a39890'},
@@ -756,7 +757,7 @@ const facCap=c=>FAC[c.t].cap*(c.t==='landfill'?(c.lfN||1):c.t==='incinerator'&&!
 const facTrucks=c=>c.t==='landfill'?Math.min(4,1+Math.ceil((c.lfN||1)/2)):FAC[c.t].trucks;
 const parkR=c=>DEF[c.t].r+(c.up?1:0);
 const PARKS=['park1','park2','park3'];
-const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','tunnel','crosswalk']},{name:'Teren',tools:['tUp','tDown','tLevel','fill']},{name:'Transport',tools:['busStop','busLine','rail','trainSt','railLine','taxi','freightSt','shipC']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','pitS','pitB','warehouse','smallwh','warehouseB','impDep']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain','farmcotton','farmwood']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','transformer','hvpole','wind','coal','biomass','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','roadSvc']},{name:'Woda',tools:['pipe','tower','pump','pumpB','treatment','outlet']},{name:'Urzędowe',tools:['cityHall']}];
+const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','tunnel','crosswalk']},{name:'Teren',tools:['tUp','tDown','tLevel','tSmooth','fill']},{name:'Transport',tools:['busStop','busLine','rail','trainSt','railLine','taxi','freightSt','shipC']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','pitS','pitB','warehouse','smallwh','warehouseB','impDep']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain','farmcotton','farmwood']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','transformer','hvpole','wind','coal','biomass','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','roadSvc']},{name:'Woda',tools:['pipe','tower','pump','pumpB','treatment','outlet']},{name:'Urzędowe',tools:['cityHall']}];
 const WIND_MW=2,windMW=i=>window.__testUnlock&&!window.__testHills?6:Math.max(2,Math.min(10,hgt[i]/2)), COAL_MW=20, COAL_BURN=8, BIO_MW=30, BIO_UP=20, BIO_BURN=8;
 const TOOLS=['view','bulldoze','road','pole','poleline','poleDel','house','factory','warehouse','impDep','shop','bank','wind','transformer','coal','park1','park2','park3','smallwh'];
 const BASE_MONEY=4000, BANK_CAP=6000, WH_CAP=60, SALE=25, TRUCK_LOAD=4, MAX_CARS=400, PEOPLE_CARS=340;
@@ -823,7 +824,7 @@ paintGround(null);
 gtex=new THREE.CanvasTexture(gc);gtex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());gtex.magFilter=THREE.NearestFilter;
 /* land surface: one quad per dry tile (water tiles are cut out), mapped onto the painted ground canvas */
 const ground=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshLambertMaterial({map:gtex}));ground.receiveShadow=true;ground.frustumCulled=false;scene.add(ground);
-const banks=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshLambertMaterial({color:'#8f7350',side:THREE.DoubleSide}));banks.receiveShadow=true;banks.frustumCulled=false;scene.add(banks);
+const banks=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshLambertMaterial({color:'#ffffff',vertexColors:true,side:THREE.DoubleSide}));const WALL_C={e:new THREE.Color('#8f7350'),r:new THREE.Color('#7d7870'),rl:new THREE.Color('#6a655e')};banks.receiveShadow=true;banks.frustumCulled=false;scene.add(banks);
 const WATER_Y=-0.25,BED_Y=-0.42,LOW_DROP=0.15*-BED_Y;
 /* ---------- 7.0: terrain heights ----------
    Every tile has one height in half-steps (half a level): the river is level 0, ordinary land level 2, mountains up to level 10.
@@ -856,8 +857,10 @@ const tYi=i=>water[i]?0:lvY(hgt[i]);
 const surfY=i=>{const c=grid[i];if(c&&c.t==='bridge')return lvY(rh(i))+0.05;if(water[i])return wSurfY(i);const k=i*4;return Math.max(cornH[k],cornH[k+1],cornH[k+2],cornH[k+3],fld[i]?lvY(fld[i]-1):-9)};
 /* the two ends of a tile edge, seen from tile i: [corner A, corner B] indices */
 const EDGE_C={'1,0':[3,2],'-1,0':[0,1],'0,1':[1,2],'0,-1':[0,3]};
-function buildLand(){calcCorners();landDirty=false;const P=[],U=[],I=[],BP=[],BI=[];
-  const wall=(ax,az,bx,bz,a0,a1,b0,b1)=>{if(a1-a0<1e-4&&b1-b0<1e-4)return;const b=BP.length/3;BP.push(ax,a0,az, bx,b0,bz, bx,b1,bz, ax,a1,az);BI.push(b,b+1,b+2,b,b+2,b+3)};
+function buildLand(){calcCorners();landDirty=false;const P=[],U=[],I=[],BP=[],BI=[],BC=[];
+  /* high cliffs are grey rock, low banks brown earth */
+  const wall=(ax,az,bx,bz,a0,a1,b0,b1)=>{if(a1-a0<1e-4&&b1-b0<1e-4)return;const b=BP.length/3;BP.push(ax,a0,az, bx,b0,bz, bx,b1,bz, ax,a1,az);BI.push(b,b+1,b+2,b,b+2,b+3);
+    const rk=Math.max(a1,b1)>lvY(H_LAND+7),lo=rk?WALL_C.rl:WALL_C.e,hi=rk?WALL_C.r:WALL_C.e;BC.push(lo.r,lo.g,lo.b, lo.r,lo.g,lo.b, hi.r,hi.g,hi.b, hi.r,hi.g,hi.b)};
   for(let i=0;i<N*N;i++){const x=i%N,z=(i/N)|0,x0=x-HALF,z0=z-HALF,k=i*4;
     if(!water[i]){const b=P.length/3;P.push(x0,cornH[k]+0.001,z0, x0,cornH[k+1]+0.001,z0+1, x0+1,cornH[k+2]+0.001,z0+1, x0+1,cornH[k+3]+0.001,z0);
       U.push(x/N,1-z/N, x/N,1-(z+1)/N, (x+1)/N,1-(z+1)/N, (x+1)/N,1-z/N);I.push(b,b+1,b+2,b,b+2,b+3)}
@@ -873,7 +876,7 @@ function buildLand(){calcCorners();landDirty=false;const P=[],U=[],I=[],BP=[],BI
       if(ta>na+1e-4||tb>nb+1e-4)wall(ax,az,bx,bz,Math.min(na,ta),ta,Math.min(nb,tb),tb)}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));g.setIndex(I);g.computeVertexNormals();
   ground.geometry.dispose();ground.geometry=g;
-  const w=new THREE.BufferGeometry();w.setAttribute('position',new THREE.Float32BufferAttribute(BP,3));w.setIndex(BI);w.computeVertexNormals();
+  const w=new THREE.BufferGeometry();w.setAttribute('position',new THREE.Float32BufferAttribute(BP,3));w.setAttribute('color',new THREE.Float32BufferAttribute(BC,3));w.setIndex(BI);w.computeVertexNormals();
   banks.geometry.dispose();banks.geometry=w}
 
 /* rolling meadow around the town */
@@ -1109,7 +1112,7 @@ const firstDay=()=>gameT<1440;
 /* ---------- milestones: the number of people living in the city unlocks buildings, services and hazards (no money, just an order) ---------- */
 const MS=[{name:'Osada',pop:0},{name:'Wioska',pop:15},{name:'Mała wieś',pop:100},{name:'Miasteczko',pop:250},{name:'Małe miasto',pop:500},{name:'Miasto',pop:900},{name:'Duże miasto',pop:1500},{name:'Aglomeracja',pop:2500},{name:'Metropolia',pop:4000}];
 const MS_OF={};[
- 'road crosswalk tUp tDown tLevel house pole poleline poleDel transformer wind pipe pipeDel pump tower outlet shop smallfac smallwh impDep mine farmveg farmgrain landfill park1',
+ 'road crosswalk tUp tDown tLevel tSmooth house pole poleline poleDel transformer wind pipe pipeDel pump tower outlet shop smallfac smallwh impDep mine farmveg farmgrain landfill park1',
  'tenement roadSvc farmdairy factory warehouse restaurant park2 bridge tunnel coal pitS farmcotton farmwood',
  'road2 clinic cemS schoolS hvpole incS shop1 pitB fill',
  'block supermarket hotelS cinema hydro treatment school recycler taxi shipC pumpB biomass policeS',
@@ -1721,7 +1724,7 @@ function wire(a,b,sag=0.07){const pts=[];for(let k=0;k<=10;k++){const u=k/10;pts
 
 /* ---------- state ---------- */
 let grid=new Array(N*N).fill(null);
-let counts={tunnel:0,tUp:0,tDown:0,tLevel:0,impDep:0,cityHall:0,shipC:0,roadSvc:0,heliB:0,rail:0,taxi:0,trainSt:0,freightSt:0,fireS:0,fireB:0,clinic:0,hosp:0,hospC:0,cemS:0,cemB:0,crem:0,schoolS:0,school:0,lyceum:0,techn:0,bankG:0,shop1:0,prison:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,pumpB:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,farmcotton:0,farmwood:0,pitS:0,pitB:0,biomass:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
+let counts={tunnel:0,tUp:0,tDown:0,tLevel:0,tSmooth:0,impDep:0,cityHall:0,shipC:0,roadSvc:0,heliB:0,rail:0,taxi:0,trainSt:0,freightSt:0,fireS:0,fireB:0,clinic:0,hosp:0,hospC:0,cemS:0,cemB:0,crem:0,schoolS:0,school:0,lyceum:0,techn:0,bankG:0,shop1:0,prison:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,pumpB:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,farmcotton:0,farmwood:0,pitS:0,pitB:0,biomass:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
 const pw={bank:0,matCap:0,dem:0,cap:0,ok:0,happy:0,dist:[0,0,0,0,0,0,0]};
 let envDirty=true;const eduP=new Uint8Array(N*N),eduS=new Uint8Array(N*N),lycCov=new Uint8Array(N*N),techCov=new Uint8Array(N*N),medCov=new Uint8Array(N*N);const crowdCov=new Uint8Array(N*N),noiseCov=new Uint8Array(N*N),entCov=new Uint8Array(N*N),pol=new Uint8Array(N*N),shopCov=new Uint8Array(N*N),parkCov=new Uint8Array(N*N);
 const winds=new Set(),bolts=new Set();
@@ -2014,20 +2017,21 @@ function genHeights(type=mapType){hgt.fill(H_LAND);fld.fill(0);for(let i=0;i<N*N
   const pca=[];{const S=[];for(let k=0;k<nc;k++)S.push([0,0,0,0,0,0]);for(let i=0;i<N*N;i++){if(comp[i]<0)continue;const a=S[comp[i]],x=i%N,z=(i/N)|0;a[0]++;a[1]+=x;a[2]+=z;a[3]+=x*x;a[4]+=z*z;a[5]+=x*z}
     for(let k=0;k<nc;k++){const[n,sx,sz,sxx,szz,sxz]=S[k],mx=sx/n,mz=sz/n,cxx=sxx/n-mx*mx,czz=szz/n-mz*mz,cxz=sxz/n-mx*mz,tr=cxx+czz,det=cxx*czz-cxz*cxz,l1=tr/2+Math.sqrt(Math.max(0,tr*tr/4-det)),l2=tr-l1;
       let ux=cxz,uz=l1-cxx;if(Math.abs(ux)+Math.abs(uz)<1e-6){ux=cxx>=czz?1:0;uz=cxx>=czz?0:1}const L=Math.hypot(ux,uz),sg=Math.random()<0.5?1:-1;pca.push({long:l1>4*Math.max(1e-6,l2),nx:-uz/L*sg,nz:ux/L*sg})}}
-  const n1=noise2(7),n2=noise2(19),gap=fj?1:3,W=fj?10:9,A0=fj?22:10,CAP=fj?H_CAP:H_MAX;
+  const n1=noise2(7),n2=noise2(19),n3=noise2(12),n4=noise2(26),gap=fj?1:3,W=fj?10:9,A0=fj?22:10,CAP=fj?H_CAP:H_MAX;
   for(let i=0;i<N*N;i++){if(water[i]||d[i]<=gap)continue;const w=src[i],x=i%N,z=(i/N)|0,wx=w%N,wz=(w/N)|0;
     /* the side is taken across the river's main direction (a long river), or across the local stretch (a crossing of rivers) */
     const P=pca[comp[w]];let side;if(P.long)side=(x-wx)*P.nx+(z-wz)*P.nz;else{const ew=run(w,1,0)+run(w,-1,0)>=run(w,0,1)+run(w,0,-1);side=ew?(z-wz)*sideH[comp[w]]:(x-wx)*sideV[comp[w]]}
     if(side<=0)continue;
     const t=(d[i]-gap)/W;if(t>=1.35)continue;const prof=Math.pow(Math.sin(Math.PI*Math.min(1,t/1.35)),0.7),A=A0*(0.55+0.7*n1(x,z));
-    const h=H_LAND+Math.round(prof*A+2.2*(n2(x,z)-0.5));if(h-H_LAND>=2&&h>hgt[i])hgt[i]=Math.min(CAP,h)}
+    /* fjords: sharp, jagged peaks (ridged noise) rising from green slopes instead of broad terraces */
+    const rg=n=>{const v=1-Math.abs(2*n-1);return v*v},h=fj?H_LAND+Math.round(34*Math.pow(prof,0.8)*(0.12+0.95*(0.6*rg(n3(x,z))+0.4*rg(n4(x,z))))):H_LAND+Math.round(prof*A+2.2*(n2(x,z)-0.5));if(h-H_LAND>=2&&h>hgt[i])hgt[i]=Math.min(CAP,h)}
   /* no thin ridges: a raised tile needs raised neighbours on two sides; single spikes are cut down */
   /* no notches: a dip up to five tiles wide between higher ground on both sides is filled up */
   const hAt=(x,z)=>x<0||z<0||x>=N||z>=N||water[idx(x,z)]?0:hgt[idx(x,z)];
-  for(let pass=0;pass<3;pass++)for(let i=0;i<N*N;i++){if(water[i])continue;const x=i%N,z=(i/N)|0;let best=hgt[i];
+  for(let pass=0;pass<(fj?0:3);pass++)for(let i=0;i<N*N;i++){if(water[i])continue;const x=i%N,z=(i/N)|0;let best=hgt[i];
     for(const[dx,dz]of[[1,0],[0,1],[1,1],[1,-1]]){const a=Math.max(hAt(x-dx,z-dz),hAt(x-2*dx,z-2*dz),hAt(x-3*dx,z-3*dz)),b=Math.max(hAt(x+dx,z+dz),hAt(x+2*dx,z+2*dz),hAt(x+3*dx,z+3*dz)),m=Math.min(a,b);if(m>best)best=m}
     if(best>hgt[i])hgt[i]=best}
-  for(let pass=0;pass<2;pass++)for(let i=0;i<N*N;i++){if(water[i]||hgt[i]<=H_LAND)continue;const up=nbrs(i).filter(j=>!water[j]&&hgt[j]>H_LAND).length;if(up<2){hgt[i]=H_LAND;continue}let m=0;for(const j of nbrs(i))m=Math.max(m,water[j]?0:hgt[j]);if(hgt[i]>m+2)hgt[i]=m+2}}
+  for(let pass=0;pass<2;pass++)for(let i=0;i<N*N;i++){if(water[i]||hgt[i]<=H_LAND)continue;const up=nbrs(i).filter(j=>!water[j]&&hgt[j]>H_LAND).length;if(up<2){hgt[i]=H_LAND;continue}let m=0;for(const j of nbrs(i))m=Math.max(m,water[j]?0:hgt[j]);if(hgt[i]>m+(fj?5:2))hgt[i]=m+(fj?5:2)}}
 const bfsCache=new Map();
 const factories=new Set();
 let cars=[];
@@ -3665,7 +3669,7 @@ el.addEventListener('pointermove',e=>{
   if(mode==='pending'&&Math.hypot(p.x-p.sx,p.y-p.sy)>7){
     if(p.btn===2||p.shift)mode='rotate';else if(p.btn===1)mode='pan';
     else if(((buildMode==='line'&&MODE_OK(tool))||roadMode())&&moveSrc<0){if(lineConf)cancelLine(true);mode='line';lineA=tileAt(p.sx,p.sy);lineB=lineA;showLine()}
-    else if(STREET[tool]||tool==='crosswalk'||tool==='rail'||tool==='highway'||tool==='bridge'||tool==='tunnel'||tool==='tUp'||tool==='tDown'||tool==='tLevel'||tool==='hydro'||tool==='fill'||tool==='pole'||tool==='poleDel'||tool==='pipe'||tool==='pipeDel'||tool==='bulldoze'){mode='paint';lastPaint=-1;paintAt(p.sx,p.sy)}else mode='pan'}
+    else if(STREET[tool]||tool==='crosswalk'||tool==='rail'||tool==='highway'||tool==='bridge'||tool==='tunnel'||TERR[tool]||tool==='hydro'||tool==='fill'||tool==='pole'||tool==='poleDel'||tool==='pipe'||tool==='pipeDel'||tool==='bulldoze'){mode='paint';lastPaint=-1;brushDone.clear();paintAt(p.sx,p.sy)}else mode='pan'}
   if(mode==='rotate'){cam.theta-=dx*0.008;cam.phi-=dy*0.006;if(tut&&tut.on)tut.turned=(tut.turned||0)+Math.abs(dx)}
   else if(mode==='pan')pan(dx,dy);
   else if(mode==='paint')paintAt(e.clientX,e.clientY);
@@ -3726,7 +3730,7 @@ let paintPrev=-1;function paintAt(x,y){const i=tileAt(x,y);if(i<0||i===lastPaint
 function hover(x,y){if(lineConf)return;if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{hover(x,y)}finally{tool=sv}return}const i=tileAt(x,y);if(!areaT)area.visible=false;hoverI=i;showGhost1(i);
   if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,grid[i].t==='rail'?'Tory wjazdowe · połącz z nimi dworzec, a pociągi przywiozą turystów':'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
   const ar=toolRange(tool);if(ar)showArea(i,ar,false,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool));
-  hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;hl.position.y=surfY(i)+0.06;
+  hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;hl.position.y=surfY(i)+0.06;if(TERR[tool])showBrush(i);
   const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='busStop')ok=showStopGhost(i)&&(!!grid[i].bus||money>=DEF.busStop.cost);else if(isLineT(tool))ok=lineStopAt(i,tool==='busLine')>=0;else if(tool==='crosswalk')ok=crossOK(i)&&!grid[i].cross&&!grid[i].bus&&money>=DEF.crosswalk.cost;else if(tool==='crossDel')ok=!!grid[i]&&(!!grid[i].cross||!!grid[i].bus);else if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c?!railNearWhy(i):(!!STREET[c.t]&&!c.rail&&!c.edge&&!crossWhy(i)))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
   else if(STREET[tool]||tool==='roundabout'){const c=grid[i];ok=c&&c.t==='rail'&&STREET[tool]?!water[i]&&!c.edge&&money>=DEF[tool].cost:c?(STREET[c.t]||c.t==='roundabout')&&c.t!==tool&&money>=DEF[tool].cost-DEF[c.t].cost:!water[i]&&money>=DEF[tool].cost&&tool!=='roundabout'}
   else if(tool==='bulldoze')ok=!!grid[i];else if(tool==='poleline')ok=!!grid[i]&&!!STREET[grid[i].t]&&money>=DEF.pole.cost;else if(tool==='pole')ok=money>=DEF.pole.cost&&((!grid[i]&&!water[i])||(!!grid[i]&&!!POLEABLE[grid[i].t]&&!grid[i].pole));else if(tool==='poleDel')ok=isLV(i);else if(FP(tool)){const x=i%N,z=(i/N)|0,[fw,fh]=FP(tool);ok=x<=N-fw&&z<=N-fh&&money>=DEF[tool].cost;if(ok)for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++){const j=idx(x+dx,z+dz);if(grid[j]||water[j])ok=false}}
@@ -3762,14 +3766,26 @@ function slopeWhy(i,t){if(fld[i])return'To pole jest zalane.';const was=grid[i];
     if(!why&&paintPrev>=0&&j2adj(paintPrev,i)&&netK(paintPrev)===netK(i)&&!linkH(i,paintPrev))why='Za stromo: droga pokona najwyżej pół poziomu na jednym polu. Wyrównaj teren albo poprowadź tunel.'}finally{grid[i]=was}return why}
 /* raise, lower, level */
 let levelH=null;
-function terraform(i,painting){const c=grid[i];
-  if(tool==='tLevel'&&levelH==null){if(water[i]){if(!painting)setHint('Wysokość wzorcową wskaż na lądzie.',true,true);return}levelH=hgt[i];setHint(`<b>Wyrównaj teren</b> · wysokość wzorcowa: poziom ${mw(levelH/2)}. Teraz stuknij lub przeciągnij po polach do wyrównania (stuknij narzędzie ponownie, by wybrać inną wysokość).`,false,true);hintEl.hidden=false;if(painting)lastPaint=i;return}
-  if(water[i]){if(tool==='tUp'){fillRiver(i,painting);return}if(!painting)setHint('Pole wody: zasyp je albo podnieś od brzegu.',true,true);return}
-  if(c&&!(c.t==='lpole')){if(!painting)setHint('Na zajętym polu nie zmienisz terenu: najpierw je wyburz.',true,true);return}
-  if(c&&c.t==='lpole'){if(!painting)setHint('Najpierw usuń słup.',true,true);return}
-  const h0=hgt[i],h1=tool==='tUp'?Math.min(H_MAX,h0+1):tool==='tDown'?Math.max(0,h0-1):levelH;if(h1===h0)return;
-  const cost=DEF[tool].cost*Math.abs(h1-h0);if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢.`,true,true);return}
-  spend(cost);setH(i,h1);save()}
+/* 7.0.2: terrain tools work with a round brush (one tile up to radius 3); a drag changes every tile only once */
+const TERR={tUp:1,tDown:1,tLevel:1,tSmooth:1};let brushR=0,levelPick=false;const brushDone=new Set();
+try{brushR=Math.max(0,Math.min(3,+localStorage.getItem('lt-brush')||0))}catch(e){}
+function showBrush(i){const d=2*brushR+1;hl.visible=true;hl.scale.set(d,d,1);hl.position.set(cx(i),Math.max(...brushTiles(i).map(surfY))+0.06,cz(i))}
+function brushTiles(i){const x=i%N,z=(i/N)|0,o=[];for(let dz=-brushR;dz<=brushR;dz++)for(let dx=-brushR;dx<=brushR;dx++){if(dx*dx+dz*dz>(brushR+0.45)**2)continue;const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)o.push(idx(nx,nz))}return o}
+const freeH=i=>!water[i]&&!grid[i];
+function terraform(i,painting){if(!painting)brushDone.clear();
+  if(tool==='tLevel'&&(levelH==null||levelPick)){if(water[i]){if(!painting)setHint('Wysokość wzorcową wskaż na lądzie.',true,true);return}levelH=hgt[i];levelPick=false;renderModes();setHint(`<b>Wyrównaj teren</b> · wysokość wzorcowa: poziom ${mw(levelH/2)}. Teraz stuknij lub przeciągnij po polach do wyrównania.`,false,true);hintEl.hidden=false;if(painting)lastPaint=i;return}
+  const ts=brushTiles(i).filter(j=>!brushDone.has(j));
+  if(!brushR){const c=grid[i];if(water[i]){if(tool==='tUp'){fillRiver(i,painting);return}if(!painting)setHint('Pole wody: zasyp je albo podnieś od brzegu.',true,true);return}
+    if(c){if(!painting)setHint(c.t==='lpole'?'Najpierw usuń słup.':'Na zajętym polu nie zmienisz terenu: najpierw je wyburz.',true,true);return}}
+  /* targets come from the heights before this stroke, so smoothing does not chase its own changes */
+  const H0=new Map(ts.map(j=>[j,hgt[j]]));const want=new Map();
+  for(const j of ts){if(!freeH(j))continue;const h0=hgt[j];let h1;
+    if(tool==='tUp')h1=Math.min(H_MAX,h0+1);else if(tool==='tDown')h1=Math.max(0,h0-1);else if(tool==='tLevel')h1=levelH;
+    else{let sum=0,n=0;for(const k of[j,...nbrs8(j)]){if(water[k])continue;sum+=H0.has(k)?H0.get(k):hgt[k];n++}const avg=sum/Math.max(1,n);h1=Math.abs(avg-h0)<0.5?h0:h0+Math.sign(avg-h0)*Math.min(2,Math.round(Math.abs(avg-h0)))}
+    if(h1!==h0)want.set(j,h1)}
+  if(!want.size){for(const j of ts)brushDone.add(j);return}
+  let cost=0;for(const[j,h]of want)cost+=DEF[tool].cost*Math.abs(h-hgt[j]);if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢.`,true,true);return}
+  spend(cost);for(const[j,h]of want)setH(j,h);for(const j of ts)brushDone.add(j);save()}
 function setH(i,h){hgt[i]=h;fld[i]=0;landDirty=true;groundSig=-1;envDirty=true;
   /* dug down to the water beside it: the tile becomes water */
   const w=nbrs(i).filter(j=>water[j]);if(w.length&&h<=Math.max(...w.map(j=>wlv[j]))){water[i]=1;wKnown[i]=1;wlv[i]=Math.max(h,...w.map(j=>wlv[j]));clearDeco(i);applyWater()}
@@ -3863,7 +3879,7 @@ function apply(i,painting){
   if(tool==='hydro'&&!grid[i]){if(!water[i]){if(!painting)setHint('Tamę stawia się na wodzie, w poprzek rzeki.',true,true);return}
 }
   if(tool==='fill'){fillRiver(i,painting);return}
-  if(tool==='tUp'||tool==='tDown'||tool==='tLevel'){terraform(i,painting);return}
+  if(TERR[tool]){terraform(i,painting);return}
   if(tool==='tunnel'){placeTunnel(i,painting);return}
   if(tool==='pitS'&&!grid[i]&&!water[i]&&!dep[i]){if(!painting)setHint('Kopalnię stawia się na złożu: ciemne łaty to węgiel, złotawe to chalkopiryt.',true,true);return}
   if((tool==='pump'||tool==='outlet')&&!grid[i]&&!water[i]){let near=false;for(const k of nbrs(i))if(water[k])near=true;if(!near){setHint(`${DEF[tool].name} musi stać tuż przy rzece.`,true,true);return}}
@@ -4224,7 +4240,7 @@ road2:'<path d="M5 2.5L3.5 17.5M15 2.5l1.5 15"/><path d="M9.2 3v14.5M10.8 3v14.5
 road3:'<path d="M4 2.5L2.5 17.5M16 2.5l1.5 15"/><path d="M9.3 3v14.5M10.7 3v14.5M6.7 4v2M6.4 9v2M6.1 14v2M13.3 4v2M13.6 9v2M13.9 14v2"/>',
 roundabout:'<circle cx="10" cy="10" r="6.5"/><circle cx="10" cy="10" r="2.3"/><path d="M15.2 6.2l.4-2.6M15.2 6.2l-2.6-.3"/>',
 highway:'<path d="M7 2.5L3 17.5M13 2.5l4 15"/><path d="M7.4 11l2.6-2.6 2.6 2.6M7.4 15l2.6-2.6 2.6 2.6"/>',
-tunnel:'<path d="M2 16.5h16"/><path d="M4.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5"/><path d="M7.5 16.5V11.5a2.5 2.5 0 0 1 5 0v5"/>',tUp:'<path d="M2 16.5h16"/><path d="M3.5 16.5l4-6 3 3 2-2 4 5"/><path d="M14 2.5v5M11.8 4.6L14 2.5l2.2 2.1"/>',tDown:'<path d="M2 16.5h16"/><path d="M3.5 16.5l4-6 3 3 2-2 4 5"/><path d="M14 2.5v5M11.8 5.4L14 7.5l2.2-2.1"/>',tLevel:'<path d="M2 16.5h16"/><path d="M3 12.5h14"/><path d="M6 12.5V9M10 12.5V7M14 12.5V9"/>',bridge:'<path d="M2 8h16M3 8v5M17 8v5"/><path d="M5 13a5 5 0 0 1 10 0"/><path d="M2 16.5c1.5-1 2.5-1 4 0s2.5 1 4 0 2.5-1 4 0 2.5 1 4 0"/>',
+tunnel:'<path d="M2 16.5h16"/><path d="M4.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5"/><path d="M7.5 16.5V11.5a2.5 2.5 0 0 1 5 0v5"/>',tUp:'<path d="M2 16.5h16"/><path d="M3.5 16.5l4-6 3 3 2-2 4 5"/><path d="M14 2.5v5M11.8 4.6L14 2.5l2.2 2.1"/>',tDown:'<path d="M2 16.5h16"/><path d="M3.5 16.5l4-6 3 3 2-2 4 5"/><path d="M14 2.5v5M11.8 5.4L14 7.5l2.2-2.1"/>',tSmooth:'<path d="M2 16.5h16"/><path d="M2.5 13c2.5-4 5-4 7.5-1.5s5 2.5 7.5-1.5"/>',tLevel:'<path d="M2 16.5h16"/><path d="M3 12.5h14"/><path d="M6 12.5V9M10 12.5V7M14 12.5V9"/>',bridge:'<path d="M2 8h16M3 8v5M17 8v5"/><path d="M5 13a5 5 0 0 1 10 0"/><path d="M2 16.5c1.5-1 2.5-1 4 0s2.5 1 4 0 2.5-1 4 0 2.5 1 4 0"/>',
 pole:'<path d="M10 3v14.5M5 5.5h10M7 8.5h6"/>',
 poleline:'<path d="M4.5 4v13.5M15.5 4v13.5M2 5.5h5M13 5.5h5"/><path d="M4.5 6c3.7 2.2 7.3 2.2 11 0"/>',
 poleDel:'<path d="M8 3v14.5M3.5 5.5h9M5.5 8.5h5"/><path d="M12.5 11.5l5 5M17.5 11.5l-5 5"/>',
@@ -4321,7 +4337,13 @@ const MODE_OK=t=>!!t&&!!DEF[t]&&!DRIVE[t]&&!['pipe','pole','poleline','rail','pi
 const DELT={pipe:'pipeDel',power:'poleDel',cross:'crossDel'};
 const BMODES=[['one','Pojedynczo: po postawieniu wraca do podglądu','<rect x="6" y="6" width="8" height="8" rx="1.2"/>'],['many','Wiele: stawiaj, aż wrócisz do podglądu','<rect x="2.5" y="3" width="6" height="6" rx="1"/><rect x="11.5" y="5" width="6" height="6" rx="1"/><rect x="5" y="11.5" width="6" height="6" rx="1"/>'],['line','Linia: przeciągnij poziomo albo pionowo, zobaczysz szkic i zatwierdzisz','<rect x="2" y="7.5" width="4.6" height="5" rx=".8"/><rect x="7.7" y="7.5" width="4.6" height="5" rx=".8"/><rect x="13.4" y="7.5" width="4.6" height="5" rx=".8"/>'],['road','Zbuduj wzdłuż drogi (słupy i rury): przeciągnij od ulicy do ulicy','<path d="M3 17.5c0-5 3-6 7-7.5s7-3 7-7.5"/><circle cx="4.2" cy="13" r="1.3"/><circle cx="10" cy="10" r="1.3"/><circle cx="15.8" cy="6.5" r="1.3"/>']];
 const DMODES=[['all','Wyburzaj wszystko','<path d="M4.5 4.5l11 11M15.5 4.5l-11 11"/>'],['pipe','Usuwaj tylko rury (zwrot 2 T¢)',null],['power','Usuwaj tylko słupy (zwrot 50%)',null],['cross','Usuwaj tylko przejścia dla pieszych i przystanki','<path d="M3 5.5h14M3 14.5h14M6 7v6M10 7v6M14 7v6"/>']];
-function renderModes(){const box=document.getElementById('msub');const del=tool==='bulldoze';const L=del?DMODES:BMODES;
+function renderModes(){const box=document.getElementById('msub');
+  if(TERR[tool]){const lb=['1 pole','R1','R2','R3'][brushR];let h=`<button type="button" data-b="-" title="Mniejszy pędzel" aria-label="Mniejszy pędzel" ${brushR?'':'disabled'}>−</button><span class="mlb" title="Pędzel">${lb}</span><button type="button" data-b="+" title="Większy pędzel" aria-label="Większy pędzel" ${brushR<3?'':'disabled'}>+</button>`;
+    if(tool==='tLevel')h+=`<span class="mbr"></span><button type="button" data-l="pick" title="Pobierz wysokość z pola" aria-label="Pobierz wysokość z pola" aria-pressed="${levelPick||levelH==null}"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3.5l3.5 3.5-2 2-3.5-3.5z"/><path d="M11.5 7L5 13.5 4 17l3.5-1L14 9.5"/></svg></button><button type="button" data-l="-" title="Niżej" aria-label="Niżej">−</button><span class="mlb" title="Wysokość wyrównania">${levelH==null?'—':'poz. '+mw(levelH/2)}</span><button type="button" data-l="+" title="Wyżej" aria-label="Wyżej">+</button>`;
+    box.innerHTML=h;box.classList.add('terr');
+    for(const b of box.querySelectorAll('[data-b]'))b.onclick=()=>{brushR=Math.max(0,Math.min(3,brushR+(b.dataset.b==='+'?1:-1)));try{localStorage.setItem('lt-brush',String(brushR))}catch(e){}renderModes();if(hoverI>=0)showBrush(hoverI)};
+    for(const b of box.querySelectorAll('[data-l]'))b.onclick=()=>{const k=b.dataset.l;if(k==='pick'){levelPick=true;setHint('<b>Wyrównaj teren</b> · stuknij pole, z którego pobrać wysokość.',false,true)}else{levelH=Math.max(0,Math.min(H_MAX,(levelH??H_LAND)+(k==='+'?1:-1)));levelPick=false;setHint(`<b>Wyrównaj teren</b> · wysokość wzorcowa: poziom ${mw(levelH/2)}. Przeciągnij po terenie.`,false,true)}hintEl.hidden=false;renderModes()};return}
+  box.classList.remove('terr');const del=tool==='bulldoze';const L=del?DMODES:BMODES;
   box.innerHTML=L.map(([k,tt,ic])=>`<button type="button" data-m="${k}" title="${tt}" aria-label="${tt}" aria-pressed="${del?delMode===k:ALONG[tool]?(alongOn?k==='road':k==='many'):buildMode===k}" ${!del&&tool!=='view'&&!(k==='road'?!!ALONG[tool]:ALONG[tool]?k==='many':MODE_OK(tool))?'disabled':''}><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ic||ICO[DELT[k]]}</svg></button>`).join('');
   for(const b of box.querySelectorAll('button'))b.onclick=()=>{if(del){delMode=b.dataset.m;setXray(delMode==='pipe'||underOn);document.getElementById('hazard').hidden=false;setHint(toolHint())}else if(ALONG[tool]){alongOn=b.dataset.m==='road'?!alongOn:false;if(lineConf||lineA>=0)cancelLine(true);try{localStorage.setItem('lt-along',alongOn?'1':'0')}catch(e){}setHint(toolHint())}else if(b.dataset.m!=='road'){buildMode=b.dataset.m;try{localStorage.setItem('lt-bmode',buildMode)}catch(e){}setHint(toolHint())}renderModes()}}
 CATS.forEach((c,k)=>{const b=document.createElement('button');b.type='button';b.className='cat';b.innerHTML=svgI(CAT_ICO[k],14)+`<span>${c.name}</span>`;b.setAttribute('role','tab');
@@ -4330,7 +4352,7 @@ function showCat(k){if(catBtns[k]&&catBtns[k].hidden){k=catBtns.findIndex(b=>!b.
   CATS.forEach((c,j)=>c.tools.forEach(t=>toolBtns[t].hidden=j!==k||!unlocked(t)));toolsEl.scrollLeft=0}
 /* a category tab exists only once something in it is unlocked */
 function refreshLocks(){CATS.forEach((c,k)=>{catBtns[k].hidden=!c.tools.some(unlocked)});showCat(curCat);if(linBtn)linBtn.hidden=!unlocked('busLine')}
-function selectTool(t){if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel'||underOn);if(t==='tLevel')levelH=null;pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=false;for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
+function selectTool(t){if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel'||underOn);if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=false;for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
   const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);if(t==='bulldoze'&&delMode==='pipe')setXray(true);setHint(toolHint());if(lmsg)setHint(lmsg,true,true);hl.visible=false;renderModes();
   if(linpEl){linpEl.hidden=!isLineT(t);if(linBtn)linBtn.setAttribute('aria-expanded',String(isLineT(t)));renderLines()}}
 showCat(0);
@@ -6838,7 +6860,20 @@ const LT_TR=[
 ["Woda bez ujścia podnosi się! Gdy przeleje się przez brzeg, zaleje teren. Otwórz jej drogę za mapę albo usyp wał.", "Water with no way out is rising! When it spills over the bank, it will flood the land. Open its way off the map or build up an embankment.", "Wasser ohne Abfluss steigt! Wenn es über das Ufer tritt, überflutet es das Land. Öffne ihm den Weg aus der Karte oder schütte einen Damm auf."],
 ["woda się podnosi", "water is rising", "Wasser steigt"],
 ["Powódź! Woda zalała teren: budynki i drogi pod wodą nie działają, dopóki nie opadnie.", "Flood! Water has covered the land: buildings and roads under water do not work until it goes down.", "Hochwasser! Wasser hat das Land überflutet: Gebäude und Straßen unter Wasser funktionieren nicht, bis es zurückgeht."],
-["Przystanek stawia się na płaskim odcinku, nie na podjeździe.", "A stop goes on a flat stretch, not on a ramp.", "Eine Haltestelle kommt auf ein ebenes Stück, nicht auf eine Rampe."]
+["Przystanek stawia się na płaskim odcinku, nie na podjeździe.", "A stop goes on a flat stretch, not on a ramp.", "Eine Haltestelle kommt auf ein ebenes Stück, nicht auf eine Rampe."],
+["Wygładź teren", "Smooth terrain", "Gelände glätten"],
+["Łagodzi skoki: każde pole pod pędzlem zbliża się do średniej wysokości sąsiadów. 30 T¢ za każde pół poziomu zmiany.", "Softens steps: every tile under the brush moves towards the average height of its neighbours. 30 T¢ for every half level of change.", "Mildert Stufen: Jedes Feld unter dem Pinsel nähert sich der mittleren Höhe seiner Nachbarn. 30 T¢ pro halbe Stufe Änderung."],
+["Ustaw wysokość przyciskami − i + albo pobierz ją z pola pipetą, potem przeciągnij po terenie: pola dostaną tę wysokość. 30 T¢ za każde pół poziomu różnicy.", "Set the height with − and + or pick it from a tile with the eyedropper, then drag over the ground: the tiles get that height. 30 T¢ for every half level of difference.", "Stelle die Höhe mit − und + ein oder nimm sie mit der Pipette von einem Feld, dann ziehe über das Gelände: Die Felder bekommen diese Höhe. 30 T¢ pro halbe Stufe Unterschied."],
+["poz. {}", "lvl {}", "Stufe {}"],
+["1 pole", "1 tile", "1 Feld"],
+["Pędzel", "Brush", "Pinsel"],
+["Mniejszy pędzel", "Smaller brush", "Kleinerer Pinsel"],
+["Większy pędzel", "Bigger brush", "Größerer Pinsel"],
+["Pobierz wysokość z pola", "Pick the height from a tile", "Höhe von einem Feld übernehmen"],
+["Wysokość wyrównania", "Levelling height", "Einebnungshöhe"],
+["<b>Wyrównaj teren</b> · stuknij pole, z którego pobrać wysokość.", "<b>Level terrain</b> · tap the tile to take the height from.", "<b>Gelände einebnen</b> · tippe das Feld an, dessen Höhe übernommen werden soll."],
+["<b>Wyrównaj teren</b> · wysokość wzorcowa: poziom {}. Przeciągnij po terenie.", "<b>Level terrain</b> · target height: level {}. Drag over the ground.", "<b>Gelände einebnen</b> · Zielhöhe: Stufe {}. Ziehe über das Gelände."],
+["<b>Wyrównaj teren</b> · wysokość wzorcowa: poziom {}. Teraz stuknij lub przeciągnij po polach do wyrównania.", "<b>Level terrain</b> · target height: level {}. Now tap or drag over the tiles to level.", "<b>Gelände einebnen</b> · Zielhöhe: Stufe {}. Tippe oder ziehe jetzt über die Felder."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
