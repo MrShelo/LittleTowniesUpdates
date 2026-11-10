@@ -1,1 +1,1 @@
-{"v": "7.0.6", "notes": "Pojazdy są o 25% mniejsze i mają jedną skalę na każdej drodze."}
+{"v": "7.0.7", "notes": "Zasięg usług (zdrowie, szkoły, policja, straż, służby drogowe) liczy się po drogach od wjazdu budynku: tyle bloków w każdą stronę, a co 4 odgałęzienia po drodze zasięg jest o blok krótszy. Podgląd zasięgu pokazuje pola, do których usługa dojedzie."}

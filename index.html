@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.0.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.0.7';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -795,7 +795,7 @@ g2.fillStyle='#7cc24a';g2.fillRect(0,0,N*32,N*32);
 const gc=document.createElement('canvas');gc.width=gc.height=N*32;g2=gc.getContext('2d');
 const water=new Uint8Array(N*N);
 /* 7.0: terrain height of every tile in half-steps (see buildLand), flooded land and the current water level */
-const H_LAND=4,H_MAX=20,H_CAP=40,H_TOP=90,hgt=new Uint8Array(N*N).fill(4),fld=new Uint8Array(N*N),wlv=new Uint8Array(N*N),wKnown=new Uint8Array(N*N);
+let gridVerN=0;const H_LAND=4,H_MAX=20,H_CAP=40,H_TOP=90,hgt=new Uint8Array(N*N).fill(4),fld=new Uint8Array(N*N),wlv=new Uint8Array(N*N),wKnown=new Uint8Array(N*N);
 /* ore deposits under the grass: 0 none, 1 coal, 2 chalcopyrite */
 const dep=new Uint8Array(N*N);
 const DEP={1:{k:'coal',name:'Złoże węgla',col:'#38332f',spot:'#1f1c1a'},2:{k:'chalco',name:'Złoże chalkopirytu',col:'#a9843f',spot:'#5c9a80'}};
@@ -917,13 +917,21 @@ function makeTree(){const g=new THREE.Group();const t=new THREE.Mesh(trunkG,trun
 const hl=new THREE.Mesh(new THREE.PlaneGeometry(0.96,0.96),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.35,depthWrite:false}));
 hl.rotation.x=-Math.PI/2; hl.position.y=0.06; hl.visible=false; scene.add(hl);
 const area=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({color:'#5fd84a',transparent:true,opacity:.3,depthWrite:false}));
-area.rotation.x=-Math.PI/2;area.position.y=0.055;area.visible=false;scene.add(area);let areaT=0;
+area.rotation.x=-Math.PI/2;area.position.y=0.055;area.visible=reachHide();scene.add(area);let areaT=0;
 /* bright frames: green around the effect range, orange around the building's own tile */
 const areaB=new THREE.Group();scene.add(areaB);const AREA_COL={green:['#5fd84a','#1fbf4a'],noise:['#eef0f2','#9aa0a6'],pol:['#f2d64b','#c9900f']};const abM=new THREE.MeshBasicMaterial({color:'#1fbf4a'}),abT=new THREE.MeshBasicMaterial({color:'#f07a4f'}),abG=new THREE.BoxGeometry(1,0.025,1);
 function frameAt(x,z,size,w,m){for(const[dx,dz,sx,sz]of[[0,-1,size+w,w],[0,1,size+w,w],[-1,0,w,size+w],[1,0,w,size+w]]){const b=new THREE.Mesh(abG,m);b.scale.set(sx,1,sz);b.position.set(x+dx*size/2,0.075,z+dz*size/2);areaB.add(b)}}
 function frameRect(x,z,sx,sz,w,m){for(const[dx,dz,a,b]of[[0,-1,sx+w,w],[0,1,sx+w,w],[-1,0,w,sz+w],[1,0,w,sz+w]]){const q=new THREE.Mesh(abG,m);q.scale.set(a,1,b);q.position.set(x+dx*sx/2,0.075,z+dz*sz/2);areaB.add(q)}}
 /* fp: footprint [w,h] of the building — its reach counts from every tile it covers */
-function showArea(i,r,flash,kind='green',fp=null){const fw=fp?fp[0]:1,fh=fp?fp[1]:1,x=cx(i)+(fw-1)/2,z=cz(i)+(fh-1)/2;
+/* 7.0.7: public services (health, schools, police, fire, road service) reach along the roads: their range is drawn as the tiles they reach */
+function reachHide(){if(reachMesh)reachMesh.count=0;return false}
+var reachMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(0.96,0.96).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:'#5fd84a',transparent:true,opacity:0.38,depthWrite:false}),N*N);reachMesh.count=0;reachMesh.frustumCulled=false;reachMesh.renderOrder=3;scene.add(reachMesh);
+function showArea(i,r,flash,kind='green',fp=null,T=null){reachMesh.count=0;
+  if(T&&roadRangeT(T)&&r){const fw0=fp?fp[0]:1,fh0=fp?fp[1]:1,c=grid[i];const ts=c&&c.t===T?tilesOf(i):[];if(!ts.length)for(let dz=0;dz<fh0;dz++)for(let dx=0;dx<fw0;dx++){const x=i%N+dx,z=((i/N)|0)+dz;if(x<N&&z<N)ts.push(idx(x,z))}
+    const cov=c&&c.t===T?reachOf(i,r):reachFrom(ts,r,reachSp(T));let n=0;for(let j=0;j<N*N;j++){if(!cov[j])continue;dObj.position.set(cx(j),surfY(j)+0.07,cz(j));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();reachMesh.setMatrixAt(n++,dObj.matrix)}
+    reachMesh.instanceMatrix.needsUpdate=true;reachMesh.material.color.set(AREA_COL[kind][0]);area.visible=false;reachMesh.count=n;areaB.clear();areaB.userData.k='';areaT=flash==='hold'?1e9:flash?1.6:0;
+    const x=cx(i)+(fw0-1)/2,z=cz(i)+(fh0-1)/2;areaB.position.y=tYi(i);frameRect(x,z,fw0,fh0,0.06,abT);return}
+  const fw=fp?fp[0]:1,fh=fp?fp[1]:1,x=cx(i)+(fw-1)/2,z=cz(i)+(fh-1)/2;
   area.visible=true;area.position.set(x,tYi(i)+0.055,z);areaB.position.y=tYi(i);area.scale.set(2*r+fw,2*r+fh,1);areaT=flash==='hold'?1e9:flash?1.6:0;
   const col=AREA_COL[kind];area.material.color.set(col[0]);area.material.opacity=kind==='noise'?0.42:0.3;abM.color.set(col[1]);
   const k=i+'|'+r+'|'+kind+'|'+fw+'x'+fh;if(areaB.userData.k!==k){areaB.userData.k=k;areaB.clear();frameRect(x,z,2*r+fw,2*r+fh,0.08,abM);frameRect(x,z,fw,fh,0.06,abT)}}
@@ -2285,7 +2293,7 @@ function refreshAround(i){const x=i%N,z=(i/N)|0;rebuildRoad(i);refreshBuilding(i
 
 function roadBase(t){return t==='highway'?[G.hwBase,mat.road]:t==='bridge'?[G.deck,mat.road]:[G.roadBase,t==='road2'?mat.road2:t==='road3'?mat.road3:mat.road]}
 let mvNext=null;
-function addCell(i,t,anim=true,second=-1){whDirty=true;const extra=Array.isArray(second)?second:(second>=0?[second]:[]);
+function addCell(i,t,anim=true,second=-1){whDirty=true;gridVerN++;const extra=Array.isArray(second)?second:(second>=0?[second]:[]);
   clearDeco(i);groundDeco(i,false);
   const g=new THREE.Group();g.position.set(cx(i),tYi(i),cz(i));
   const cell={t,group:g,work:0,timer:1+Math.random()*3,mv:mvNext!=null?mvNext:Math.random()};mvNext=null;
@@ -2316,7 +2324,7 @@ function addCell(i,t,anim=true,second=-1){whDirty=true;const extra=Array.isArray
   xrayNew(g);
   if(anim){if(!DRIVE[t]&&cell.model&&t!=='lpole'&&t!=='hvpole'&&t!=='rail')startConstruction(cell);else{g.scale.setScalar(0.5);popping.push({g,t:0})}}
 }
-function removeCell(i){let c=grid[i];if(!c)return;if(c.t==='part'){i=c.main;c=grid[i];if(!c||c.t==='part'){grid[i]=null;return}}whDirty=true;const stLeft=isWH(c.t)&&!whKeep&&c.st?c.st:null;scene.remove(c.group);if(c.model){factories.delete(c.model);if(c.model.userData.rotor)winds.delete(c.model.userData.rotor)}if(c.bolt)bolts.delete(c.bolt);
+function removeCell(i){let c=grid[i];if(!c)return;gridVerN++;if(c.t==='part'){i=c.main;c=grid[i];if(!c||c.t==='part'){grid[i]=null;return}}whDirty=true;const stLeft=isWH(c.t)&&!whKeep&&c.st?c.st:null;scene.remove(c.group);if(c.model){factories.delete(c.model);if(c.model.userData.rotor)winds.delete(c.model.userData.rotor)}if(c.bolt)bolts.delete(c.bolt);
   c.group.traverse(o=>{if(o.geometry&&!o.geometry.userData.keep)o.geometry.dispose()});
   if(c.t==='bridge'&&pipe[i]){pipe[i]=0}
   if(c.railFx){scene.remove(c.railFx);c.railFx=null}if(c.crossFx){scene.remove(c.crossFx);c.crossFx=null}if(c.busFx){scene.remove(c.busFx);c.busFx=null}if(c.bus||c.t==='trainSt'){const S=i;setTimeout(()=>{if(!grid[S]||!(grid[S].bus||grid[S].t==='trainSt'))stopGone(S)},0)}if(c.rail||c.t==='rail'||c.t==='trainSt'||c.t==='freightSt'){railVer++;setTimeout(railRefreshAll,0)}
@@ -2593,7 +2601,7 @@ const MED={clinic:{r:9,cap:35},hosp:{r:11,cap:100},hospC:{r:13,cap:300}},DCARE={
 const dCap=c=>DCARE[c.t]+(c.t==='cemB'&&c.up?20:0)+(c.t==='crem'&&c.up?40:0),medCap=c=>MED[c.t].cap;
 let crimes=[],crimeSeq=0,crimeT=40,heistT=240;const pinG=new THREE.ConeGeometry(0.12,0.3,8).rotateX(Math.PI);pinG.userData.keep=true;
 const matPin=new THREE.MeshBasicMaterial({color:'#ff3b30'}),matPinH=new THREE.MeshBasicMaterial({color:'#ffcc00'});
-const stCover=(st,i)=>{const c=grid[st];if(!c)return false;const r=polRad(c);return tilesOf(st).some(t=>Math.abs(t%N-i%N)<=r&&Math.abs(((t/N)|0)-((i/N)|0))<=r)};
+const stCover=(st,i)=>{const c=grid[st];if(!c)return false;const R=reachOf(st,polRad(c));return tilesOf(i).some(t=>R[t])};
 const stations=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isPolice(c.t)&&!c.off&&c.powered&&entryOf(i)>=0)o.push(i)}return o};
 const polCars=st=>cars.filter(c=>!c.dead&&c.kind==='police'&&c.home===st&&c.role!=='transport');
 function popNow(){let p=0;for(const c of grid)if(c&&HLV[c.t])p+=popOf(c);return p}
@@ -2676,7 +2684,7 @@ function setLitter(i,n){const c=grid[i];if(!c||!DRIVE[c.t])return;c.litter=Math.
   for(let k=0;k<c.litter*2;k++){const b=box(0.07,0.03,0.05,litM[k%3],(Math.sin(i*7+k*3.1))*0.32,0.025,(Math.cos(i*5+k*2.3))*0.32);b.rotation.y=k;b.castShadow=false;g.add(b)}c.group.add(g);c.litFx=g}
 function litterHour(){const p=litterP();if(p<=0)return;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!HLV[c.t]||c.aband||!popOf(c))continue;if(Math.random()<p){const e=entryOf(i);if(e>=0&&!grid[e].edge){setLitter(e,(grid[e].litter||0)+1);cur.litter=(cur.litter||0)+1}}}envDirty=true}
 const svcBases=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.t==='roadSvc'&&!c.off&&!c.ruin&&c.powered&&entryOf(i)>=0)o.push(i)}return o};
-const svcCover=(b,i)=>tilesOf(b).some(t=>cheb(t,i)<=SVC_R);
+const svcCover=(b,i)=>{const R=reachOf(b,SVC_R);return tilesOf(i).some(t=>R[t])};
 function dirtHour(){for(let i=0;i<N*N;i++){const c=grid[i];if(!c||(!PARKS.includes(c.t)&&!isFarm(c.t)))continue;const p=Math.max(...tilesOf(i).map(k=>pol[k]));if(p>0){const was=c.dirt||0;c.dirt=Math.min(1,was+0.08*p);if(was<0.5&&c.dirt>=0.5)envDirty=true}}
   for(const b of svcBases())for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!svcCover(b,i))continue;if(c.dirt>0){const was=c.dirt;c.dirt=Math.max(0,c.dirt-0.6);if(was>=0.5&&c.dirt<0.5)envDirty=true}if(c.litter&&cheb(b,i)<=SVC_R)setLitter(i,c.litter-1)}}
 function sweepArrive(v){if(v.phase==='back')return removeCar(v);const here=curTile(v);if(grid[here]&&grid[here].litter){setLitter(here,0);float(here,'posprzątane','neutral');envDirty=true}
@@ -3074,7 +3082,7 @@ function fireGroup(t){if(NOFIRE.has(t))return null;if(t==='coal'||t==='biomass'|
 let fires=[];const flameG=new THREE.ConeGeometry(0.09,0.3,6);flameG.userData.keep=true;const flameM=[new THREE.MeshBasicMaterial({color:'#ff7a1a'}),new THREE.MeshBasicMaterial({color:'#ffc42e'})];
 const hasWater=c=>c.water==='ok'||c.water==='dirty';
 const fireStations=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&isFireSt(c.t)&&!c.off&&!c.ruin&&c.powered&&hasWater(c)&&entryOf(i)>=0)o.push(i)}return o};
-const fireCover=(st,i)=>{const c=grid[st];if(!c)return false;const r=fireRad(c);return tilesOf(st).some(t=>Math.abs(t%N-i%N)<=r&&Math.abs(((t/N)|0)-((i/N)|0))<=r)};
+const fireCover=(st,i)=>{const c=grid[st];if(!c)return false;const R=reachOf(st,fireRad(c));return tilesOf(i).some(t=>R[t])};
 const fireTrucks=st=>cars.filter(c=>!c.dead&&c.kind==='fire'&&c.home===st).length,truckCap=st=>FIRE[grid[st].t].trucks+(grid[st].up?FIRE[grid[st].t].extra:0);
 const canBurn=c=>c&&c.t!=='part'&&!c.edge&&!DRIVE[c.t]&&!c.ruin&&!c.burn&&fireGroup(c.t)&&!constructs.some(C=>C.cell===c);
 function fireChip(i){const c=grid[i],gp=c.group.position;const el=document.createElement('div');el.className='st crimeChip fireChip';
@@ -3591,6 +3599,22 @@ function xrayNew(g){if(!xray)return;const set=new Set();xrayMats(g,true,set);for
 /* ---------- environment & happiness ----------
    Pollution (Chebyshev distance): factory 1 = yellow, 2 = yellow-green; coal plant 1 = yellow, 2–3 = yellow-green.
    House: 3 base, +1 shop within 5 tiles, +1 park in its range, −1 / −2 for the tile's pollution, −1 without power; clamped 1–5. */
+const roadRangeT=t=>!!(MED[t]||EDU[t]||POL[t]||FIRE[t]||t==='roadSvc');
+/* the tiles a service reaches: along the roads from its entrances, one block per road tile, and every 4 side branches passed cost one more block;
+   the tiles around a reached road are covered */
+function reachFrom(tiles,R,sp=1){const out=new Uint8Array(N*N);for(const t of tiles)out[t]=1;const own=new Set(tiles),dist=new Map(),H=[];
+  for(const t of tiles)for(const j of nbrs(t))if(!own.has(j)&&isDrive(j)&&!dist.has(j)){dist.set(j,0);hpush(H,0,j)}
+  const deg=j=>{let n=0;for(const k of nbrs(j))if(isDrive(k)&&linkH(j,k))n++;return n};
+  while(H.length){const[d,i]=hpop(H);if(d>dist.get(i)+1e-9)continue;out[i]=1;{const x=i%N,z=(i/N)|0;for(let dz=-sp;dz<=sp;dz++)for(let dx=-sp;dx<=sp;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)out[idx(nx,nz)]=1}}
+    for(const k of nbrs(i)){if(!isDrive(k)||!linkH(i,k))continue;const nd=d+1+0.25*Math.max(0,deg(k)-2);if(nd>R+1e-9)continue;if(!dist.has(k)||nd<dist.get(k)-1e-9){dist.set(k,nd);hpush(H,nd,k)}}}
+  /* a building touching a reached tile is covered as a whole */
+  for(let j=0;j<N*N;j++){if(!out[j])continue;const c=grid[j];if(c&&c.t==='part'&&grid[c.main]&&grid[c.main].tiles)for(const t of grid[c.main].tiles)out[t]=1;else if(c&&c.tiles)for(const t of c.tiles)out[t]=1}
+  return out}
+const reachC=new Map();let reachVer=-1;
+function reachOf(i,R){if(grid[i]&&grid[i].t==='part')i=grid[i].main;const v=roadVer+'|'+gridVer();if(v!==reachVer){reachC.clear();reachVer=v}const sp=reachSp(grid[i]&&grid[i].t),k=i+'|'+R+'|'+sp;let o=reachC.get(k);if(!o){o=reachFrom(tilesOf(i),R,sp);reachC.set(k,o)}return o}
+/* fire crews and road crews also work a little off the road (two tiles), the others serve the tiles along it */
+const reachSp=t=>FIRE[t]||t==='roadSvc'?2:1;
+const gridVer=()=>gridVerN;
 function computeEnv(){eduP.fill(0);eduS.fill(0);lycCov.fill(0);techCov.fill(0);medCov.fill(0);crowdCov.fill(0);pol.fill(0);entCov.fill(0);noiseCov.fill(0);shopCov.fill(0);parkCov.fill(0);
   const stamp=(arr,i,r,v,max)=>{const x=i%N,z=(i/N)|0;for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);
     const d=Math.max(Math.abs(dx),Math.abs(dz));const val=typeof v==='function'?v(d):v;if(max)arr[j]=Math.max(arr[j],val);else arr[j]=val}};
@@ -3600,8 +3624,8 @@ function computeEnv(){eduP.fill(0);eduS.fill(0);lycCov.fill(0);techCov.fill(0);m
     if(c.t==='shop'||c.t==='shop1'||c.t==='bakery'||c.t==='gallery'||c.t==='supermarket')stamp(shopCov,i,SHOP_R,1,true);
     if(c.crowd)stamp(crowdCov,i,SHOP_R,1,true);
     {const er=entR(c);if(er)for(const t of tilesOf(i))stamp(entCov,t,er,1,true)}
-    if(EDU[c.t]&&c.powered!==false){const E=EDU[c.t];for(const t of tilesOf(i)){stamp(E.k==='p'?eduP:eduS,t,E.r,1,true);if(E.lyc)stamp(lycCov,t,E.r,1,true);if(E.tech)stamp(techCov,t,E.r,1,true)}}
-    if(MED[c.t])for(const t of tilesOf(i))stamp(medCov,t,MED[c.t].r,1,true);
+    if(EDU[c.t]&&c.powered!==false){const E=EDU[c.t],cov=reachOf(i,E.r),A=E.k==='p'?eduP:eduS;for(let j=0;j<N*N;j++)if(cov[j]){A[j]=1;if(E.lyc)lycCov[j]=1;if(E.tech)techCov[j]=1}}
+    if(MED[c.t]){const cov=reachOf(i,MED[c.t].r);for(let j=0;j<N*N;j++)if(cov[j])medCov[j]=1}
     if(false);
     else if(DEF[c.t]&&DEF[c.t].r&&c.trash<TRASH[c.t].cap&&!((c.dirt||0)>=0.5))for(const t of tilesOf(i))stamp(parkCov,t,parkR(c),1,true)}
   for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part')continue;const ts=tilesOf(i);c.lyc=ts.some(k=>lycCov[k]);c.techB=ts.some(k=>techCov[k])}
@@ -3707,7 +3731,7 @@ function endPtr(e){const p=ptrs.get(e.pointerId);if(!p)return;
   if(mode==='line'&&(e.type==='pointerup'||e.type==='pointercancel'))endLine();
   ptrs.delete(e.pointerId);if(ptrs.size===0)mode='none';else if(mode==='multi')mode='none'}
 el.addEventListener('pointerup',endPtr);el.addEventListener('pointercancel',endPtr);
-el.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){hl.visible=false;hoverI=-1;if(stopGhost)stopGhost.visible=false;if(ghost&&pendA<0&&moveSrc<0)ghost.visible=false;if(!areaT)area.visible=false}});
+el.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){hl.visible=false;hoverI=-1;if(stopGhost)stopGhost.visible=false;if(ghost&&pendA<0&&moveSrc<0)ghost.visible=false;if(!areaT)area.visible=reachHide()}});
 el.addEventListener('wheel',e=>{e.preventDefault();cam.radius*=Math.exp(e.deltaY*0.0012);updateCamera()},{passive:false});
 /* line building: dragging draws a see-through draft of the whole line; nothing is built until it is confirmed (✓ Zbuduj) or it is cancelled */
 let lineConf=false;const lineG=new THREE.Group();scene.add(lineG);const lineTpl=new Map();
@@ -3746,9 +3770,9 @@ function placeLine(){const ts=lineTiles();if(!ts.length)return;lineRun=true;let 
   try{for(const t of ts){if(FP(tool)&&!roadMode()){pendA=t;const T=curT(),tt=fpTiles(t);if(fpOK(tt,T)&&money>=fpCost()){placeFP();n++}else pendA=-1}else{const m1=money;apply(t,true);if(money<m1)n++}}}finally{lineRun=false}
   updateGhost();setHint(n?`Postawiono w linii: ${n} × ${DEF[tool]?DEF[tool].name:''} za ${fmt(m0-money)} T¢.`:'Nic nie postawiono: pola zajęte albo brak gotówki.',!n,true);hintEl.hidden=false}
 let paintPrev=-1;function paintAt(x,y){const i=tileAt(x,y);if(i<0||i===lastPaint)return;paintPrev=lastPaint;lastPaint=i;apply(i,true)}
-function hover(x,y){if(lineConf)return;if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{hover(x,y)}finally{tool=sv}return}const i=tileAt(x,y);if(!areaT)area.visible=false;hoverI=i;showGhost1(i);
+function hover(x,y){if(lineConf)return;if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{hover(x,y)}finally{tool=sv}return}const i=tileAt(x,y);if(!areaT)area.visible=reachHide();hoverI=i;showGhost1(i);
   if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,grid[i].t==='rail'?'Tory wjazdowe · połącz z nimi dworzec, a pociągi przywiozą turystów':'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
-  const ar=toolRange(tool);if(ar)showArea(i,ar,false,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool));
+  const ar=toolRange(tool);if(ar)showArea(i,ar,false,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool),tool);
   hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;hl.position.y=surfY(i)+0.06;if(TERR[tool])showBrush(i);
   const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='busStop')ok=showStopGhost(i)&&(!!grid[i].bus||money>=DEF.busStop.cost);else if(isLineT(tool))ok=lineStopAt(i,tool==='busLine')>=0;else if(tool==='crosswalk')ok=crossOK(i)&&!grid[i].cross&&!grid[i].bus&&money>=DEF.crosswalk.cost;else if(tool==='crossDel')ok=!!grid[i]&&(!!grid[i].cross||!!grid[i].bus);else if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c?!railNearWhy(i):(!!STREET[c.t]&&!c.rail&&!c.edge&&!crossWhy(i)))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
   else if(STREET[tool]||tool==='roundabout'){const c=grid[i];ok=c&&c.t==='rail'&&STREET[tool]?!water[i]&&!c.edge&&money>=DEF[tool].cost:c?(STREET[c.t]||c.t==='roundabout')&&c.t!==tool&&money>=DEF[tool].cost-DEF[c.t].cost:!water[i]&&money>=DEF[tool].cost&&tool!=='roundabout'}
@@ -3805,7 +3829,7 @@ function terraform(i,painting){if(!painting)brushDone.clear();
   if(!want.size){for(const j of ts)brushDone.add(j);return}
   let cost=0;for(const[j,h]of want)cost+=DEF[tool].cost*Math.abs(h-hgt[j]);if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢.`,true,true);return}
   spend(cost);for(const[j,h]of want)setH(j,h);for(const j of ts)brushDone.add(j);save()}
-function setH(i,h){hgt[i]=h;fld[i]=0;landDirty=true;groundSig=-1;envDirty=true;if(dep[i])depDirty=true;
+function setH(i,h){gridVerN++;hgt[i]=h;fld[i]=0;landDirty=true;groundSig=-1;envDirty=true;if(dep[i])depDirty=true;
   /* dug down to the water beside it: the tile becomes water */
   const w=nbrs(i).filter(j=>water[j]);if(w.length&&h<=Math.max(...w.map(j=>wlv[j]))){water[i]=1;wKnown[i]=1;wlv[i]=Math.max(h,...w.map(j=>wlv[j]));clearDeco(i);applyWater()}
   for(const j of[i,...nbrs(i)])if(grid[j]){if(DRIVE[grid[j].t])rebuildRoad(j);else refreshBuilding(j)}floodCheck=0;groundDeco(i,!grid[i]&&!water[i]);redecoY(i)}
@@ -3846,10 +3870,10 @@ function ghostFor(T){const sm=moveSrc>=0&&grid[moveSrc]&&!grid[moveSrc].tiles&&(
   m.traverse(o=>{if(o.material){o.castShadow=false;o.receiveShadow=false;o.material=Array.isArray(o.material)?o.material.map(mk):mk(o.material)}});
   ghost=new THREE.Group();ghost.add(m);ghost.renderOrder=5;scene.add(ghost);ghostT=GK;return ghost}
 const faceRoad=i=>{const e=nbrs(i).find(k=>grid[k]&&DRIVE[grid[k].t]);return e!=null&&e>=0?Math.atan2(cx(e)-cx(i),cz(e)-cz(i)):0};
-function updateGhost(){if(lineConf&&pendA<0){sel.visible=false;if(ghost)ghost.visible=false;return}const F=curFP();if(pendA<0||!F){sel.visible=false;placeEl.hidden=true;if(ghost)ghost.visible=false;if(areaT>=1e9&&inspI<0){area.visible=false;areaT=0}return}const[fw,fh]=F,T=curT(),t=fpTiles(pendA);
+function updateGhost(){if(lineConf&&pendA<0){sel.visible=false;if(ghost)ghost.visible=false;return}const F=curFP();if(pendA<0||!F){sel.visible=false;placeEl.hidden=true;if(ghost)ghost.visible=false;if(areaT>=1e9&&inspI<0){area.visible=reachHide();areaT=0}return}const[fw,fh]=F,T=curT(),t=fpTiles(pendA);
   const ok=fpOK(t,T),cost=fpCost(),afford=money>=cost;sel.visible=true;sel.scale.set(fw,fh,1);sel.position.set(cx(pendA)+(fw-1)/2,tYi(pendA)+0.065,cz(pendA)+(fh-1)/2);
   sel.material.color.set(ok&&afford?'#3fbf5a':'#e0402b');placeEl.hidden=false;hintEl.hidden=true;
-  {const ar=toolRange(T);if(ar)showArea(pendA,ar,'hold',rangeKind(T),DEF[T]&&(DEF[T].r||DEF[T].area)?null:[fw,fh])}
+  {const ar=toolRange(T);if(ar)showArea(pendA,ar,'hold',rangeKind(T),DEF[T]&&(DEF[T].r||DEF[T].area)?null:[fw,fh],T)}
   try{const g=ghostFor(T);g.visible=true;g.position.set(cx(pendA)+(fw-1)/2,tYi(pendA),cz(pendA)+(fh-1)/2);g.rotation.y=FP0(T)?rotIdx*Math.PI/2:faceRoad(pendA)}catch(e){}
   document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?(!t.every(j=>hgt[j]===hgt[t[0]])?'teren nierówny: wyrównaj go':T==='pitB'||T==='pitS'?'oba pola muszą leżeć na tym samym złożu':'musi stać przy rzece'):'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:`${fmt(cost)} T¢`}`;
   document.getElementById('pOk').disabled=!(ok&&afford)}
@@ -3857,7 +3881,7 @@ function placeFP(){if(pendA<0)return;const T=curT(),t=fpTiles(pendA),cost=fpCost
   const a=pendA;pendA=-1;lockBuy();
   if(moveSrc>=0){const src=moveSrc;moveSrc=-1;doMove(src,a,t,cost);updateGhost();hintEl.hidden=false;
     if(entryOf(a)<0&&!NOROAD[T])setHint('Przeniesiono. Budynek nie ma dojazdu: dołóż ulicę obok.',true,true);else setHint(`Przeniesiono za ${fmt(cost)} T¢.`,false,true);return}
-  spend(cost);addCell(a,tool,true,t.slice(1));if(grid[a]&&grid[a].tiles){grid[a].rot=rotIdx;refreshBuilding(a)}updateGhost();{const ar=toolRange(tool);if(ar&&grid[a])showArea(a,svcRange(tool,grid[a])||ar,true,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool))}hintEl.hidden=false;
+  spend(cost);addCell(a,tool,true,t.slice(1));if(grid[a]&&grid[a].tiles){grid[a].rot=rotIdx;refreshBuilding(a)}updateGhost();{const ar=toolRange(tool);if(ar&&grid[a])showArea(a,svcRange(tool,grid[a])||ar,true,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool),tool)}hintEl.hidden=false;
   if(entryOf(a)<0)setHint('Budynek nie ma dojazdu. Dołóż ulicę obok, by zaczął działać.',true,true);else setHint(toolHint());save();afterPlace(true)}
 function cancelFP(){pendA=-1;const mv=moveSrc>=0;moveSrc=-1;updateGhost();hintEl.hidden=false;if(mv)setHint('Przenoszenie anulowane.',false,true)}
 /* R: single-tile buildings get a fixed facing (auto = front to the street); with a building open in the inspector, R turns that building */
@@ -3952,7 +3976,7 @@ function apply(i,painting){
   if(DRIVE[tool]){const why=roadNearWhy(i)||slopeWhy(i,tool);if(why){if(!painting||why!==lastSlopeWhy)setHint(why,true,true);lastSlopeWhy=why;return}}
   const cost=DEF[tool].cost;
   if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢ na: ${DEF[tool].name.toLowerCase()}.`,true,true);return}
-  spend(cost);lockBuy();addCell(i,tool==='incS'?'incinerator':tool);if(rot1!=null&&grid[i]&&!grid[i].tiles){grid[i].rot1=rot1;refreshBuilding(i)}if(DEF[tool].r||DEF[tool].area)showArea(i,DEF[tool].r||DEF[tool].area,true);else if(svcRange(tool))showArea(i,svcRange(tool,grid[i]),true,rangeKind(tool),rangeFP(tool));
+  spend(cost);lockBuy();addCell(i,tool==='incS'?'incinerator':tool);if(rot1!=null&&grid[i]&&!grid[i].tiles){grid[i].rot1=rot1;refreshBuilding(i)}if(DEF[tool].r||DEF[tool].area)showArea(i,DEF[tool].r||DEF[tool].area,true,'green',null,tool);else if(svcRange(tool))showArea(i,svcRange(tool,grid[i]),true,rangeKind(tool),rangeFP(tool),tool);
   if(!DRIVE[tool]&&!NOROAD[tool]&&entryOf(i)<0)setHint('Budynek nie ma dojazdu. Dołóż ulicę obok, by zaczął działać.',true,true);
   save();afterPlace(painting)}
 function afterPlace(quiet){if(buildMode==='one'&&MODE_OK(tool)&&!lineRun){const t=tool;selectTool('view');if(!quiet)setHint(`Postawiono: ${DEF[t].name}. Tryb „Pojedynczo” – wróciłeś do podglądu.`,false,true)}}
@@ -3989,13 +4013,13 @@ const houses=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&HOUSING[grid[i].t
 let buyLock=0;const lockBuy=()=>{buyLock=performance.now()+500;inspEl.classList.add('locked');setTimeout(()=>inspEl.classList.remove('locked'),520)};
 function openHouse(i){lockBuy();if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;
   if(tut&&tut.on&&grid[i]&&HLV[grid[i].t]&&tutNow()==='house'&&!tut.houseSeen){tut.houseSeen=true;setTimeout(()=>tutInfo('Dom zdobywa doświadczenie','Podświetlony pasek to <b>doświadczenie</b> domu. Budynki mieszkalne zdobywają je same, tym szybciej, im <b>wyższe zadowolenie</b> mieszkańców (przy zadowoleniu 0 stoją w miejscu). Gdy pasek się zapełni, dom możesz rozbudować na wyższy poziom: więcej mieszkańców, podatków i zakupów.','tutXP'),300)}inspI=i;inspEl.hidden=false;hintEl.hidden=true;document.body&&document.body.classList.add('inspOn');ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
-  const c=grid[i];area.visible=false;areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='heliB'?HELI_R:c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold');
-  else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');else if(c&&svcRange(c.t,c))showArea(i,svcRange(c.t,c),'hold',rangeKind(c.t),rangeFP(c.t));renderInsp()}
+  const c=grid[i];area.visible=reachHide();areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='heliB'?HELI_R:c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold','green',null,c.t);
+  else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold');else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');else if(c&&svcRange(c.t,c))showArea(i,svcRange(c.t,c),'hold',rangeKind(c.t),rangeFP(c.t),c.t);renderInsp()}
 /* the card refreshes twice a second; a refresh between pressing and releasing a button would swallow the click, so it waits while a finger or the mouse is down on the card */
 let inspDown=0,inspRel=0;inspEl.addEventListener('pointerdown',()=>{inspDown=performance.now()},true);
 for(const ty of['pointerup','pointercancel'])addEventListener(ty,()=>{if(inspDown){inspDown=0;inspRel=performance.now()+150}},true);
 const inspBusy=()=>{const t=performance.now();return(inspDown&&t-inspDown<4000)||t<inspRel};
-function closeHouse(){if(areaT>1e8){areaT=0;area.visible=false}inspI=-1;inspEl.hidden=true;document.body&&document.body.classList.remove('inspOn');hintEl.hidden=false;ring.visible=false}
+function closeHouse(){if(areaT>1e8){areaT=0;area.visible=reachHide()}inspI=-1;inspEl.hidden=true;document.body&&document.body.classList.remove('inspOn');hintEl.hidden=false;ring.visible=false}
 function stepHouse(d){const c=grid[inspI];if(!c)return closeHouse();const list=catList(catOfT(c.t));let k=list.indexOf(inspI);
   k=k<0?0:(k+d+list.length)%list.length;openHouse(list[k])}
 const ICON_OFF='<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" style="vertical-align:-2px"><path d="M10 3v6.5"/><path d="M6.2 5.6a6 6 0 1 0 7.6 0"/></svg>',ICON_ON='<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor" style="vertical-align:-2px"><path d="M6 4.5l10 5.5-10 5.5z"/></svg>';
@@ -4371,7 +4395,7 @@ function showCat(k){if(catBtns[k]&&catBtns[k].hidden){k=catBtns.findIndex(b=>!b.
   CATS.forEach((c,j)=>c.tools.forEach(t=>toolBtns[t].hidden=j!==k||!unlocked(t)));toolsEl.scrollLeft=0}
 /* a category tab exists only once something in it is unlocked */
 function refreshLocks(){CATS.forEach((c,k)=>{catBtns[k].hidden=!c.tools.some(unlocked)});showCat(curCat);if(linBtn)linBtn.hidden=!unlocked('busLine')}
-function selectTool(t){if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel'||underOn);if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=false;for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
+function selectTool(t){if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel'||underOn);if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=reachHide();for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
   const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);if(t==='bulldoze'&&delMode==='pipe')setXray(true);setHint(toolHint());if(lmsg)setHint(lmsg,true,true);hl.visible=false;renderModes();
   if(linpEl){linpEl.hidden=!isLineT(t);if(linBtn)linBtn.setAttribute('aria-expanded',String(isLineT(t)));renderLines()}}
 showCat(0);
@@ -4764,7 +4788,7 @@ const OVL={med:{c:['#d63b3b'],note:'Czerwone: zasięg klinik i szpitali. Chorzy 
   noise:{c:['#9a5bd6'],note:'Fioletowe: hałas wiatraków i transformatorów (−1 zadowolenia).'},park:{c:['#3cae4f'],note:'Zielone: dom tutaj ma +1 zadowolenia z parku.'},ent:{c:['#e0569a'],note:'Różowe: dom tutaj ma +1 zadowolenia z rozrywki.'},under:{c:['#6f6a62'],note:'Teren jest przezroczysty: widać rury, tunele i kable w tunelach.'}};
 function ovlVal(i){if(ovlMode==='med')return medCov[i]?1:0;if(ovlMode==='edu')return eduP[i]&&eduS[i]?2:eduP[i]||eduS[i]?1:0;if(ovlMode==='pol')return pol[i];if(ovlMode==='noise')return noiseCov[i]?1:0;if(ovlMode==='park')return parkCov[i]?1:0;if(ovlMode==='ent')return entCov[i]?1:0;return 0}
 function drawOvl(){if(ovlMode==='none'){ovlMesh.count=0;return}let n=0;const col=new THREE.Color();let cov=null;
-  if(ovlMode==='police'||ovlMode==='fire'){cov=new Uint8Array(N*N);for(const st of ovlMode==='fire'?fireStations():stations()){const r=ovlMode==='fire'?fireRad(grid[st]):polRad(grid[st]);for(const t of tilesOf(st)){const x=t%N,z=(t/N)|0;for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)cov[idx(nx,nz)]=1}}}}
+  if(ovlMode==='police'||ovlMode==='fire'){cov=new Uint8Array(N*N);for(const st of ovlMode==='fire'?fireStations():stations()){const r=ovlMode==='fire'?fireRad(grid[st]):polRad(grid[st]),R=reachOf(st,r);for(let j=0;j<N*N;j++)if(R[j])cov[j]=1}}
   for(let i=0;i<N*N;i++){const v=cov?cov[i]:ovlVal(i);if(!v||water[i])continue;dObj.position.set(cx(i),surfY(i)+0.075,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();ovlMesh.setMatrixAt(n,dObj.matrix);
     const cs=OVL[ovlMode].c;col.set(cs[Math.min(cs.length,v)-1]);ovlMesh.setColorAt(n,col);n++}
   ovlMesh.count=n;ovlMesh.instanceMatrix.needsUpdate=true;if(ovlMesh.instanceColor)ovlMesh.instanceColor.needsUpdate=true}
@@ -5110,7 +5134,7 @@ settleHour();cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=
   if(gdUpd){for(const m of[gBl,gSt,gSm,gFh])m.instanceMatrix.needsUpdate=true;for(const m of[gBl,gFh])if(m.instanceColor)m.instanceColor.needsUpdate=true;gdUpd=false}
   if(decoUpd){for(const m of DECO_M)m.instanceMatrix.needsUpdate=true;decoUpd=false}
   updateSky();
-  if(areaT>0){areaT-=vdt;if(areaT<=0){areaT=0;area.visible=false}}
+  if(areaT>0){areaT-=vdt;if(areaT<=0){areaT=0;area.visible=reachHide()}}
   if(focus){const k=Math.min(1,vdt*6);cam.target.x+=(focus.x-cam.target.x)*k;cam.target.z+=(focus.z-cam.target.z)*k;updateCamera();
     if(Math.hypot(focus.x-cam.target.x,focus.z-cam.target.z)<0.02)focus=null}
   if(inspI>=0&&statsAcc>0.5&&statsEl.hidden&&!inspBusy()){statsAcc=0;renderInsp()}
