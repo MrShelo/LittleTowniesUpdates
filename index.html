@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.3.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.3.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -614,7 +614,7 @@ const DEF={
   freightSt:{name:'Dworzec towarowy',cost:4000,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Pociąg towarowy co godzinę: stały import do magazynów albo eksport z magazynów wybranego towaru, od 10 kg/godz. co 5. Wymaga torów do krawędzi mapy.',sw:'#6b5a3c'},
   heliB:{name:'Baza helikopterów gaśniczych',cost:6000,size:4,desc:'Zajmuje 2×2 pola. Helikopter gaśniczy leci prosto do pożaru w zasięgu 25 pól (51×51) i gasi go z góry – także tam, gdzie wóz nie dojedzie. Potrzebuje prądu i wody. Ulepszenie: drugi helikopter.',sw:'#b8241c',area:25},
   cityHall:{name:'Urząd miasta',cost:5000,size:4,desc:'Zajmuje 2×2 pola. Otwiera zakładkę Uchwały: za opłatą wprowadzasz prawa, które zmieniają całe miasto. Jeden na miasto.',sw:'#8a6a3a'},
-  shipC:{name:'Centrum spedycji',cost:2500,fw:3,fh:1,desc:'Zajmuje 3×1 pola. Co 6 godzin ciężarówki wywożą hurtem wybrane towary z magazynów (60% ceny) albo – w trybie importu – sprowadzają je (50% ceny). Można włączyć automatyczne ponawianie.',sw:'#5a6b7a'},
+  shipC:{name:'Centrum spedycji',cost:2500,fw:3,fh:1,desc:'Zajmuje 3×1 pola. Co 2 godziny ciężarówki wywożą hurtem wybrane towary z magazynów (60% ceny) albo – w trybie importu – sprowadzają je (50% ceny). Można włączyć automatyczne ponawianie.',sw:'#5a6b7a'},
   busStop:{name:'Przystanek',cost:40,desc:'Wiata na prostym odcinku zwykłej ulicy – nie na skrzyżowaniu, zakręcie, przejściu dla pieszych ani przejeździe kolejowym. Kliknij tę połowę jezdni, po której ma stać; kliknięcie drugiej połowy przenosi ją na drugą stronę. Autobus staje przy niej, jadąc pasem przy wiacie.',sw:'#2f8fd8'},
   busLine:{name:'Linie autobusowe',cost:0,lbl:'panel linii',desc:'Klikaj po kolei przystanki, przez które ma jechać autobus. Linia powstaje od 2 przystanków i zawsze wraca do pierwszego. Trasy widać tylko w tym trybie.',sw:'#e0402b'},
   railLine:{name:'Linie kolejowe',cost:0,lbl:'panel linii',desc:'Klikaj po kolei dworce kolejowe połączone torami. Pociąg pasażerski kursuje między nimi w pętli; mieszkańcy dojdą do dworca z 14 pól.',sw:'#3d6fa8'},
@@ -708,7 +708,7 @@ const HCOL={0:'#8a2a2a',1:'#d4483a',2:'#e58a3a',3:'#d9b23a',4:'#7dbb4a',5:'#2f9e
 const SHOP_R=5;
 /* road upkeep is per 12 game hours: 1 T¢ per plain road tile, more for bigger roads */
 const ROAD_UPK={road:1,road2:2,road3:3,roundabout:2,highway:4,bridge:5,tunnel:6},ROAD_PER=12;
-const UPKEEP={biomass:90,pitS:30,pitB:60,cityHall:200,shipC:150,roadSvc:90,heliB:600,taxi:120,trainSt:180,freightSt:240,fireS:122,fireB:284,clinic:180,hosp:400,hospC:1100,cemS:50,cemB:80,crem:200,schoolS:90,school:160,lyceum:360,techn:400,policeS:144,policeB:336,prison:150,hydro:20,hydrogen:300,pump:25,pumpB:50,tower:20,outlet:10,treatment:80,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:5,wind:30,coal:125,park1:20,park2:50,park3:90,landfill:30,incinerator:120,recycler:70,factory:100,smallfac:50,factoryB:120,mine:25,mineB:90,warehouse:10,smallwh:5,warehouseB:20,bank:50,bankG:200,incS:60};
+const UPKEEP={biomass:90,pitS:30,pitB:60,cityHall:200,shipC:120,roadSvc:90,heliB:600,taxi:120,trainSt:180,freightSt:240,fireS:122,fireB:284,clinic:180,hosp:400,hospC:1100,cemS:50,cemB:80,crem:200,schoolS:90,school:160,lyceum:360,techn:400,policeS:144,policeB:336,prison:150,hydro:20,hydrogen:300,pump:25,pumpB:50,tower:20,outlet:10,treatment:80,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:5,wind:30,coal:125,park1:20,park2:50,park3:90,landfill:30,incinerator:120,recycler:70,factory:100,smallfac:50,factoryB:120,mine:25,mineB:90,warehouse:10,smallwh:5,warehouseB:20,bank:50,bankG:200,incS:60};
 /* waste: houses and parks fill steadily, factories per truck produced, shops per sale; pickup is due every ~6 h (work) or ~12 h (homes, parks) ±15% */
 const TRASH={supermarket:{cap:50,per:0.15,every:6},smallfac:{cap:24,per:0.3,every:6},house:{cap:18,rate:1,every:12},tenement:{cap:36,rate:2.5,every:12},block:{cap:60,rate:5,every:12},modern:{cap:60,rate:4,every:12},park1:{cap:10,rate:0.5,every:12},park2:{cap:10,rate:0.5,every:12},park3:{cap:10,rate:0.5,every:12},
   bakery:{cap:30,per:0.2,every:6},factory:{cap:40,per:0.6,every:6},factoryB:{cap:60,per:0.8,every:6},mine:{cap:30,per:0.4,every:8},mineB:{cap:60,per:0.8,every:6},farmveg:{cap:20,per:0.5,every:12},farmdairy:{cap:20,per:0.6,every:12},farmgrain:{cap:20,per:0.4,every:12},farmcotton:{cap:20,per:0.4,every:12},farmwood:{cap:20,per:0.5,every:12},pitS:{cap:30,per:0.4,every:8},pitB:{cap:60,per:0.8,every:6},shop:{cap:30,per:0.2,every:6},gallery:{cap:60,per:0.2,every:6},restaurant:{cap:30,per:0.3,every:6},cinema:{cap:30,per:0.15,every:6},theater:{cap:30,per:0.15,every:6},casino:{cap:30,per:0.2,every:6},hotelS:{cap:30,per:0.4,every:12},hotelB:{cap:60,per:0.5,every:12}};
@@ -2670,12 +2670,12 @@ function renderOrd(){const el=document.getElementById('ordp');if(!el||el.hidden)
   for(const b of el.querySelectorAll('[data-ord]'))b.onclick=()=>{const o=ORDS.find(q=>q.k===b.dataset.ord);if(ORD[o.k]){delete ORD[o.k];float(-1,'','neutral');setHint(`Uchylono: ${o.name}.`,false,true)}else{if(money<o.cost||!hallOK())return;spend(o.cost);ORD[o.k]=1;setHint(`Wprowadzono uchwałę: ${o.name}.`,false,true)}hintEl.hidden=false;envDirty=true;powerDirty=true;save();renderOrd()}}
 /* ---------- shipping centre: every 6 hours trucks take the chosen goods from the warehouses, in bulk ---------- */
 /* 6.6: every run is one load: you set how many kilograms of each good go on it, at most 100 kg in total */
-const SHIP_LOAD=100,SHIP_STEP=5;
+const SHIP_LOAD=150,SHIP_STEP=5;
 function shipQ(c){if(!c.shipQ){c.shipQ={};const sel=c.ship||[];if(sel.length){const each=Math.max(SHIP_STEP,Math.floor(SHIP_LOAD/sel.length/SHIP_STEP)*SHIP_STEP);let left=SHIP_LOAD;
     for(const k of sel){const v=Math.min(each,left);if(v<=0)break;c.shipQ[k]=v;left-=v}}}
   for(const k in c.shipQ)if(!(c.shipQ[k]>0)||!SHIP_GOODS.includes(k))delete c.shipQ[k];c.ship=Object.keys(c.shipQ);return c.shipQ}
 const shipTot=c=>Object.values(shipQ(c)).reduce((a,v)=>a+v,0);
-const SHIP_EVERY=360,SHIP_P=0.6,SHIP_GOODS=['mat',...Object.keys(GOODS).filter(k=>k!=='mat')],SHIP_N0=50,SHIP_NMIN=25,SHIP_NMAX=300,SHIP_IMP=0.5;
+const SHIP_EVERY=120,SHIP_P=0.6,SHIP_GOODS=['mat',...Object.keys(GOODS).filter(k=>k!=='mat')],SHIP_N0=50,SHIP_NMIN=25,SHIP_NMAX=300,SHIP_IMP=0.5;
 function shipImport(i){const c=grid[i],Q=shipQ(c),sel=c.ship;let tot=0,cost=0;
   for(const k of sel){const unit=frPrice(k)*SHIP_IMP,room=Math.floor(whFreeFor(k));const n0=Math.min(Q[k]||0,room,Math.floor(Math.max(0,cashNow()-cost)/unit));if(n0<=0)continue;
     const n=addGood(k,n0,i);tot+=n;cost+=n*unit;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
@@ -2815,7 +2815,7 @@ function depotHour(){for(const i of depots()){const c=grid[i];c.dimp=c.dimp||{};
     const u=depPrice(k);n=Math.min(n,Math.floor((cashNow()-IMP_FLOOR)/u));if(n<1){float(i,'import wstrzymany: za duży dług','warn');continue}
     const cost=Math.round(n*u);payImport(k,n,cost);const car=createCar('truck',pathTo(b,o).reverse(),{home:o,dest:i,pid:k,units:n,depImp:true});try{if(GM[k])car.mesh.userData.cargo.material=GM[k]}catch(e){}
     c.dlast=gameT;float(i,`import: ${n} kg ${frName(k).toLowerCase()} · −${fmt(cost)} T¢`,'warn')}}}
-const FR_MIN=10,FR_STEP=5,FR_MAX=120,FR_IMP=0.5,FR_EXP=0.5,FR_GOODS=['mat',...Object.keys(GOODS).filter(k=>k!=='mat')];
+const FR_MIN=10,FR_STEP=5,FR_MAX=180,FR_IMP=0.5,FR_EXP=0.5,FR_GOODS=['mat',...Object.keys(GOODS).filter(k=>k!=='mat')];
 const frName=k=>k==='mat'?'Materiały':GOODS[k].name,frPrice=k=>k==='mat'?8:GOODS[k].ex||GOODS[k].price||8;
 const frRamps=c=>{c.fr=c.fr||[{k:'mat',m:'off',n:FR_MIN}];if(c.up&&c.fr.length<2)c.fr.push({k:'veg',m:'off',n:FR_MIN});return c.fr.slice(0,c.up?2:1)};
 function freightRun(st){const c=grid[st];for(const R0 of frRamps(c)){if(R0.m==='off')continue;const k=R0.k;
@@ -4210,7 +4210,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
       <div class="dpload"><span>Załadunek ${imp?'dostawy':'wywozu'}</span><b>${tot} / ${SHIP_LOAD} kg</b><i style="--p:${Math.round(tot/SHIP_LOAD*100)}%"></i></div>
       ${SHIP_GOODS.map(k=>{const v=Q[k]||0;return`<div class="dpr${v?' on':''}"><div class="dpn"><b>${frName(k)}</b><small>${mw(Math.round(frPrice(k)*(imp?SHIP_IMP:SHIP_P)*10)/10)} T¢/kg · w magazynach ${fmt(Math.round(have(k)))}</small></div><div class="stp"><button class="btn panel" data-shq="${k}:-${SHIP_STEP}"${v<=0?' disabled':''} aria-label="−${SHIP_STEP} kg">−</button><b>${v} kg</b><button class="btn panel" data-shq="${k}:${SHIP_STEP}"${tot>=SHIP_LOAD?' disabled':''} aria-label="+${SHIP_STEP} kg">+</button></div></div>`}).join('')}
       <small class="dpnote">Krok ${SHIP_STEP} kg, łącznie najwyżej ${SHIP_LOAD} kg na jeden ${imp?'transport':'wywóz'}. ${imp?'Sprowadza tyle, ile zmieści się w magazynach i na ile starczy gotówki.':'Wywozi tyle, ile jest w magazynach.'}</small>
-      <div class="chips"><button class="chipb" id="shipAuto" aria-pressed="${!!c.shipAuto}">Automatyczne ponawianie co 6 godz.</button><button class="chipb" id="shipGo"${!tot?' disabled':''}>${c.shipAt!=null?(imp?'Dostawa zaplanowana':'Wywóz zaplanowany'):(imp?'Zamów dostawę za 6 godz.':'Zaplanuj wywóz za 6 godz.')}</button></div></div>`}
+      <div class="chips"><button class="chipb" id="shipAuto" aria-pressed="${!!c.shipAuto}">Automatyczne ponawianie co 2 godz.</button><button class="chipb" id="shipGo"${!tot?' disabled':''}>${c.shipAt!=null?(imp?'Dostawa zaplanowana':'Wywóz zaplanowany'):(imp?'Zamów dostawę za 2 godz.':'Zaplanuj wywóz za 2 godz.')}</button></div></div>`}
   if(c.t==='cityHall')R('Uchwały',`${Object.keys(ORD).length} aktywnych · ${hallOK()?'urząd działa':'urząd nie działa: uchwały zawieszone'}`,hallOK()?'':'warnv');
   if(c.t==='taxi'){R('Taksówki w trasie',`${taxiCount(i)} / ${taxiCap(i)}`);R('Kurs',`${TAXI_FARE} T¢ za turystę`);if(!stActive(i))R('Stan','stoi: brak prądu','warnv')}
   if(isStationT(c.t)){const ok=stationRail(i)>=0;R('Kolej',ok?'tory dochodzą do krawędzi mapy':'brak torów do krawędzi mapy',ok?'':'warnv');if(ok&&stActive(i))R('Następny pociąg',trains.some(t=>t.st===i)?'na torach':`za ${Math.max(1,Math.ceil(c.trT??20))} min`);if(!stActive(i))R('Stan','stoi: brak prądu','warnv')}
@@ -7007,7 +7007,11 @@ const LT_TR=[
 ["zasięg {} bloków po drogach, obręb {}×{}, +1 zadowolenia", "range {} blocks along the roads, surround {}×{}, +1 happiness", "Reichweite {} Blöcke entlang der Straßen, Umfeld {}×{}, +1 Zufriedenheit"],
 ["Kamera filmowa", "Cinematic camera", "Kinokamera"],
 ["Kamera filmowa (V)", "Cinematic camera (V)", "Kinokamera (V)"],
-["Kamera filmowa · dowolny klawisz lub kliknięcie ją kończy", "Cinematic camera · any key or click ends it", "Kinokamera · jede Taste oder jeder Klick beendet sie"]
+["Kamera filmowa · dowolny klawisz lub kliknięcie ją kończy", "Cinematic camera · any key or click ends it", "Kinokamera · jede Taste oder jeder Klick beendet sie"],
+["Zajmuje 3×1 pola. Co 2 godziny ciężarówki wywożą hurtem wybrane towary z magazynów (60% ceny) albo – w trybie importu – sprowadzają je (50% ceny). Można włączyć automatyczne ponawianie.", "Takes 3×1 tiles. Every 2 hours trucks haul selected goods out of the warehouses in bulk (60% of the price) or – in import mode – bring them in (50% of the price). Automatic repeat can be turned on.", "Belegt 3×1 Felder. Alle 2 Stunden bringen Lkw ausgewählte Waren in großen Mengen aus den Lagern weg (60% des Preises) oder – im Importmodus – liefern sie an (50% des Preises). Automatische Wiederholung lässt sich einschalten."],
+["Automatyczne ponawianie co 2 godz.", "Automatic repeat every 2 h", "Automatische Wiederholung alle 2 Std."],
+["Zaplanuj wywóz za 2 godz.", "Schedule a pickup in 2 h", "Abholung in 2 Std. planen"],
+["Zamów dostawę za 2 godz.", "Order a delivery in 2 h", "Lieferung in 2 Std. bestellen"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
