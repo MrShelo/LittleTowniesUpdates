@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.4.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.4.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -4939,7 +4939,7 @@ function showTipAt(x,y,text,src){if(tipSrc!==src||tipEl.hidden){tipEl.innerHTML=
 function hideTip(){tipEl.hidden=true;tipSrc=null;clearTimeout(tipT)}
 /* 7.4.1: the inspector's right edge lines up with the right edge of the build toolbar */
 function alignInsp(){try{const b=document.querySelector('.dock .build'),d=document.querySelector('.dock');if(!b||!d)return;const ie=document.getElementById('insp');let r=d.getBoundingClientRect().right-b.getBoundingClientRect().right;d.style.setProperty('--inspR',Math.max(0,Math.round(r))+'px');if(!ie.hidden){const diff=b.getBoundingClientRect().right-ie.getBoundingClientRect().right;r-=diff;d.style.setProperty('--inspR',Math.max(0,Math.round(r))+'px')}}catch(e){}}
-addEventListener('resize',alignInsp);new MutationObserver(()=>{if(!document.getElementById('insp').hidden)alignInsp()}).observe(document.getElementById('insp'),{attributes:true,attributeFilter:['hidden']});setTimeout(alignInsp,500);try{new ResizeObserver(()=>alignInsp()).observe(document.querySelector('.dock .build'))}catch(e){}
+addEventListener('resize',alignInsp);try{new MutationObserver(()=>{if(!document.getElementById('insp').hidden)alignInsp()}).observe(document.getElementById('insp'),{attributes:true,attributeFilter:['hidden']})}catch(e){}setTimeout(alignInsp,500);try{new ResizeObserver(()=>alignInsp()).observe(document.querySelector('.dock .build'))}catch(e){}
 /* 7.4.0: readable hints on the build-mode buttons (single, many, line, along a road) and brush/level buttons */
 {const ms=document.getElementById('msub');if(ms){ms.addEventListener('pointerover',e=>{const b=e.target.closest('button[title],button[data-tip],span[title]');if(!b||!ms.contains(b))return;if(b.title){b.dataset.tip=b.title;b.removeAttribute('title')}if(b.dataset.tip)showTip(b)});
   ms.addEventListener('pointerout',e=>{const b=e.target.closest('button,span');if(b&&tipSrc===b&&!b.contains(e.relatedTarget))hideTip()});ms.addEventListener('click',()=>hideTip())}}
