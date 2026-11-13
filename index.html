@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.5.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.5.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -7284,10 +7284,56 @@ const LT_TR=[
 ["Podatki i pożyczki", "Taxes and loans", "Steuern und Kredite"],
 ["Stuknij miejsce, obróć i zatwierdź ({}). Pobiera {} MW.", "Tap a spot, rotate and confirm ({}). Uses {} MW.", "Tippe auf eine Stelle, drehe und bestätige ({}). Verbraucht {} MW."],
 ["silny smog (szare pole)", "heavy smog (grey tile)", "starker Smog (graues Feld)"],
-["{} kg {}", "{} kg {}", "{} kg {}"],
-["−{} kg {}", "−{} kg {}", "−{} kg {}"],
 ["teren zbyt nierówny (ponad 2 poziomy różnicy)", "ground too uneven (more than 2 levels of difference)", "Gelände zu uneben (mehr als 2 Stufen Unterschied)"],
-["{} T¢ + {} T¢ za wyrównanie terenu", "{} T¢ + {} T¢ for levelling the ground", "{} T¢ + {} T¢ für das Einebnen des Geländes"]
+["{} T¢ + {} T¢ za wyrównanie terenu", "{} T¢ + {} T¢ for levelling the ground", "{} T¢ + {} T¢ für das Einebnen des Geländes"],
+["{} kg warzywa i owoce", "{} kg fruit and vegetables", "{} kg Obst und Gemüse"],
+["−{} kg warzywa i owoce", "−{} kg fruit and vegetables", "−{} kg Obst und Gemüse"],
+["+{} kg warzywa i owoce", "+{} kg fruit and vegetables", "+{} kg Obst und Gemüse"],
+["{} kg nabiał", "{} kg dairy", "{} kg Milchprodukte"],
+["−{} kg nabiał", "−{} kg dairy", "−{} kg Milchprodukte"],
+["+{} kg nabiał", "+{} kg dairy", "+{} kg Milchprodukte"],
+["{} kg pieczywo", "{} kg bread", "{} kg Brot"],
+["−{} kg pieczywo", "−{} kg bread", "−{} kg Brot"],
+["+{} kg pieczywo", "+{} kg bread", "+{} kg Brot"],
+["{} kg napoje", "{} kg drinks", "{} kg Getränke"],
+["−{} kg napoje", "−{} kg drinks", "−{} kg Getränke"],
+["+{} kg napoje", "+{} kg drinks", "+{} kg Getränke"],
+["{} kg odzież", "{} kg clothing", "{} kg Kleidung"],
+["−{} kg odzież", "−{} kg clothing", "−{} kg Kleidung"],
+["+{} kg odzież", "+{} kg clothing", "+{} kg Kleidung"],
+["{} kg elektronika", "{} kg electronics", "{} kg Elektronik"],
+["−{} kg elektronika", "−{} kg electronics", "−{} kg Elektronik"],
+["+{} kg elektronika", "+{} kg electronics", "+{} kg Elektronik"],
+["{} kg meble", "{} kg furniture", "{} kg Möbel"],
+["−{} kg meble", "−{} kg furniture", "−{} kg Möbel"],
+["+{} kg meble", "+{} kg furniture", "+{} kg Möbel"],
+["{} kg zabawki", "{} kg toys", "{} kg Spielzeug"],
+["−{} kg zabawki", "−{} kg toys", "−{} kg Spielzeug"],
+["+{} kg zabawki", "+{} kg toys", "+{} kg Spielzeug"],
+["{} kg kosmetyki", "{} kg cosmetics", "{} kg Kosmetik"],
+["−{} kg kosmetyki", "−{} kg cosmetics", "−{} kg Kosmetik"],
+["+{} kg kosmetyki", "+{} kg cosmetics", "+{} kg Kosmetik"],
+["{} kg narzędzia", "{} kg tools", "{} kg Werkzeuge"],
+["−{} kg narzędzia", "−{} kg tools", "−{} kg Werkzeuge"],
+["+{} kg narzędzia", "+{} kg tools", "+{} kg Werkzeuge"],
+["{} kg zboże", "{} kg grain", "{} kg Getreide"],
+["−{} kg zboże", "−{} kg grain", "−{} kg Getreide"],
+["+{} kg zboże", "+{} kg grain", "+{} kg Getreide"],
+["{} kg materiały", "{} kg materials", "{} kg Material"],
+["−{} kg materiały", "−{} kg materials", "−{} kg Material"],
+["+{} kg materiały", "+{} kg materials", "+{} kg Material"],
+["{} kg bawełna", "{} kg cotton", "{} kg Baumwolle"],
+["−{} kg bawełna", "−{} kg cotton", "−{} kg Baumwolle"],
+["+{} kg bawełna", "+{} kg cotton", "+{} kg Baumwolle"],
+["{} kg drewno", "{} kg wood", "{} kg Holz"],
+["−{} kg drewno", "−{} kg wood", "−{} kg Holz"],
+["+{} kg drewno", "+{} kg wood", "+{} kg Holz"],
+["{} kg chalkopiryt", "{} kg chalcopyrite", "{} kg Kupferkies"],
+["−{} kg chalkopiryt", "−{} kg chalcopyrite", "−{} kg Kupferkies"],
+["+{} kg chalkopiryt", "+{} kg chalcopyrite", "+{} kg Kupferkies"],
+["{} kg węgiel", "{} kg coal", "{} kg Kohle"],
+["−{} kg węgiel", "−{} kg coal", "−{} kg Kohle"],
+["+{} kg węgiel", "+{} kg coal", "+{} kg Kohle"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
