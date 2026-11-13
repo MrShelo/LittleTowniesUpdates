@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.5.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.5.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -7271,7 +7271,9 @@ const LT_TR=[
 ["Podatki", "Taxes", "Steuern"],
 ["Podatki i pożyczki", "Taxes and loans", "Steuern und Kredite"],
 ["Stuknij miejsce, obróć i zatwierdź ({}). Pobiera {} MW.", "Tap a spot, rotate and confirm ({}). Uses {} MW.", "Tippe auf eine Stelle, drehe und bestätige ({}). Verbraucht {} MW."],
-["silny smog (szare pole)", "heavy smog (grey tile)", "starker Smog (graues Feld)"]
+["silny smog (szare pole)", "heavy smog (grey tile)", "starker Smog (graues Feld)"],
+["{} kg {}", "{} kg {}", "{} kg {}"],
+["−{} kg {}", "−{} kg {}", "−{} kg {}"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
@@ -7296,6 +7298,8 @@ const LT_TR=[
      has an entry is translated as a whole, the rest piece by piece; what is still left gets every known name inside it replaced */
   const SPLITS=[/(\s·\s)/,/((?<=(?:[\p{Ll}\d%]{3}|\))[.!?])\s+)/u,/((?<=[\p{L}\d%)][.!?])\s+(?=[\p{Lu}„"(]))/u,/(,\s+)/];
   function look(key,T,depth){const ex=T.exact.get(key);if(ex!=null)return ex;
+    /* a lower-cased name inside a sentence ("5 kg odzież") uses the capitalised entry */
+    {const c0=key.charAt(0);if(c0&&c0!==c0.toUpperCase()){const e2=T.exact.get(c0.toUpperCase()+key.slice(1));if(e2!=null)return lang==='de'?e2:e2.charAt(0).toLowerCase()+e2.slice(1)}}
     if(depth<5)for(const p of T.pats){const m=p.re.exec(key);if(m)return fill(p.tr,m.slice(1).map(x=>tr(x,T,depth+1)))}return null}
   function tr(s,T,depth){if(!s||!LETTER.test(s))return s;const key=NORM(s);if(!key)return s;const c=T.cache.get(key);if(c!==undefined)return c;
     let out=look(key,T,depth);
