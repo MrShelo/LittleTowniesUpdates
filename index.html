@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.5.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.5.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -209,6 +209,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .clock{display:grid;gap:1px;padding:6px 12px;line-height:1.15}
 .clock b{font-family:var(--font-d);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
 .clock small{font-size:11px;color:var(--muted)}
+/* 7.5.3: fixed widths so the top bar does not jump when texts change length */
+.clock{width:196px;box-sizing:border-box}.clock small,.clock b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#rSt{width:92px;box-sizing:border-box}#rSt b,#rSt small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#r-pop{width:178px}
+@media (max-width:700px){.clock{width:150px}#rSt{width:auto}}
 .stats{position:absolute;z-index:8;top:10px;bottom:10px;height:max-content;right:max(16px,env(safe-area-inset-right,0px));left:max(16px,env(safe-area-inset-left,0px));
   margin-left:auto;max-width:480px;max-height:calc(95% - 20px);overflow:auto;padding:14px 16px 22px;display:grid;gap:14px;background:var(--panel2)}
 .stats header{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
