@@ -168,6 +168,8 @@ iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:
       <div id="varBox" hidden>
         <div class="vars" id="vars"></div>
         <div class="muted" id="varInfo" style="margin-top:6px"></div>
+        <div class="row" style="margin-top:8px;gap:6px;align-items:center" title="Części oznaczone jako „LOD” (Zachowanie części) znikają, gdy kamera jest dalej niż ta odległość"><span class="muted">LOD: szczegóły znikają dalej niż</span><input type="number" id="lodD" min="5" max="200" step="1" style="width:64px"><span class="muted">pól</span></div>
+        <label class="row" style="margin-top:4px;gap:6px"><input type="checkbox" id="lodPrev"> <span class="muted">Podgląd z daleka (bez części LOD)</span></label>
       </div>
     </div></div>
     <div class="panel" id="partSec" data-p="part" hidden><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Część<span class="acts"><span class="cnt" id="selInfo"></span></span></div><div class="pb">
@@ -185,6 +187,7 @@ iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:
       <div class="grid2">
         <span class="muted">Świeci</span><select id="rGl"><option value="0">nie</option><option value="1">zawsze</option><option value="2">tylko nocą (jak okna)</option></select>
         <span class="muted" id="rGcL">Kolor nocą</span><span class="row" id="rGcBox" style="gap:6px;flex-wrap:nowrap"><label class="row" style="gap:6px;flex:none"><input type="checkbox" id="rGcOn"> <span class="muted">zmienia na</span></label><input type="color" id="rGc" style="height:26px;flex:1;min-width:40px" value="#ffd36b"></span>
+        <span class="muted">LOD</span><select id="rLh"><option value="">widoczna zawsze</option><option value="1">znika z daleka (szczegół)</option></select>
         <span class="muted">Widoczność</span><select id="rVt"><option value="">zawsze</option><option value="1">tylko w dzień</option><option value="2">tylko w nocy</option></select>
         <span class="muted">Losowy kolor</span><label class="row" style="gap:6px"><input type="checkbox" id="rRc"> <span class="muted">każdy budynek / pojazd inny</span></label>
         <span class="muted" id="rGrL">Wspólny kolor</span><div id="rGrBox"><div class="row" style="gap:4px"><span class="grp" id="rGrName">brak grupy</span><button class="mini" id="rGrJoin" title="Zaznaczone bryły losują jeden wspólny kolor">Połącz zaznaczone</button><button class="mini" id="rGrLeave">Odłącz</button></div>
@@ -257,9 +260,9 @@ const r4=v=>Math.round(v*1e4)/1e4,deg=v=>Math.round(v*180/Math.PI*10)/10,rad=v=>
 const jcopy=o=>JSON.parse(JSON.stringify(o));
 /* an override: {mods,add,fx,alt:[{mods,add,fx}…]}; alt are the alternative looks the game picks from at random */
 const normV=o=>jcopy({mods:(o&&o.mods)||{},add:(o&&o.add)||[],fx:(o&&o.fx)||[]});
-function normFull(o){const f=normV(o);f.alt=((o&&o.alt)||[]).map(normV);return f}
+function normFull(o){const f=normV(o);f.alt=((o&&o.alt)||[]).map(normV);if(o&&o.lodD)f.lodD=+o.lodD;return f}
 function compact(o){const c=jcopy(o);const cv=v=>{if(!v.fx||!v.fx.length)delete v.fx;return v};cv(c);if(c.alt&&c.alt.length)c.alt.forEach(cv);else delete c.alt;return c}
-const emptyOvr=o=>!o||(!Object.keys(o.mods||{}).length&&!(o.add||[]).length&&!(o.fx||[]).length&&!(o.alt||[]).length);
+const emptyOvr=o=>!o||(!Object.keys(o.mods||{}).length&&!(o.add||[]).length&&!(o.fx||[]).length&&!(o.alt||[]).length&&!o.lodD);
 
 /* ---------- loading the game ---------- */
 function b64utf8(s){const b=new TextEncoder().encode(s);let o='';for(let i=0;i<b.length;i+=0x8000)o+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(o)}
@@ -349,7 +352,7 @@ $('search').oninput=renderList;
 const curModel=()=>models.find(x=>x.key===cur);
 function openModel(key){if(cur&&isDirty()&&!confirm('Model ma niezapisane zmiany. Porzucić je?'))return;cur=key;full=normFull((drafts[key]&&drafts[key].ovr)||published[key]);vi=0;work=full;base=JSON.stringify(full);
   showOrig=false;$('cmpBtn').setAttribute('aria-pressed','false');rebuild();renderList();frame()}
-function setVariant(k){vi=Math.max(0,Math.min(k,full.alt.length));work=vi?full.alt[vi-1]:full;rebuild()}
+function setVariant(k){vi=Math.max(0,Math.min(k,full.alt.length));work=vi?full.alt[vi-1]:full;rebuild();try{const md=models.find(q=>q.key===cur);$('lodD').value=full.lodD||'';$('lodD').placeholder=String((md&&md.lodD)||40)}catch(e){}}
 function rebuild(){animStop();if(root)scene.remove(root);tc.detach();clearHelpers();if(pivot&&pivot.parent)pivot.parent.remove(pivot);pivot=null;pv=null;sel=[];
   rgCols={};root=api.build(cur,false);if(root.parent)root.parent.remove(root);ms=[];
   /* paths of every object in the untouched model: the game finds the group a moved part goes to by the same path */
@@ -370,7 +373,7 @@ function look(m,d,baseCol){if(!m||!m.material||!m.material.color)return;let col=
     if(m.userData.rcKey!==key){m.userData.rcKey=key;let c=pal[(Math.random()*pal.length)|0];if(d.rg){const g=rgCols[d.rg];if(g&&pal.includes(g))c=g;else rgCols[d.rg]=c}m.userData.rcCol=c}col=m.userData.rcCol}else m.userData.rcKey=null;
   const g=d&&d.gl,gc=g===2&&d.gc;if(gc&&night)col=gc;
   m.material.color.set(col);if(m.material.emissive){m.material.emissive.copy(m.material.color).multiplyScalar(g===1?0.6:g===2&&night?0.95:0)}}
-function applyLooks(){if(showOrig)return;const dv=d=>d&&d.vt?(d.vt===1?!night:night):true;ms.forEach((m,i)=>{const d=work.mods[i];m.visible=d&&d.h?false:d&&d.vt?dv(d):orig[i].vis});added.forEach((m,k)=>{const a=work.add[k];m.visible=!a.h&&dv(a)});for(const k in rgCols){const used=[...ms.map((m,i)=>work.mods[i]),...work.add].some(d=>d&&d.rc&&d.rg==k);if(!used)delete rgCols[k]}ms.forEach((m,i)=>{const d=work.mods[i];look(m,d,d&&d.c||orig[i].c)});added.forEach((m,k)=>look(m,work.add[k],work.add[k].c||'#cccccc'))}
+function applyLooks(){if(showOrig)return;const far=$('lodPrev')&&$('lodPrev').checked,dv=d=>(far&&d&&d.lh)?false:d&&d.vt?(d.vt===1?!night:night):true;ms.forEach((m,i)=>{const d=work.mods[i];m.visible=d&&d.h?false:(far&&d&&d.lh)?false:d&&d.vt?dv(d):orig[i].vis});added.forEach((m,k)=>{const a=work.add[k];m.visible=!a.h&&dv(a)});for(const k in rgCols){const used=[...ms.map((m,i)=>work.mods[i]),...work.add].some(d=>d&&d.rc&&d.rg==k);if(!used)delete rgCols[k]}ms.forEach((m,i)=>{const d=work.mods[i];look(m,d,d&&d.c||orig[i].c)});added.forEach((m,k)=>look(m,work.add[k],work.add[k].c||'#cccccc'))}
 /* parts nested in sub-groups are stored relative to the model root (rs), exactly like the game applies them */
 const nested=m=>m.parent&&m.parent!==root;
 function rootLocal(o){root.updateMatrixWorld(true);return new T.Matrix4().copy(root.matrixWorld).invert().multiply(o.matrixWorld)}
@@ -430,7 +433,7 @@ function applyPivot(){if(!pivot||!pv)return;const P=pivot.position,Q=pivot.quate
     setPoseRoot(o,pos,q,s);recordIdx(it.i)}}
 const selectAll=()=>{if(root&&!showOrig)select(allIdx().filter(i=>isFx(i)||objOf(i).visible))};
 const ADD_NAMES={wedge:'nowy graniastosłup trójkątny',box:'nowy prostopadłościan',cyl:'nowy walec',cone:'nowy stożek',sphere:'nowa kula',pyr:'nowy ostrosłup'};
-function roleTags(d,i){const t=[];if(!d)d={};if(d.gl)t.push(d.gl===1?'świeci':d.gc?'nocą świeci na '+d.gc:'świeci nocą');if(d.rc)t.push(d.rg?'wspólny losowy kolor '+d.rg:'losowy kolor');if(d.vt)t.push(d.vt===1?'tylko w dzień':'tylko nocą');const pt=d.pt===1||(d.pt!==-1&&i!=null&&orig[i]&&orig[i].pt0);if(pt)t.push('kolor budynku');if(d.an&&api.animLib&&api.animLib[d.an.k])t.push('animacja');return t.length?' · '+t.join(', '):''}
+function roleTags(d,i){const t=[];if(!d)d={};if(d.gl)t.push(d.gl===1?'świeci':d.gc?'nocą świeci na '+d.gc:'świeci nocą');if(d.rc)t.push(d.rg?'wspólny losowy kolor '+d.rg:'losowy kolor');if(d.vt)t.push(d.vt===1?'tylko w dzień':'tylko nocą');if(d.lh)t.push('LOD');const pt=d.pt===1||(d.pt!==-1&&i!=null&&orig[i]&&orig[i].pt0);if(pt)t.push('kolor budynku');if(d.an&&api.animLib&&api.animLib[d.an.k])t.push('animacja');return t.length?' · '+t.join(', '):''}
 /* ---------- outliner: the model's own groups and parts, then added solids and effects ---------- */
 const OI={cube:'<svg class="ic" viewBox="0 0 16 16"><path d="M8 1.6l5.6 3.1v6.6L8 14.4l-5.6-3.1V4.7z" fill="var(--c)" stroke="rgba(0,0,0,.45)" stroke-width="1"/><path d="M2.4 4.7L8 7.8l5.6-3.1M8 7.8v6.6" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1"/></svg>',
   folder:'<svg class="ic" viewBox="0 0 16 16"><path d="M1.5 4.2c0-.7.5-1.2 1.2-1.2h3.4l1.5 1.6h5.7c.7 0 1.2.5 1.2 1.2v6.5c0 .7-.5 1.2-1.2 1.2H2.7c-.7 0-1.2-.5-1.2-1.2z" fill="#5bc0f8"/></svg>',
@@ -543,7 +546,7 @@ $('delAdd').onclick=delAdded;
 function roleData(i,make){if(isOrig(i)){if(make)work.mods[i]=work.mods[i]||{};return work.mods[i]}return work.add[i-ms.length]}
 function setRole(key,val){for(const i of sel){if(isFx(i))continue;const d=roleData(i,true);if(val===undefined||val===null||val==='')delete d[key];else d[key]=val;if(isOrig(i)&&!Object.keys(d).length)delete work.mods[i]}applyLooks();fillPartSel();fillRoles(sel.filter(i=>!isFx(i)));updDirty()}
 function fillRoles(parts){const show=!!parts.length&&!showOrig;$('roleSec').hidden=!show;if(!show){renderAnimLib();return}const d=roleData(parts[0])||{};
-  $('rGl').value=String(d.gl||0);$('rVt').value=d.vt?String(d.vt):'';$('rGcL').hidden=$('rGcBox').hidden=d.gl!==2;$('rGcOn').checked=!!d.gc;$('rGc').value=d.gc||'#ffd36b';$('rGc').disabled=!d.gc;$('rRc').checked=!!d.rc;$('rPalBox').hidden=$('rPalL').hidden=!d.rc;if(d.rc)renderPal(curPal(d));$('rGrL').hidden=$('rGrBox').hidden=!d.rc;fillGroup(parts);renderAnimLib();
+  $('rGl').value=String(d.gl||0);$('rVt').value=d.vt?String(d.vt):'';$('rLh').value=d.lh?'1':'';$('rGcL').hidden=$('rGcBox').hidden=d.gl!==2;$('rGcOn').checked=!!d.gc;$('rGc').value=d.gc||'#ffd36b';$('rGc').disabled=!d.gc;$('rRc').checked=!!d.rc;$('rPalBox').hidden=$('rPalL').hidden=!d.rc;if(d.rc)renderPal(curPal(d));$('rGrL').hidden=$('rGrBox').hidden=!d.rc;fillGroup(parts);renderAnimLib();
   $('rPt').value=d.pt===1?'1':d.pt===-1?'-1':'';$('rAn').value=d.an&&d.an.k||'';const L=d.an&&api.animLib&&api.animLib[d.an.k];$('anParams').hidden=!L;
   if(L){$('anAx').value=d.an.ax||L.ax;$('anSp').value=d.an.sp??L.sp;$('anAm').value=d.an.am??L.am;$('anPh').value=d.an.ph||0;$('anAm').disabled=d.an.k==='spin'||d.an.k==='rotor'||d.an.k==='blink'}
   const m=curModel(),pt0=isOrig(parts[0])&&orig[parts[0]].pt0;
@@ -576,6 +579,9 @@ function renderPal(pal){const box=$('rPal');box.innerHTML='';
   $('rPalL').textContent=`Kolory (${pal.length})`}
 $('palRoll').onclick=()=>{rgCols={};for(const i of partIdx()){const m=objOf(i);if(m&&(sel.includes(i)||(roleData(i)||{}).rg))m.userData.rcKey=null}applyLooks();fillPartSel()};
 $('palDef').onclick=()=>commitPal((api.rcDef||[]).slice());
+$('rLh').onchange=()=>{setRole('lh',+$('rLh').value||undefined)};
+$('lodD').onchange=()=>{if(!full)return;const v=+$('lodD').value;if(v>0)full.lodD=v;else delete full.lodD;updDirty()};
+$('lodPrev').onchange=()=>applyLooks();
 $('rVt').onchange=()=>{const v=+$('rVt').value||undefined;setRole('vt',v);if(v===2&&!night)note('Ta część jest widoczna tylko nocą – włącz „Noc”, żeby ją zobaczyć.');else if(v===1&&night)note('Ta część jest widoczna tylko w dzień – wyłącz „Noc”.')};
 $('rRc').onchange=()=>{if(!$('rRc').checked)for(const i of sel){const d=!isFx(i)&&roleData(i);if(d)delete d.rg}setRole('rc',$('rRc').checked?1:undefined)};
 $('rPt').onchange=()=>setRole('pt',$('rPt').value?+$('rPt').value:undefined);
