@@ -1,1 +1,1 @@
-{"v": "7.6.3", "notes": "7.6.3: budynki wielopolowe stają na terenie o różnicy do 3 poziomów (wcześniej 2) – teren wyrównuje się sam"}
+{"v": "7.6.4", "notes": "7.6.4: budynek przy drodze ma dojazd także, gdy stoi do 1 poziomu wyżej niż droga (niżej bez zmian); limit wyrównania multibloków wraca do 2 poziomów"}
