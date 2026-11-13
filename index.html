@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.7.7';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.8';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1091,15 +1091,16 @@ function ovrRoles(m,d,g,ctx,RG){if(m.material&&m.material.color){
     if(d.gl&&m.material.emissive){const gc=d.gl===2&&typeof d.gc==='string'?d.gc:null;ovrMat(m,'gl'+d.gl+(gc||''),mt=>{mt.userData.dayCol=mt.color.getHex()});
       /* night glow can also switch the part to another colour (gc), e.g. a dark window that lights up yellow */
       const G={m:d.gl,d:gc?(m.material.userData.dayCol!=null?new THREE.Color(m.material.userData.dayCol):m.material.color.clone()):null,n:gc?new THREE.Color(gc):null};GLOWS.set(m.material,G);glowSet(m.material,G,nightK())}}
-  if(d.lh)m.userData.lh=1;
+  /* lh: 1 = detail that disappears far away, 2 = LOD part shown only far away (a simple stand-in for the detailed model) */
+  if(d.lh)m.userData.lh=d.lh===2?2:1;
   /* vt: the part shows only by day (1) or only at night (2) */
   if(d.vt&&!d.h){m.userData.vt=d.vt;DAYVIS.add(m);m.visible=d.vt===1?nightK()<0.5:nightK()>=0.5}
   if(d.an&&ANIM_LIB[d.an.k]){m.userData.an=d.an;m.userData.an0=[m.position.clone(),m.rotation.clone(),m.scale.clone(),m.visible];ANIMS.add(m)}}
 /* 7.4.0: LOD: parts marked in the editor disappear beyond the model's LOD distance */
 const LODS=new Set();let lodAcc=0;const _lp=new THREE.Vector3();
 function lodTick(dt){lodAcc+=dt;if(lodAcc<0.25)return;lodAcc=0;try{natLodTick()}catch(e){}if(!LODS.size)return;const cp=camera.position;
-  for(const e of LODS){const{m,g}=e;if(!m.parent||!g.parent){if(!g.parent)LODS.delete(e);continue}g.getWorldPosition(_lp);const far=_lp.distanceTo(cp)>(g.userData.lodD||40);
-    if(far){if(!m.userData.lodHid){m.userData.lodHid=true;m.visible=false}}else if(m.userData.lodHid){m.userData.lodHid=false;m.visible=m.userData.vt?(m.userData.vt===1?nightK()<0.5:nightK()>=0.5):true}}}
+  for(const e of LODS){const{m,g}=e;if(!m.parent||!g.parent){if(!g.parent)LODS.delete(e);continue}g.getWorldPosition(_lp);const far=_lp.distanceTo(cp)>(g.userData.lodD||40),hide=m.userData.lh===2?!far:far;
+    if(hide){if(!m.userData.lodHid){m.userData.lodHid=true;m.visible=false}}else if(m.userData.lodHid){m.userData.lodHid=false;m.visible=m.userData.vt?(m.userData.vt===1?nightK()<0.5:nightK()>=0.5):true}}}
 function applyOvrObj(o,ms,g,ctx){if(!o||!g)return g;const RG={};try{
     const PATH=p=>{let x=g;for(const k of String(p).split('/')){if(k==='')continue;x=x&&x.children[+k]}return x&&x.isObject3D?x:null},PT=new Map();
     for(const k in o.mods||{}){const d=o.mods[k];if(d&&d.par!=null)PT.set('m'+k,PATH(d.par))}(o.add||[]).forEach((a,j)=>{if(a.par!=null)PT.set('a'+j,PATH(a.par))});
@@ -1136,7 +1137,7 @@ const inScene=o=>{while(o){if(o===scene)return true;o=o.parent}return false};
 let ovrClean=0;function ovrAnimTick(t,dt){ovrClean+=dt;const cl=ovrClean>2;if(cl)ovrClean=0;
   for(const m of ANIMS){if(cl&&!inScene(m)){ANIMS.delete(m);continue}animApply(m,t)}
   for(const g of FXS){if(cl&&!inScene(g)){FXS.delete(g);continue}fxApply(g,t)}
-  const nt=nightK()>=0.5;for(const m of DAYVIS){if(cl&&!inScene(m)){DAYVIS.delete(m);continue}const v=m.userData.vt===1?!nt:nt;if(m.visible!==v)m.visible=v}}
+  const nt=nightK()>=0.5;for(const m of DAYVIS){if(cl&&!inScene(m)){DAYVIS.delete(m);continue}const v=!m.userData.lodHid&&(m.userData.vt===1?!nt:nt);if(m.visible!==v)m.visible=v}}
 /* static parts of a building are merged into one mesh per material when it is placed: a big city draws (and shadows)
    a handful of meshes per building instead of dozens. Anything the game or a model override moves, hides, recolours or
    references later (userData, animations, particles, hidden parts) is left as it was. */
@@ -1930,7 +1931,7 @@ function natBase(k){const g=new THREE.Group();if(k==='rock'){g.add(new THREE.Mes
 const natCache=new Map(),natVC=new THREE.MeshLambertMaterial({vertexColors:true});
 function natMerged(k,far){const key=k+(far?'|f':'');if(natCache.has(key))return natCache.get(key);let geo=null;
   try{if(MODEL_OVR['nat:'+k]){const g=applyOvr('nat:'+k,natBase(k));g.updateMatrixWorld(true);const P=[],Nn=[],C=[];
-      g.traverse(m=>{if(!m.isMesh||!m.visible||(far&&m.userData.lh))return;let q=m.geometry.index?m.geometry.toNonIndexed():m.geometry.clone();q.applyMatrix4(m.matrixWorld);q.computeVertexNormals();const col=m.material.color||new THREE.Color('#888');
+      g.traverse(m=>{if(!m.isMesh||!m.visible||(far?m.userData.lh===1:m.userData.lh===2))return;let q=m.geometry.index?m.geometry.toNonIndexed():m.geometry.clone();q.applyMatrix4(m.matrixWorld);q.computeVertexNormals();const col=m.material.color||new THREE.Color('#888');
         const pa=q.attributes.position.array,na=q.attributes.normal.array;for(let j=0;j<pa.length;j+=3){P.push(pa[j],pa[j+1],pa[j+2]);Nn.push(na[j],na[j+1],na[j+2]);C.push(col.r,col.g,col.b)}});
       if(P.length){geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(P,3));geo.setAttribute('normal',new THREE.Float32BufferAttribute(Nn,3));geo.setAttribute('color',new THREE.Float32BufferAttribute(C,3));geo.userData.keep=true}}}catch(e){geo=null}
   natCache.set(key,geo);return geo}

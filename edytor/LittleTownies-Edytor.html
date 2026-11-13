@@ -168,8 +168,10 @@ iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:
       <div id="varBox" hidden>
         <div class="vars" id="vars"></div>
         <div class="muted" id="varInfo" style="margin-top:6px"></div>
-        <div class="row" style="margin-top:8px;gap:6px;align-items:center" title="Części oznaczone jako „LOD” (Zachowanie części) znikają, gdy kamera jest dalej niż ta odległość"><span class="muted">LOD: szczegóły znikają dalej niż</span><input type="number" id="lodD" min="5" max="200" step="1" style="width:64px"><span class="muted">pól</span></div>
-        <label class="row" style="margin-top:4px;gap:6px"><input type="checkbox" id="lodPrev"> <span class="muted">Podgląd z daleka (bez części LOD)</span></label>
+        <div class="row" style="margin-top:8px;gap:6px;align-items:center" title="Części oznaczone jako „LOD” (Zachowanie części) znikają, gdy kamera jest dalej niż ta odległość"><span class="muted">LOD: model z daleka od</span><input type="number" id="lodD" min="5" max="200" step="1" style="width:64px"><span class="muted">pól</span></div>
+        <label class="row" style="margin-top:4px;gap:6px"><input type="checkbox" id="lodPrev"> <span class="muted">Podgląd z daleka (model LOD)</span></label>
+        <div class="row" style="margin-top:6px;gap:4px;flex-wrap:wrap"><button class="mini" id="lodAuto" title="Tworzy prosty model z daleka z kilku brył (obrys budynku) i ukrywa szczegóły z daleka. Potem możesz go dowolnie edytować">Utwórz LOD automatycznie</button><button class="mini" id="lodNew" title="Dodaje pustą bryłę LOD widoczną tylko z daleka – zbuduj własny model z daleka">+ bryła LOD</button><button class="mini" id="lodClr" title="Usuwa bryły LOD i oznaczenia LOD ze wszystkich części">Usuń LOD</button></div>
+        <div class="muted" id="lodInfo" style="margin-top:4px"></div>
       </div>
     </div></div>
     <div class="panel" id="partSec" data-p="part" hidden><div class="ph"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>Część<span class="acts"><span class="cnt" id="selInfo"></span></span></div><div class="pb">
@@ -187,7 +189,7 @@ iframe#game{position:absolute;width:2px;height:2px;left:-10px;top:-10px;opacity:
       <div class="grid2">
         <span class="muted">Świeci</span><select id="rGl"><option value="0">nie</option><option value="1">zawsze</option><option value="2">tylko nocą (jak okna)</option></select>
         <span class="muted" id="rGcL">Kolor nocą</span><span class="row" id="rGcBox" style="gap:6px;flex-wrap:nowrap"><label class="row" style="gap:6px;flex:none"><input type="checkbox" id="rGcOn"> <span class="muted">zmienia na</span></label><input type="color" id="rGc" style="height:26px;flex:1;min-width:40px" value="#ffd36b"></span>
-        <span class="muted">LOD</span><select id="rLh"><option value="">widoczna zawsze</option><option value="1">znika z daleka (szczegół)</option></select>
+        <span class="muted">LOD</span><select id="rLh"><option value="">widoczna zawsze</option><option value="1">tylko z bliska (szczegół)</option><option value="2">tylko z daleka (część LOD)</option></select>
         <span class="muted">Widoczność</span><select id="rVt"><option value="">zawsze</option><option value="1">tylko w dzień</option><option value="2">tylko w nocy</option></select>
         <span class="muted">Losowy kolor</span><label class="row" style="gap:6px"><input type="checkbox" id="rRc"> <span class="muted">każdy budynek / pojazd inny</span></label>
         <span class="muted" id="rGrL">Wspólny kolor</span><div id="rGrBox"><div class="row" style="gap:4px"><span class="grp" id="rGrName">brak grupy</span><button class="mini" id="rGrJoin" title="Zaznaczone bryły losują jeden wspólny kolor">Połącz zaznaczone</button><button class="mini" id="rGrLeave">Odłącz</button></div>
@@ -373,7 +375,7 @@ function look(m,d,baseCol){if(!m||!m.material||!m.material.color)return;let col=
     if(m.userData.rcKey!==key){m.userData.rcKey=key;let c=pal[(Math.random()*pal.length)|0];if(d.rg){const g=rgCols[d.rg];if(g&&pal.includes(g))c=g;else rgCols[d.rg]=c}m.userData.rcCol=c}col=m.userData.rcCol}else m.userData.rcKey=null;
   const g=d&&d.gl,gc=g===2&&d.gc;if(gc&&night)col=gc;
   m.material.color.set(col);if(m.material.emissive){m.material.emissive.copy(m.material.color).multiplyScalar(g===1?0.6:g===2&&night?0.95:0)}}
-function applyLooks(){if(showOrig)return;const far=$('lodPrev')&&$('lodPrev').checked,dv=d=>(far&&d&&d.lh)?false:d&&d.vt?(d.vt===1?!night:night):true;ms.forEach((m,i)=>{const d=work.mods[i];m.visible=d&&d.h?false:(far&&d&&d.lh)?false:d&&d.vt?dv(d):orig[i].vis});added.forEach((m,k)=>{const a=work.add[k];m.visible=!a.h&&dv(a)});for(const k in rgCols){const used=[...ms.map((m,i)=>work.mods[i]),...work.add].some(d=>d&&d.rc&&d.rg==k);if(!used)delete rgCols[k]}ms.forEach((m,i)=>{const d=work.mods[i];look(m,d,d&&d.c||orig[i].c)});added.forEach((m,k)=>look(m,work.add[k],work.add[k].c||'#cccccc'))}
+function applyLooks(){if(showOrig)return;const far=$('lodPrev')&&$('lodPrev').checked,lodV=d=>!d||!d.lh?true:d.lh===2?far:!far,dv=d=>!lodV(d)?false:d&&d.vt?(d.vt===1?!night:night):true;ms.forEach((m,i)=>{const d=work.mods[i];m.visible=d&&d.h?false:!lodV(d)?false:d&&d.vt?dv(d):orig[i].vis});lodInfo();added.forEach((m,k)=>{const a=work.add[k];m.visible=!a.h&&dv(a)});for(const k in rgCols){const used=[...ms.map((m,i)=>work.mods[i]),...work.add].some(d=>d&&d.rc&&d.rg==k);if(!used)delete rgCols[k]}ms.forEach((m,i)=>{const d=work.mods[i];look(m,d,d&&d.c||orig[i].c)});added.forEach((m,k)=>look(m,work.add[k],work.add[k].c||'#cccccc'))}
 /* parts nested in sub-groups are stored relative to the model root (rs), exactly like the game applies them */
 const nested=m=>m.parent&&m.parent!==root;
 function rootLocal(o){root.updateMatrixWorld(true);return new T.Matrix4().copy(root.matrixWorld).invert().multiply(o.matrixWorld)}
@@ -546,7 +548,7 @@ $('delAdd').onclick=delAdded;
 function roleData(i,make){if(isOrig(i)){if(make)work.mods[i]=work.mods[i]||{};return work.mods[i]}return work.add[i-ms.length]}
 function setRole(key,val){for(const i of sel){if(isFx(i))continue;const d=roleData(i,true);if(val===undefined||val===null||val==='')delete d[key];else d[key]=val;if(isOrig(i)&&!Object.keys(d).length)delete work.mods[i]}applyLooks();fillPartSel();fillRoles(sel.filter(i=>!isFx(i)));updDirty()}
 function fillRoles(parts){const show=!!parts.length&&!showOrig;$('roleSec').hidden=!show;if(!show){renderAnimLib();return}const d=roleData(parts[0])||{};
-  $('rGl').value=String(d.gl||0);$('rVt').value=d.vt?String(d.vt):'';$('rLh').value=d.lh?'1':'';$('rGcL').hidden=$('rGcBox').hidden=d.gl!==2;$('rGcOn').checked=!!d.gc;$('rGc').value=d.gc||'#ffd36b';$('rGc').disabled=!d.gc;$('rRc').checked=!!d.rc;$('rPalBox').hidden=$('rPalL').hidden=!d.rc;if(d.rc)renderPal(curPal(d));$('rGrL').hidden=$('rGrBox').hidden=!d.rc;fillGroup(parts);renderAnimLib();
+  $('rGl').value=String(d.gl||0);$('rVt').value=d.vt?String(d.vt):'';$('rLh').value=d.lh?String(d.lh):'';$('rGcL').hidden=$('rGcBox').hidden=d.gl!==2;$('rGcOn').checked=!!d.gc;$('rGc').value=d.gc||'#ffd36b';$('rGc').disabled=!d.gc;$('rRc').checked=!!d.rc;$('rPalBox').hidden=$('rPalL').hidden=!d.rc;if(d.rc)renderPal(curPal(d));$('rGrL').hidden=$('rGrBox').hidden=!d.rc;fillGroup(parts);renderAnimLib();
   $('rPt').value=d.pt===1?'1':d.pt===-1?'-1':'';$('rAn').value=d.an&&d.an.k||'';const L=d.an&&api.animLib&&api.animLib[d.an.k];$('anParams').hidden=!L;
   if(L){$('anAx').value=d.an.ax||L.ax;$('anSp').value=d.an.sp??L.sp;$('anAm').value=d.an.am??L.am;$('anPh').value=d.an.ph||0;$('anAm').disabled=d.an.k==='spin'||d.an.k==='rotor'||d.an.k==='blink'}
   const m=curModel(),pt0=isOrig(parts[0])&&orig[parts[0]].pt0;
@@ -582,6 +584,25 @@ $('palDef').onclick=()=>commitPal((api.rcDef||[]).slice());
 $('rLh').onchange=()=>{setRole('lh',+$('rLh').value||undefined)};
 $('lodD').onchange=()=>{if(!full)return;const v=+$('lodD').value;if(v>0)full.lodD=v;else delete full.lodD;updDirty()};
 $('lodPrev').onchange=()=>applyLooks();
+/* 7.7.8: own LOD models: parts marked "only far" (lh 2) replace the detailed parts (lh 1) beyond the LOD distance */
+function lodInfo(){const el=$('lodInfo');if(!el||!work)return;const all=[...Object.values(work.mods||{}),...(work.add||[])];const f=all.filter(d=>d&&d.lh===2).length,n=all.filter(d=>d&&d.lh===1).length;
+  const pl=(n,a,b,c)=>n===1?a:(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?b:c;el.textContent=f||n?`Model z daleka: ${f} ${pl(f,'bryła','bryły','brył')} LOD · ${n} ${pl(n,'szczegół znika','szczegóły znikają','szczegółów znika')} z daleka.${f&&!$('lodPrev').checked?' Włącz podgląd z daleka, by edytować bryły LOD.':''}`:'Brak LOD: z daleka model wygląda tak samo jak z bliska.'}
+function lodBoxes(){const B=[];root.updateMatrixWorld(true);const inv=new T.Matrix4().copy(root.matrixWorld).invert();
+  const kind=m=>{const g=m.geometry,t=g&&g.type||'',P=g&&g.parameters||{};return t.startsWith('Cone')?(P.radialSegments===4?'pyr':'cone'):t.startsWith('Cylinder')?'cyl':t.startsWith('Sphere')?'sphere':'box'};
+  const push=(m,col,gk)=>{if(!m||!m.geometry)return;const b=new T.Box3().setFromObject(m);if(b.isEmpty())return;b.applyMatrix4(inv);const s=b.getSize(new T.Vector3());B.push({b,c:col,g:gk||kind(m),v:Math.max(1e-5,s.x*s.y*s.z),fp:s.x*s.z})};
+  ms.forEach((m,i)=>{const d=work.mods[i];if(d&&(d.h||d.lh===2))return;if(!orig[i].vis&&!(d&&d.vt))return;push(m,(d&&d.c)||orig[i].c)});added.forEach((m,k)=>{const a=work.add[k];if(a.h||a.lh===2)return;push(m,a.c||'#cccccc',a.g==='wedge'?'wedge':null)});
+  if(!B.length)return[];B.sort((a,b)=>b.v-a.v);const big=B[0].v,out=[];
+  const inside=(e,o)=>{const i=e.b.clone().intersect(o.b);if(i.isEmpty())return 0;const s=i.getSize(new T.Vector3());return s.x*s.y*s.z/e.v};
+  /* the biggest shapes stay as separate simple solids; a part mostly inside one already kept, or a tiny detail, is dropped */
+  for(const e of B){if(out.length>=10)break;if(e.v<0.02*big&&e.fp<0.15)continue;if(out.some(o=>inside(e,o)>0.75))continue;out.push(e)}
+  return out}
+$('lodAuto').onclick=()=>{if(!root||showOrig)return;const bx=lodBoxes();if(!bx.length){note('Ten model nie ma brył, z których da się zrobić LOD.');return}
+  work.add=(work.add||[]).filter(a=>a.lh!==2);for(const k in work.mods){const d=work.mods[k];if(d&&d.lh===2)delete d.lh}
+  ms.forEach((m,i)=>{const d=work.mods[i]||(work.mods[i]={});if(!d.h)d.lh=1});(work.add||[]).forEach(a=>{if(!a.h)a.lh=1});
+  for(const o of bx){const c=o.b.getCenter(new T.Vector3()),z=o.b.getSize(new T.Vector3());work.add.push({g:o.g||'box',c:o.c,p:[c.x,c.y,c.z].map(r4),r:[0,0,0],s:[Math.max(0.02,z.x),Math.max(0.02,z.y),Math.max(0.02,z.z)].map(r4),lh:2})}
+  $('lodPrev').checked=true;rebuild();updDirty();note(`Utworzono LOD z ${bx.length} ${bx.length===1?'bryły':'brył'}. Z daleka gra pokaże tylko je – edytuj je w podglądzie z daleka.`)};
+$('lodNew').onclick=()=>{if(!root||showOrig)return;const a={g:'box',c:'#d9d2c3',p:[orbit.target.x,0.25,orbit.target.z].map(r4),r:[0,0,0],s:[0.5,0.5,0.5],lh:2};work.add.push(a);added.push(makeAdded(a));$('lodPrev').checked=true;applyLooks();fillPartSel();select([ms.length+added.length-1]);updDirty()};
+$('lodClr').onclick=()=>{if(!root||showOrig)return;work.add=(work.add||[]).filter(a=>a.lh!==2);(work.add||[]).forEach(a=>{delete a.lh});for(const k in work.mods){const d=work.mods[k];if(d){delete d.lh;if(!Object.keys(d).length)delete work.mods[k]}}$('lodPrev').checked=false;rebuild();updDirty();note('Usunięto LOD z tego modelu.')};
 $('rVt').onchange=()=>{const v=+$('rVt').value||undefined;setRole('vt',v);if(v===2&&!night)note('Ta część jest widoczna tylko nocą – włącz „Noc”, żeby ją zobaczyć.');else if(v===1&&night)note('Ta część jest widoczna tylko w dzień – wyłącz „Noc”.')};
 $('rRc').onchange=()=>{if(!$('rRc').checked)for(const i of sel){const d=!isFx(i)&&roleData(i);if(d)delete d.rg}setRole('rc',$('rRc').checked?1:undefined)};
 $('rPt').onchange=()=>setRole('pt',$('rPt').value?+$('rPt').value:undefined);
