@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.5.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.5.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -4025,7 +4025,12 @@ const fpCost=()=>moveSrc>=0?moveCost(grid[moveSrc]):DEF[tool].cost;
 const moveCost=c=>Math.floor(DEF[c.t].cost/2);
 const movable=c=>!!c&&!DRIVE[c.t]&&c.t!=='part'&&c.t!=='hydro'&&!!BUILD[c.t];
 function fpTiles(i){const[fw,fh]=curFP(),x=i%N,z=(i/N)|0;if(x>N-fw||z>N-fh)return null;const t=[];for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++)t.push(idx(x+dx,z+dz));return t}
-function fpOK(t,T){return!!t&&t.every(freeFor)&&t.every(j=>hgt[j]===hgt[t[0]]&&!fld[j])&&(T!=='pitB'||(!!dep[t[0]]&&t.every(j=>dep[j]===dep[t[0]])))&&(T!=='pitS'||!!dep[t[0]])&&(!(T==='pump'||T==='outlet')||nbrs(t[0]).some(k=>water[k]))&&(T!=='pumpB'||t.every(j=>nbrs(j).some(k=>water[k])))}
+/* 7.5.5: a multi-tile building may stand on uneven ground (up to 2 levels of difference): the ground under it is levelled for the terrain price */
+function fpLevel(t){if(!t||!t.length)return null;const hs=t.map(j=>hgt[j]),mn=Math.min(...hs),mx=Math.max(...hs);if(mn===mx)return{h:mn,cost:0};if(mx-mn>4)return null;
+  let h=null;for(const j of t){for(const k of nbrs(j))if(grid[k]&&DRIVE[grid[k].t]&&!t.includes(k)&&rh(k)>=mn&&rh(k)<=mx){h=rh(k);break}if(h!=null)break}
+  if(h==null){const cnt={};for(const v of hs)cnt[v]=(cnt[v]||0)+1;h=+Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a-b)[0]}
+  let d=0;for(const v of hs)d+=Math.abs(v-h);return{h,cost:DEF.tLevel.cost*d}}
+function fpOK(t,T){return!!t&&t.every(freeFor)&&t.every(j=>!fld[j])&&!!fpLevel(t)&&(T!=='pitB'||(!!dep[t[0]]&&t.every(j=>dep[j]===dep[t[0]])))&&(T!=='pitS'||!!dep[t[0]])&&(!(T==='pump'||T==='outlet')||nbrs(t[0]).some(k=>water[k]))&&(T!=='pumpB'||t.every(j=>nbrs(j).some(k=>water[k])))}
 /* see-through copy of the building that follows the placement preview */
 let ghost=null,ghostT='';
 function ghostFor(T){const sm=moveSrc>=0&&grid[moveSrc]&&!grid[moveSrc].tiles&&(T==='park3'||T==='incinerator'),GK=T+(sm?':1':'');if(ghost&&ghostT===GK)return ghost;
@@ -4036,13 +4041,13 @@ function ghostFor(T){const sm=moveSrc>=0&&grid[moveSrc]&&!grid[moveSrc].tiles&&(
   ghost=new THREE.Group();ghost.add(m);ghost.renderOrder=5;scene.add(ghost);ghostT=GK;return ghost}
 const faceRoad=i=>{const e=nbrs(i).find(k=>grid[k]&&DRIVE[grid[k].t]);return e!=null&&e>=0?Math.atan2(cx(e)-cx(i),cz(e)-cz(i)):0};
 function updateGhost(){if(lineConf&&pendA<0){sel.visible=false;if(ghost)ghost.visible=false;return}const F=curFP();if(pendA<0||!F){sel.visible=false;placeEl.hidden=true;if(ghost)ghost.visible=false;if(areaT>=1e9&&inspI<0){area.visible=reachHide();areaT=0}return}const[fw,fh]=F,T=curT(),t=fpTiles(pendA);
-  const ok=fpOK(t,T),cost=fpCost(),afford=money>=cost;sel.visible=true;sel.scale.set(fw,fh,1);sel.position.set(cx(pendA)+(fw-1)/2,tYi(pendA)+0.065,cz(pendA)+(fh-1)/2);
+  const ok=fpOK(t,T),LV=ok?fpLevel(t):null,lvc=LV?LV.cost:0,cost=fpCost()+lvc,afford=money>=cost;sel.visible=true;sel.scale.set(fw,fh,1);sel.position.set(cx(pendA)+(fw-1)/2,tYi(pendA)+0.065,cz(pendA)+(fh-1)/2);
   sel.material.color.set(ok&&afford?'#3fbf5a':'#e0402b');placeEl.hidden=false;hintEl.hidden=true;
   {const ar=toolRange(T);if(ar)showArea(pendA,ar,'hold',rangeKind(T),DEF[T]&&(DEF[T].r||DEF[T].area)?null:[fw,fh],T)}
   try{const g=ghostFor(T);g.visible=true;g.position.set(cx(pendA)+(fw-1)/2,tYi(pendA),cz(pendA)+(fh-1)/2);g.rotation.y=FP0(T)?rotIdx*Math.PI/2:faceRoad(pendA)}catch(e){}
-  document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?(!t.every(j=>hgt[j]===hgt[t[0]])?'teren nierówny: wyrównaj go':T==='pitB'||T==='pitS'?'oba pola muszą leżeć na tym samym złożu':'musi stać przy rzece'):'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:`${fmt(cost)} T¢`}`;
+  document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?(!fpLevel(t)?'teren zbyt nierówny (ponad 2 poziomy różnicy)':T==='pitB'||T==='pitS'?'oba pola muszą leżeć na tym samym złożu':'musi stać przy rzece'):'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:lvc?`${fmt(cost-lvc)} T¢ + ${fmt(lvc)} T¢ za wyrównanie terenu`:`${fmt(cost)} T¢`}`;
   document.getElementById('pOk').disabled=!(ok&&afford)}
-function placeFP(){if(pendA<0)return;const T=curT(),t=fpTiles(pendA),cost=fpCost();if(!fpOK(t,T)||money<cost)return updateGhost();
+function placeFP(){if(pendA<0)return;const T=curT(),t=fpTiles(pendA),cost=fpCost();if(!fpOK(t,T))return updateGhost();const LV=fpLevel(t);if(money<cost+LV.cost)return updateGhost();if(LV.cost){spend(LV.cost);for(const j of t)if(hgt[j]!==LV.h)setH(j,LV.h)}
   const a=pendA;pendA=-1;lockBuy();
   if(moveSrc>=0){const src=moveSrc;moveSrc=-1;doMove(src,a,t,cost);updateGhost();hintEl.hidden=false;
     if(entryOf(a)<0&&!NOROAD[T])setHint('Przeniesiono. Budynek nie ma dojazdu: dołóż ulicę obok.',true,true);else setHint(`Przeniesiono za ${fmt(cost)} T¢.`,false,true);return}
@@ -7280,7 +7285,9 @@ const LT_TR=[
 ["Stuknij miejsce, obróć i zatwierdź ({}). Pobiera {} MW.", "Tap a spot, rotate and confirm ({}). Uses {} MW.", "Tippe auf eine Stelle, drehe und bestätige ({}). Verbraucht {} MW."],
 ["silny smog (szare pole)", "heavy smog (grey tile)", "starker Smog (graues Feld)"],
 ["{} kg {}", "{} kg {}", "{} kg {}"],
-["−{} kg {}", "−{} kg {}", "−{} kg {}"]
+["−{} kg {}", "−{} kg {}", "−{} kg {}"],
+["teren zbyt nierówny (ponad 2 poziomy różnicy)", "ground too uneven (more than 2 levels of difference)", "Gelände zu uneben (mehr als 2 Stufen Unterschied)"],
+["{} T¢ + {} T¢ za wyrównanie terenu", "{} T¢ + {} T¢ for levelling the ground", "{} T¢ + {} T¢ für das Einebnen des Geländes"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
