@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.6.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.6.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -615,6 +615,7 @@ const DEF={
   policeS:{name:'Komisariat',cost:800,desc:'Zasięg 17 bloków po drogach i obręb 9×9, cele na 10 osób. 2 radiowozy patrolują i jadą na interwencje. Ulepszenia: „Drugi garaż” (+2 radiowozy do interwencji), „Większy rewir” (+3 bloki po drogach, obręb +2).',sw:'#2f5fa8',area:5},
   railTunnel:{name:'Tunel kolejowy',cost:150,desc:'Tory pod wzniesieniem. Zaczyna się przy końcu torów u stóp wzgórza i biegnie płasko na ich wysokości; nad tunelem musi być co najmniej półtora poziomu terenu.',sw:'#6f6a62'},
   rail:{name:'Tory',cost:40,desc:'Przeciągnij, by położyć tory. Przecinają w poprzek pojedynczą, prostą ulicę (przejazd) i rzeki (most kolejowy). Z dworcem łączą się tylko na końcach jego peronu (wjazd i wyjazd). Dworzec działa, gdy tory dochodzą do krawędzi mapy.',sw:'#7d6a58',unit:'T¢/pole'},
+  busDepot:{name:'Zajezdnia autobusowa',cost:1500,fw:2,fh:2,desc:'Zajmuje 2×2 pola. Garażuje i obsługuje autobusy: każda linia autobusowa dostaje +2 autobusy, a nowe autobusy wyjeżdżają na trasę dwa razy szybciej.',sw:'#3c6fa8'},
   taxi:{name:'Baza taxi',cost:700,size:2,desc:'Zajmuje 2 pola. 4 taksówki wożą turystów z drogi wjazdowej i z dworca do hoteli, rozrywki i sklepów. Bez bazy taxi turyści nie przyjeżdżają. Kurs: 5 T¢.',sw:'#e9b81c'},
   trainSt:{name:'Dworzec kolejowy',cost:3500,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Gdy tory łączą go z krawędzią mapy, co 2 godziny przyjeżdża pociąg z turystami (+60% turystów). Taksówki odbierają ich z dworca.',sw:'#3d6fa8'},
   freightSt:{name:'Dworzec towarowy',cost:4000,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Pociąg towarowy co godzinę: stały import do magazynów albo eksport z magazynów wybranego towaru, od 10 kg/godz. co 5. Wymaga torów do krawędzi mapy.',sw:'#6b5a3c'},
@@ -665,7 +666,7 @@ const DEF={
   biomass:{name:'El. na biomasę',cost:1000,size:2,desc:'Zajmuje 2×1 pola. 30 MW z drewna (z farmy drzew; gdy go brak, kupuje spoza miasta po 16 T¢/kg): spala 1 kg co 8 min, gdy wiatraki i inne źródła nie wystarczają. Dymi o połowę słabiej niż węglowa. Ulepszenie „Drugi komin”: +20 MW. Łączy się przez transformator obok albo słup WN.',sw:'#6d7f4a'},
   fill:{name:'Zasypanie rzeki',cost:200,desc:'Zamienia pole wody przy brzegu w ląd. Uwaga: woda odcięta od ujścia za mapę zacznie się podnosić i może zalać okolicę.',sw:'#a8875a',unit:'T¢/pole'},
 };
-const DEMAND={pitS:1,pitB:2,cityHall:2,shipC:1.5,roadSvc:1,heliB:2,taxi:0.5,trainSt:2,freightSt:2.5,fireS:1,fireB:2.5,clinic:1.5,hosp:4,hospC:9,crem:3,schoolS:0.8,school:1.5,lyceum:3,techn:4,bankG:4,shop1:1,prisonS:1.5,prison:3,policeS:1,policeB:2.5,bakery:0.6,factoryB:3.5,mine:1,mineB:3,supermarket:2.5,smallfac:1,pump:1,pumpB:2.5,tower:0.5,treatment:2,restaurant:0.8,cinema:1.5,theater:1.5,casino:3,hotelS:1,hotelB:3,gallery:3,tenement:1.2,block:2,modern:2.5,house:0.5,factory:2,shop:1,bank:5,incinerator:1,recycler:1.5};
+const DEMAND={busDepot:1.2,pitS:1,pitB:2,cityHall:2,shipC:1.5,roadSvc:1,heliB:2,taxi:0.5,trainSt:2,freightSt:2.5,fireS:1,fireB:2.5,clinic:1.5,hosp:4,hospC:9,crem:3,schoolS:0.8,school:1.5,lyceum:3,techn:4,bankG:4,shop1:1,prisonS:1.5,prison:3,policeS:1,policeB:2.5,bakery:0.6,factoryB:3.5,mine:1,mineB:3,supermarket:2.5,smallfac:1,pump:1,pumpB:2.5,tower:0.5,treatment:2,restaurant:0.8,cinema:1.5,theater:1.5,casino:3,hotelS:1,hotelB:3,gallery:3,tenement:1.2,block:2,modern:2.5,house:0.5,factory:2,shop:1,bank:5,incinerator:1,recycler:1.5};
 const WHCAP={warehouse:200,smallwh:150,warehouseB:500};
 const isWH=t=>t==='warehouse'||t==='smallwh'||t==='warehouseB';const WH_T=['warehouse','smallwh','warehouseB'];
 const UTIL_R={pump:2,pumpB:2,tower:2,treatment:2};
@@ -715,7 +716,7 @@ const HCOL={0:'#8a2a2a',1:'#d4483a',2:'#e58a3a',3:'#d9b23a',4:'#7dbb4a',5:'#2f9e
 const SHOP_R=5;
 /* road upkeep is per 12 game hours: 1 T¢ per plain road tile, more for bigger roads */
 const ROAD_UPK={road:1,road2:2,road3:3,roundabout:2,highway:4,bridge:5,tunnel:6},ROAD_PER=12;
-const UPKEEP={biomass:90,pitS:30,pitB:60,cityHall:200,shipC:120,roadSvc:90,heliB:600,taxi:120,trainSt:180,freightSt:240,fireS:122,fireB:284,clinic:180,hosp:400,hospC:1100,cemS:50,cemB:80,crem:200,schoolS:90,school:160,lyceum:360,techn:400,policeS:144,policeB:336,prisonS:80,prison:150,hydro:20,hydrogen:300,pump:25,pumpB:50,tower:20,outlet:10,treatment:80,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:5,wind:30,coal:125,park1:20,park2:50,park3:90,landfill:30,incinerator:120,recycler:70,factory:100,smallfac:50,factoryB:120,mine:25,mineB:90,warehouse:10,smallwh:5,warehouseB:20,bank:50,bankG:200,incS:60};
+const UPKEEP={busDepot:120,biomass:90,pitS:30,pitB:60,cityHall:200,shipC:120,roadSvc:90,heliB:600,taxi:120,trainSt:180,freightSt:240,fireS:122,fireB:284,clinic:180,hosp:400,hospC:1100,cemS:50,cemB:80,crem:200,schoolS:90,school:160,lyceum:360,techn:400,policeS:144,policeB:336,prisonS:80,prison:150,hydro:20,hydrogen:300,pump:25,pumpB:50,tower:20,outlet:10,treatment:80,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:5,wind:30,coal:125,park1:20,park2:50,park3:90,landfill:30,incinerator:120,recycler:70,factory:100,smallfac:50,factoryB:120,mine:25,mineB:90,warehouse:10,smallwh:5,warehouseB:20,bank:50,bankG:200,incS:60};
 /* waste: houses and parks fill steadily, factories per truck produced, shops per sale; pickup is due every ~6 h (work) or ~12 h (homes, parks) ±15% */
 const TRASH={supermarket:{cap:50,per:0.15,every:6},smallfac:{cap:24,per:0.3,every:6},house:{cap:18,rate:1,every:12},tenement:{cap:36,rate:2.5,every:12},block:{cap:60,rate:5,every:12},modern:{cap:60,rate:4,every:12},park1:{cap:10,rate:0.5,every:12},park2:{cap:10,rate:0.5,every:12},park3:{cap:10,rate:0.5,every:12},
   bakery:{cap:30,per:0.2,every:6},factory:{cap:40,per:0.6,every:6},factoryB:{cap:60,per:0.8,every:6},mine:{cap:30,per:0.4,every:8},mineB:{cap:60,per:0.8,every:6},farmveg:{cap:20,per:0.5,every:12},farmdairy:{cap:20,per:0.6,every:12},farmgrain:{cap:20,per:0.4,every:12},farmcotton:{cap:20,per:0.4,every:12},farmwood:{cap:20,per:0.5,every:12},pitS:{cap:30,per:0.4,every:8},pitB:{cap:60,per:0.8,every:6},shop:{cap:30,per:0.2,every:6},gallery:{cap:60,per:0.2,every:6},restaurant:{cap:30,per:0.3,every:6},cinema:{cap:30,per:0.15,every:6},theater:{cap:30,per:0.15,every:6},casino:{cap:30,per:0.2,every:6},hotelS:{cap:30,per:0.4,every:12},hotelB:{cap:60,per:0.5,every:12}};
@@ -774,7 +775,7 @@ const facCap=c=>FAC[c.t].cap*(c.t==='landfill'?(c.lfN||1):c.t==='incinerator'&&!
 const facTrucks=c=>c.t==='landfill'?Math.min(4,1+Math.ceil((c.lfN||1)/2)):FAC[c.t].trucks;
 const parkR=c=>DEF[c.t].r+(c.up?1:0)+1;
 const PARKS=['park1','park2','park3'];
-const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','tunnel','crosswalk']},{name:'Teren',tools:['tUp','tDown','tLevel','tSmooth','fill']},{name:'Transport',tools:['busStop','busLine','rail','railTunnel','trainSt','railLine','taxi','freightSt','shipC']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','pitS','pitB','warehouse','smallwh','warehouseB','impDep']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain','farmcotton','farmwood']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prisonS','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','transformer','hvpole','wind','coal','biomass','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','roadSvc']},{name:'Woda',tools:['pipe','tower','pump','pumpB','treatment','outlet']},{name:'Urzędowe',tools:['cityHall']}];
+const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','tunnel','crosswalk']},{name:'Teren',tools:['tUp','tDown','tLevel','tSmooth','fill']},{name:'Transport',tools:['busStop','busLine','busDepot','rail','railTunnel','trainSt','railLine','taxi','freightSt','shipC']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','pitS','pitB','warehouse','smallwh','warehouseB','impDep']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain','farmcotton','farmwood']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prisonS','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','transformer','hvpole','wind','coal','biomass','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','roadSvc']},{name:'Woda',tools:['pipe','tower','pump','pumpB','treatment','outlet']},{name:'Urzędowe',tools:['cityHall']}];
 const WIND_MW=2,windMW=i=>window.__testUnlock&&!window.__testHills?6:Math.max(2,Math.min(10,hgt[i]/2)), COAL_MW=20, COAL_BURN=8, BIO_MW=30, BIO_UP=20, BIO_BURN=8;
 const TOOLS=['view','bulldoze','road','pole','poleline','poleDel','house','factory','warehouse','impDep','shop','bank','wind','transformer','coal','park1','park2','park3','smallwh'];
 const BASE_MONEY=4000, BANK_CAP=6000, WH_CAP=60, SALE=25, TRUCK_LOAD=4, MAX_CARS=400, PEOPLE_CARS=340;
@@ -1148,7 +1149,7 @@ const MS_OF={};[
  'tenement roadSvc farmdairy factory warehouse restaurant park2 bridge tunnel coal pitS farmcotton farmwood',
  'road2 clinic cemS schoolS hvpole incS shop1 pitB fill',
  'block supermarket hotelS cinema hydro treatment school recycler taxi shipC pumpB biomass policeS',
- 'road3 roundabout factoryB warehouseB bank theater crem park3 rail railTunnel trainSt freightSt heliB cityHall fireS busStop busLine railLine prisonS',
+ 'road3 roundabout factoryB warehouseB bank theater crem park3 rail railTunnel trainSt freightSt heliB cityHall fireS busStop busLine railLine prisonS busDepot',
  'modern highway hosp mineB policeB fireB lyceum techn incinerator',
  'gallery cemB casino prison','hotelB hydrogen','hospC bankG'].forEach((l,k)=>l.split(' ').forEach(t=>MS_OF[t]=k));
 /* hazards and their menu tab start once the first building of the service is unlocked */
@@ -1325,6 +1326,12 @@ function railPiece(g,arms,y){if(!RAILM.bal){RAILM.bal=M('#8d8579');RAILM.sl=M('#
     const st=arms[pr[0]],br=arms[3-pr[0]-pr[1]];straight(st[0],st[1]);curve(br,st);curve(br,[-st[0],-st[1]]);return}
   straight(1,0);straight(0,1)}
 function buildRail(){const g=new THREE.Group();railPiece(g,[],0.01);return g}
+/* 7.5.x: bus depot – a hall with three bays and buses parked in front */
+function buildBusDepot(){const g=new THREE.Group(),wall=M('#e4dccb'),roof=M('#3c6fa8'),door=M('#4a4f57');g.add(box(1.96,0.03,1.96,mat.concrete));
+  g.add(box(1.8,0.5,0.9,wall,0,0.03,-0.48));g.add(box(1.86,0.05,0.96,roof,0,0.53,-0.48));for(const x of[-0.6,0,0.6])g.add(box(0.46,0.36,0.02,door,x,0.03,-0.02));
+  for(let k=0;k<3;k++)g.add(box(0.02,0.004,0.8,mat.white,-0.9+k*0.6+0.3,0.032,0.5));
+  for(const x of[-0.6,0.6]){const b=carMesh0('bus');b.scale.setScalar(0.85);b.rotation.y=Math.PI;b.position.set(x,0.03,0.5);g.add(b)}
+  g.add(box(0.04,0.6,0.04,mat.steel,0.92,0.03,0.9));g.add(box(0.3,0.16,0.03,roof,0.92,0.6,0.9));return g}
 function buildTaxi(){const g=new THREE.Group(),y=M('#f2c230');g.add(box(1.96,0.03,0.96,mat.concrete));g.add(box(0.7,0.36,0.6,M('#efe9dc'),-0.55,0.03,-0.1));g.add(box(0.72,0.03,0.62,mat.roofD,-0.55,0.39,-0.1));
   g.add(box(0.44,0.1,0.02,y,-0.55,0.27,0.205));g.add(box(0.16,0.2,0.02,mat.door,-0.72,0.03,0.205));for(const x of[-0.43,-0.3])g.add(box(0.1,0.1,0.02,mat.glass,x,0.12,0.205));
   for(let k=0;k<3;k++){const x=0.2+k*0.28;g.add(box(0.02,0.004,0.5,mat.white,x-0.14,0.032,0));g.add(box(0.17,0.07,0.3,y,x,0.04,0.02));g.add(box(0.14,0.05,0.14,mat.cabin,x,0.11,0.0));g.add(box(0.06,0.03,0.04,mat.white,x,0.16,0.0))}
@@ -1749,14 +1756,14 @@ function buildHydro(){const g=new THREE.Group(),con=M('#c4c1b8'),con2=M('#a9a69c
 function buildSupermarket(){const g=new THREE.Group();g.add(box(1.94,0.04,0.94,mat.concrete));g.add(box(1.5,0.44,0.62,M('#e9eef2'),-0.1,0.04,-0.14));
   g.add(box(1.54,0.06,0.66,M('#3a7fc0'),-0.1,0.48,-0.14));g.add(box(0.8,0.24,0.02,mat.glass,-0.1,0.04,0.175));g.add(box(0.7,0.12,0.03,M('#3a7fc0'),-0.1,0.35,0.19));
   for(let k=0;k<4;k++)g.add(box(0.02,0.005,0.2,mat.dash,0.25+k*0.16,0.045,0.33));for(const x of[0.55,0.75])g.add(box(0.12,0.06,0.1,carCols[(x*10)%8|0],x,0.04,0.33));return g}
-const BUILD={cityHall:buildCityHall,shipC:buildShipC,roadSvc:buildRoadSvc,heliB:buildHeliB,rail:buildRail,taxi:buildTaxi,trainSt:buildTrainSt,freightSt:buildFreightSt,fireS:buildFireS,fireB:buildFireB,incS:buildIncinerator,clinic:buildClinic,hosp:buildHosp,hospC:buildHospC,cemS:buildCemS,cemB:buildCemB,crem:buildCrem,schoolS:buildSchoolS,school:buildSchool,lyceum:buildLyceum,techn:buildTechn,bankG:buildBankG,shop1:buildShop1,prisonS:()=>{const g=buildPrison();g.scale.set(2/3,0.85,2/3);return g},prison:buildPrison,policeS:buildPoliceS,policeB:buildPoliceB,bakery:buildBakery,lpole:buildLPole,factoryB:buildFactoryB,warehouseB:buildWarehouseB,mine:buildMine,mineB:buildMineB,supermarket:buildSupermarket,smallfac:()=>{const g=buildFactory();g.scale.setScalar(0.72);return g},hydro:buildHydro,hydrogen:()=>{const g=buildHydrogen();g.scale.set(1.9,1.5,1.9);return g},pump:buildPump,pumpB:buildPumpB,tower:buildTower,outlet:buildOutlet,treatment:buildTreatment,restaurant:buildRestaurant,cinema:buildCinema,theater:buildTheater,casino:buildCasino,hotelS:buildHotelS,hotelB:buildHotelB,gallery:buildGallery,farmveg:()=>buildFarm('veg'),farmdairy:()=>buildFarm('dairy'),farmgrain:()=>buildFarm('grain'),farmcotton:()=>buildFarm('cotton'),farmwood:()=>buildFarm('wood'),pitS:buildPit,pitB:buildPitB,biomass:buildBiomass,tenement:()=>buildTenementL(0),block:()=>buildBlockL(0),modern:()=>buildModernL(0),landfill:buildLandfill,incinerator:buildIncineratorB,recycler:buildRecycler,hvpole:buildHV,smallwh:buildSmallWh,impDep:buildImpDep,park1:()=>buildPark(1),park2:()=>buildPark(2),park3:()=>{const g=new THREE.Group(),a=buildPark(3),b=buildPark(2);a.position.x=-0.5;b.position.x=0.5;g.add(a,b);return g},house:()=>buildHouseL(0),factory:buildFactory,shop:buildShop,bank:buildBank,warehouse:buildWarehouse,wind:buildWind,transformer:buildTransformer,coal:buildCoal};
+const BUILD={cityHall:buildCityHall,shipC:buildShipC,roadSvc:buildRoadSvc,heliB:buildHeliB,rail:buildRail,taxi:buildTaxi,busDepot:buildBusDepot,trainSt:buildTrainSt,freightSt:buildFreightSt,fireS:buildFireS,fireB:buildFireB,incS:buildIncinerator,clinic:buildClinic,hosp:buildHosp,hospC:buildHospC,cemS:buildCemS,cemB:buildCemB,crem:buildCrem,schoolS:buildSchoolS,school:buildSchool,lyceum:buildLyceum,techn:buildTechn,bankG:buildBankG,shop1:buildShop1,prisonS:()=>{const g=buildPrison();g.scale.set(2/3,0.85,2/3);return g},prison:buildPrison,policeS:buildPoliceS,policeB:buildPoliceB,bakery:buildBakery,lpole:buildLPole,factoryB:buildFactoryB,warehouseB:buildWarehouseB,mine:buildMine,mineB:buildMineB,supermarket:buildSupermarket,smallfac:()=>{const g=buildFactory();g.scale.setScalar(0.72);return g},hydro:buildHydro,hydrogen:()=>{const g=buildHydrogen();g.scale.set(1.9,1.5,1.9);return g},pump:buildPump,pumpB:buildPumpB,tower:buildTower,outlet:buildOutlet,treatment:buildTreatment,restaurant:buildRestaurant,cinema:buildCinema,theater:buildTheater,casino:buildCasino,hotelS:buildHotelS,hotelB:buildHotelB,gallery:buildGallery,farmveg:()=>buildFarm('veg'),farmdairy:()=>buildFarm('dairy'),farmgrain:()=>buildFarm('grain'),farmcotton:()=>buildFarm('cotton'),farmwood:()=>buildFarm('wood'),pitS:buildPit,pitB:buildPitB,biomass:buildBiomass,tenement:()=>buildTenementL(0),block:()=>buildBlockL(0),modern:()=>buildModernL(0),landfill:buildLandfill,incinerator:buildIncineratorB,recycler:buildRecycler,hvpole:buildHV,smallwh:buildSmallWh,impDep:buildImpDep,park1:()=>buildPark(1),park2:()=>buildPark(2),park3:()=>{const g=new THREE.Group(),a=buildPark(3),b=buildPark(2);a.position.x=-0.5;b.position.x=0.5;g.add(a,b);return g},house:()=>buildHouseL(0),factory:buildFactory,shop:buildShop,bank:buildBank,warehouse:buildWarehouse,wind:buildWind,transformer:buildTransformer,coal:buildCoal};
 function boltMesh(){const b=new THREE.Mesh(new THREE.OctahedronGeometry(0.09,0),mat.bolt);b.scale.y=1.7;b.position.set(0.22,1.05,0);b.visible=false;b.layers.set(1);return b}
 function wire(a,b,sag=0.07){const pts=[];for(let k=0;k<=10;k++){const u=k/10;pts.push(new THREE.Vector3(a.x+(b.x-a.x)*u,a.y+(b.y-a.y)*u-Math.sin(u*Math.PI)*sag,a.z+(b.z-a.z)*u))}
   return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),mat.wire)}
 
 /* ---------- state ---------- */
 let grid=new Array(N*N).fill(null);
-let counts={tunnel:0,tUp:0,tDown:0,tLevel:0,tSmooth:0,impDep:0,cityHall:0,shipC:0,roadSvc:0,heliB:0,rail:0,taxi:0,trainSt:0,freightSt:0,fireS:0,fireB:0,clinic:0,hosp:0,hospC:0,cemS:0,cemB:0,crem:0,schoolS:0,school:0,lyceum:0,techn:0,bankG:0,shop1:0,prisonS:0,prison:0,railTunnel:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,pumpB:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,farmcotton:0,farmwood:0,pitS:0,pitB:0,biomass:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
+let counts={busDepot:0,tunnel:0,tUp:0,tDown:0,tLevel:0,tSmooth:0,impDep:0,cityHall:0,shipC:0,roadSvc:0,heliB:0,rail:0,taxi:0,trainSt:0,freightSt:0,fireS:0,fireB:0,clinic:0,hosp:0,hospC:0,cemS:0,cemB:0,crem:0,schoolS:0,school:0,lyceum:0,techn:0,bankG:0,shop1:0,prisonS:0,prison:0,railTunnel:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,pumpB:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,farmcotton:0,farmwood:0,pitS:0,pitB:0,biomass:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
 const pw={bank:0,matCap:0,dem:0,cap:0,ok:0,happy:0,dist:[0,0,0,0,0,0,0]};
 let envDirty=true;const eduP=new Uint8Array(N*N),eduS=new Uint8Array(N*N),lycCov=new Uint8Array(N*N),techCov=new Uint8Array(N*N),medCov=new Uint8Array(N*N);const crowdCov=new Uint8Array(N*N),noiseCov=new Uint8Array(N*N),entCov=new Uint8Array(N*N),pol=new Uint8Array(N*N),shopCov=new Uint8Array(N*N),parkCov=new Uint8Array(N*N);
 const winds=new Set(),bolts=new Set();
@@ -2375,7 +2382,12 @@ function refreshBuilding(i){const c=grid[i];if(!c||DRIVE[c.t])return;if(c.t==='p
   if(c.t==='lpole'){c.marker.visible=false;lpoleWires(i,c);return}
   if(c.tiles&&c.rot!=null&&c.model)c.model.rotation.y=c.rot*Math.PI/2;
   if(!c.tiles&&c.rot1!=null&&c.model)c.model.rotation.y=c.rot1*Math.PI/2;
-  if(c.t==='hydro'){c.marker.visible=false;if(!water[i]){c.model.rotation.y=0;return}const w=wIdx.get(i),alongX=!!w&&w[0]===waterMesh,sg=flowSign(i,alongX?0:1);
+  if(c.t==='hydro'){c.marker.visible=false;if(!water[i]){c.model.rotation.y=0;return}
+    /* 7.6.2: a dam always lies across the river, side to the bank: along the line of its neighbouring segments, or across the narrower width of the water */
+    const x=i%N,z=(i/N)|0,hy=(dx,dz)=>{const nx=x+dx,nz=z+dz;return nx>=0&&nz>=0&&nx<N&&nz<N&&grid[idx(nx,nz)]&&grid[idx(nx,nz)].t==='hydro'};
+    const run=(dx,dz)=>{let k=0,nx=x+dx,nz=z+dz;while(nx>=0&&nz>=0&&nx<N&&nz<N&&water[idx(nx,nz)]){k++;nx+=dx;nz+=dz}return k};
+    const spanX=hy(1,0)||hy(-1,0)?true:hy(0,1)||hy(0,-1)?false:(run(1,0)+run(-1,0))<=(run(0,1)+run(0,-1));
+    const alongX=!spanX,sg=flowSign(i,alongX?0:1);
     c.model.rotation.y=Math.atan2(alongX?sg:0,alongX?0:sg);damFit(i);return}
     if(c.t==='pump'||c.t==='outlet'){c.marker.visible=false;const w=nearWater(i);if(w>=0)c.model.rotation.y=Math.atan2(cx(w)-cx(i),cz(w)-cz(i));return}
   if(c.t==='pumpB'){c.marker.visible=false;const ts=tilesOf(i),vert=ts.length>1&&ts[1]%N===ts[0]%N,w=nearWater(i);if(w>=0){const gp=c.group.position;const dx=cx(w)-gp.x,dz=cz(w)-gp.z;c.model.rotation.y=vert?(dx>0?Math.PI/2:-Math.PI/2):(dz>0?0:Math.PI)}return}
@@ -2391,7 +2403,7 @@ function refreshAround(i){const x=i%N,z=(i/N)|0;rebuildRoad(i);refreshBuilding(i
 
 function roadBase(t){return t==='highway'?[G.hwBase,mat.road]:t==='bridge'?[G.deck,mat.road]:[G.roadBase,t==='road2'?mat.road2:t==='road3'?mat.road3:mat.road]}
 let mvNext=null;
-function addCell(i,t,anim=true,second=-1){whDirty=true;gridVerN++;if(FLOW_T[t])flowDirtyW=true;const extra=Array.isArray(second)?second:(second>=0?[second]:[]);
+function addCell(i,t,anim=true,second=-1){whDirty=true;gridVerN++;if(FLOW_T[t])flowDirtyW=true;if(t==='hydro')setTimeout(()=>{for(const j of[i,...nbrs(i)])if(grid[j]&&grid[j].t==='hydro')refreshBuilding(j)},0);const extra=Array.isArray(second)?second:(second>=0?[second]:[]);
   clearDeco(i);groundDeco(i,false);
   const g=new THREE.Group();g.position.set(cx(i),tYi(i),cz(i));
   const cell={t,group:g,work:0,timer:1+Math.random()*3,mv:mvNext!=null?mvNext:Math.random()};mvNext=null;
@@ -2423,7 +2435,7 @@ function addCell(i,t,anim=true,second=-1){whDirty=true;gridVerN++;if(FLOW_T[t])f
   xrayNew(g);
   if(anim){if(!DRIVE[t]&&cell.model&&t!=='lpole'&&t!=='hvpole'&&t!=='rail')startConstruction(cell);else{g.scale.setScalar(0.5);popping.push({g,t:0})}}
 }
-function removeCell(i){let c=grid[i];if(!c)return;gridVerN++;if(FLOW_T[c.t])flowDirtyW=true;if(c.t==='part'){i=c.main;c=grid[i];if(!c||c.t==='part'){grid[i]=null;return}}whDirty=true;const stLeft=isWH(c.t)&&!whKeep&&c.st?c.st:null;scene.remove(c.group);if(c.model){factories.delete(c.model);if(c.model.userData.rotor)winds.delete(c.model.userData.rotor)}if(c.bolt)bolts.delete(c.bolt);
+function removeCell(i){let c=grid[i];if(!c)return;gridVerN++;if(FLOW_T[c.t])flowDirtyW=true;if(c.t==='hydro')setTimeout(()=>{for(const j of nbrs(i))if(grid[j]&&grid[j].t==='hydro')refreshBuilding(j)},0);if(c.t==='part'){i=c.main;c=grid[i];if(!c||c.t==='part'){grid[i]=null;return}}whDirty=true;const stLeft=isWH(c.t)&&!whKeep&&c.st?c.st:null;scene.remove(c.group);if(c.model){factories.delete(c.model);if(c.model.userData.rotor)winds.delete(c.model.userData.rotor)}if(c.bolt)bolts.delete(c.bolt);
   c.group.traverse(o=>{if(o.geometry&&!o.geometry.userData.keep)o.geometry.dispose()});
   if(c.t==='bridge'&&pipe[i]){pipe[i]=0}
   if(c.railFx){scene.remove(c.railFx);c.railFx=null}if(c.crossFx){scene.remove(c.crossFx);c.crossFx=null}if(c.busFx){scene.remove(c.busFx);c.busFx=null}if(c.bus||c.t==='trainSt'){const S=i;setTimeout(()=>{if(!grid[S]||!(grid[S].bus||grid[S].t==='trainSt'))stopGone(S)},0)}if(c.rail||c.t==='rail'||c.t==='trainSt'||c.t==='freightSt'){railVer++;setTimeout(railRefreshAll,0)}
@@ -3048,6 +3060,8 @@ function board(L,S,v,cap){const q=paxQ.get(S);let inn=0;if(q&&q.length){const ke
 /* ---------- buses ---------- */
 function busPathFrom(L,R,S){const k=L.stops.indexOf(S),off=R.pos[k],p=R.path.slice(off).concat(R.path.slice(1,off+1)),m=new Map();
   L.stops.forEach((s,j)=>{const ix=(R.pos[j]-off+R.len)%R.len;if(ix>0)m.set(ix,s)});return{p,m}}
+/* a working bus depot: +2 buses on every bus line, buses leave twice as fast */
+const depotOn=()=>{if(!counts.busDepot)return false;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.t==='busDepot'&&!c.off&&c.powered!==false&&entryOf(i)>=0)return true}return false};
 function spawnBus(L,S){const R=busRoute(L);if(!R||!L.stops.includes(S))return null;const{p,m}=busPathFrom(L,R,S);const c=createCar('bus',p,{home:-1,dest:-1,line:L.id,s0:S,stopMap:m,riders:[]});
   try{if(c.mesh.userData.body)c.mesh.userData.body.material=M(L.col)}catch(e){}busAtStop(c,S);return c}
 function busAtStop(c,S){const L=lineOf(c.line);if(!L)return;let out=0;
@@ -3084,7 +3098,7 @@ function transitTick(dt){if(routeKey()!==routeSig)drawRoutes();if(linpEl&&!linpE
   for(const L of tLines){const all=live.get(L.id)||[],R=L.on?lineRoute(L):null;
     if(!R){for(const v of all){if(L.kind==='bus')removeCar(v);else removeTrain(v)}continue}
     const vs=all.filter(v=>!v.retire);if(vs.length>L.veh)vs.slice(L.veh).forEach(v=>v.retire=true);
-    else if(vs.length<L.veh){L.spT=(L.spT||0)-0.5;if(L.spT<=0){L.spT=L.kind==='bus'?3:8;const S=L.stops[Math.floor(vs.length*L.stops.length/L.veh)%L.stops.length];if(L.kind==='bus')spawnBus(L,S);else spawnLineTrain(L,S)}}}
+    else if(vs.length<L.veh+(L.kind==='bus'&&depotOn()?2:0)){L.spT=(L.spT||0)-0.5;if(L.spT<=0){L.spT=L.kind==='bus'?(depotOn()?1.5:3):8;const S=L.stops[Math.floor(vs.length*L.stops.length/L.veh)%L.stops.length];if(L.kind==='bus')spawnBus(L,S);else spawnLineTrain(L,S)}}}
   /* nobody waits for ever: after an hour and a half at the stop the trip is given up */
   for(const[S,q]of paxQ){if(!q.length)continue;const keep=q.filter(r=>gameT-r.t0<PAX_WAIT&&lineOf(r.line));if(keep.length!==q.length){cur.paxLost=(cur.paxLost||0)+q.length-keep.length;paxQ.set(S,keep);stopVis(S)}}}
 function transitHour(){for(const L of tLines){L.pl=L.ph||0;L.ph=0}renderLines()}
@@ -3679,7 +3693,7 @@ function computePower(dt){if(topoDirty||powerSig()!==topoSig)rebuildHV();compute
    All water used becomes sewage: plants treat it, outlets dump the rest into the river. Night halves use. Units: m³ per game hour. */
 /* water users that return no sewage (the geothermal plant turns its water into steam) */
 const NOSEW={hydrogen:1};
-const WATER={cityHall:2,heliB:6,trainSt:1,fireS:2,fireB:4,clinic:2,hosp:6,hospC:15,crem:2,schoolS:1,school:2,lyceum:4,techn:4,bankG:1,shop1:0.8,prisonS:2.5,prison:5,policeS:1,policeB:2,bakery:0.8,factoryB:4,mine:0.5,mineB:1.5,supermarket:2,hydrogen:10,smallfac:1.5,house:1,tenement:2.5,block:5,modern:5,shop:0.5,gallery:1.5,restaurant:1.5,hotelS:2,hotelB:5,factory:3,cinema:1,theater:1,casino:1.5,bank:0.5};
+const WATER={busDepot:0.8,cityHall:2,heliB:6,trainSt:1,fireS:2,fireB:4,clinic:2,hosp:6,hospC:15,crem:2,schoolS:1,school:2,lyceum:4,techn:4,bankG:1,shop1:0.8,prisonS:2.5,prison:5,policeS:1,policeB:2,bakery:0.8,factoryB:4,mine:0.5,mineB:1.5,supermarket:2,hydrogen:10,smallfac:1.5,house:1,tenement:2.5,block:5,modern:5,shop:0.5,gallery:1.5,restaurant:1.5,hotelS:2,hotelB:5,factory:3,cinema:1,theater:1,casino:1.5,bank:0.5};
 const PUMP_R=40,TOWER_R=15,TREAT_R=30;
 const pipe=new Uint8Array(N*N),riverDirty=new Uint8Array(N*N),riverDirt=new Float32Array(N*N);let riverSrc=[],riverT=0;
 /* sewage enters at the outlets and drifts downstream about one tile every 3 game minutes; when the outlets stop, the river slowly washes itself clean */
@@ -4459,7 +4473,7 @@ const ICO={
 cityHall:'<path d="M2.5 17.5h15M3.5 8h13L10 3.5z"/><path d="M5 8v8M8.3 8v8M11.7 8v8M15 8v8"/>',
 shipC:'<path d="M2.5 13.5V6.5h9v7M11.5 9h3.2l2.8 2.8v1.7"/><circle cx="6" cy="14.5" r="1.4"/><circle cx="14" cy="14.5" r="1.4"/>',
 ord:'<path d="M5.5 2.5h7l3 3v12h-10z"/><path d="M12.5 2.5v3h3M8 9h5M8 12h5M8 15h3"/>',
-busStop:'<path d="M6 18V3.5"/><rect x="3.5" y="2.5" width="11" height="6.5" rx="1.3"/><path d="M6.5 5.7h5"/><path d="M9.5 18h6M11 11.5h4.5v6.5"/>',
+busDepot:'<rect x="2.5" y="6" width="15" height="11" rx="1"/><path d="M2.5 9l7.5-5 7.5 5M6 17v-5h8v5M6 14.5h8"/>',busStop:'<path d="M6 18V3.5"/><rect x="3.5" y="2.5" width="11" height="6.5" rx="1.3"/><path d="M6.5 5.7h5"/><path d="M9.5 18h6M11 11.5h4.5v6.5"/>',
 busLine:'<rect x="4" y="2.5" width="12" height="13" rx="2.2"/><path d="M4 9.5h12M6.5 15.5v2M13.5 15.5v2M7 5.2h6"/><circle cx="7" cy="12.6" r=".8"/><circle cx="13" cy="12.6" r=".8"/>',
 railLine:'<circle cx="4.5" cy="15.5" r="2"/><circle cx="15.5" cy="4.5" r="2"/><path d="M6.3 14.2l2.5-2.5h2.4l2.5-2.5"/><path d="M4.5 13.5V9.5M15.5 6.5v4"/>',
 crosswalk:'<path d="M3 5.5h14M3 14.5h14"/><path d="M5.5 7.5v5M8.5 7.5v5M11.5 7.5v5M14.5 7.5v5"/>',
@@ -7356,7 +7370,9 @@ const LT_TR=[
 ["+{} kg chalkopiryt", "+{} kg chalcopyrite", "+{} kg Kupferkies"],
 ["{} kg węgiel", "{} kg coal", "{} kg Kohle"],
 ["−{} kg węgiel", "−{} kg coal", "−{} kg Kohle"],
-["+{} kg węgiel", "+{} kg coal", "+{} kg Kohle"]
+["+{} kg węgiel", "+{} kg coal", "+{} kg Kohle"],
+["Zajezdnia autobusowa", "Bus depot", "Busdepot"],
+["Zajmuje 2×2 pola. Garażuje i obsługuje autobusy: każda linia autobusowa dostaje +2 autobusy, a nowe autobusy wyjeżdżają na trasę dwa razy szybciej.", "Takes 2×2 tiles. Garages and services the buses: every bus line gets +2 buses, and new buses leave for their route twice as fast.", "Belegt 2×2 Felder. Stellt die Busse unter und wartet sie: jede Buslinie bekommt +2 Busse, und neue Busse fahren doppelt so schnell los."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
