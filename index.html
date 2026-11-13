@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.6.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.6.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -4063,7 +4063,7 @@ const moveCost=c=>Math.floor(DEF[c.t].cost/2);
 const movable=c=>!!c&&!DRIVE[c.t]&&c.t!=='part'&&c.t!=='hydro'&&!!BUILD[c.t];
 function fpTiles(i){const[fw,fh]=curFP(),x=i%N,z=(i/N)|0;if(x>N-fw||z>N-fh)return null;const t=[];for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++)t.push(idx(x+dx,z+dz));return t}
 /* 7.5.5: a multi-tile building may stand on uneven ground (up to 2 levels of difference): the ground under it is levelled for the terrain price */
-function fpLevel(t){if(!t||!t.length)return null;const hs=t.map(j=>hgt[j]),mn=Math.min(...hs),mx=Math.max(...hs);if(mn===mx)return{h:mn,cost:0};if(mx-mn>4)return null;
+function fpLevel(t){if(!t||!t.length)return null;const hs=t.map(j=>hgt[j]),mn=Math.min(...hs),mx=Math.max(...hs);if(mn===mx)return{h:mn,cost:0};if(mx-mn>6)return null;/* 7.6.3: up to 3 levels */
   let h=null;for(const j of t){for(const k of nbrs(j))if(grid[k]&&DRIVE[grid[k].t]&&!t.includes(k)&&rh(k)>=mn&&rh(k)<=mx){h=rh(k);break}if(h!=null)break}
   if(h==null){const cnt={};for(const v of hs)cnt[v]=(cnt[v]||0)+1;h=+Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a-b)[0]}
   let d=0;for(const v of hs)d+=Math.abs(v-h);return{h,cost:DEF.tLevel.cost*d}}
@@ -4082,7 +4082,7 @@ function updateGhost(){if(lineConf&&pendA<0){sel.visible=false;if(ghost)ghost.vi
   sel.material.color.set(ok&&afford?'#3fbf5a':'#e0402b');placeEl.hidden=false;hintEl.hidden=true;
   {const ar=toolRange(T);if(ar)showArea(pendA,ar,'hold',rangeKind(T),DEF[T]&&(DEF[T].r||DEF[T].area)?null:[fw,fh],T)}
   try{const g=ghostFor(T);g.visible=true;g.position.set(cx(pendA)+(fw-1)/2,tYi(pendA),cz(pendA)+(fh-1)/2);g.rotation.y=FP0(T)?rotIdx*Math.PI/2:faceRoad(pendA)}catch(e){}
-  document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?(!fpLevel(t)?'teren zbyt nierówny (ponad 2 poziomy różnicy)':T==='pitB'||T==='pitS'?'oba pola muszą leżeć na tym samym złożu':'musi stać przy rzece'):'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:lvc?`${fmt(cost-lvc)} T¢ + ${fmt(lvc)} T¢ za wyrównanie terenu`:`${fmt(cost)} T¢`}`;
+  document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?(!fpLevel(t)?'teren zbyt nierówny (ponad 3 poziomy różnicy)':T==='pitB'||T==='pitS'?'oba pola muszą leżeć na tym samym złożu':'musi stać przy rzece'):'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:lvc?`${fmt(cost-lvc)} T¢ + ${fmt(lvc)} T¢ za wyrównanie terenu`:`${fmt(cost)} T¢`}`;
   document.getElementById('pOk').disabled=!(ok&&afford)}
 function placeFP(){if(pendA<0)return;const T=curT(),t=fpTiles(pendA),cost=fpCost();if(!fpOK(t,T))return updateGhost();const LV=fpLevel(t);if(money<cost+LV.cost)return updateGhost();if(LV.cost){spend(LV.cost);for(const j of t)if(hgt[j]!==LV.h)setH(j,LV.h)}
   const a=pendA;pendA=-1;lockBuy();
@@ -7372,7 +7372,8 @@ const LT_TR=[
 ["−{} kg węgiel", "−{} kg coal", "−{} kg Kohle"],
 ["+{} kg węgiel", "+{} kg coal", "+{} kg Kohle"],
 ["Zajezdnia autobusowa", "Bus depot", "Busdepot"],
-["Zajmuje 2×2 pola. Garażuje i obsługuje autobusy: każda linia autobusowa dostaje +2 autobusy, a nowe autobusy wyjeżdżają na trasę dwa razy szybciej.", "Takes 2×2 tiles. Garages and services the buses: every bus line gets +2 buses, and new buses leave for their route twice as fast.", "Belegt 2×2 Felder. Stellt die Busse unter und wartet sie: jede Buslinie bekommt +2 Busse, und neue Busse fahren doppelt so schnell los."]
+["Zajmuje 2×2 pola. Garażuje i obsługuje autobusy: każda linia autobusowa dostaje +2 autobusy, a nowe autobusy wyjeżdżają na trasę dwa razy szybciej.", "Takes 2×2 tiles. Garages and services the buses: every bus line gets +2 buses, and new buses leave for their route twice as fast.", "Belegt 2×2 Felder. Stellt die Busse unter und wartet sie: jede Buslinie bekommt +2 Busse, und neue Busse fahren doppelt so schnell los."],
+["teren zbyt nierówny (ponad 3 poziomy różnicy)", "ground too uneven (more than 3 levels of difference)", "Gelände zu uneben (mehr als 3 Stufen Unterschied)"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
