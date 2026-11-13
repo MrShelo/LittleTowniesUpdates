@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.5.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.5.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -907,7 +907,7 @@ for(const[w,d,x,z]of[[N+4,2,0,-HALF-1],[N+4,2,0,HALF+1],[2,N,-HALF-1,0],[2,N,HAL
 /* trees: shared geometry, instanced outside the grid */
 const trunkG=new THREE.CylinderGeometry(0.04,0.06,0.3,6);trunkG.translate(0,0.15,0);
 const pineG=new THREE.ConeGeometry(0.24,0.62,7);pineG.translate(0,0.55,0);
-const blobG=new THREE.IcosahedronGeometry(0.28,1);blobG.translate(0,0.5,0);
+const blobG=new THREE.IcosahedronGeometry(0.28,0);blobG.translate(0,0.5,0);
 for(const g of[trunkG,pineG,blobG])g.userData.keep=true;
 const trunkM=new THREE.MeshLambertMaterial({color:'#7a5536'}),pineM=new THREE.MeshLambertMaterial({color:'#3d7a3c'}),blobM=new THREE.MeshLambertMaterial({color:'#5d9e43'});
 (function forest(){const COUNT=520;const tr=new THREE.InstancedMesh(trunkG,trunkM,COUNT),pi=new THREE.InstancedMesh(pineG,pineM,COUNT),bl=new THREE.InstancedMesh(blobG,blobM,COUNT);
@@ -1852,7 +1852,8 @@ function natLodTick(){const d=cam.radius,tD=(MODEL_OVR['nat:pine']&&MODEL_OVR['n
 const natEmpty=new THREE.BufferGeometry();natEmpty.setAttribute('position',new THREE.Float32BufferAttribute([],3));natEmpty.userData.keep=true;
 /* the shared trunk mesh is dropped only when every tree kind drawing it has its own edited (merged) look */
 function natTrunkless(k){return['pine','blob','pyr','stack','dead'].every(q=>!!MODEL_OVR['nat:'+q])}
-function dryTrees(){if(typeof pol==='undefined')return;for(const i of deco){const want=pol[i]>0,is=decoDry.has(i);if(want===is)continue;const m=decoMat.get(i),cr=decoCrown.get(i);if(!m||!cr)continue;
+const polSeen=new Uint8Array(N*N);
+function dryTrees(){if(typeof pol==='undefined')return;for(let i=0;i<N*N;i++){const g=pol[i]>0?1:0;if(g!==polSeen[i]){polSeen[i]=g;if(!grid[i]&&!water[i])groundDeco(i,true)}}for(const i of deco){const want=pol[i]>0,is=decoDry.has(i);if(want===is)continue;const m=decoMat.get(i),cr=decoCrown.get(i);if(!m||!cr)continue;
     if(want){imDel(cr,i);imSet(dDead,i,m);decoDry.add(i)}else{imDel(dDead,i);imSet(cr,i,m);decoDry.delete(i)}decoUpd=true}}
 for(const m of DECO_M){m.castShadow=true;m.frustumCulled=false;imInit(m);scene.add(m)}
 function setDeco(i){const T=themeOf();dObj.position.set(cx(i)+rnd(-.18,.18),tYi(i),cz(i)+rnd(-.18,.18));dObj.rotation.set(0,rnd(0,6.28),0);dObj.scale.setScalar(rnd(0.75,1.1));
@@ -1870,12 +1871,16 @@ const gBl=new THREE.InstancedMesh(GD.blade,new THREE.MeshLambertMaterial({color:
 for(const m of[gBl,gSt,gSm,gFh]){m.frustumCulled=false;m.receiveShadow=true;scene.add(m)}gSt.castShadow=true;
 const BLC=['#5ea838','#6cb640','#7dc44c','#4e9a32'].map(c=>new THREE.Color(c)),FLC=['#fbf6e8','#f6d24a','#ef93b0','#b7a6f2','#e8503a'].map(c=>new THREE.Color(c));
 gBl.setColorAt(0,BLC[0]);gFh.setColorAt(0,FLC[0]);for(const m of[gBl,gSt,gSm,gFh])imInit(m);
-function groundDeco(i,on){const x0=cx(i),z0=cz(i);if(on&&beachMap[i])on=false;
+/* 7.5.1: on grey ground (smog, rock high up) only a few dull blades */
+const GREYC=['#8d9878','#7f8a6c','#9aa385'].map(c=>new THREE.Color(c));
+const greyTile=i=>{let p=false;try{p=pol[i]>0}catch(e){}return p||hgt[i]>=H_LAND+7};
+function groundDeco(i,on){const x0=cx(i),z0=cz(i);if(on&&beachMap[i])on=false;const gr=on&&greyTile(i);
   for(let t=0;t<2;t++){const tx=x0+rnd(-0.38,0.38),tz=z0+rnd(-0.38,0.38);for(let k=0;k<3;k++){const s2=t*3+k;
-    if(on){dObj.position.set(tx+rnd(-0.03,0.03),tYi(i),tz+rnd(-0.03,0.03));dObj.rotation.set(rnd(-0.35,0.35),rnd(0,6.28),rnd(-0.35,0.35));dObj.scale.set(1,rnd(0.6,1.4),1);dObj.updateMatrix();imSet(gBl,i*BL+s2,dObj.matrix,BLC[(Math.random()*4)|0])}
+    if(on&&gr&&(t>0||k>1)){imDel(gBl,i*BL+s2);continue}
+    if(on){dObj.position.set(tx+rnd(-0.03,0.03),tYi(i),tz+rnd(-0.03,0.03));dObj.rotation.set(rnd(-0.35,0.35),rnd(0,6.28),rnd(-0.35,0.35));dObj.scale.set(1,rnd(0.6,1.4),1);dObj.updateMatrix();imSet(gBl,i*BL+s2,dObj.matrix,gr?GREYC[(Math.random()*3)|0]:BLC[(Math.random()*4)|0])}
     else imDel(gBl,i*BL+s2)}}
   if(on&&Math.random()<0.07){dObj.position.set(x0+rnd(-0.35,0.35),tYi(i)+0.01,z0+rnd(-0.35,0.35));dObj.rotation.set(rnd(0,3),rnd(0,6.28),0);const sc=rnd(0.6,1.4);dObj.scale.set(sc,sc*0.55,sc*rnd(0.8,1.2));dObj.updateMatrix();imSet(gSt,i,dObj.matrix)}else imDel(gSt,i);
-  if(on&&!themeOf().noFlowers&&Math.random()<0.08){const fx=x0+rnd(-0.35,0.35),fz=z0+rnd(-0.35,0.35),fy=tYi(i);dObj.position.set(fx,fy,fz);dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();imSet(gSm,i,dObj.matrix);
+  if(on&&!gr&&!themeOf().noFlowers&&Math.random()<0.08){const fx=x0+rnd(-0.35,0.35),fz=z0+rnd(-0.35,0.35),fy=tYi(i);dObj.position.set(fx,fy,fz);dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();imSet(gSm,i,dObj.matrix);
     dObj.position.set(fx,fy+0.085,fz);dObj.updateMatrix();imSet(gFh,i,dObj.matrix,FLC[(Math.random()*5)|0])}else{imDel(gSm,i);imDel(gFh,i)}
   gdUpd=true}
 function seedGround(){for(let i=0;i<N*N;i++)groundDeco(i,!grid[i]&&!water[i])}
@@ -1995,8 +2000,8 @@ function applyWater(){for(let i=0;i<N*N;i++){if(water[i]&&!wKnown[i]){hgt[i]=0;w
 /* map types: standard (1–3 narrow rivers), big (two wide rivers), islands (a wide river splitting into branches around islands, plus a tributary) */
 const MAPS={standard:'Standard',big:'Dwie duże rzeki',islands:'Wyspy',lake:'Duże jezioro',carib:'Karaiby',bigriver:'Wielka rzeka',tundra:'Fiordy'};let mapType='standard';
 /* world themes: grass and tree colours, beaches, which trees grow */
-const THEMES={std:{grass:'#74c843',blades:['#63b83a','#74c744','#88d651','#55a835'],pine:'#3f8a3e',blob:'#5fb245',trees:'mixed'},
-  carib:{grass:'#78cc45',blades:['#70c946','#84d755','#97e262','#66bd41'],pine:'#3f8a3e',blob:'#55b342',trees:'palm',beach:true},
+const THEMES={std:{grass:'#5cbc2a',blades:['#5ea838','#6cb640','#7dc44c','#4e9a32'],pine:'#3d7a3c',blob:'#5d9e43',trees:'mixed'},
+  carib:{grass:'#62c230',blades:['#6cbf45','#7fcc52','#8fd65d','#62b33f'],pine:'#3d7a3c',blob:'#4fa53f',trees:'palm',beach:true},
   tundra:{grass:'#2f6233',blades:['#244d29','#2d5a2f','#386636','#20452a'],pine:'#2b5636',blob:'#2b5636',trees:'conifer',noFlowers:true}};
 const themeOf=()=>THEMES[mapType]||THEMES.std;
 let beachMap=new Uint8Array(N*N);
@@ -2453,8 +2458,8 @@ snowM.count=0;snowM.frustumCulled=false;snowM.renderOrder=2;scene.add(snowM);
 const flakeN=1600,flakeG=new THREE.BufferGeometry(),flakeP=new Float32Array(flakeN*3);for(let k=0;k<flakeN;k++){flakeP[k*3]=Math.random()*2-1;flakeP[k*3+1]=Math.random();flakeP[k*3+2]=Math.random()*2-1}
 flakeG.setAttribute('position',new THREE.BufferAttribute(flakeP,3));const flakes=new THREE.Points(flakeG,new THREE.PointsMaterial({color:'#ffffff',size:0.07,transparent:true,opacity:0.85,depthWrite:false}));flakes.frustumCulled=false;flakes.visible=false;scene.add(flakes);
 function seasonLook(){const T=themeOf(),si=seasonIdx(),sn=snowOn(),C=c=>new THREE.Color(c);
-  gBl.material.emissive.set(sn?'#aeb8bc':si===2?'#2e1a00':'#000000');gFh.visible=!sn&&si!==2;
-  pineM.color.copy(sn?C(T.pine).lerp(C('#dfe8ea'),0.4):C(T.pine));blobM.color.copy(sn?C(T.blob).lerp(C('#e4ecef'),0.55):si===2?C(T.blob).lerp(C('#d07a28'),0.6):si===1?C(T.blob).lerp(C('#6f9a2e'),0.15):C(T.blob));
+  gBl.material.emissive.set(si===2?'#2e1a00':'#000000');gBl.visible=!sn;gFh.visible=!sn&&si!==2;/* 7.5.1: no grass sticking out of the snow */
+  pineM.color.copy(sn?C(T.pine).lerp(C('#f2f6f7'),0.7):C(T.pine));blobM.color.copy(sn?C(T.blob).lerp(C('#f4f7f8'),0.78):si===2?C(T.blob).lerp(C('#d07a28'),0.6):si===1?C(T.blob).lerp(C('#6f9a2e'),0.15):C(T.blob));
   groundSig=-1;envDirty=true}
 function updateSnowRoads(){snowRoad.fill(0);let n=0;if(!snowOn()){snowM.count=0;return}const bases=svcBases(),m=new THREE.Matrix4();
   for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!DRIVE[c.t]||c.t==='bridge')continue;if(bases.some(b=>svcCover(b,i)))continue;snowRoad[i]=1;m.makeTranslation(cx(i),0.064+lvY(rh(i)),cz(i));snowM.setMatrixAt(n++,m)}
