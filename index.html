@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.7.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -145,7 +145,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   padding-bottom:10px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .dock > *{pointer-events:auto}
-.hint:empty{display:none}.hint{justify-self:center;max-width:min(560px,100%);padding:8px 14px;font-size:13.5px;line-height:1.4;text-align:center;text-wrap:balance}
+.hint:empty{display:none}.hint .stopFlip{min-height:28px;padding:2px 10px;margin-left:6px;font-size:12.5px;vertical-align:middle}.hint{justify-self:center;max-width:min(560px,100%);padding:8px 14px;font-size:13.5px;line-height:1.4;text-align:center;text-wrap:balance}
 .hint b{font-weight:600}
 .hint.warn{color:var(--warn);border-color:var(--warn)}
 .build{justify-self:center;max-width:100%;min-width:0;display:grid;gap:6px;padding:6px}
@@ -157,8 +157,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .cats{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
 .cat{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;font:600 12.5px var(--font-b);letter-spacing:.02em;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
-.cat:hover{color:var(--fg)}
-.cat[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.cat:hover{color:var(--fg)}.cat{border-color:color-mix(in srgb,var(--cc,var(--line)) 45%,var(--line));background:color-mix(in srgb,var(--cc,transparent) 10%,transparent)}.cat svg{color:var(--cc,currentColor)}
+.cat[aria-selected="true"]{background:var(--cc,var(--fg));color:#fff;border-color:var(--cc,var(--fg))}.cat[aria-selected="true"] svg{color:#fff}
 .tools{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;max-width:100%}
 .tools .sep{flex:0 0 1px;background:var(--line);margin:4px 2px}
 .res.short .val > span:first-child{color:var(--warn)}
@@ -656,7 +656,7 @@ const DEF={
   heliB:{name:'Baza helikopterów gaśniczych',cost:6000,size:4,desc:'Zajmuje 2×2 pola. Helikopter gaśniczy leci prosto do pożaru w zasięgu 25 pól (51×51) i gasi go z góry – także tam, gdzie wóz nie dojedzie. Potrzebuje prądu i wody. Ulepszenie: drugi helikopter.',sw:'#b8241c',area:25},
   cityHall:{name:'Urząd miasta',cost:5000,size:4,desc:'Zajmuje 2×2 pola. Otwiera zakładkę Uchwały: za opłatą wprowadzasz prawa, które zmieniają całe miasto. Jeden na miasto.',sw:'#8a6a3a'},
   shipC:{name:'Centrum spedycji',cost:2500,fw:3,fh:1,desc:'Zajmuje 3×1 pola. Co 2 godziny ciężarówki wywożą hurtem wybrane towary z magazynów (60% ceny) albo – w trybie importu – sprowadzają je (50% ceny). Można włączyć automatyczne ponawianie.',sw:'#5a6b7a'},
-  busStop:{name:'Przystanek',cost:40,desc:'Wiata na prostym odcinku zwykłej ulicy – nie na skrzyżowaniu, zakręcie, przejściu dla pieszych ani przejeździe kolejowym. Kliknij tę połowę jezdni, po której ma stać; kliknięcie drugiej połowy przenosi ją na drugą stronę. Autobus staje przy niej, jadąc pasem przy wiacie.',sw:'#2f8fd8'},
+  busStop:{name:'Przystanek',cost:40,desc:'Wiata na prostym odcinku zwykłej ulicy – nie na skrzyżowaniu, zakręcie, przejściu dla pieszych ani przejeździe kolejowym. Stronę ulicy wybierasz obracaniem (R lub ↻ Obróć) – podgląd pokazuje, gdzie stanie wiata. Kliknięcie istniejącego przystanku przenosi go na drugą stronę. Autobus staje przy niej, jadąc pasem przy wiacie.',sw:'#2f8fd8'},
   busLine:{name:'Linie autobusowe',cost:0,lbl:'panel linii',desc:'Klikaj po kolei przystanki, przez które ma jechać autobus. Linia powstaje od 2 przystanków i zawsze wraca do pierwszego. Trasy widać tylko w tym trybie.',sw:'#e0402b'},
   railLine:{name:'Linie kolejowe',cost:0,lbl:'panel linii',desc:'Klikaj po kolei dworce kolejowe połączone torami. Pociąg pasażerski kursuje między nimi w pętli; mieszkańcy dojdą do dworca z 14 pól.',sw:'#3d6fa8'},
   crosswalk:{name:'Przejście dla pieszych',cost:20,desc:'Pasy i znak na prostym odcinku ulicy. Nie stawia się ich na skrzyżowaniach. Usuwasz je w Wyburz → „Przejścia”.',sw:'#f4f6f8'},
@@ -2337,7 +2337,10 @@ let deckNext=null;function deckH(i,t){if(deckNext!=null){const v=deckNext;deckNe
   if(best>=0)return best;if(t==='bridge'){let m=-1;for(const j of nbrs(i))if(!water[j])m=Math.max(m,hgt[j]);return m>=0?m:H_LAND}return hgt[i]}
 const TUNM={wall:M('#8d8a83'),dark:M('#24262a'),cable:M('#2b2b2b')};
 function tunnelLook(g,i,alongX,conns){const H=0.19;
-  for(const o of[-0.47,0.47])g.add(alongX?box(1,H,0.04,TUNM.wall,0,0,o):box(0.04,H,1,TUNM.wall,o,0,0));g.add(box(1,0.03,1,TUNM.wall,0,H,0));
+  /* 7.7.4: a dead end (no way out on that side) stops a little inside the tile with a closed wall, so it never pokes through the hillside */
+  const has=(dx,dz)=>conns.some(([a,b])=>a===dx&&b===dz),lo=(alongX?has(-1,0):has(0,-1))?-0.5:-0.46,hi=(alongX?has(1,0):has(0,1))?0.5:0.46,L=hi-lo,m=(hi+lo)/2;
+  for(const o of[-0.47,0.47])g.add(alongX?box(L,H,0.04,TUNM.wall,m,0,o):box(0.04,H,L,TUNM.wall,o,0,m));g.add(alongX?box(L,0.03,1,TUNM.wall,m,H,0):box(1,0.03,L,TUNM.wall,0,H,m));
+  for(const e of[lo,hi])if(Math.abs(e)<0.5)g.add(alongX?box(0.04,H,0.98,TUNM.dark,e-Math.sign(e)*0.02,0,0):box(0.98,H,0.04,TUNM.dark,0,0,e-Math.sign(e)*0.02));
   /* a portal where the tunnel meets the open road */
   const x=i%N,z=(i/N)|0;for(const[dx,dz]of conns){const j=idx(x+dx,z+dz);if(grid[j]&&grid[j].t==='tunnel')continue;const hgtTop=Math.max(0.24,lvY(hgt[i])-lvY(rh(i))+0.01);
     const P=0.5,top=0.26;if(dx){g.add(box(0.07,top,0.1,TUNM.wall,dx*P,0,-0.46));g.add(box(0.07,top,0.1,TUNM.wall,dx*P,0,0.46));g.add(box(0.07,0.06,1.02,TUNM.wall,dx*P,0.2,0));g.add(box(0.02,0.2,0.84,TUNM.dark,dx*(P-0.04),0,0))}
@@ -3152,7 +3155,10 @@ function stopWhy(i){const c=grid[i];if(!c||!DRIVE[c.t])return'Przystanek stawia 
   if(roadNbrs(i).length>2)return'Nie na skrzyżowaniu – postaw go na prostym odcinku ulicy.';if(!crossOK(i))return'Tylko na prostym odcinku – nie na zakręcie ani na końcu ulicy.';return null}
 const stopAxOf=i=>{const c=grid[i];if(c&&c.busAx!=null)return c.busAx;const n=roadNbrs(i);return n.length?axOf(i,n[0]):0};
 /* the side of the street is the half of the tile under the pointer */
-const sideAt=(i,ax)=>(ax===0?hit.z-cz(i):hit.x-cx(i))<0?-1:1;
+const sideAt0=(i,ax)=>(ax===0?hit.z-cz(i):hit.x-cx(i))<0?-1:1;
+/* 7.7.4: the side of the street is picked by rotating (R / ↻); by default the half under the cursor */
+let stopSide=null;const sideAt=(i,ax)=>stopSide!=null?stopSide:sideAt0(i,ax);
+function flipStopSide(){const i=hoverI;stopSide=stopSide==null?-(i>=0?sideAt0(i,stopAxOf(i)):1):-stopSide;setHint(`<b>Przystanek</b> · strona ulicy zmieniona. Kliknij jezdnię, by postawić wiatę po pokazanej stronie. <button class="btn panel stopFlip" data-stopflip>↻ Obróć (R)</button>`,false,true);hintEl.hidden=false;stopGhostK='';if(hoverI>=0)showStopGhost(hoverI)}
 /* a bus serves the stop driving in the lane next to the shelter (right-hand traffic) */
 function stopDir(i){const c=grid[i];if(!c||!c.bus)return null;const s=c.bus;return stopAxOf(i)===0?[s,0]:[0,-s]}
 /* the shelter: pad, glass back wall, blue roof, bench and a sign; up to five people wait next to it */
@@ -3170,9 +3176,9 @@ function stopVis(i){const c=grid[i];if(!c||!c.busFx)return;const n=(paxQ.get(i)|
 let stopGhost=null,stopGhostK='';
 function showStopGhost(i){const ok=i>=0&&(!stopWhy(i)||!!(grid[i]&&grid[i].bus));if(!ok||tool!=='busStop'){if(stopGhost)stopGhost.visible=false;return ok}const ax=stopAxOf(i),s=sideAt(i,ax),k=ax+':'+s;
   if(!stopGhost||stopGhostK!==k){if(stopGhost)scene.remove(stopGhost);stopGhost=stopModel(ax,s,false);stopGhost.traverse(o=>{if(o.material){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=0.55;o.castShadow=false}});scene.add(stopGhost);stopGhostK=k}
-  stopGhost.position.set(cx(i),0.01,cz(i));stopGhost.visible=!(grid[i].bus===s);return true}
+  stopGhost.position.set(cx(i),0.01,cz(i));try{fxOnRoad(stopGhost,i);stopGhost.position.y+=0.01}catch(e){}stopGhost.visible=!(grid[i].bus===s);return true}
 function placeStop(i){const c=grid[i];
-  if(c&&c.bus){const s=sideAt(i,stopAxOf(i));if(c.bus===s){setHint('Tu już stoi przystanek. Kliknij drugą połowę jezdni, by przenieść wiatę na drugą stronę ulicy. Usuniesz go w Wyburz → „Przejścia i przystanki”.',false,true);return}
+  if(c&&c.bus){let s=sideAt(i,stopAxOf(i));if(c.bus===s)s=-s;stopGhostK='';
     c.bus=s;drawStop(i);transVer++;save();setHint('Przystanek przeniesiony na drugą stronę ulicy. Autobusy podjadą teraz pasem przy wiacie.',false,true);return}
   const why=stopWhy(i);if(why){setHint(why,true,true);return}if(money<DEF.busStop.cost){setHint(`Brakuje ${fmt(DEF.busStop.cost-money)} T¢.`,true,true);return}
   const ax=stopAxOf(i);spend(DEF.busStop.cost);c.bus=sideAt(i,ax);c.busAx=ax;drawStop(i);transVer++;save();
@@ -4278,11 +4284,12 @@ function doMove(src,a,t,cost){const c=grid[src];if(!c)return;const row=rowOf(c,s
   const keep={happy:c.happy,vis:c.vis,crowd:c.crowd,crowdT:c.crowdT,stock:c.stock};
   spend(cost);whKeep=true;try{removeCell(src)}finally{whKeep=false}placeRow(row,true);const n=grid[a];if(n){Object.assign(n,keep);if(n.incoming!=null)n.incoming=0}
   powerDirty=true;envDirty=true;farmDirty=true;topoDirty=true;bfsCache.clear();float(a,'przeniesiono','neutral');save()}
-document.getElementById('pRot').addEventListener('click',rotateFP);document.getElementById('pOk').addEventListener('click',()=>lineConf?confirmLine():placeFP());document.getElementById('pNo').addEventListener('click',()=>lineConf?cancelLine():cancelFP());
+document.getElementById('pRot').addEventListener('click',rotateFP);document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-stopflip]');if(b){e.stopPropagation();flipStopSide()}},true);document.getElementById('pOk').addEventListener('click',()=>lineConf?confirmLine():placeFP());document.getElementById('pNo').addEventListener('click',()=>lineConf?cancelLine():cancelFP());
 const hintEl=document.getElementById('hint');let hintTimer=0;
 function setHint(html,warn,temp){hintEl.innerHTML=html;hintEl.classList.toggle('warn',!!warn);hintTimer=temp?2.6:0}
 function toolHint(){
   if(tool==='view')return'';
+  if(tool==='busStop')return`<b>${DEF.busStop.name}</b> · ${fmt(DEF.busStop.cost)} T¢ · ${DEF.busStop.desc} <button class="btn panel stopFlip" data-stopflip>↻ Obróć (R)</button>`;
   if(tool==='bulldoze')return'<b>Wyburz</b> · zwraca połowę kosztu. Przeciągnij, by usuwać kilka pól.';
   if(roadMode())return`<b>${DEF[tool].name} wzdłuż drogi</b> · przeciągnij od jednej ulicy do drugiej: ${tool==='pipe'?'rura pójdzie':'słupy pójdą'} trasą drogi. Zobaczysz szkic i zatwierdzisz go przyciskiem „Zbuduj”.`;
   const d=DEF[tool];return`<b>${d.name}</b> · ${d.cost?fmt(d.cost)+' T¢ · ':''}${d.desc}`+(FP(tool)?` Stuknij miejsce, obróć i zatwierdź (${FP(tool).join('×')}).`:BUILD[tool]&&!DRIVE[tool]?' R obraca budynek.':'')+(DEMAND[tool]?` Pobiera ${mw(DEMAND[tool])} MW.`:'')+(UPKEEP[tool]?` Utrzymanie ${UPKEEP[tool]} T¢/godz.`:'')}
@@ -4538,7 +4545,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   if(isFireSt(c.t)){R('Zasięg',`${fireRad(c)} bloków po drogach, obręb ${obrD(c.t,c)}×${obrD(c.t,c)}`);R('Wozy w akcji',`${fireTrucks(i)} / ${truckCap(i)}`);R('Stan',!c.powered?'stoi: brak prądu':!hasWater(c)?'stoi: brak wody (doprowadź rury)':'gotowa',!c.powered||!hasWater(c)?'warnv':'')}
   if(c.t==='heliB'){R('Helikoptery w powietrzu',`${heliOut(i)} / ${heliCap(i)}`);R('Zasięg',`${HELI_R} pól w każdą stronę`);R('Stan',!c.powered?'stoi: brak prądu':!hasWater(c)?'stoi: brak wody (doprowadź rury)':'gotowa',!c.powered||!hasWater(c)?'warnv':'')}
   if(isWH(c.t)&&c.up2){const acc=SHIP_GOODS.filter(k=>whAccepts(c,k));R('Przyjmuje',acc.length===SHIP_GOODS.length?'wszystkie towary i materiały':acc.map(frName).join(', '));
-    pick=`<div class="fr"><b>Sortowanie: co przyjmuje ten magazyn</b><div class="chips">${whfChips().map(g=>`<button class="chipb" data-whf="${g.ks.join(',')}" aria-pressed="${g.ks.every(k=>whAccepts(c,k))}">${g.n}</button>`).join('')}</div><div class="chips"><button class="chipb" id="whfAll">Wszystkie</button></div></div>`}
+    pick=`<div class="fr"><b>Sortowanie: co przyjmuje ten magazyn</b><div class="chips">${whfChips().map(g=>`<button class="chipb" data-whf="${g.ks.join(',')}" aria-pressed="${g.ks.every(k=>whAccepts(c,k))}">${g.n}</button>`).join('')}</div><div class="chips"><button class="chipb" id="whfAll">Zaznacz wszystkie</button><button class="chipb" id="whfNone">Odznacz wszystkie</button></div>${c.whf&&!c.whf.length?'<small class="warnv">Magazyn nic nie przyjmuje – zaznacz towary, które ma przyjmować.</small>':''}</div>`}
   if(c.t==='shipC'){c.ship=c.ship||[];R(c.shipM==='imp'?'Następna dostawa':'Następny wywóz',c.shipAt!=null?`za ${Math.max(1,Math.ceil((c.shipAt-gameT)/60))} godz.`:'nie zaplanowano');R('Cena',`${Math.round(SHIP_P*100)}% ceny towaru`);
     const imp=c.shipM==='imp',Q=shipQ(c),tot=shipTot(c);if(imp)R('Koszt importu',`${Math.round(SHIP_IMP*100)}% ceny towaru`);
     pick=`<div class="dep"><div class="chips"><button class="chipb" data-shm="exp" aria-pressed="${!imp}">Eksport</button><button class="chipb" data-shm="imp" aria-pressed="${imp}">Import</button></div>
@@ -4607,8 +4614,8 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   for(const b of inspEl.querySelectorAll('[data-icat]'))b.onclick=()=>{const l=catList(b.dataset.icat);if(l.length)openHouse(l[0])};
   for(const b of inspEl.querySelectorAll('[data-line]'))b.onclick=()=>setLine(i,b.dataset.line);
   for(const b of inspEl.querySelectorAll('[data-line2]'))b.onclick=()=>{const g=grid[i];if(!g)return;g.line2=g.line2===b.dataset.line2?null:b.dataset.line2;g.alt2=false;save();renderInsp()};
-  for(const b of inspEl.querySelectorAll('[data-whf]'))b.onclick=()=>{const g=grid[i],ks=b.dataset.whf.split(',');let l=g.whf?[...g.whf]:[...SHIP_GOODS];l=ks.every(k=>l.includes(k))?l.filter(x=>!ks.includes(x)):[...l,...ks.filter(k=>!l.includes(k))];if(!l.length){setHint('Magazyn musi przyjmować przynajmniej jeden towar.',true,true);hintEl.hidden=false;return}g.whf=l.length===SHIP_GOODS.length?null:l;save();renderInsp()};
-  {const wa=document.getElementById('whfAll');if(wa)wa.onclick=()=>{grid[i].whf=null;save();renderInsp()}}
+  for(const b of inspEl.querySelectorAll('[data-whf]'))b.onclick=()=>{const g=grid[i],ks=b.dataset.whf.split(',');let l=g.whf?[...g.whf]:[...SHIP_GOODS];l=ks.every(k=>l.includes(k))?l.filter(x=>!ks.includes(x)):[...l,...ks.filter(k=>!l.includes(k))];g.whf=l.length===SHIP_GOODS.length?null:l;save();renderInsp()};
+  {const wa=document.getElementById('whfAll');if(wa)wa.onclick=()=>{grid[i].whf=null;save();renderInsp()};const wn=document.getElementById('whfNone');if(wn)wn.onclick=()=>{grid[i].whf=[];save();renderInsp()}}
   for(const b of inspEl.querySelectorAll('[data-shq]'))b.onclick=()=>{const g=grid[i];if(!g)return;const Q=shipQ(g),[k,v]=b.dataset.shq.split(':'),cur0=Q[k]||0,room=SHIP_LOAD-shipTot(g);Q[k]=Math.max(0,cur0+Math.min(+v,room));shipQ(g);save();renderInsp()};
   for(const b of inspEl.querySelectorAll('[data-shm]'))b.onclick=()=>{const g=grid[i];g.shipM=b.dataset.shm;save();renderInsp()};
   for(const b of inspEl.querySelectorAll('[data-shn]'))b.onclick=()=>{const g=grid[i];g.shipN=Math.max(SHIP_NMIN,Math.min(SHIP_NMAX,(g.shipN||SHIP_N0)+ +b.dataset.shn));save();renderInsp()};
@@ -4776,7 +4783,9 @@ function renderModes(){const box=document.getElementById('msub');
   box.classList.remove('terr');const del=tool==='bulldoze';const L=del?DMODES:BMODES;
   box.innerHTML=L.map(([k,tt,ic])=>`<button type="button" data-m="${k}" title="${tt}" aria-label="${tt}" aria-pressed="${del?delMode===k:ALONG[tool]?(alongOn?k==='road':k==='many'):buildMode===k}" ${!del&&tool!=='view'&&!(k==='road'?!!ALONG[tool]:ALONG[tool]?k==='many':MODE_OK(tool))?'disabled':''}><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ic||ICO[DELT[k]]}</svg></button>`).join('');
   for(const b of box.querySelectorAll('button'))b.onclick=()=>{if(del){delMode=b.dataset.m;setXray(delMode==='pipe'||underOn);document.getElementById('hazard').hidden=false;setHint(toolHint())}else if(ALONG[tool]){alongOn=b.dataset.m==='road'?!alongOn:false;if(lineConf||lineA>=0)cancelLine(true);try{localStorage.setItem('lt-along',alongOn?'1':'0')}catch(e){}setHint(toolHint())}else if(b.dataset.m!=='road'){buildMode=b.dataset.m;try{localStorage.setItem('lt-bmode',buildMode)}catch(e){}setHint(toolHint())}renderModes()}}
-CATS.forEach((c,k)=>{const b=document.createElement('button');b.type='button';b.className='cat';b.innerHTML=svgI(CAT_ICO[k],14)+`<span>${c.name}</span>`;b.setAttribute('role','tab');
+/* 7.7.4: every tab has its own colour */
+const CAT_COL=['#5b6470','#9a7b4f','#2f8fd8','#e07a3f','#7b6fd6','#7cad3a','#2fa79b','#d9468f','#e0a91c','#2f6fe0','#d8452f','#e05a6a','#8a5cc9','#e8b40c','#3fa34d','#6f8a3a','#2bb3d6','#8c6d5a'];
+CATS.forEach((c,k)=>{const b=document.createElement('button');b.type='button';b.className='cat';try{b.style.setProperty('--cc',CAT_COL[k%CAT_COL.length])}catch(e){}b.innerHTML=svgI(CAT_ICO[k],14)+`<span>${c.name}</span>`;b.setAttribute('role','tab');
   b.addEventListener('click',()=>showCat(k));catsEl.append(b);catBtns.push(b);for(const t of c.tools)toolsEl.append(mkTool(t))});
 function showCat(k){if(catBtns[k]&&catBtns[k].hidden){k=catBtns.findIndex(b=>!b.hidden);if(k<0)k=0}curCat=k;catBtns.forEach((b,j)=>b.setAttribute('aria-selected',String(j===k)));
   CATS.forEach((c,j)=>c.tools.forEach(t=>toolBtns[t].hidden=j!==k||!unlocked(t)));toolsEl.scrollLeft=0;
@@ -4787,7 +4796,7 @@ function paintRouteBtn(){const b=document.getElementById('tool-routes');if(!b)re
   b.innerHTML=`<span class="sw" style="background:${routeAll?'#2f8f5a':'var(--chip)'};color:${routeAll?'#fff':'var(--fg)'}"><svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15c3-8 6 2 9-6s3-3 5-4"/><circle cx="3" cy="15" r="1.4"/><circle cx="17" cy="5" r="1.4"/></svg></span><span class="nm">Podgląd linii</span><span class="ct">${routeAll?'wł.':'wył.'}</span>`}
 /* a category tab exists only once something in it is unlocked */
 function refreshLocks(){CATS.forEach((c,k)=>{catBtns[k].hidden=!c.tools.some(unlocked)});showCat(curCat);if(linBtn)linBtn.hidden=!unlocked('busLine')}
-function selectTool(t){if(!unlocked(t)&&LAW_UNL[t]){const T=LAWS.find(q=>q.k===LAW_UNL[t]);setHint(`Odblokujesz to w ustawach urzędu miasta: zbadaj całe drzewko „${T.name}”.`,true,true);hintEl.hidden=false;return}if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel'||underOn);if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=reachHide();for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
+function selectTool(t){if(t!=='busStop')stopSide=null;if(!unlocked(t)&&LAW_UNL[t]){const T=LAWS.find(q=>q.k===LAW_UNL[t]);setHint(`Odblokujesz to w ustawach urzędu miasta: zbadaj całe drzewko „${T.name}”.`,true,true);hintEl.hidden=false;return}if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel'||underOn);if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=reachHide();for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
   const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);if(t==='bulldoze'&&delMode==='pipe')setXray(true);setHint(toolHint());if(lmsg)setHint(lmsg,true,true);hl.visible=false;renderModes();
   if(linpEl){linpEl.hidden=!isLineT(t);if(linBtn)linBtn.setAttribute('aria-expanded',String(isLineT(t)));renderLines()}}
 showCat(0);
@@ -5299,7 +5308,7 @@ if(CapApp){try{CapApp.addListener('appStateChange',st=>{if(!st.isActive){saveNow
 document.getElementById('mExit').addEventListener('click',()=>{writeSave();menuEl.hidden=true;openTitle()});
 window.addEventListener('keydown',e=>{if(lineConf&&menuEl.hidden){if(e.key==='Escape')return cancelLine();if(e.key==='Enter')return confirmLine()}if(e.key==='Escape'){if((pendA>=0||moveSrc>=0)&&menuEl.hidden)return cancelFP();if(!menuEl.hidden)closeMenu();else if(!closeWindows())openMenu()}
   if((FP(tool)||moveSrc>=0)&&menuEl.hidden){if(e.key==='r'||e.key==='R')rotateFP();if(e.key==='Enter'&&pendA>=0)placeFP()}
-  else if((e.key==='r'||e.key==='R')&&menuEl.hidden&&!(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))){if(inspI>=0&&tool==='view')rotateBuilding(inspI);else if(BUILD[tool]&&!DRIVE[tool])rotate1()}});
+  else if((e.key==='r'||e.key==='R')&&menuEl.hidden&&!(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))){if(tool==='busStop')flipStopSide();else if(inspI>=0&&tool==='view')rotateBuilding(inspI);else if(BUILD[tool]&&!DRIVE[tool])rotate1()}});
 
 const U={clockSub:document.getElementById('clockSub'),clock:document.getElementById('clock'),money:document.getElementById('money'),moneyCap:document.getElementById('moneyCap'),moneyBar:document.getElementById('moneyBar'),
   mat:document.getElementById('mat'),matCap:document.getElementById('matCap'),matBar:document.getElementById('matBar'),cars:document.getElementById('cars'),
@@ -7656,7 +7665,14 @@ const LT_TR=[
 ["Urząd miasta jest zniszczony.", "City hall is destroyed.", "Das Rathaus ist zerstört."],
 ["Urząd miasta jest wyłączony – włącz go w inspektorze.", "City hall is switched off – turn it on in the inspector.", "Das Rathaus ist ausgeschaltet – schalte es im Inspektor ein."],
 ["Urząd miasta nie ma prądu – podłącz go do sieci.", "City hall has no power – connect it to the grid.", "Das Rathaus hat keinen Strom – schließe es ans Netz an."],
-["Ustawy są zawieszone, ale możesz je już badać i wprowadzać.", "Laws are suspended, but you can already research and pass them.", "Gesetze sind ausgesetzt, du kannst sie aber schon erforschen und erlassen."]
+["Ustawy są zawieszone, ale możesz je już badać i wprowadzać.", "Laws are suspended, but you can already research and pass them.", "Gesetze sind ausgesetzt, du kannst sie aber schon erforschen und erlassen."],
+["Stronę ulicy wybierasz obracaniem (R lub ↻ Obróć) – podgląd pokazuje, gdzie stanie wiata. Kliknięcie istniejącego przystanku przenosi go na drugą stronę.", "You pick the side of the street by rotating (R or ↻ Rotate) – the preview shows where the shelter will stand. Clicking an existing stop moves it to the other side.", "Die Straßenseite wählst du durch Drehen (R oder ↻ Drehen) – die Vorschau zeigt, wo das Wartehäuschen steht. Ein Klick auf eine bestehende Haltestelle verlegt sie auf die andere Seite."],
+["↻ Obróć (R)", "↻ Rotate (R)", "↻ Drehen (R)"],
+["strona ulicy zmieniona.", "side of the street changed.", "Straßenseite geändert."],
+["Kliknij jezdnię, by postawić wiatę po pokazanej stronie.", "Click the road to place the shelter on the side shown.", "Klicke auf die Fahrbahn, um das Wartehäuschen auf der gezeigten Seite aufzustellen."],
+["Zaznacz wszystkie", "Select all", "Alle auswählen"],
+["Odznacz wszystkie", "Deselect all", "Alle abwählen"],
+["Magazyn nic nie przyjmuje – zaznacz towary, które ma przyjmować.", "The warehouse accepts nothing – select the goods it should accept.", "Das Lager nimmt nichts an – wähle die Waren aus, die es annehmen soll."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
