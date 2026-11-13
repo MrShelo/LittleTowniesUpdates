@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.5.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.6.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1930,7 +1930,7 @@ let wBlocks=[];
 /* river flow: in every body of water the source is the map-edge mouth nearest the top-left corner; flowD = steps downstream from it */
 const flowD=new Int32Array(N*N).fill(-1);
 /* 7.0.5: on the sea (Caribbean) the water drifts in one direction across the map and follows the coast: it slides along the shore and past the mouths of bays */
-const seaAx=new Int8Array(N*N),seaSg=new Int8Array(N*N);let seaOn=false;
+const seaAx=new Int8Array(N*N),seaSg=new Int8Array(N*N),seaVX=new Float32Array(N*N),seaVZ=new Float32Array(N*N);let seaOn=false;
 function seaFlow(){seaOn=mapType==='carib';if(!seaOn)return;const dl=new Int16Array(N*N).fill(-1),q=[];for(let i=0;i<N*N;i++)if(!water[i]){dl[i]=0;q.push(i)}for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(dl[j]<0){dl[j]=dl[q[h]]+1;q.push(j)}
   const big=Math.max(...dl),D=(x,z)=>x<0||z<0||x>=N||z>=N?big:dl[idx(x,z)]<0?big:dl[idx(x,z)];
   let r=0;for(let i=0;i<N*N;i++)r=(r*31+(water[i]?i:0))%997;const ang=(r/997)*Math.PI*2,gx=Math.cos(ang),gz=Math.sin(ang);
@@ -1939,7 +1939,7 @@ function seaFlow(){seaOn=mapType==='carib';if(!seaOn)return;const dl=new Int16Ar
     let ux=gx,uz=gz;if(L>1e-6){nx/=L;nz/=L;const dot=gx*nx+gz*nz;let tx=gx-dot*nx,tz=gz-dot*nz;const T=Math.hypot(tx,tz);if(T<1e-3){tx=-nz;tz=nx}else{tx/=T;tz/=T}const w=Math.max(0,Math.min(1,1-(dl[i]-1)/4));ux=gx*(1-w)+tx*w;uz=gz*(1-w)+tz*w}
     vx[i]=ux;vz[i]=uz}
   for(let pass=0;pass<3;pass++){const ax2=new Float32Array(N*N),az2=new Float32Array(N*N);for(let i=0;i<N*N;i++){if(!water[i])continue;let sx=vx[i]*2,sz=vz[i]*2;for(const j of nbrs(i))if(water[j]){sx+=vx[j];sz+=vz[j]}ax2[i]=sx;az2[i]=sz}vx=ax2;vz=az2}
-  for(let i=0;i<N*N;i++){if(!water[i])continue;seaAx[i]=Math.abs(vx[i])>=Math.abs(vz[i])?0:1;seaSg[i]=(seaAx[i]?vz[i]:vx[i])>=0?1:-1}}
+  for(let i=0;i<N*N;i++){if(!water[i])continue;seaAx[i]=Math.abs(vx[i])>=Math.abs(vz[i])?0:1;seaSg[i]=(seaAx[i]?vz[i]:vx[i])>=0?1:-1;const L=Math.hypot(vx[i],vz[i])||1;seaVX[i]=vx[i]/L;seaVZ[i]=vz[i]/L}}
 function computeFlow(){flowD.fill(-1);const seen=new Uint8Array(N*N);
   for(let s0=0;s0<N*N;s0++){if(!water[s0]||seen[s0])continue;const comp=[s0];seen[s0]=1;for(let h=0;h<comp.length;h++)for(const j of nbrs(comp[h]))if(water[j]&&!seen[j]){seen[j]=1;comp.push(j)}
     const onEdge=i=>{const x=i%N,z=(i/N)|0;return x===0||z===0||x===N-1||z===N-1};
@@ -1951,11 +1951,34 @@ function computeFlow(){flowD.fill(-1);const seen=new Uint8Array(N*N);
 /* direction (+1 / −1 along the tile's axis) in which the water runs downstream */
 function flowSign(i,ax){if(seaOn&&water[i])return seaSg[i];const x=i%N,z=(i/N)|0,f=(dx,dz)=>{const nx=x+dx,nz=z+dz;return nx>=0&&nz>=0&&nx<N&&nz<N&&water[idx(nx,nz)]?flowD[idx(nx,nz)]:-1};
   const p=ax?f(0,1):f(1,0),m=ax?f(0,-1):f(-1,0);if(p<0&&m<0)return 1;if(p<0)return m>flowD[i]?-1:1;if(m<0)return p>flowD[i]?1:-1;return p>=m?1:-1}
-function buildCurrent(axisOf){wBlocks=[];for(let i=0;i<N*N;i++){if(!water[i])continue;const ax=axisOf(i);
-  const sg=flowSign(i,ax);for(let k=0;k<WB_PER;k++)wBlocks.push({i,sg,x:cx(i),z:cz(i),ax,ph:Math.random(),lat:rnd(-0.38,0.38),len:rnd(0.1,0.28),w:rnd(0.05,0.1),h:rnd(0.015,0.03),dark:Math.random()<0.45,sp:rnd(0.18,0.3)})}}
-function tickCurrent(t){let nl=0,nd=0;for(const b of wBlocks){const u=(b.ph+t*b.sp)%1,edge=Math.min(1,u/0.12,(1-u)/0.12),along=(u-0.5)*b.sg;
-    dObj.position.set(b.ax?b.x+b.lat:b.x+along,WATER_Y+0.004+(b.y||0),b.ax?b.z+along:b.z+b.lat);dObj.rotation.set(0,0,0);
-    const L=b.len*edge;dObj.scale.set(b.ax?b.w*edge:L,b.h,b.ax?L:b.w*edge);dObj.updateMatrix();
+/* 7.6.0: the water runs in 8 directions (also diagonally). The river runs downstream, the sea drifts; a pump pulls the water beside it towards itself,
+   an outlet pushes it forwards in a fan; where the pulls cancel out (or the body has no outflow) the water stands still. */
+const fvx=new Float32Array(N*N),fvz=new Float32Array(N*N),fStill=new Uint8Array(N*N);let flowDirtyW=false;
+const FLOW_T={pump:{k:-1,r:3,s:1.4},pumpB:{k:-1,r:4,s:2},outlet:{k:1,r:5,s:2.2}};
+function flowField(){fvx.fill(0);fvz.fill(0);fStill.fill(0);
+  /* bodies with no tile on the map edge do not flow by themselves */
+  const comp=new Int32Array(N*N).fill(-1),edgeC=[];let nc=0;for(let s0=0;s0<N*N;s0++){if(!water[s0]||comp[s0]>=0)continue;const q=[s0];comp[s0]=nc;let ed=false;for(let h=0;h<q.length;h++){const i=q[h],x=i%N,z=(i/N)|0;if(x===0||z===0||x===N-1||z===N-1)ed=true;for(const j of nbrs(i))if(water[j]&&comp[j]<0){comp[j]=nc;q.push(j)}}edgeC.push(ed);nc++}
+  for(let i=0;i<N*N;i++){if(!water[i]||!edgeC[comp[i]])continue;if(seaOn){fvx[i]=seaVX[i];fvz[i]=seaVZ[i];continue}
+    const x=i%N,z=(i/N)|0;let sx=0,sz=0;for(const[dx,dz]of[[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(!water[j]||flowD[j]<0)continue;const d=flowD[j]-flowD[i],l=Math.hypot(dx,dz);sx+=d*dx/l;sz+=d*dz/l}
+    const L=Math.hypot(sx,sz);if(L>1e-6){fvx[i]=sx/L;fvz[i]=sz/L}}
+  /* pumps pull, outlets push */
+  for(let i=0;i<N*N;i++){const c=grid[i];const F=c&&FLOW_T[c.t];if(!F||c.off)continue;for(const t of tilesOf(i)){const x0=t%N,z0=(t/N)|0;
+      for(let dz=-F.r;dz<=F.r;dz++)for(let dx=-F.r;dx<=F.r;dx++){const nx=x0+dx,nz=z0+dz;if(nx<0||nz<0||nx>=N||nz>=N||(!dx&&!dz))continue;const j=idx(nx,nz);if(!water[j])continue;
+        const d=Math.hypot(dx,dz);if(d>F.r+0.5)continue;const w=F.s*(1-d/(F.r+1));fvx[j]+=F.k*dx/d*w;fvz[j]+=F.k*dz/d*w}}}
+  /* one smoothing pass over the 8 neighbours */
+  const ax=new Float32Array(N*N),az=new Float32Array(N*N);for(let i=0;i<N*N;i++){if(!water[i])continue;let sx=fvx[i]*2,sz=fvz[i]*2;for(const j of nbrs8(i))if(water[j]){sx+=fvx[j]*0.5;sz+=fvz[j]*0.5}ax[i]=sx;az[i]=sz}
+  for(let i=0;i<N*N;i++){if(!water[i])continue;const L=Math.hypot(ax[i],az[i]);if(L<0.45){fStill[i]=1;fvx[i]=fvz[i]=0;continue}
+    /* snap to one of 8 directions */
+    const a=Math.round(Math.atan2(az[i],ax[i])/(Math.PI/4))*(Math.PI/4);fvx[i]=Math.round(Math.cos(a)*1e4)/1e4;fvz[i]=Math.round(Math.sin(a)*1e4)/1e4}}
+function buildCurrent(axisOf){flowField();flowDirtyW=false;wBlocks=[];for(let i=0;i<N*N;i++){if(!water[i])continue;const ax=axisOf(i);
+  const sg=flowSign(i,ax);for(let k=0;k<WB_PER;k++)wBlocks.push({i,sg,x:cx(i),z:cz(i),ax,dx:fvx[i],dz:fvz[i],still:!!fStill[i],ph:Math.random(),lat:rnd(-0.38,0.38),len:rnd(0.1,0.28),w:rnd(0.05,0.1),h:rnd(0.015,0.03),dark:Math.random()<0.45,sp:rnd(0.18,0.3)})}}
+function tickCurrent(t){if(flowDirtyW&&wBlocks.length){const m=new Map();for(const b of wBlocks)if(!m.has(b.i))m.set(b.i,b.ax);buildCurrent(i=>m.get(i)||0)}
+  let nl=0,nd=0;for(const b of wBlocks){
+    if(b.still){/* standing water: the flecks lie still and only breathe a little */const k=0.75+0.25*Math.sin(t*0.8+b.ph*6.28);const ox=Math.cos(b.ph*6.28)*0.3,oz=Math.sin(b.ph*12.56)*0.3;
+      dObj.position.set(b.x+ox,WATER_Y+0.004+(b.y||0),b.z+oz);dObj.rotation.set(0,b.ph*3.14,0);dObj.scale.set(b.w*k,b.h,b.len*0.6*k);dObj.updateMatrix()}
+    else{const diag=b.dx&&b.dz,span=diag?1.41:1,u=(b.ph+t*b.sp/span)%1,edge=Math.min(1,u/0.12,(1-u)/0.12),along=(u-0.5)*span*0.92,px=-b.dz,pz=b.dx,lat=b.lat*(diag?0.7:1);
+      dObj.position.set(b.x+b.dx*along+px*lat,WATER_Y+0.004+(b.y||0),b.z+b.dz*along+pz*lat);dObj.rotation.set(0,Math.atan2(b.dx,b.dz),0);
+      const L=b.len*edge;dObj.scale.set(b.w*edge,b.h,L);dObj.updateMatrix()}
     if(b.dark)wbD.setMatrixAt(nd++,dObj.matrix);else wbL.setMatrixAt(nl++,dObj.matrix)}
   wbL.count=nl;wbD.count=nd;wbL.instanceMatrix.needsUpdate=true;wbD.instanceMatrix.needsUpdate=true}
 /* dams: water that no source can reach without crossing a dam lies 15% lower; a body of water is sealed when no outflow is reachable */
@@ -2368,7 +2391,7 @@ function refreshAround(i){const x=i%N,z=(i/N)|0;rebuildRoad(i);refreshBuilding(i
 
 function roadBase(t){return t==='highway'?[G.hwBase,mat.road]:t==='bridge'?[G.deck,mat.road]:[G.roadBase,t==='road2'?mat.road2:t==='road3'?mat.road3:mat.road]}
 let mvNext=null;
-function addCell(i,t,anim=true,second=-1){whDirty=true;gridVerN++;const extra=Array.isArray(second)?second:(second>=0?[second]:[]);
+function addCell(i,t,anim=true,second=-1){whDirty=true;gridVerN++;if(FLOW_T[t])flowDirtyW=true;const extra=Array.isArray(second)?second:(second>=0?[second]:[]);
   clearDeco(i);groundDeco(i,false);
   const g=new THREE.Group();g.position.set(cx(i),tYi(i),cz(i));
   const cell={t,group:g,work:0,timer:1+Math.random()*3,mv:mvNext!=null?mvNext:Math.random()};mvNext=null;
@@ -2400,7 +2423,7 @@ function addCell(i,t,anim=true,second=-1){whDirty=true;gridVerN++;const extra=Ar
   xrayNew(g);
   if(anim){if(!DRIVE[t]&&cell.model&&t!=='lpole'&&t!=='hvpole'&&t!=='rail')startConstruction(cell);else{g.scale.setScalar(0.5);popping.push({g,t:0})}}
 }
-function removeCell(i){let c=grid[i];if(!c)return;gridVerN++;if(c.t==='part'){i=c.main;c=grid[i];if(!c||c.t==='part'){grid[i]=null;return}}whDirty=true;const stLeft=isWH(c.t)&&!whKeep&&c.st?c.st:null;scene.remove(c.group);if(c.model){factories.delete(c.model);if(c.model.userData.rotor)winds.delete(c.model.userData.rotor)}if(c.bolt)bolts.delete(c.bolt);
+function removeCell(i){let c=grid[i];if(!c)return;gridVerN++;if(FLOW_T[c.t])flowDirtyW=true;if(c.t==='part'){i=c.main;c=grid[i];if(!c||c.t==='part'){grid[i]=null;return}}whDirty=true;const stLeft=isWH(c.t)&&!whKeep&&c.st?c.st:null;scene.remove(c.group);if(c.model){factories.delete(c.model);if(c.model.userData.rotor)winds.delete(c.model.userData.rotor)}if(c.bolt)bolts.delete(c.bolt);
   c.group.traverse(o=>{if(o.geometry&&!o.geometry.userData.keep)o.geometry.dispose()});
   if(c.t==='bridge'&&pipe[i]){pipe[i]=0}
   if(c.railFx){scene.remove(c.railFx);c.railFx=null}if(c.crossFx){scene.remove(c.crossFx);c.crossFx=null}if(c.busFx){scene.remove(c.busFx);c.busFx=null}if(c.bus||c.t==='trainSt'){const S=i;setTimeout(()=>{if(!grid[S]||!(grid[S].bus||grid[S].t==='trainSt'))stopGone(S)},0)}if(c.rail||c.t==='rail'||c.t==='trainSt'||c.t==='freightSt'){railVer++;setTimeout(railRefreshAll,0)}
@@ -4953,7 +4976,7 @@ function setTipHTML(el,h){if(el.__tipH===h)return;el.__tipH=h;if(tipSrc===el&&!t
 function showTipAt(x,y,text,src){if(tipSrc!==src||tipEl.hidden){tipEl.innerHTML=tipHTML(text)}tipSrc=src;tipEl.hidden=false;placeTip(x,y,false)}
 function hideTip(){tipEl.hidden=true;tipSrc=null;clearTimeout(tipT)}
 /* 7.4.1: the inspector's right edge lines up with the right edge of the build toolbar */
-function hudFit(){try{const h=document.querySelector('.hud'),sd=h&&h.querySelector('.side');if(!sd)return;const on=innerWidth>=900;h.classList.toggle('sideAbs',on);if(on)h.style.setProperty('--sideW',(sd.offsetWidth+24)+'px')}catch(e){}}
+function hudFit(){try{const h=document.querySelector('.hud'),sd=h&&h.querySelector('.side');if(!sd)return;const on=innerWidth>=1600;h.classList.toggle('sideAbs',on);if(on)h.style.setProperty('--sideW',(sd.offsetWidth+24)+'px')}catch(e){}}
 addEventListener('resize',hudFit);setTimeout(hudFit,300);try{new ResizeObserver(()=>hudFit()).observe(document.querySelector('.hud .side'))}catch(e){}
 function alignInsp(){try{const b=document.querySelector('.dock .build'),d=document.querySelector('.dock');if(!b||!d)return;const ie=document.getElementById('insp');let r=d.getBoundingClientRect().right-b.getBoundingClientRect().right;d.style.setProperty('--inspR',Math.max(0,Math.round(r))+'px');if(!ie.hidden){const diff=b.getBoundingClientRect().right-ie.getBoundingClientRect().right;r-=diff;d.style.setProperty('--inspR',Math.max(0,Math.round(r))+'px')}}catch(e){}}
 addEventListener('resize',alignInsp);try{new MutationObserver(()=>{if(!document.getElementById('insp').hidden)alignInsp()}).observe(document.getElementById('insp'),{attributes:true,attributeFilter:['hidden']})}catch(e){}setTimeout(alignInsp,500);try{new ResizeObserver(()=>alignInsp()).observe(document.querySelector('.dock .build'))}catch(e){}
