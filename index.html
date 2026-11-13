@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.4.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.4.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -4786,7 +4786,7 @@ function checkBankrupt(){if(gameOver||money>=-2000)return;gameOver=true;paused=t
 document.getElementById('oNew').addEventListener('click',()=>{overEl.hidden=true;openMaps(true)});
 document.getElementById('oExit').addEventListener('click',()=>{writeSave();overEl.hidden=true;openTitle()});
 /* ---------- radio: each track is its own looping station, joined "live" at the current time ---------- */
-const STATIONS=[{name:'Nature FM',tracks:['nature','nature2','nature3']},{name:'Luxury FM',tracks:['luxury','luxury2','luxury3']},{name:'Lofi Radio',tracks:['lofi','lofi2','lofi3']}];
+const STATIONS=[{name:'Nature FM',tracks:['nature','nature2','nature3']},{name:'Luxury FM',tracks:['luxury','luxury2','luxury3']},{name:'Lofi Radio',tracks:['lofi','lofi2','lofi3']},{name:'Focus FM',tracks:['focus','focus2','focus3']}];
 /* each track is tried locally first, then from the update repository (a build that got the new game via an update may not have the new files yet) */
 const MUSIC_SRC=f=>[`music/${f}.mp3`,`https://media.githubusercontent.com/media/MrShelo/LittleTowniesUpdates/main/music/${f}.mp3`,`https://raw.githubusercontent.com/MrShelo/LittleTowniesUpdates/main/music/${f}.mp3`];
 /* ---------- 6.5: sounds of the city ----------

@@ -16,7 +16,7 @@ Gdyby nowa wersja się nie uruchomiła, po 20 s gra sama wraca do wersji wbudowa
 3. `git add -A && git commit -m "v1.3.1" && git tag v1.3.1 && git push origin main --tags`
 
 ## Muzyka
-Stacje radiowe: Nature FM, Luxury FM, Lofi Radio (`music/`).
+Stacje radiowe: Nature FM, Luxury FM, Lofi Radio, Focus FM (`music/`).
 
 ## Edytor modeli
 `edytor/LittleTownies-Edytor.html` – otwórz w przeglądarce (Edge/Chrome). Wczytuje grę z GitHuba i pokazuje modele w folderach
