@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.7.8';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.9';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -3039,14 +3039,21 @@ function railPath(st){const j=stationRail(st);if(j<0)return null;const{par}=rail
     else{const e=T.ends.indexOf(j);if(e===0)p.push(...T.row);else if(e===1)p.push(...[...T.row].reverse())}}return p}
 /* 7.4.0: a train always drives forwards: past the platform the track must lead on to the map edge again (straight through, or round a loop back onto the way in) */
 const railFullC=new Map();
-function railFull(st){const k=st+'|'+railVer;if(railFullC.has(k))return railFullC.get(k);if(railFullC.size>200)railFullC.clear();let out=null;
+/* 7.7.9: when the way out is missing, remember where the track past the platform ends, so the station info can point at it */
+const railWhyC=new Map();
+function railFull(st){const k=st+'|'+railVer;if(railFullC.has(k))return railFullC.get(k);if(railFullC.size>200){railFullC.clear();railWhyC.clear()}let out=null,why=null;
   try{const p=railPath(st),T=stTrack(st);if(p&&p.length&&T){const{rows}=railInfo(),rowSet=new Set(T.row),last=p[p.length-1];
     const far=T.ends.find(e=>e>=0&&j2adj(e,last)&&!p.includes(e)&&isRailT(e));
+    if(far==null){const e=T.ends.find(e=>e>=0&&!p.includes(e));why={none:e!=null?e:-1}}
     if(far!=null){const startK=far*N*N+last,prevS=new Map([[startK,-1]]),q=[[far,last]];let goal=null;
       for(let h=0;h<q.length&&goal==null;h++){const[t,pr]=q[h],x=t%N,z=(t/N)|0;if(x===0||z===0||x===N-1||z===N-1){goal=t*N*N+pr;break}
         for(const j of railNext(t,rows)){if(j===pr||rowSet.has(j)||!isRailT(j))continue;const kk=j*N*N+t;if(prevS.has(kk))continue;prevS.set(kk,t*N*N+pr);q.push([j,t])}}
-      if(goal!=null){const ex=[];for(let kk=goal;kk!==-1;kk=prevS.get(kk))ex.push(Math.floor(kk/(N*N)));ex.reverse();out={p:p.concat(ex),stopU:p.length-1}}}}}catch(e){out=null}
-  railFullC.set(k,out);return out}
+      if(goal!=null){const ex=[];for(let kk=goal;kk!==-1;kk=prevS.get(kk))ex.push(Math.floor(kk/(N*N)));ex.reverse();out={p:p.concat(ex),stopU:p.length-1}}
+      else{const ends=q.map(([t,pr])=>t).filter(t=>railNext(t,rows).filter(j=>!rowSet.has(j)).length<=1);why={cut:ends.length?ends[ends.length-1]:q[q.length-1][0],n:q.length,from:far}}}}}catch(e){out=null}
+  railFullC.set(k,out);railWhyC.set(k,why);return out}
+function railWhy(st){railFull(st);return railWhyC.get(st+'|'+railVer)||null}
+const tileXY=t=>`${t%N}, ${(t/N)|0}`;
+
 const stationOK=i=>stationRail(i)>=0&&!!railFull(i);
 const stActive=i=>{const c=grid[i];return!!c&&!c.off&&!c.ruin&&c.powered};
 const passStations=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.t==='trainSt'&&stActive(i)&&entryOf(i)>=0&&stationOK(i))o.push(i)}return o};
@@ -4415,7 +4422,10 @@ function openHouse(i){lockBuy();if(grid[i]&&grid[i].t==='part')i=grid[i].main;if
 let inspDown=0,inspRel=0;inspEl.addEventListener('pointerdown',()=>{inspDown=performance.now()},true);
 for(const ty of['pointerup','pointercancel'])addEventListener(ty,()=>{if(inspDown){inspDown=0;inspRel=performance.now()+150}},true);
 const inspBusy=()=>{const t=performance.now();return(inspDown&&t-inspDown<4000)||t<inspRel};
-function closeHouse(){if(areaT>1e8){areaT=0;area.visible=reachHide()}inspI=-1;inspEl.hidden=true;document.body&&document.body.classList.remove('inspOn');hintEl.hidden=false;ring.visible=false}
+/* a red pulsing marker on the tile where the track past a station platform ends */
+let cutMark=null;function railCutMark(t){if(!cutMark){cutMark=new THREE.Mesh(new THREE.RingGeometry(0.28,0.46,32),new THREE.MeshBasicMaterial({color:'#ff3b30',side:THREE.DoubleSide,depthTest:false,transparent:true,opacity:.9}));cutMark.rotation.x=-Math.PI/2;cutMark.renderOrder=999;scene.add(cutMark)}
+  cutMark.position.set(cx(t),gY(cx(t),cz(t))+0.25,cz(t));cutMark.visible=true}
+function closeHouse(){if(cutMark)cutMark.visible=false;if(areaT>1e8){areaT=0;area.visible=reachHide()}inspI=-1;inspEl.hidden=true;document.body&&document.body.classList.remove('inspOn');hintEl.hidden=false;ring.visible=false}
 function stepHouse(d){const c=grid[inspI];if(!c)return closeHouse();const list=catList(catOfT(c.t));let k=list.indexOf(inspI);
   k=k<0?0:(k+d+list.length)%list.length;openHouse(list[k])}
 const ICON_OFF='<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" style="vertical-align:-2px"><path d="M10 3v6.5"/><path d="M6.2 5.6a6 6 0 1 0 7.6 0"/></svg>',ICON_ON='<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="currentColor" style="vertical-align:-2px"><path d="M6 4.5l10 5.5-10 5.5z"/></svg>';
@@ -4468,7 +4478,7 @@ const NEED_SVG=['<path d="M10 6.5c-3.6-2-6 .8-5.5 4.2.5 3.3 3 6 5.5 5 2.5 1 5-1.
   '<path d="M5.5 7h9a3 3 0 0 1 3 3.2l-.4 3.2a1.8 1.8 0 0 1-3.1.9L12.5 13h-5L6 14.3a1.8 1.8 0 0 1-3.1-.9l-.4-3.2A3 3 0 0 1 5.5 7z"/><path d="M6.5 9v2.5M5.2 10.2h2.6"/>'].map(d=>`<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`);
 /* demolish from the inspector: the same rules and refund as the bulldozer */
 function demolishAt(i){const sv=tool,sd=delMode;tool='bulldoze';delMode='all';try{apply(i,false)}finally{tool=sv;delMode=sd}if(!grid[i])closeHouse();else{inspEl.__html=null;renderInsp()}}
-function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHouse();
+function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHouse();
   if(c.ruin){const html=`<div class="top"><b>Zgliszcza · ${DEF[c.t].name}</b><small>pole ${i%N+1}, ${((i/N)|0)+1}</small><button class="btn icon panel x" id="inspX" aria-label="Zamknij">×</button></div><div class="eff">Budynek spłonął i nie działa. Wyburz go narzędziem Wyburz, żeby zwolnić miejsce.</div>`;
     if(html!==inspEl.__html){inspEl.__html=html;inspEl.innerHTML=html;document.getElementById('inspX').onclick=closeHouse}return}
   const ccat=catOfT(c.t),list=catList(ccat),k=list.indexOf(i),rows=[],night=isNight(),nt=nextType(c.t);
@@ -4567,7 +4577,8 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
       <div class="chips"><button class="chipb" id="shipAuto" aria-pressed="${!!c.shipAuto}">Automatyczne ponawianie co 2 godz.</button><button class="chipb" id="shipGo"${!tot?' disabled':''}>${c.shipAt!=null?(imp?'Dostawa zaplanowana':'Wywóz zaplanowany'):(imp?'Zamów dostawę za 2 godz.':'Zaplanuj wywóz za 2 godz.')}</button></div></div>`}
   if(c.t==='cityHall')R('Uchwały',`${Object.keys(ORD).length} aktywnych · ${hallOK()?'urząd działa':'urząd nie działa: uchwały zawieszone'}`,hallOK()?'':'warnv');
   if(c.t==='taxi'){R('Taksówki w trasie',`${taxiCount(i)} / ${taxiCap(i)}`);R('Kurs',`${TAXI_FARE} T¢ za turystę`);if(!stActive(i))R('Stan','stoi: brak prądu','warnv')}
-  if(isStationT(c.t)){const ok0=stationRail(i)>=0,ok=ok0&&!!railFull(i);R('Kolej',ok?'pociąg przejeżdża przodem i wraca na krawędź mapy':ok0?'niedokończona linia kolejowa: za peronem brak zawrotki ani toru do krawędzi mapy':'brak torów do krawędzi mapy',ok?'':'warnv');if(ok&&stActive(i))R('Następny pociąg',trains.some(t=>t.st===i)?'na torach':`za ${Math.max(1,Math.ceil(c.trT??20))} min`);if(!stActive(i))R('Stan','stoi: brak prądu','warnv')}
+  if(isStationT(c.t)){const ok0=stationRail(i)>=0,ok=ok0&&!!railFull(i);R('Kolej',ok?'pociąg przejeżdża przodem i wraca na krawędź mapy':ok0?'niedokończona linia kolejowa: za peronem brak zawrotki ani toru do krawędzi mapy':'brak torów do krawędzi mapy',ok?'':'warnv');
+    if(ok0&&!ok){const w=railWhy(i);if(w&&w.none!=null)R('Gdzie',w.none>=0?`pociąg wjeżdża od drugiej strony, a za peronem (pole ${tileXY(w.none)}) nie ma toru`:'za peronem nie ma miejsca na tor','warnv');else if(w&&w.cut!=null){R('Gdzie',`tor za peronem (od pola ${tileXY(w.from)}) urywa się na polu ${tileXY(w.cut)}`,'warnv');try{railCutMark(w.cut)}catch(e){}}}if(ok&&stActive(i))R('Następny pociąg',trains.some(t=>t.st===i)?'na torach':`za ${Math.max(1,Math.ceil(c.trT??20))} min`);if(!stActive(i))R('Stan','stoi: brak prądu','warnv')}
   if(c.t==='trainSt'){const ls=tLines.filter(L=>L.stops.includes(inspI));R('Linie kolejowe',ls.length?ls.map(L=>esc(L.name)).join(', '):'brak');if(ls.length)R('Pasażerowie czekają',String((paxQ.get(inspI)||[]).length));R('Turyści czekają na taxi',String(c.waiting||0),c.waiting&&!counts.taxi?'warnv':'');R('Więcej turystów',c.up?'+100%':'+60%')}
   if(c.t==='impDep'){c.dimp=c.dimp||{};const on=FR_GOODS.filter(k=>(c.dimp[k]||0)>0),tot=on.reduce((a,k)=>a+c.dimp[k]*depPrice(k),0);
     R('Zamówienia',on.length?`${on.length} ${on.length===1?'towar':on.length<5?'towary':'towarów'} · ok. ${fmt(Math.round(tot))} T¢/godz.`:'nic — ustaw ilości poniżej');R('Dostawa','co pełną godzinę, ciężarówką z granicy miasta');
@@ -7699,7 +7710,11 @@ const LT_TR=[
 ["Nie łączy się ze słupem – różnica {} poz. (słupy i transformatory pokonują najwyżej 2 poziomy, większe różnice tylko linia WN).", "Does not connect to the pole – {} level difference (poles and transformers bridge at most 2 levels, bigger differences only an HV line).", "Verbindet sich nicht mit dem Mast – {} Ebenen Unterschied (Masten und Transformatoren überbrücken höchstens 2 Ebenen, größere Unterschiede nur eine HS-Leitung)."],
 ["Zajmuje 2×2 pola. Garażuje i obsługuje autobusy: bez działającej zajezdni (z prądem i dojazdem) autobusy nie wyjeżdżają na linie. Każda linia ma tyle autobusów, ile jej przydzielisz.", "Takes 2×2 tiles. Garages and services buses: without a working depot (with power and road access) buses do not go out on the lines. Each line has as many buses as you assign to it.", "Belegt 2×2 Felder. Stellt Busse unter und wartet sie: ohne funktionierendes Depot (mit Strom und Zufahrt) fahren keine Busse auf die Linien. Jede Linie hat so viele Busse, wie du ihr zuteilst."],
 ["Zajezdnia nie działa (wyłączona, bez prądu lub bez dojazdu) – autobusy nie wyjadą na linie. Postaw zajezdnię w zakładce Transport.", "The bus depot is not working (switched off, no power or no road access) – buses will not go out on the lines. Build a depot in the Transport tab.", "Das Busdepot arbeitet nicht (ausgeschaltet, ohne Strom oder ohne Zufahrt) – Busse fahren nicht auf die Linien. Baue ein Depot im Reiter Verkehr."],
-["Brak zajezdni autobusowej – autobusy nie wyjadą na linie. Postaw zajezdnię w zakładce Transport.", "No bus depot – buses will not go out on the lines. Build a depot in the Transport tab.", "Kein Busdepot – Busse fahren nicht auf die Linien. Baue ein Depot im Reiter Verkehr."]
+["Brak zajezdni autobusowej – autobusy nie wyjadą na linie. Postaw zajezdnię w zakładce Transport.", "No bus depot – buses will not go out on the lines. Build a depot in the Transport tab.", "Kein Busdepot – Busse fahren nicht auf die Linien. Baue ein Depot im Reiter Verkehr."],
+["Gdzie", "Where", "Wo"],
+["tor za peronem (od pola {}) urywa się na polu {}", "the track past the platform (from tile {}) ends at tile {}", "das Gleis hinter dem Bahnsteig (ab Feld {}) endet auf Feld {}"],
+["pociąg wjeżdża od drugiej strony, a za peronem (pole {}) nie ma toru", "the train comes in from the other side, and past the platform (tile {}) there is no track", "der Zug kommt von der anderen Seite, und hinter dem Bahnsteig (Feld {}) liegt kein Gleis"],
+["za peronem nie ma miejsca na tor", "there is no room for a track past the platform", "hinter dem Bahnsteig ist kein Platz für ein Gleis"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
