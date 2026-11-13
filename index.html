@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.6.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -208,6 +208,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .needsH svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
 .needsH .nb.low i{animation:nbl 1.2s ease-in-out infinite}@keyframes nbl{50%{opacity:.45}}.val2{grid-column:1/-1;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:5px;margin-top:-2px}.val2 b{color:var(--fg);font-family:var(--font-d)}.val2 i{width:7px;height:7px;border-radius:50%;background:#8a7a4a;flex:none}
 #r-water.oversew .val2 b{color:var(--warn)}
+/* 7.7.0: every HUD tile is one row tall, so wrapped rows sit close together */
+#r-water{width:212px;grid-template-columns:auto 1fr auto;column-gap:8px}#r-water .val2{grid-column:3;grid-row:1;margin:0}#r-water .bar.seg{grid-column:1/3;grid-row:2}#r-water .bar:not(.seg){grid-column:3;grid-row:2;min-width:56px}
+.needsH .nb{min-height:16px}.res.needsH{align-self:stretch;row-gap:2px}.hud{align-items:stretch;align-content:flex-start}.hud>.res:not(.needsH){align-self:flex-start}
 .clock{display:grid;gap:1px;padding:6px 12px;line-height:1.15}
 .clock b{font-family:var(--font-d);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
 .clock small{font-size:11px;color:var(--muted)}
@@ -317,7 +320,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .st{position:absolute;left:0;top:0;display:flex;gap:3px;padding:3px;border-radius:9px;background:rgba(20,24,26,.78);box-shadow:0 2px 6px rgba(0,0,0,.25);will-change:transform}
 .st i{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;color:#fff}
 .st i svg{width:14px;height:14px}
-.crimeChip{z-index:2}.crimeChip .s-crime{background:#d63b3b}.ordp .ordc{border-top:1px solid var(--line);padding:8px 0;display:grid;gap:4px}.ordp .ordc.on b{color:var(--money)}.ordp ul{margin:0;padding-left:18px;font-size:12px;color:var(--muted)}.ordp .btn{min-height:34px}.stTabs{position:sticky;top:0;z-index:2;background:var(--panel2);padding:4px 0}.stats [data-tab][hidden]{display:none!important}
+.crimeChip{z-index:2}.crimeChip .s-crime{background:#d63b3b}.ordp .ordc{border-top:1px solid var(--line);padding:8px 0;display:grid;gap:4px}.ordp{width:min(1180px,calc(100% - 80px));max-height:min(82vh,760px)}.lawHead{display:flex;justify-content:space-between;align-items:center;gap:10px}.lawRp{font-weight:700;color:var(--money)}.lawGrid{display:grid;grid-template-columns:repeat(6,minmax(170px,1fr));gap:8px;overflow-x:auto;padding-bottom:4px}.lawT{border:1px solid var(--line);border-top:3px solid var(--lc);border-radius:10px;padding:6px;display:grid;gap:6px;align-content:start}.lawT h4{margin:0;font-size:14px;display:flex;gap:6px;align-items:center}.lawTier{display:grid;gap:6px;border-top:1px dashed var(--line);padding-top:6px}.lawc{display:grid;gap:3px;background:var(--panel2);border-radius:8px;padding:6px}.lawc.on{outline:2px solid var(--lc)}.lawc.on b{color:var(--money)}.lawc ul{margin:0;padding-left:16px;font-size:11.5px;color:var(--muted)}.lawc .btn,.lawLock .btn,.lawUnl{min-height:32px;font-size:12px}.lawLock{display:grid;gap:4px;text-align:center;color:var(--muted);font-size:12px;padding:6px 0}.lawUnl.on{color:var(--money);font-weight:700;font-size:12px;text-align:center}.ordp .ordc.on b{color:var(--money)}.ordp ul{margin:0;padding-left:18px;font-size:12px;color:var(--muted)}.ordp .btn{min-height:34px}.stTabs{position:sticky;top:0;z-index:2;background:var(--panel2);padding:4px 0}.stats [data-tab][hidden]{display:none!important}
 .stTabs{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:thin}.stTabs .chipb{flex:none}
 .tnote{margin:6px 0 0;font-size:11.5px;color:var(--muted);line-height:1.4}
 .scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
@@ -398,10 +401,10 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <aside class="tut panel" id="tut" hidden aria-label="Samouczek"></aside>
 <div class="tutInfo panel" id="tutInfo" hidden role="dialog" aria-label="Samouczek"></div>
 <div class="ovl panel taxp" id="taxp" hidden><b>Podatki</b><div id="taxBox"></div><input type="range" id="taxR" min="10" max="20" step="1" value="12" hidden><small id="taxN" hidden></small><span class="bh">Pożyczki</span><div id="loanBox"></div><span class="bh">Import</span><small id="impN"></small></div>
-<nav class="rail" aria-label="Widoki"><button class="btn icon panel" id="gestBtn" hidden aria-pressed="false" aria-label="Gest dwoma palcami: przybliżanie" title="Gest dwoma palcami: przybliżanie (stuknij, by obracać)"></button><button class="btn icon panel" id="ordBtn" hidden aria-expanded="false" aria-label="Uchwały" title="Uchwały (urząd miasta)"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 2.5h7l3 3v12h-10z"/><path d="M12.5 2.5v3h3M8 9h5M8 12h5M8 15h3"/></svg></button><button class="btn icon panel" id="linBtn" hidden aria-expanded="false" aria-label="Komunikacja miejska" title="Komunikacja miejska: linie autobusowe i kolejowe"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="13" rx="2.2"/><path d="M4 9.5h12M6.5 15.5v2M13.5 15.5v2M7 5.2h6"/><circle cx="7" cy="12.6" r=".8"/><circle cx="13" cy="12.6" r=".8"/></svg></button><button class="btn icon panel" id="msBtn" aria-expanded="false" aria-label="Kamienie milowe" title="Kamienie milowe"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h8v4.2a4 4 0 0 1-8 0z"/><path d="M6 5H3.5v1.2A2.8 2.8 0 0 0 6.3 9M14 5h2.5v1.2A2.8 2.8 0 0 1 13.7 9"/><path d="M10 11.7v2.8M7 17.5h6M8 14.5h4v3H8z"/></svg></button><button class="btn icon panel" id="ovlBtn" aria-expanded="false" aria-label="Nakładki" title="Nakładki: zasięgi i strefy"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.8l7.5 4-7.5 4-7.5-4z"/><path d="M2.5 10.2l7.5 4 7.5-4"/><path d="M2.5 13.6l7.5 4 7.5-4"/></svg></button><button class="btn icon panel" id="taxBtn" aria-expanded="false" aria-label="Podatki i pożyczki" title="Podatki i pożyczki"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="15" height="10.5" rx="1.6"/><path d="M7 6.5V4.6a1.1 1.1 0 0 1 1.1-1.1h3.8A1.1 1.1 0 0 1 13 4.6v1.9"/><path d="M8 13.8l4-4.2"/><circle cx="8.3" cy="10" r=".8"/><circle cx="11.7" cy="13.4" r=".8"/></svg></button><button class="btn icon panel" id="statsBtn" aria-expanded="false" aria-label="Gospodarka" title="Gospodarka"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="10" width="15" height="7.5" rx="1.2"/><path d="M4.5 10V5.5h8V10"/><path d="M6.5 7.6h4"/><path d="M14.5 10V3.5h2.5V10"/><path d="M6 13.6h1.5M9.3 13.6h1.5M12.6 13.6h1.5"/></svg></button></nav>
+<nav class="rail" aria-label="Widoki"><button class="btn icon panel" id="gestBtn" hidden aria-pressed="false" aria-label="Gest dwoma palcami: przybliżanie" title="Gest dwoma palcami: przybliżanie (stuknij, by obracać)"></button><button class="btn icon panel" id="ordBtn" hidden aria-expanded="false" aria-label="Ustawy" title="Ustawy (urząd miasta)"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 2.5h7l3 3v12h-10z"/><path d="M12.5 2.5v3h3M8 9h5M8 12h5M8 15h3"/></svg></button><button class="btn icon panel" id="linBtn" hidden aria-expanded="false" aria-label="Komunikacja miejska" title="Komunikacja miejska: linie autobusowe i kolejowe"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="13" rx="2.2"/><path d="M4 9.5h12M6.5 15.5v2M13.5 15.5v2M7 5.2h6"/><circle cx="7" cy="12.6" r=".8"/><circle cx="13" cy="12.6" r=".8"/></svg></button><button class="btn icon panel" id="msBtn" aria-expanded="false" aria-label="Kamienie milowe" title="Kamienie milowe"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h8v4.2a4 4 0 0 1-8 0z"/><path d="M6 5H3.5v1.2A2.8 2.8 0 0 0 6.3 9M14 5h2.5v1.2A2.8 2.8 0 0 1 13.7 9"/><path d="M10 11.7v2.8M7 17.5h6M8 14.5h4v3H8z"/></svg></button><button class="btn icon panel" id="ovlBtn" aria-expanded="false" aria-label="Nakładki" title="Nakładki: zasięgi i strefy"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.8l7.5 4-7.5 4-7.5-4z"/><path d="M2.5 10.2l7.5 4 7.5-4"/><path d="M2.5 13.6l7.5 4 7.5-4"/></svg></button><button class="btn icon panel" id="taxBtn" aria-expanded="false" aria-label="Podatki i pożyczki" title="Podatki i pożyczki"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="15" height="10.5" rx="1.6"/><path d="M7 6.5V4.6a1.1 1.1 0 0 1 1.1-1.1h3.8A1.1 1.1 0 0 1 13 4.6v1.9"/><path d="M8 13.8l4-4.2"/><circle cx="8.3" cy="10" r=".8"/><circle cx="11.7" cy="13.4" r=".8"/></svg></button><button class="btn icon panel" id="statsBtn" aria-expanded="false" aria-label="Gospodarka" title="Gospodarka"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="10" width="15" height="7.5" rx="1.2"/><path d="M4.5 10V5.5h8V10"/><path d="M6.5 7.6h4"/><path d="M14.5 10V3.5h2.5V10"/><path d="M6 13.6h1.5M9.3 13.6h1.5M12.6 13.6h1.5"/></svg></button></nav>
 <div class="ovl panel msp" id="msp" hidden aria-label="Kamienie milowe"></div>
 <div class="ovl panel msp linp" id="linp" hidden aria-label="Komunikacja miejska"></div>
-<div class="ovl panel msp ordp" id="ordp" hidden aria-label="Uchwały"></div>
+<div class="ovl panel msp ordp" id="ordp" hidden aria-label="Ustawy"></div>
 <div class="order" id="order" hidden role="status" aria-live="polite"></div>
 <div class="ovl panel" id="ovl" hidden role="group" aria-label="Nakładki"><b>Nakładki</b>
     <button class="chipb" data-ovl="police"><i style="background:#2f6fe0"></i>Zasięg policji</button><button class="chipb" data-ovl="fire"><i style="background:#e8641c"></i>Zasięg straży</button><button class="chipb" data-ovl="pol"><i style="background:#d9b02a"></i>Zanieczyszczenie</button>
@@ -615,6 +618,12 @@ const DEF={
   policeS:{name:'Komisariat',cost:800,desc:'Zasięg 17 bloków po drogach i obręb 9×9, cele na 10 osób. 2 radiowozy patrolują i jadą na interwencje. Ulepszenia: „Drugi garaż” (+2 radiowozy do interwencji), „Większy rewir” (+3 bloki po drogach, obręb +2).',sw:'#2f5fa8',area:5},
   railTunnel:{name:'Tunel kolejowy',cost:150,desc:'Tory pod wzniesieniem. Zaczyna się przy końcu torów u stóp wzgórza i biegnie płasko na ich wysokości; nad tunelem musi być co najmniej półtora poziomu terenu.',sw:'#6f6a62'},
   rail:{name:'Tory',cost:40,desc:'Przeciągnij, by położyć tory. Przecinają w poprzek pojedynczą, prostą ulicę (przejazd) i rzeki (most kolejowy). Z dworcem łączą się tylko na końcach jego peronu (wjazd i wyjazd). Dworzec działa, gdy tory dochodzą do krawędzi mapy.',sw:'#7d6a58',unit:'T¢/pole'},
+  combine:{name:'Wielki kombinat',cost:6000,fw:2,fh:3,desc:'Zajmuje 2×3 pola. Do 4 linii specjalistycznych naraz (pracują po kolei), bez towarów ogólnych. Partie 2× większe niż w dużej fabryce, obsada 14–22. Jeden na miasto (ustawy: Nawyki komunistyczne).',sw:'#8a2f2f'},
+  airport:{name:'Lotnisko',cost:12000,fw:4,fh:7,desc:'Zajmuje 4×7 pól. Samoloty przywożą turystów: +60% przyjezdnych w całym mieście, loty dają +150 T¢/godz. Jedno na miasto (ustawy: Transport publiczny).',sw:'#5b6f86'},
+  recycB:{name:'Wielkie centrum recyklingu',cost:4500,fw:2,fh:3,desc:'Zajmuje 2×3 pola. Przerabia 40 kg odpadów na godz. na materiały (bufor 240 kg), 4 śmieciarki. Jedno na miasto (ustawy: Ekologia).',sw:'#3c8a5c'},
+  retire:{name:'Dom spokojnej starości',cost:3000,fw:3,fh:2,desc:'Zajmuje 3×2 pola. W zasięgu 15 bloków po drogach i obrębie 9×9 seniorzy żyją o 25% dłużej, a domy z seniorami mają +1 zadowolenia. Jeden na miasto (ustawy: Zdrowe nawyki).',sw:'#b88a5a'},
+  stadium:{name:'Stadion piłkarski',cost:8000,fw:4,fh:3,desc:'Zajmuje 4×3 pola. Rozrywka: 25 bloków po drogach i obręb 13×13 (+1 zadowolenia), bilet 40 T¢. Codziennie o 18:00 mecz: duży przychód z biletów. Jeden na miasto (ustawy: Turystyka).',sw:'#2f8f4f'},
+  hqPolice:{name:'Komenda stołeczna',cost:9000,fw:5,fh:3,desc:'Zajmuje 5×3 pola. Obręb połowy mapy i 40 bloków po drogach, 90 cel, 8 radiowozów. Zatrzymani zostają w jej celach. Jedna na miasto (ustawy: Miasto policyjne).',sw:'#2a4f8f'},
   busDepot:{name:'Zajezdnia autobusowa',cost:1500,fw:2,fh:2,desc:'Zajmuje 2×2 pola. Garażuje i obsługuje autobusy: każda linia autobusowa dostaje +2 autobusy, a nowe autobusy wyjeżdżają na trasę dwa razy szybciej.',sw:'#3c6fa8'},
   taxi:{name:'Baza taxi',cost:700,size:2,desc:'Zajmuje 2 pola. 4 taksówki wożą turystów z drogi wjazdowej i z dworca do hoteli, rozrywki i sklepów. Bez bazy taxi turyści nie przyjeżdżają. Kurs: 5 T¢.',sw:'#e9b81c'},
   trainSt:{name:'Dworzec kolejowy',cost:3500,fw:3,fh:2,desc:'Zajmuje 3×2 pola. Gdy tory łączą go z krawędzią mapy, co 2 godziny przyjeżdża pociąg z turystami (+60% turystów). Taksówki odbierają ich z dworca.',sw:'#3d6fa8'},
@@ -666,7 +675,7 @@ const DEF={
   biomass:{name:'El. na biomasę',cost:1000,size:2,desc:'Zajmuje 2×1 pola. 30 MW z drewna (z farmy drzew; gdy go brak, kupuje spoza miasta po 16 T¢/kg): spala 1 kg co 8 min, gdy wiatraki i inne źródła nie wystarczają. Dymi o połowę słabiej niż węglowa. Ulepszenie „Drugi komin”: +20 MW. Łączy się przez transformator obok albo słup WN.',sw:'#6d7f4a'},
   fill:{name:'Zasypanie rzeki',cost:200,desc:'Zamienia pole wody przy brzegu w ląd. Uwaga: woda odcięta od ujścia za mapę zacznie się podnosić i może zalać okolicę.',sw:'#a8875a',unit:'T¢/pole'},
 };
-const DEMAND={busDepot:1.2,pitS:1,pitB:2,cityHall:2,shipC:1.5,roadSvc:1,heliB:2,taxi:0.5,trainSt:2,freightSt:2.5,fireS:1,fireB:2.5,clinic:1.5,hosp:4,hospC:9,crem:3,schoolS:0.8,school:1.5,lyceum:3,techn:4,bankG:4,shop1:1,prisonS:1.5,prison:3,policeS:1,policeB:2.5,bakery:0.6,factoryB:3.5,mine:1,mineB:3,supermarket:2.5,smallfac:1,pump:1,pumpB:2.5,tower:0.5,treatment:2,restaurant:0.8,cinema:1.5,theater:1.5,casino:3,hotelS:1,hotelB:3,gallery:3,tenement:1.2,block:2,modern:2.5,house:0.5,factory:2,shop:1,bank:5,incinerator:1,recycler:1.5};
+const DEMAND={combine:8,airport:6,recycB:5,retire:2,stadium:4,hqPolice:4,busDepot:1.2,pitS:1,pitB:2,cityHall:2,shipC:1.5,roadSvc:1,heliB:2,taxi:0.5,trainSt:2,freightSt:2.5,fireS:1,fireB:2.5,clinic:1.5,hosp:4,hospC:9,crem:3,schoolS:0.8,school:1.5,lyceum:3,techn:4,bankG:4,shop1:1,prisonS:1.5,prison:3,policeS:1,policeB:2.5,bakery:0.6,factoryB:3.5,mine:1,mineB:3,supermarket:2.5,smallfac:1,pump:1,pumpB:2.5,tower:0.5,treatment:2,restaurant:0.8,cinema:1.5,theater:1.5,casino:3,hotelS:1,hotelB:3,gallery:3,tenement:1.2,block:2,modern:2.5,house:0.5,factory:2,shop:1,bank:5,incinerator:1,recycler:1.5};
 const WHCAP={warehouse:200,smallwh:150,warehouseB:500};
 const isWH=t=>t==='warehouse'||t==='smallwh'||t==='warehouseB';const WH_T=['warehouse','smallwh','warehouseB'];
 const UTIL_R={pump:2,pumpB:2,tower:2,treatment:2};
@@ -716,11 +725,11 @@ const HCOL={0:'#8a2a2a',1:'#d4483a',2:'#e58a3a',3:'#d9b23a',4:'#7dbb4a',5:'#2f9e
 const SHOP_R=5;
 /* road upkeep is per 12 game hours: 1 T¢ per plain road tile, more for bigger roads */
 const ROAD_UPK={road:1,road2:2,road3:3,roundabout:2,highway:4,bridge:5,tunnel:6},ROAD_PER=12;
-const UPKEEP={busDepot:120,biomass:90,pitS:30,pitB:60,cityHall:200,shipC:120,roadSvc:90,heliB:600,taxi:120,trainSt:180,freightSt:240,fireS:122,fireB:284,clinic:180,hosp:400,hospC:1100,cemS:50,cemB:80,crem:200,schoolS:90,school:160,lyceum:360,techn:400,policeS:144,policeB:336,prisonS:80,prison:150,hydro:20,hydrogen:300,pump:25,pumpB:50,tower:20,outlet:10,treatment:80,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:5,wind:30,coal:125,park1:20,park2:50,park3:90,landfill:30,incinerator:120,recycler:70,factory:100,smallfac:50,factoryB:120,mine:25,mineB:90,warehouse:10,smallwh:5,warehouseB:20,bank:50,bankG:200,incS:60};
+const UPKEEP={combine:300,airport:900,recycB:260,retire:200,stadium:400,hqPolice:600,busDepot:120,biomass:90,pitS:30,pitB:60,cityHall:200,shipC:120,roadSvc:90,heliB:600,taxi:120,trainSt:180,freightSt:240,fireS:122,fireB:284,clinic:180,hosp:400,hospC:1100,cemS:50,cemB:80,crem:200,schoolS:90,school:160,lyceum:360,techn:400,policeS:144,policeB:336,prisonS:80,prison:150,hydro:20,hydrogen:300,pump:25,pumpB:50,tower:20,outlet:10,treatment:80,restaurant:15,cinema:40,theater:60,casino:240,hotelS:45,hotelB:130,transformer:5,wind:30,coal:125,park1:20,park2:50,park3:90,landfill:30,incinerator:120,recycler:70,factory:100,smallfac:50,factoryB:120,mine:25,mineB:90,warehouse:10,smallwh:5,warehouseB:20,bank:50,bankG:200,incS:60};
 /* waste: houses and parks fill steadily, factories per truck produced, shops per sale; pickup is due every ~6 h (work) or ~12 h (homes, parks) ±15% */
 const TRASH={supermarket:{cap:50,per:0.15,every:6},smallfac:{cap:24,per:0.3,every:6},house:{cap:18,rate:1,every:12},tenement:{cap:36,rate:2.5,every:12},block:{cap:60,rate:5,every:12},modern:{cap:60,rate:4,every:12},park1:{cap:10,rate:0.5,every:12},park2:{cap:10,rate:0.5,every:12},park3:{cap:10,rate:0.5,every:12},
-  bakery:{cap:30,per:0.2,every:6},factory:{cap:40,per:0.6,every:6},factoryB:{cap:60,per:0.8,every:6},mine:{cap:30,per:0.4,every:8},mineB:{cap:60,per:0.8,every:6},farmveg:{cap:20,per:0.5,every:12},farmdairy:{cap:20,per:0.6,every:12},farmgrain:{cap:20,per:0.4,every:12},farmcotton:{cap:20,per:0.4,every:12},farmwood:{cap:20,per:0.5,every:12},pitS:{cap:30,per:0.4,every:8},pitB:{cap:60,per:0.8,every:6},shop:{cap:30,per:0.2,every:6},gallery:{cap:60,per:0.2,every:6},restaurant:{cap:30,per:0.3,every:6},cinema:{cap:30,per:0.15,every:6},theater:{cap:30,per:0.15,every:6},casino:{cap:30,per:0.2,every:6},hotelS:{cap:30,per:0.4,every:12},hotelB:{cap:60,per:0.5,every:12}};
-const FAC={landfill:{cap:330,trucks:2,rate:0},incinerator:{cap:150,trucks:2,rate:40},recycler:{cap:60,trucks:2,rate:10},coal:{cap:20,trucks:1,rate:4}};
+  bakery:{cap:30,per:0.2,every:6},factory:{cap:40,per:0.6,every:6},factoryB:{cap:60,per:0.8,every:6},combine:{cap:120,per:1.6,every:6},airport:{cap:80,per:0.4,every:6},recycB:{cap:60,per:0.2,every:12},retire:{cap:40,per:0.2,every:12},stadium:{cap:90,per:0.4,every:6},hqPolice:{cap:50,per:0.2,every:12},mine:{cap:30,per:0.4,every:8},mineB:{cap:60,per:0.8,every:6},farmveg:{cap:20,per:0.5,every:12},farmdairy:{cap:20,per:0.6,every:12},farmgrain:{cap:20,per:0.4,every:12},farmcotton:{cap:20,per:0.4,every:12},farmwood:{cap:20,per:0.5,every:12},pitS:{cap:30,per:0.4,every:8},pitB:{cap:60,per:0.8,every:6},shop:{cap:30,per:0.2,every:6},gallery:{cap:60,per:0.2,every:6},restaurant:{cap:30,per:0.3,every:6},cinema:{cap:30,per:0.15,every:6},theater:{cap:30,per:0.15,every:6},casino:{cap:30,per:0.2,every:6},hotelS:{cap:30,per:0.4,every:12},hotelB:{cap:60,per:0.5,every:12}};
+const FAC={landfill:{cap:330,trucks:2,rate:0},incinerator:{cap:150,trucks:2,rate:40},recycler:{cap:60,trucks:2,rate:10},recycB:{cap:240,trucks:4,rate:40},coal:{cap:20,trucks:1,rate:4}};
 const GT_CAP=25,REC_YIELD=0.5,SOLAR_MW=2;
 const UPG={
   transformer:{name:'Wyższy transformator',cost:300,upkeep:20,desc:'Łączy elektrownie i słupy w zasięgu 5×5'},
@@ -751,12 +760,12 @@ const UPGF={factory:{name:'Filtry',cost:300,upkeep:15,desc:'Zanieczyszczenia o 1
 const OUT_R=25;
 const UPG2={warehouse:{name:'Sortowanie materiałów',cost:250,upkeep:5,desc:'Wybierasz, jakie towary i materiały przyjmuje magazyn (na start wszystkie)'},smallwh:{name:'Sortowanie materiałów',cost:120,upkeep:3,desc:'Wybierasz, jakie towary i materiały przyjmuje magazyn (na start wszystkie)'},warehouseB:{name:'Sortowanie materiałów',cost:500,upkeep:8,desc:'Wybierasz, jakie towary i materiały przyjmuje magazyn (na start wszystkie)'},shop:{name:'Druga kasa',cost:250,upkeep:8,desc:'+10 klientów na godzinę'},fireS:{name:'Większy rewir',cost:405,upkeep:14,desc:'Zasięg +3 bloki po drogach, obręb +2'},fireB:{name:'Większy rewir',cost:648,upkeep:20,desc:'Zasięg +3 bloki po drogach, obręb +2'},incinerator:{name:'Trzeci komin',cost:900,upkeep:35,desc:'+40 kg/godz. (wymaga drugiego komina): razem 120 kg/godz.'},factory:{name:'Nowa technologia',cost:500,upkeep:20,desc:'+50% przetwarzania: większe partie z tych samych zmian'},smallfac:{name:'Nowa technologia',cost:300,upkeep:12,desc:'+50% przetwarzania'},factoryB:{name:'Nowa technologia',cost:900,upkeep:35,desc:'+50% przetwarzania na wszystkich liniach'},bankG:{name:'Skrzydło księgowości',cost:3000,upkeep:0,desc:'+5 000 T¢ limitu gotówki'},shop1:{name:'Kasy SCO',cost:150,upkeep:5,desc:'+5 klientów na godzinę'},policeS:{name:'Większy rewir',cost:700,upkeep:24,desc:'Zasięg +3 bloki po drogach, obręb +2'},policeB:{name:'Większy rewir',cost:1200,upkeep:40,desc:'Zasięg +3 bloki po drogach, obręb +2'},prison:{name:'Blok pracy',cost:1500,upkeep:20,desc:'Każdy nowy więzień ma 30% szans na pracę: 1–3 T¢/godz. od osoby'},pump:{name:'Druga rura',cost:200,upkeep:10,desc:'Podwaja pobór: 80 m³/godz.'},outlet:{name:'Druga rura zrzutu',cost:120,upkeep:5,desc:'Podwaja przepustowość: 50 m³/godz.'},wind:{name:'Wzmocniony napęd',cost:250,upkeep:15,desc:'+3 MW, większy wirnik'}};
 const STORE_COST=100,STORE_MAX=7,GAL_BASE=4;const galUsed=c=>c.stores.length+(c.cinema?1:0),galFull=c=>!c.up&&galUsed(c)>=GAL_BASE;
-const isFactory=t=>t==='factory'||t==='smallfac'||t==='factoryB';const isMine=t=>t==='mine'||t==='mineB';const isWork=t=>isFactory(t)||isMine(t);
+const isFactory=t=>t==='factory'||t==='smallfac'||t==='factoryB'||t==='combine';const isBigF=t=>t==='factoryB'||t==='combine';const isMine=t=>t==='mine'||t==='mineB';const isWork=t=>isFactory(t)||isMine(t);
 const WORK_T=['factory','smallfac','factoryB','mine','mineB'];const MINE_T={mine:8/3,mineB:40/3};const LINE_COST=400,LINE_UPK=15,LINES_MAX=3;
 const isShop=t=>t==='bakery'||t==='shop1'||t==='shop'||t==='supermarket'||t==='gallery'||t==='restaurant';
 const FOOD=['veg','dairy','bread','drinks'];
-const PRICE={cinema:30,theater:40,casino:150,restaurant:30,hotelS:100,hotelB:200};
-const ENT_R={cinema:17,theater:19,casino:21,restaurant:15};
+const PRICE={cinema:30,theater:40,casino:150,restaurant:30,hotelS:100,hotelB:200,stadium:40};
+const ENT_R={cinema:17,theater:19,casino:21,restaurant:15,stadium:25};
 const entR=c=>!c?0:c.t==='restaurant'&&c.up?18:c.t==='cinema'&&c.up?20:ENT_R[c.t]||(c.t==='gallery'&&c.cinema?17:0)||(c.t==='hotelB'&&c.attr?ENT_R[c.attr]:0);
 /* 7.0.8: shops reach along the roads too: small ones 5 blocks, big ones (supermarket, gallery) 6 */
 const shopR=t=>t==='supermarket'?25:t==='gallery'?30:15;
@@ -775,7 +784,7 @@ const facCap=c=>FAC[c.t].cap*(c.t==='landfill'?(c.lfN||1):c.t==='incinerator'&&!
 const facTrucks=c=>c.t==='landfill'?Math.min(4,1+Math.ceil((c.lfN||1)/2)):FAC[c.t].trucks;
 const parkR=c=>DEF[c.t].r+(c.up?1:0)+1;
 const PARKS=['park1','park2','park3'];
-const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','tunnel','crosswalk']},{name:'Teren',tools:['tUp','tDown','tLevel','tSmooth','fill']},{name:'Transport',tools:['busStop','busLine','busDepot','rail','railTunnel','trainSt','railLine','taxi','freightSt','shipC']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','pitS','pitB','warehouse','smallwh','warehouseB','impDep']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain','farmcotton','farmwood']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prisonS','prison']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','transformer','hvpole','wind','coal','biomass','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','roadSvc']},{name:'Woda',tools:['pipe','tower','pump','pumpB','treatment','outlet']},{name:'Urzędowe',tools:['cityHall']}];
+const CATS=[{name:'Drogi',tools:['road','road2','road3','roundabout','highway','bridge','tunnel','crosswalk']},{name:'Teren',tools:['tUp','tDown','tLevel','tSmooth','fill']},{name:'Transport',tools:['busStop','busLine','busDepot','rail','railTunnel','trainSt','railLine','taxi','freightSt','shipC','airport']},{name:'Domy',tools:['house','tenement','block','modern']},{name:'Przemysł',tools:['factory','smallfac','factoryB','mine','mineB','pitS','pitB','warehouse','smallwh','warehouseB','impDep','combine']},{name:'Farmy',tools:['farmveg','farmdairy','farmgrain','farmcotton','farmwood']},{name:'Usługi',tools:['shop','shop1','supermarket','gallery','bank','bankG','retire']},{name:'Rozrywka',tools:['restaurant','cinema','theater','casino','stadium']},{name:'Turystyka',tools:['hotelS','hotelB']},{name:'Policja',tools:['policeS','policeB','prisonS','prison','hqPolice']},{name:'Straż',tools:['fireS','fireB','heliB']},{name:'Zdrowie',tools:['clinic','hosp','hospC','cemS','cemB','crem']},{name:'Edukacja',tools:['schoolS','school','lyceum','techn']},{name:'Energia',tools:['pole','poleline','transformer','hvpole','wind','coal','biomass','hydro','hydrogen']},{name:'Zieleń',tools:['park1','park2','park3']},{name:'Odpady',tools:['landfill','incS','incinerator','recycler','recycB','roadSvc']},{name:'Woda',tools:['pipe','tower','pump','pumpB','treatment','outlet']},{name:'Urzędowe',tools:['cityHall']}];
 const WIND_MW=2,windMW=i=>window.__testUnlock&&!window.__testHills?6:Math.max(2,Math.min(10,hgt[i]/2)), COAL_MW=20, COAL_BURN=8, BIO_MW=30, BIO_UP=20, BIO_BURN=8;
 const TOOLS=['view','bulldoze','road','pole','poleline','poleDel','house','factory','warehouse','impDep','shop','bank','wind','transformer','coal','park1','park2','park3','smallwh'];
 const BASE_MONEY=4000, BANK_CAP=6000, WH_CAP=60, SALE=25, TRUCK_LOAD=4, MAX_CARS=400, PEOPLE_CARS=340;
@@ -1136,7 +1145,7 @@ const stageOf=a=>a<7?0:a<15?1:a<19?2:a<65?3:4;
 function newPerson(a){return{a,s:0,si:0,sk:0,h:0,hi:-1}}
 function seedPeople(c,frac){const n=Math.round(residents(c)*frac);c.pp=[];for(let k=0;k<n;k++){const r=Math.random();c.pp.push(newPerson(r<0.16?rnd(0,7):r<0.264?rnd(7,15):r<0.32?rnd(15,19):r<0.88?rnd(19,64):rnd(65,80)))}c.lastBuy=gameT}
 function sickFactors(i){const c=grid[i],ts=tilesOf(i);return{water:c.water==='ok',power:!!c.powered,air:!ts.some(k=>pol[k]),park:ts.some(k=>parkCov[k]),med:ts.some(k=>medCov[k])}}
-function sickChance(i){const f=sickFactors(i);return Math.max(0,0.2-0.04*Object.values(f).filter(Boolean).length)*(ordOn('health')?0.7:1)}
+function sickChance(i){const f=sickFactors(i);return Math.max(0,0.2-0.04*Object.values(f).filter(Boolean).length)*(LAW('hl_check')?0.7:1)}
 function medFor(i){const ts=tilesOf(i);let best=-1,room=0;for(let j=0;j<N*N;j++){const m=grid[j];if(!m||!MED[m.t]||m.off||!m.powered)continue;const r=MED[m.t].r;
   if(!tilesOf(j).some(t=>ts.some(k=>Math.abs(t%N-k%N)<=r&&Math.abs(((t/N)|0)-((k/N)|0))<=r)))continue;const fr=medCap(m)-(m.pat||0);if(fr>room){room=fr;best=j}}return best}
 function die(i,c,k){const q=c.pp[k];if(q.s===2&&grid[q.hi]&&grid[q.hi].pat)grid[q.hi].pat--;c.pp.splice(k,1);c.dead=(c.dead||0)+1;cur.deaths=(cur.deaths||0)+1}
@@ -1155,10 +1164,10 @@ const MS_OF={};[
 /* hazards and their menu tab start once the first building of the service is unlocked */
 const HAZ={med:{tools:['clinic','hosp','hospC'],name:'choroby'},pol:{tools:['policeS','policeB'],name:'kradzieże i napady'},fire:{tools:['fireS','fireB','heliB'],name:'pożary'},dead:{tools:['cemS','cemB','crem'],name:'zgony'},tour:{tools:['taxi'],name:'turyści (gdy postawisz bazę taxi)'}};
 let msLevel=window.__testUnlock?99:0,cityName=(()=>{try{const l=localStorage.getItem('lt-lang');return l==='en'?'My town':l==='de'?'Meine Stadt':'Moje miasto'}catch(e){return'Moje miasto'}})();
-const unlocked=t=>t==='view'||t==='bulldoze'||(MS_OF[t]??0)<=msLevel;
+const unlocked=t=>t==='view'||t==='bulldoze'||(LAW_UNL[t]?!!LAWU[LAW_UNL[t]]:(MS_OF[t]??0)<=msLevel);
 const hazAt=k=>Math.min(...HAZ[k].tools.map(t=>MS_OF[t]??99)),hazOn=k=>hazAt(k)<=msLevel;
 function lifeHour(i,c,six){if(!c.pp||c.aband)return;const cap=residents(c),h=c.happy??3,safe=firstDay();
-  for(let k=c.pp.length-1;k>=0;k--){const q=c.pp[k];q.a+=AGE_H/(ordOn('health')?1.2:1);
+  for(let k=c.pp.length-1;k>=0;k--){const q=c.pp[k];q.a+=AGE_H/((1+(LAW('hl_move')?0.1:0)+(LAW('hl_check')?0.1:0))*(stageOf(q.a)===4&&tilesOf(i).some(t=>retCov[t])?1.25:1));
     let pd=q.a>=65?0.004*(1+(q.a-65)/8):0.0002;if(q.s===1)pd+=0.006*(1+q.si*0.3);if(q.s===2)pd+=0.001;if(!safe&&hazOn('dead')&&Math.random()<pd){die(i,c,k);continue}
     if(q.s===1){q.sk++;if(q.sk>=24){q.s=0;q.sk=0}}else if(q.s===2){q.h--;if(q.h<=0){q.s=0;const m=grid[q.hi];if(m&&m.pat)m.pat--;q.hi=-1}}}
   if(c.lastBuy==null)c.lastBuy=gameT;if(safe)c.lastBuy=gameT;if(gameT-c.lastBuy>4320&&c.pp.length&&hazOn('dead')){c.starveT=(c.starveT||0)+60;if(c.starveT>=1440){c.starveT=0;die(i,c,(Math.random()*c.pp.length)|0);float(i,'mieszkaniec zmarł: brak zakupów od 3 dni','warn')}}else c.starveT=0;
@@ -1168,7 +1177,7 @@ function lifeHour(i,c,six){if(!c.pp||c.aband)return;const cap=residents(c),h=c.h
   for(const q of c.pp)if(q.s===1){const m=medFor(i);if(m<0)break;q.s=2;q.h=8;q.hi=m;grid[m].pat=(grid[m].pat||0)+1}
   const adults=c.pp.filter(q=>q.a>=19&&q.a<65).length;
   if(c.pp.length<cap&&adults>=2&&Math.random()<0.032){c.pp.push(newPerson(0));cur.births=(cur.births||0)+1}
-  if(c.pp.length<cap&&h>=3&&Math.random()<0.3*(ordOn('tour')?0.25:1))c.pp.push(newPerson(rnd(20,40)));
+  if(c.pp.length<cap&&h>=3&&Math.random()<0.3*(LAW('tr_promo')?0.6:1))c.pp.push(newPerson(rnd(20,40)));
   if(h<=1&&c.pp.length&&Math.random()<0.08)c.pp.splice((Math.random()*c.pp.length)|0,1);
   if(c.pp.length>cap)c.pp.length=cap}
 function peopleBox(i,c){if(!c.pp)return'';const H=needs(c);const needRows=NEEDS.map(n=>`<span>${n.name}${BASIC.includes(n.k)?' <small>(podstawowa)</small>':''}</span><span class="${H[n.k]<NEED_MIN?'neg':''}">${Math.round(H[n.k]*100)}%</span>`).join('')+`<span>Średnia potrzeb</span><span class="${needAvg(c)<NEED_MIN?'neg':''}">${Math.round(needAvg(c)*100)}%${basicOK(c)?'':' · liczą się tylko żywność i napoje'}</span>`;const st=[0,0,0,0,0];for(const q of c.pp)st[stageOf(q.a)]++;const ts=tilesOf(i),ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]);
@@ -1527,6 +1536,59 @@ function buildRecycler(){const g=new THREE.Group();g.add(box(0.9,0.04,0.86,mat.c
   g.add(box(0.74,0.04,0.46,mat.binG,0,0.34,-0.14));
   [mat.binB,mat.binY,mat.binG].forEach((m,k)=>{g.add(box(0.16,0.16,0.14,m,-0.24+k*0.24,0.04,0.25))});
   g.add(box(0.3,0.2,0.02,mat.facDark,0.15,0.04,0.075));return g}
+/* 7.7.0: law-tree buildings (one per city) */
+const cyl=(r1,r2,h,m,x,y,z,seg=12)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,seg),m);o.position.set(x,y+h/2,z);o.castShadow=true;o.receiveShadow=true;return o};
+function buildCombine(){const g=new THREE.Group(),red=M('#a8322a');g.add(box(1.96,0.03,2.96,mat.concrete));
+  g.add(box(1.7,0.5,1.5,mat.fac,0,0.03,0.55));g.add(box(1.72,0.05,1.52,mat.roofD,0,0.53,0.55));
+  for(let k=-2;k<=2;k++){const t=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.03,1.5),mat.skylight);t.rotation.z=0.45;t.position.set(k*0.32,0.62,0.55);g.add(t)}
+  g.add(box(1.0,0.7,0.9,M('#b9b2a6'),-0.35,0.03,-0.85));g.add(box(1.02,0.04,0.92,mat.roofD,-0.35,0.73,-0.85));
+  g.add(box(0.9,0.08,0.02,red,-0.35,0.58,-0.395));g.add(box(0.22,0.18,0.02,mat.gold,-0.35,0.36,-0.39));
+  const signs=[];for(const x of[-0.6,-0.2,0.2,0.6]){const sg=box(0.26,0.1,0.02,mat.facDark,x,0.34,1.31);signs.push(sg);g.add(sg);g.add(box(0.28,0.24,0.02,mat.facDark,x,0.03,1.31))}
+  g.userData.paint=[];g.userData.lineSigns=signs;
+  const puffs=[];for(const x of[0.45,0.75]){g.add(cyl(0.08,0.11,1.35,mat.chim,x,0.03,-0.95));g.add(box(0.18,0.06,0.18,red,x,1.15,-0.95))}
+  for(const x of[0.45,0.75])for(let k=0;k<2;k++){const p=new THREE.Mesh(new THREE.SphereGeometry(0.09,8,6),new THREE.MeshLambertMaterial({color:'#8e9296',transparent:true,opacity:.7,depthWrite:false}));p.position.set(x,1.4,-0.95);g.add(p);puffs.push(p)}
+  g.userData.puffs=puffs;g.userData.sb={x:0.6,y:1.4,z:-0.95,spread:0.3};
+  for(const x of[-0.8,-0.55])g.add(cyl(0.11,0.11,0.6,mat.white,x,0.03,-0.2));return g}
+function buildAirport(){const g=new THREE.Group(),asph=M('#4a4f56'),grass=M('#7fae5a');g.add(box(3.96,0.02,6.96,grass));
+  g.add(box(1.0,0.03,6.7,asph,-1.25,0.02,0));for(let k=-6;k<=6;k++)g.add(box(0.05,0.004,0.28,mat.white,-1.25,0.05,k*0.5));
+  for(const z of[-3.2,3.2])for(let k=-3;k<=3;k++)g.add(box(0.06,0.004,0.18,mat.white,-1.25+k*0.12,0.05,z));
+  g.add(box(0.3,0.025,4.5,asph,-0.45,0.02,0));g.add(box(1.4,0.025,2.4,asph,0.5,0.02,0.4));
+  g.add(box(1.0,0.42,2.2,M('#e8ecf0'),1.35,0.02,0.4));for(const y of[0.12,0.27])g.add(box(0.02,0.1,2.1,mat.glass,0.84,y,0.4));g.add(box(1.06,0.05,2.26,M('#6b7b8c'),1.35,0.44,0.4));
+  g.add(box(0.5,0.3,1.4,M('#d7dce2'),1.55,0.02,-1.7));g.add(box(0.04,0.004,1.2,M('#2c2f33'),1.3,0.36,-1.7));
+  g.add(cyl(0.07,0.09,1.0,M('#d7dce2'),1.5,0.02,2.3));g.add(cyl(0.2,0.16,0.18,mat.glass,1.5,1.02,2.3,10));g.add(cyl(0.21,0.21,0.03,M('#6b7b8c'),1.5,1.2,2.3,10));
+  const pl=new THREE.Group(),wh=mat.white;pl.add(box(0.12,0.12,0.9,wh,0,0,0));pl.add(box(0.95,0.03,0.22,wh,0,0.04,0.02));pl.add(box(0.36,0.025,0.12,wh,0,0.09,-0.38));pl.add(box(0.025,0.2,0.14,M('#c0392b'),0,0.1,-0.38));
+  pl.position.set(0.35,0.06,0.6);pl.rotation.y=Math.PI/2;g.add(pl);
+  const p2=pl.clone();p2.position.set(-1.25,0.06,-2.2);p2.rotation.y=0;g.add(p2);return g}
+function buildRecycB(){const g=new THREE.Group(),gr=M('#3c8a5c');g.add(box(1.96,0.04,2.96,mat.concrete));
+  g.add(box(1.5,0.48,1.6,mat.recy,0,0.04,-0.5));g.add(box(1.54,0.05,1.64,gr,0,0.52,-0.5));
+  for(const x of[-0.45,0,0.45])g.add(box(0.3,0.3,0.02,mat.facDark,x,0.04,0.31));
+  g.add(box(0.5,0.25,0.02,M('#f2f4ef'),0.5,0.62,-0.5));g.add(box(0.1,0.15,0.03,gr,0.5,0.67,-0.48));
+  [mat.binB,mat.binY,mat.binG,mat.binB].forEach((m,k)=>g.add(box(0.28,0.2,0.24,m,-0.6+k*0.4,0.04,0.95)));
+  g.add(box(0.5,0.12,0.5,mat.cargo,-0.55,0.04,0.45));g.add(box(0.5,0.18,0.5,mat.steel,0.55,0.04,0.45));
+  g.add(cyl(0.05,0.07,0.9,mat.chim,0.75,0.04,-1.1));return g}
+function buildRetire(){const g=new THREE.Group(),wall=M('#f1e3c8'),roof=M('#8a5a44');g.add(box(2.96,0.03,1.96,mat.path));
+  g.add(box(2.4,0.55,0.8,wall,0,0.03,-0.45));g.add(box(2.5,0.06,0.9,roof,0,0.58,-0.45));g.add(box(0.8,0.4,0.6,wall,0.9,0.03,0.25));g.add(box(0.86,0.05,0.66,roof,0.9,0.43,0.25));
+  for(let k=-5;k<=5;k++)for(const y of[0.15,0.36])g.add(box(0.12,0.1,0.02,mat.glass,k*0.2,y,-0.04));
+  g.add(box(0.2,0.24,0.02,mat.door,0,0.03,-0.04));g.add(box(0.6,0.04,0.3,roof,0,0.27,0.08));for(const x of[-0.27,0.27])g.add(box(0.03,0.24,0.03,mat.white,x,0.03,0.21));
+  g.add(box(1.4,0.02,0.7,mat.parkG,-0.55,0.03,0.55));for(const x of[-1.0,-0.4])g.add(box(0.26,0.06,0.08,mat.wood,x,0.05,0.5));
+  for(const x of[-1.15,-0.2]){g.add(cyl(0.02,0.02,0.18,mat.wood,x,0.05,0.75));const t=new THREE.Mesh(new THREE.SphereGeometry(0.13,8,6),mat.parkG);t.position.set(x,0.3,0.75);g.add(t)}return g}
+function buildStadium(){const g=new THREE.Group(),stand=M('#c9ccd2'),seat=M('#c0392b'),pitch=M('#3f9a46');g.add(box(3.96,0.03,2.96,mat.concrete));
+  g.add(box(2.6,0.02,1.6,pitch,0,0.03,0));g.add(box(0.02,0.004,1.5,mat.white,0,0.052,0));
+  for(const[x,z]of[[1.2,0],[-1.2,0]])g.add(box(0.02,0.004,0.6,mat.white,x,0.052,z));
+  for(const s of[-1,1]){g.add(box(3.4,0.35,0.42,stand,0,0.03,s*1.06));for(let r=0;r<3;r++)g.add(box(3.3,0.04,0.1,seat,0,0.12+r*0.09,s*(0.92+r*0.1)))}
+  for(const s of[-1,1]){g.add(box(0.42,0.3,1.7,stand,s*1.58,0.03,0));for(let r=0;r<3;r++)g.add(box(0.1,0.04,1.6,seat,s*(1.44+r*0.1),0.1+r*0.08,0))}
+  g.add(box(3.5,0.03,0.5,M('#eef1f5'),0,0.5,-1.1));for(const x of[-1.6,0,1.6])g.add(box(0.04,0.47,0.04,mat.steel,x,0.03,-1.32));
+  for(const[x,z]of[[-1.85,-1.35],[1.85,-1.35],[-1.85,1.35],[1.85,1.35]]){g.add(cyl(0.03,0.03,1.0,mat.steel,x,0.03,z,6));g.add(box(0.2,0.1,0.04,mat.lamp,x,1.0,z))}
+  for(const s of[-1,1])g.add(box(0.03,0.1,0.3,mat.white,s*1.28,0.03,0));return g}
+function buildHQ(){const g=new THREE.Group(),bl=M('#1f4fa8'),wall=M('#eef1f5');g.add(box(4.96,0.03,2.96,mat.concrete));
+  g.add(box(2.6,1.05,1.3,wall,-0.6,0.03,-0.6));for(const y of[0.2,0.45,0.7])g.add(box(2.62,0.09,1.32,mat.glass,-0.6,y,-0.6));
+  g.add(box(2.64,0.08,1.34,bl,-0.6,0.98,-0.6));g.add(box(2.66,0.03,1.36,mat.roofD,-0.6,1.06,-0.6));
+  g.add(box(0.9,0.18,0.02,bl,-0.6,0.8,0.055));g.add(box(0.7,0.05,0.025,mat.white,-0.6,0.86,0.065));g.add(box(0.3,0.3,0.02,mat.door,-0.6,0.03,0.055));
+  const hp=new THREE.Mesh(new THREE.CylinderGeometry(0.34,0.34,0.02,20),M('#3b3f46'));hp.position.set(-1.3,1.1,-0.6);g.add(hp);
+  g.add(box(1.6,0.55,1.1,M('#cfd4da'),1.5,0.03,-0.7));for(let k=0;k<6;k++)g.add(box(0.04,0.36,0.02,mat.steel,0.9+k*0.24,0.1,-0.14));
+  g.add(box(1.62,0.04,1.12,mat.roofD,1.5,0.58,-0.7));
+  for(let k=0;k<7;k++)g.add(box(0.02,0.004,0.36,mat.white,0.6+k*0.28,0.032,0.85));
+  g.add(cyl(0.015,0.015,0.9,mat.steel,-1.9,0.03,0.2,6));g.add(box(0.24,0.15,0.01,M('#dc143c'),-1.78,0.78,0.2));g.add(box(0.24,0.07,0.012,mat.white,-1.78,0.86,0.2));return g}
 /* upgrades add parts to an existing model */
 function paintModel(c,m){for(const o of c.model.userData.paint||[])o.material=m}
 const CHIMS={incB:[{x:0.6,y:1.34,z:-0.95,r:0.08}],factory:[{x:0.3,y:0.82,z:-0.25,r:0.07}],smallfac:[{x:0.3,y:0.82,z:-0.25,r:0.07}],factoryB:[{x:0.72,y:1.0,z:-0.25,r:0.085,big:1}],incinerator:[{x:0.3,y:0.94,z:-0.22,r:0.06}],coal:[{x:0.32,y:0.75,z:0.3,r:0.045}]};
@@ -1756,16 +1818,16 @@ function buildHydro(){const g=new THREE.Group(),con=M('#c4c1b8'),con2=M('#a9a69c
 function buildSupermarket(){const g=new THREE.Group();g.add(box(1.94,0.04,0.94,mat.concrete));g.add(box(1.5,0.44,0.62,M('#e9eef2'),-0.1,0.04,-0.14));
   g.add(box(1.54,0.06,0.66,M('#3a7fc0'),-0.1,0.48,-0.14));g.add(box(0.8,0.24,0.02,mat.glass,-0.1,0.04,0.175));g.add(box(0.7,0.12,0.03,M('#3a7fc0'),-0.1,0.35,0.19));
   for(let k=0;k<4;k++)g.add(box(0.02,0.005,0.2,mat.dash,0.25+k*0.16,0.045,0.33));for(const x of[0.55,0.75])g.add(box(0.12,0.06,0.1,carCols[(x*10)%8|0],x,0.04,0.33));return g}
-const BUILD={cityHall:buildCityHall,shipC:buildShipC,roadSvc:buildRoadSvc,heliB:buildHeliB,rail:buildRail,taxi:buildTaxi,busDepot:buildBusDepot,trainSt:buildTrainSt,freightSt:buildFreightSt,fireS:buildFireS,fireB:buildFireB,incS:buildIncinerator,clinic:buildClinic,hosp:buildHosp,hospC:buildHospC,cemS:buildCemS,cemB:buildCemB,crem:buildCrem,schoolS:buildSchoolS,school:buildSchool,lyceum:buildLyceum,techn:buildTechn,bankG:buildBankG,shop1:buildShop1,prisonS:()=>{const g=buildPrison();g.scale.set(2/3,0.85,2/3);return g},prison:buildPrison,policeS:buildPoliceS,policeB:buildPoliceB,bakery:buildBakery,lpole:buildLPole,factoryB:buildFactoryB,warehouseB:buildWarehouseB,mine:buildMine,mineB:buildMineB,supermarket:buildSupermarket,smallfac:()=>{const g=buildFactory();g.scale.setScalar(0.72);return g},hydro:buildHydro,hydrogen:()=>{const g=buildHydrogen();g.scale.set(1.9,1.5,1.9);return g},pump:buildPump,pumpB:buildPumpB,tower:buildTower,outlet:buildOutlet,treatment:buildTreatment,restaurant:buildRestaurant,cinema:buildCinema,theater:buildTheater,casino:buildCasino,hotelS:buildHotelS,hotelB:buildHotelB,gallery:buildGallery,farmveg:()=>buildFarm('veg'),farmdairy:()=>buildFarm('dairy'),farmgrain:()=>buildFarm('grain'),farmcotton:()=>buildFarm('cotton'),farmwood:()=>buildFarm('wood'),pitS:buildPit,pitB:buildPitB,biomass:buildBiomass,tenement:()=>buildTenementL(0),block:()=>buildBlockL(0),modern:()=>buildModernL(0),landfill:buildLandfill,incinerator:buildIncineratorB,recycler:buildRecycler,hvpole:buildHV,smallwh:buildSmallWh,impDep:buildImpDep,park1:()=>buildPark(1),park2:()=>buildPark(2),park3:()=>{const g=new THREE.Group(),a=buildPark(3),b=buildPark(2);a.position.x=-0.5;b.position.x=0.5;g.add(a,b);return g},house:()=>buildHouseL(0),factory:buildFactory,shop:buildShop,bank:buildBank,warehouse:buildWarehouse,wind:buildWind,transformer:buildTransformer,coal:buildCoal};
+const BUILD={cityHall:buildCityHall,shipC:buildShipC,roadSvc:buildRoadSvc,heliB:buildHeliB,rail:buildRail,taxi:buildTaxi,busDepot:buildBusDepot,combine:buildCombine,airport:buildAirport,recycB:buildRecycB,retire:buildRetire,stadium:buildStadium,hqPolice:buildHQ,trainSt:buildTrainSt,freightSt:buildFreightSt,fireS:buildFireS,fireB:buildFireB,incS:buildIncinerator,clinic:buildClinic,hosp:buildHosp,hospC:buildHospC,cemS:buildCemS,cemB:buildCemB,crem:buildCrem,schoolS:buildSchoolS,school:buildSchool,lyceum:buildLyceum,techn:buildTechn,bankG:buildBankG,shop1:buildShop1,prisonS:()=>{const g=buildPrison();g.scale.set(2/3,0.85,2/3);return g},prison:buildPrison,policeS:buildPoliceS,policeB:buildPoliceB,bakery:buildBakery,lpole:buildLPole,factoryB:buildFactoryB,warehouseB:buildWarehouseB,mine:buildMine,mineB:buildMineB,supermarket:buildSupermarket,smallfac:()=>{const g=buildFactory();g.scale.setScalar(0.72);return g},hydro:buildHydro,hydrogen:()=>{const g=buildHydrogen();g.scale.set(1.9,1.5,1.9);return g},pump:buildPump,pumpB:buildPumpB,tower:buildTower,outlet:buildOutlet,treatment:buildTreatment,restaurant:buildRestaurant,cinema:buildCinema,theater:buildTheater,casino:buildCasino,hotelS:buildHotelS,hotelB:buildHotelB,gallery:buildGallery,farmveg:()=>buildFarm('veg'),farmdairy:()=>buildFarm('dairy'),farmgrain:()=>buildFarm('grain'),farmcotton:()=>buildFarm('cotton'),farmwood:()=>buildFarm('wood'),pitS:buildPit,pitB:buildPitB,biomass:buildBiomass,tenement:()=>buildTenementL(0),block:()=>buildBlockL(0),modern:()=>buildModernL(0),landfill:buildLandfill,incinerator:buildIncineratorB,recycler:buildRecycler,hvpole:buildHV,smallwh:buildSmallWh,impDep:buildImpDep,park1:()=>buildPark(1),park2:()=>buildPark(2),park3:()=>{const g=new THREE.Group(),a=buildPark(3),b=buildPark(2);a.position.x=-0.5;b.position.x=0.5;g.add(a,b);return g},house:()=>buildHouseL(0),factory:buildFactory,shop:buildShop,bank:buildBank,warehouse:buildWarehouse,wind:buildWind,transformer:buildTransformer,coal:buildCoal};
 function boltMesh(){const b=new THREE.Mesh(new THREE.OctahedronGeometry(0.09,0),mat.bolt);b.scale.y=1.7;b.position.set(0.22,1.05,0);b.visible=false;b.layers.set(1);return b}
 function wire(a,b,sag=0.07){const pts=[];for(let k=0;k<=10;k++){const u=k/10;pts.push(new THREE.Vector3(a.x+(b.x-a.x)*u,a.y+(b.y-a.y)*u-Math.sin(u*Math.PI)*sag,a.z+(b.z-a.z)*u))}
   return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),mat.wire)}
 
 /* ---------- state ---------- */
 let grid=new Array(N*N).fill(null);
-let counts={busDepot:0,tunnel:0,tUp:0,tDown:0,tLevel:0,tSmooth:0,impDep:0,cityHall:0,shipC:0,roadSvc:0,heliB:0,rail:0,taxi:0,trainSt:0,freightSt:0,fireS:0,fireB:0,clinic:0,hosp:0,hospC:0,cemS:0,cemB:0,crem:0,schoolS:0,school:0,lyceum:0,techn:0,bankG:0,shop1:0,prisonS:0,prison:0,railTunnel:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,pumpB:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,farmcotton:0,farmwood:0,pitS:0,pitB:0,biomass:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
+let counts={combine:0,airport:0,recycB:0,retire:0,stadium:0,hqPolice:0,busDepot:0,tunnel:0,tUp:0,tDown:0,tLevel:0,tSmooth:0,impDep:0,cityHall:0,shipC:0,roadSvc:0,heliB:0,rail:0,taxi:0,trainSt:0,freightSt:0,fireS:0,fireB:0,clinic:0,hosp:0,hospC:0,cemS:0,cemB:0,crem:0,schoolS:0,school:0,lyceum:0,techn:0,bankG:0,shop1:0,prisonS:0,prison:0,railTunnel:0,policeS:0,policeB:0,bakery:0,lpole:0,factoryB:0,warehouseB:0,mine:0,mineB:0,supermarket:0,smallfac:0,hydro:0,hydrogen:0,pump:0,pumpB:0,tower:0,outlet:0,treatment:0,restaurant:0,cinema:0,theater:0,casino:0,hotelS:0,hotelB:0,gallery:0,farmveg:0,farmdairy:0,farmgrain:0,farmcotton:0,farmwood:0,pitS:0,pitB:0,biomass:0,road2:0,road3:0,roundabout:0,tenement:0,block:0,modern:0,landfill:0,incinerator:0,recycler:0,highway:0,bridge:0,hvpole:0,road:0,house:0,factory:0,shop:0,bank:0,warehouse:0,smallwh:0,wind:0,transformer:0,coal:0,park1:0,park2:0,park3:0};
 const pw={bank:0,matCap:0,dem:0,cap:0,ok:0,happy:0,dist:[0,0,0,0,0,0,0]};
-let envDirty=true;const eduP=new Uint8Array(N*N),eduS=new Uint8Array(N*N),lycCov=new Uint8Array(N*N),techCov=new Uint8Array(N*N),medCov=new Uint8Array(N*N);const crowdCov=new Uint8Array(N*N),noiseCov=new Uint8Array(N*N),entCov=new Uint8Array(N*N),pol=new Uint8Array(N*N),shopCov=new Uint8Array(N*N),parkCov=new Uint8Array(N*N);
+let envDirty=true;const retCov=new Uint8Array(N*N);const eduP=new Uint8Array(N*N),eduS=new Uint8Array(N*N),lycCov=new Uint8Array(N*N),techCov=new Uint8Array(N*N),medCov=new Uint8Array(N*N);const crowdCov=new Uint8Array(N*N),noiseCov=new Uint8Array(N*N),entCov=new Uint8Array(N*N),pol=new Uint8Array(N*N),shopCov=new Uint8Array(N*N),parkCov=new Uint8Array(N*N);
 const winds=new Set(),bolts=new Set();
 let money=0, matl=0, roadVer=0;
 const goods={};for(const k in GOODS)if(k!=='mat')goods[k]=0;
@@ -2422,7 +2484,7 @@ function addCell(i,t,anim=true,second=-1){whDirty=true;gridVerN++;if(FLOW_T[t])f
   if(t==='supermarket'){cell.shelf={};cell.incoming=0;cell.spec='mall'}
   if(t==='gallery'){cell.shelf={};cell.incoming=0;cell.stores=[]}
   if(t==='restaurant'){cell.shelf={};cell.incoming=0}
-  if(isFactory(t)){cell.line='mix';paintModel(cell,GM.mix)}if(t==='factoryB'){cell.lines=['mix'];cell.owned=[];cell.li=0;paintLines(cell)}
+  if(isFactory(t)){cell.line='mix';paintModel(cell,GM.mix)}if(t==='factoryB'){cell.lines=['mix'];cell.owned=[];cell.li=0;paintLines(cell)}if(t==='combine'){cell.lines=[];cell.owned=[];cell.li=0;paintLines(cell)}
   if(isFarm(t))cell.acc=0;if(HLV[t])seedPeople(cell,1);
   farmDirty=true;
   if(TRASH[t]){cell.trash=0;cell.pickT=trashEvery(t);cell.want=false;cell.truckOn=false;cell.bag=bagMesh();g.add(cell.bag)}
@@ -2692,7 +2754,7 @@ function serve(c,d,i){
   let pay=0,ent=0;
   if(isShop(d.t)&&(d.t!=='gallery'||d.stores.length)){const k=shelfTotal(d)>=1?pickShelf(d,c.kind==='commuter'?c.home:null):undefined;{/* demand: what the customer came for, even when the shelf is empty */const w=k!==undefined?k:wantedGood(d,c.kind==='commuter'?c.home:null);if(w!==undefined){cur.want=cur.want||{};cur.want[w]=(cur.want[w]||0)+1}}if(k!==undefined){/* 7.3.1: the bigger the need, the more they buy: up to 4 kg of one good in a visit */
       const hh=c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t]?grid[c.home]:null,n=needOf(k),HH=hh&&n?needs(hh):null,per=hh?0.5/Math.max(1,popOf(hh)/4):0;
-      let q=HH?Math.max(1,Math.min(4,Math.ceil((1-HH[n.k])/per-0.01))):1;q=Math.max(1,Math.min(q,Math.floor(d.shelf[k]||0)||1));
+      let q=HH?Math.max(1,Math.min(4,Math.ceil((1-HH[n.k])/per-0.01))):1;if(LAW('hl_veg')&&k==='veg')q+=1;if(LAW('hl_pyr')&&k==='dairy')q+=1;if(LAW('hl_pyr')&&FOODG.has(k)){const g=earn(3);cur.inc+=g}q=Math.max(1,Math.min(q,Math.floor(d.shelf[k]||0)||1));
       d.shelf[k]=Math.max(0,(d.shelf[k]||0)-q);cur.sales+=q;cur.sold[k]=(cur.sold[k]||0)+q;if(HH)HH[n.k]=Math.min(1,HH[n.k]+per*q);
       const pr=d.t==='restaurant'?priceAt(d,k):priceAt(d,k)*TAX.buy/20;pay+=pr*q;cur.buyTax=(cur.buyTax||0)+(d.t==='restaurant'?0:pr*q)}
     else if(c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t]&&shelfTotal(d)>=1&&(()=>{try{return sellsOf(d).every(g=>!wantsGood(needs(grid[c.home]),g))}catch(e){return false}})()){/* nothing needed here: they just look around */}
@@ -2700,13 +2762,13 @@ function serve(c,d,i){
   if(d.t==='gallery'&&d.cinema&&(Math.random()<0.4||!pay)){pay+=PRICE.cinema;ent+=PRICE.cinema}
   if(d.t==='casino'){const r=Math.random();if(r<0.12){const loss=Math.round(PRICE.casino*(1+Math.random()*3));owe(loss);cur.inc-=loss;cur.entInc-=loss;float(i,`−${fmt(loss)} T¢ wygrana gościa`,'warn');addTrash(d,TRASH[d.t].per);return}
     const v=Math.round(PRICE.casino*(0.6+Math.random()*1.4));pay+=v;ent+=v}
-  if(d.t==='cinema'||d.t==='theater'){const v=PRICE[d.t];pay+=v;ent+=v}
+  if(d.t==='cinema'||d.t==='theater'||d.t==='stadium'){const v=PRICE[d.t];pay+=v;ent+=v}
   let hot=0;if(d.t==='restaurant')ent+=pay;
   if((c.kind==='visitor'||c.kind==='taxi')&&TAX.tour>0&&(d.t==='hotelS'||d.t==='hotelB'||entR(d)>0)){pay+=TAX.tour;hot+=TAX.tour;cur.tourTax=(cur.tourTax||0)+TAX.tour}
   if((d.t==='hotelS'||d.t==='hotelB')&&(c.kind==='visitor'||c.kind==='taxi')){pay+=PRICE[d.t];hot+=PRICE[d.t]}
   if(d.t==='restaurant'&&pay&&(d.shelf.bread||0)>0){d.shelf.bread--;cur.used.bread=(cur.used.bread||0)+1}
   if(d.t==='hotelB'&&d.attr&&(d.attr!=='restaurant'||(takeFood()&&(goods.bread<1||(goods.bread--,cur.used.bread=(cur.used.bread||0)+1,true))))){pay+=PRICE[d.attr];ent+=PRICE[d.attr]}
-  if(pay<=0)return;if(d.lyc)pay=Math.round(pay*1.05);if(c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t])grid[c.home].lastBuy=gameT;
+  if(pay<=0)return;if(d.lyc)pay=Math.round(pay*1.05);if(LAW('eco_dep'))pay*=1.01;if(LAW('tr_trails')&&(c.kind==='visitor'||c.kind==='taxi'))pay*=1.15;pay=Math.round(pay);if(c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t])grid[c.home].lastBuy=gameT;
   addTrash(d,TRASH[d.t].per);const n=earn(pay);cur.inc+=n;const eN=Math.min(n,ent),hN=Math.min(n-eN,hot);cur.entInc+=eN;cur.hotelInc=(cur.hotelInc||0)+hN;cur.shopInc=(cur.shopInc||0)+n-eN-hN;if((c.kind==='visitor'||c.kind==='taxi'))cur.tourInc+=n;if(tut&&tut.on&&isShop(d.t)&&n-eN-hN>0)tut.sold=true;
   if(n>=0.5)float(i,`+${fmt(n)} T¢`,'money');else float(i,'kasa pełna','warn')}
 /* ---------- visitors: drive in on an entry road, visit one service, leave by an entry road ---------- */
@@ -2714,7 +2776,7 @@ const edgeOuts=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].edgeOut
 /* hotel attractiveness 0–3: a park in range, entertainment (its own attraction or one nearby), a shop within 5 tiles */
 function hotelStars(i){const c=grid[i];if(!c||(c.t!=='hotelS'&&c.t!=='hotelB'))return 0;const ts=tilesOf(i);return(ts.some(k=>parkCov[k])?1:0)+((c.t==='hotelB'&&c.attr)||ts.some(k=>entCov[k])?1:0)+(ts.some(k=>shopCov[k])?1:0)}
 /* ---------- police: patrols, crimes, bank robberies ---------- */
-const POL={policeS:{r:17,patrol:2,cells:10},policeB:{r:17,patrol:4,cells:25}};const polRad=c=>POL[c.t].r+(c.up2?3:0)+(ordOn('police')?3:0);const isPolice=t=>t==='policeS'||t==='policeB';
+const POL={policeS:{r:17,patrol:2,cells:10},policeB:{r:17,patrol:4,cells:25},hqPolice:{r:40,patrol:8,cells:90}};const polRad=c=>POL[c.t].r+(c.up2?3:0)+(LAW('pl_foot')?3:0);const isPolice=t=>t==='policeS'||t==='policeB'||t==='hqPolice';
 const MED={clinic:{r:21,cap:35},hosp:{r:21,cap:100},hospC:{r:21,cap:300}},DCARE={cemS:60,cemB:280,crem:120},EDU={schoolS:{r:16,k:'p'},school:{r:19,k:'p'},lyceum:{r:19,k:'s',lyc:1},techn:{r:19,k:'s',tech:1}};
 const dCap=c=>DCARE[c.t]+(c.t==='cemB'&&c.up?20:0)+(c.t==='crem'&&c.up?40:0),medCap=c=>MED[c.t].cap;
 let crimes=[],crimeSeq=0,crimeT=40,heistT=240;const pinG=new THREE.ConeGeometry(0.12,0.3,8).rotateX(Math.PI);pinG.userData.keep=true;
@@ -2731,14 +2793,14 @@ function newPatrol(c){const st=c.home;if(!grid[st]||!isPolice(grid[st].t)||grid[
 function sendHome(c){const st=c.home,e=grid[st]?entryOf(st):-1;c.task=null;c.speed=1.8;if(e<0||!sendTo(c,e,'back'))removeCar(c)}
 function spawnPatrol(st,role){const e=entryOf(st);if(e<0)return null;const rs=roadsNear(st),b=bfs(e);const ok=rs.filter(t=>b.dist[t]>0);if(!ok.length&&role==='patrol')return null;
   const t=role==='patrol'?ok[(Math.random()*ok.length)|0]:e;const p=role==='patrol'?pathTo(b,t):[e,e];return createCar('police',p,{home:st,dest:-1,role,task:null})}
-function crimeRate(night){const p=popNow();return p?Math.max(0.2,p/240)*(night?1.4:1):0}
+function crimeRate(night){const p=popNow();return p?Math.max(0.2,p/240)*(night?1.4*(LAW('pl_curfew')?0.5:1):1):0}
 const policed=i=>stations().some(st=>stCover(st,i));
 function makePin(i,big){const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};const el=document.createElement('div');el.className='st crimeChip'+(big?' big':'');
   el.innerHTML=`<i class="s-crime" title="${big?'Napad na bank':'Przestępstwo'}"><svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${big?'<path d="M2.5 8L10 3.5 17.5 8M4 8.5v6M8 8.5v6M12 8.5v6M16 8.5v6M2.5 17h15"/>':'<path d="M10 2.8L18 16.8H2z"/><path d="M10 8v4"/><path d="M10 14.3h.01"/>'}</svg></i>`;
   document.getElementById('floats').appendChild(el);return{el,x:gp.x,z:gp.z,y:big?1.9:1.4,remove(){el.remove()}}}
 function placeCrimeChips(w,h,top,bottom){for(const cr of[...crimes,...fires]){const p=cr.pin;if(!p||!p.el)continue;v3.set(p.x,p.y,p.z).project(camera);const sx=(v3.x*0.5+0.5)*w,sy=(-v3.y*0.5+0.5)*h;
   const ok=isFinite(sx)&&isFinite(sy)&&v3.z<1&&sx>14&&sx<w-14&&sy>top-10&&sy<bottom;p.el.style.visibility=ok?'visible':'hidden';if(ok)p.el.style.transform=`translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px) translate(-50%,-50%)`}}
-function newCrime(i,heist){const e=entryOf(i);if(e<0)return;const cr={id:++crimeSeq,i,e,heist,need:heist?3:1,arr:0,sent:0,t:heist?40:28,loss:heist?Math.round(rnd(250,1250)*(grid[i]&&grid[i].t==='bankG'?3:1)):Math.round(rnd(25,75)),pin:makePin(i,heist)};crimes.push(cr);
+function newCrime(i,heist){const e=entryOf(i);if(e<0)return;const cr={id:++crimeSeq,i,e,heist,need:heist?3:1,arr:0,sent:0,t:(heist?40:28)*(LAW('pl_cam')?1.5:1),loss:heist?Math.round(rnd(250,1250)*(grid[i]&&grid[i].t==='bankG'?3:1)):Math.round(rnd(25,75)),pin:makePin(i,heist)};crimes.push(cr);
   float(i,heist?'NAPAD NA BANK!':'przestępstwo!','warn');if(heist){cur.heists++;setHint('<b>Napad na bank!</b> Policja ma niewiele czasu: potrzeba 3 radiowozów.',true,true);hintEl.hidden=false}dispatch(cr)}
 function dispatch(cr){const sts=stations().filter(st=>stCover(st,cr.i));if(!sts.length)return;const b=bfs(cr.e),opts=[];
   for(const st of sts){for(const c of polCars(st))if(!c.task&&c.role==='patrol'){const d=b.dist[curTile(c)];if(d>=0)opts.push({d,c})}
@@ -2767,14 +2829,74 @@ const ORDS=[{k:'eco',name:'Ekologia i sortowanie śmieci',cost:1500,fx:['−10% 
   {k:'police',name:'Miasto policyjne',cost:2500,fx:['+3 pola zasięgu każdego komisariatu','+1 radiowóz w każdym komisariacie','−1 zadowolenia w całym mieście','−10% produkcji w całym mieście']},
   {k:'tour',name:'Turystyka moim życiem',cost:2000,fx:['−75% nowych mieszkańców wprowadzających się do miasta','+50% turystów']},
   {k:'commie',name:'Komunistyczny podział pracy',cost:3000,fx:['+100% produkcji wszystkiego, co nie jest żywnością','−50% produkcji żywności']}];
-let ORD={};const hallOK=()=>grid.some(c=>c&&c.t==='cityHall'&&!c.off&&!c.ruin&&c.powered);const ordOn=k=>!!ORD[k]&&hallOK();
+/* 7.7.0: city laws: six trees; research points (from pupils) open a tier, T¢ buy each law in it; both tiers researched unlock the tree's building */
+const LAWS=[
+ {k:'eco',name:'Ekologia',ico:'♻️',col:'#3fbf6a',unl:'recycB',tiers:[{rp:2000,cards:[
+   {k:'eco_sort',name:'Sortowanie',cost:1200,fx:['−5% produkcji śmieci','+2% opłat za utrzymanie budynków z zakładki Odpady']},
+   {k:'eco_space',name:'Przestrzeń publiczna',cost:1000,fx:['+10% pojemności koszy w budynkach','+5 T¢/godz. utrzymania']}]},
+  {rp:3500,cards:[
+   {k:'eco_air',name:'Czyste powietrze',cost:1800,fx:['+2 T¢/godz. kary za każde pole smogu','−10 T¢/godz. utrzymania każdego budynku z włączonym filtrem']},
+   {k:'eco_dep',name:'Produkty kaucyjne',cost:2300,fx:['+3 T¢/godz. kary za każde pole smogu','−5% produkcji śmieci','+1% zarobków przy zakupach']}]}]},
+ {k:'hl',name:'Zdrowe nawyki',ico:'❤️',col:'#e05a6a',unl:'retire',tiers:[{rp:1500,cards:[
+   {k:'hl_veg',name:'Warzywne',cost:1000,fx:['+1 kg warzyw przy każdym zakupie warzyw']},
+   {k:'hl_pyr',name:'Piramida żywieniowa',cost:700,fx:['+3 T¢ przy każdym zakupie spożywczym','+1 kg nabiału przy zakupie nabiału']}]},
+  {rp:2750,cards:[
+   {k:'hl_move',name:'Ruch to zdrowie',cost:1600,fx:['+10% częściej idą pieszo lub jadą komunikacją','+10% długości życia']},
+   {k:'hl_check',name:'Badania okresowe',cost:3000,fx:['+10 T¢/godz. utrzymania każdego budynku zdrowia','+10% długości życia','−30% chorób']}]}]},
+ {k:'tp',name:'Transport publiczny',ico:'🚌',col:'#3f7fd0',unl:'airport',tiers:[{rp:900,cards:[
+   {k:'tp_stop',name:'Przystanki',cost:1000,fx:['Każdy przystanek ma automat biletowy','+1 T¢ za każdy przejazd autobusem']},
+   {k:'tp_stand',name:'Miejsca stojące',cost:1300,fx:['+5 miejsc w autobusach','+2 T¢/godz. za każdy autobus']}]},
+  {rp:5000,cards:[
+   {k:'tp_rail',name:'Atrakcyjna kolej',cost:2000,fx:['+20% turystów przyjeżdżających pociągiem','+2 T¢ za bilet kolejowy']},
+   {k:'tp_budget',name:'Budżet na transport',cost:3500,fx:['+2% kosztów utrzymania transportu publicznego','+1 pojazd na każdą linię']}]}]},
+ {k:'cm',name:'Nawyki komunistyczne',ico:'⚒️',col:'#c0392b',unl:'combine',tiers:[{rp:2000,cards:[
+   {k:'cm_coll',name:'Kolektywna produkcja',cost:1200,fx:['+25% produkcji przemysłu (bez żywności)','−15% produkcji żywności']},
+   {k:'cm_plan',name:'Plan pięcioletni',cost:1500,fx:['Minimalna obsada fabryk −1 osoba','+10 T¢/godz. utrzymania']}]},
+  {rp:3500,cards:[
+   {k:'cm_hero',name:'Przodownicy pracy',cost:2000,fx:['Każdy pracownik ponad obsadę daje +3% zamiast +2%','−1 zadowolenia w całym mieście']},
+   {k:'cm_canteen',name:'Wspólne stołówki',cost:2500,fx:['Pracownicy po zmianie nie jadą do sklepu (zaspokaja ich zakład)','+25 T¢/godz. utrzymania']}]}]},
+ {k:'tr',name:'Turystyka',ico:'🏟️',col:'#e0a91c',unl:'stadium',tiers:[{rp:1500,cards:[
+   {k:'tr_promo',name:'Promocja miasta',cost:1000,fx:['+25% turystów','−40% nowych mieszkańców']},
+   {k:'tr_trails',name:'Szlaki turystyczne',cost:900,fx:['Turyści wydają +15% w sklepach, rozrywce i hotelach']}]},
+  {rp:3000,cards:[
+   {k:'tr_week',name:'Pakiety weekendowe',cost:1800,fx:['+20% turystów','+20 T¢/godz. utrzymania']},
+   {k:'tr_train',name:'Kolej turystyczna',cost:2200,fx:['Pociąg pasażerski przywozi +40% turystów','+30 T¢/godz. utrzymania']}]}]},
+ {k:'pl',name:'Miasto policyjne',ico:'🚓',col:'#2f6fe0',unl:'hqPolice',tiers:[{rp:1800,cards:[
+   {k:'pl_foot',name:'Patrole piesze',cost:1200,fx:['+3 bloki zasięgu po drogach każdego komisariatu','−1 zadowolenia w całym mieście']},
+   {k:'pl_cam',name:'Monitoring',cost:1500,fx:['Przestępstwo trwa 50% dłużej: więcej czasu na dojazd policji','+2 T¢/godz. za każdy komisariat']}]},
+  {rp:3500,cards:[
+   {k:'pl_curfew',name:'Godzina policyjna',cost:2000,fx:['−50% przestępstw nocą']},
+   {k:'pl_fast',name:'Szybkie reagowanie',cost:2500,fx:['+1 radiowóz w każdym komisariacie','−10% produkcji w całym mieście']}]}]}];
+const LAW_UNL={};for(const T of LAWS)LAW_UNL[T.unl]=T.k;
+let LAWB={},LAWT={},LAWU={},research=0;
+let ORD={};const hallOK=()=>grid.some(c=>c&&c.t==='cityHall'&&!c.off&&!c.ruin&&c.powered);const ordOn=k=>false;const LAW=k=>!!LAWB[k]&&hallOK();
 const FOODG=new Set(['veg','dairy','bread','grain','drinks']);
-const prodMul=g=>(ordOn('consum')?1.1:1)*(ordOn('police')?0.9:1)*(ordOn('commie')?(FOODG.has(g)?0.5:2):1);
-function ordHour(){if(ordOn('eco')){let n=0;for(let i=0;i<N*N;i++)if(pol[i]>0&&!water[i])n++;const f=n*5;if(f>0){owe(f);cur.upkeep+=f;cur.ecoFine=(cur.ecoFine||0)+f}}}
-function renderOrd(){const el=document.getElementById('ordp');if(!el||el.hidden)return;const ok=hallOK();
-  el.innerHTML=`<b>Uchwały</b><small>${ok?'Uchwałę wprowadzasz jednorazową opłatą. Uchylenie jest darmowe.':'<span class="neg">Urząd miasta nie działa – uchwały są zawieszone.</span>'}</small>`+ORDS.map(o=>`<div class="ordc${ORD[o.k]?' on':''}"><b>${o.name}</b><ul>${o.fx.map(f=>`<li>${f}</li>`).join('')}</ul>
-    ${ORD[o.k]?`<button class="btn panel" data-ord="${o.k}">Uchyl uchwałę</button>`:`<button class="btn panel" data-ord="${o.k}"${money<o.cost||!ok?' disabled':''}>Wprowadź · ${fmt(o.cost)} T¢</button>`}</div>`).join('');
-  for(const b of el.querySelectorAll('[data-ord]'))b.onclick=()=>{const o=ORDS.find(q=>q.k===b.dataset.ord);if(ORD[o.k]){delete ORD[o.k];float(-1,'','neutral');setHint(`Uchylono: ${o.name}.`,false,true)}else{if(money<o.cost||!hallOK())return;spend(o.cost);ORD[o.k]=1;setHint(`Wprowadzono uchwałę: ${o.name}.`,false,true)}hintEl.hidden=false;envDirty=true;powerDirty=true;save();renderOrd()}}
+const prodMul=g=>(LAW('pl_fast')?0.9:1)*(LAW('cm_coll')?(FOODG.has(g)?0.85:1.25):1);
+function ordHour(){researchHour();if(!hallOK())return;let f=0,n=0;for(let i=0;i<N*N;i++)if(pol[i]>0&&!water[i])n++;
+  if(LAW('eco_air'))f+=2*n;if(LAW('eco_dep'))f+=3*n;if(f>0){owe(f);cur.upkeep+=f;cur.ecoFine=(cur.ecoFine||0)+f}
+  let u=0;if(LAW('eco_space'))u+=5;if(LAW('cm_plan'))u+=10;if(LAW('cm_canteen'))u+=25;if(LAW('tr_week'))u+=20;if(LAW('tr_train'))u+=30;
+  for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off)continue;if(LAW('eco_sort')&&FAC[c.t])u+=(UPKEEP[c.t]||0)*0.02;if(LAW('hl_check')&&MED[c.t])u+=10;if(LAW('pl_cam')&&isPolice(c.t))u+=2;if(LAW('eco_air')&&UPGF[c.t]&&fOn(c))u-=10}
+  if(LAW('tp_stand'))u+=2*cars.filter(c=>c.kind==='bus').length;if(LAW('tp_budget'))u+=0.02*tLines.length*(BUS_UPK*2);
+  u=Math.round(u);if(u>0){owe(u);cur.upkeep+=u;cur.lawUpk=(cur.lawUpk||0)+u}else if(u<0){const g=earn(-u);cur.inc+=g}
+  /* airport flights and the daily match */
+  if(counts.airport&&grid.some(c=>c&&c.t==='airport'&&!c.off&&c.powered!==false)){const g=earn(150);cur.inc+=g;cur.tourInc+=g}
+  if(Math.floor(gameT/60)%24===18)for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.t==='stadium'&&!c.off&&c.powered!==false&&entryOf(i)>=0){const fans=Math.round(120+popNow()*0.2),g=earn(fans*PRICE.stadium);cur.inc+=g;cur.entInc+=g;float(i,`mecz! ${fans} kibiców · +${fmt(g)} T¢`,'money')}}}
+/* research points: every pupil who goes to school brings points each game hour */
+function researchHour(){const r=researchRate();research+=r;cur.rp=(cur.rp||0)+r}
+function researchRate(){let r=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!HLV[c.t]||!c.pp||c.off)continue;const ts=tilesOf(i),P=ts.some(k=>eduP[k]),S=ts.some(k=>eduS[k]),X=ts.some(k=>lycCov[k]||techCov[k]);
+    for(const q of c.pp){const st=stageOf(q.a);if(st===1&&P)r+=0.5;else if(st===2&&S)r+=X?1.25:1}}return r}
+function renderOrd(){const el=document.getElementById('ordp');if(!el||el.hidden)return;const ok=hallOK(),rr=researchRate();
+  const card=c=>{const on=!!LAWB[c.k];return`<div class="lawc${on?' on':''}"><b>${c.name}</b><ul>${c.fx.map(f=>`<li>${f}</li>`).join('')}</ul>${on?`<button class="btn panel" data-law="${c.k}">Uchyl ustawę</button>`:`<button class="btn panel" data-law="${c.k}"${money<c.cost||!ok?' disabled':''}>Wprowadź · ${fmt(c.cost)} T¢</button>`}</div>`};
+  el.innerHTML=`<div class="lawHead"><b>Projekty ustaw</b><span class="lawRp" title="Punkty nauki: każdy uczeń w zasięgu szkoły daje punkty co godzinę">📖 ${fmt(Math.floor(research))} <small>+${(Math.round(rr*10)/10).toLocaleString()}/godz.</small></span></div>
+  <small>${ok?'Punkty nauki otwierają kolejne poziomy, a ustawę wprowadzasz jednorazową opłatą (uchylenie jest darmowe). Po zbadaniu obu poziomów odblokujesz wyjątkowy budynek (jeden na miasto).':'<span class="neg">Urząd miasta nie działa – ustawy są zawieszone.</span>'}</small>
+  <div class="lawGrid">${LAWS.map(T=>{let prev=true;const tiers=T.tiers.map((t,n)=>{const key=T.k+n,open=!!LAWT[key];const h=open?t.cards.map(card).join(''):`<div class="lawLock"><span>🔒 Poziom ${n+1}</span><button class="btn panel" data-tier="${key}"${!prev||research<t.rp||!ok?' disabled':''}>Zbadaj · ${fmt(t.rp)} 📖</button></div>`;prev=open;return`<div class="lawTier">${h}</div>`}).join('');
+    const all=T.tiers.every((t,n)=>LAWT[T.k+n]),bn=DEF[T.unl].name;
+    return`<section class="lawT" style="--lc:${T.col}"><h4><span>${T.ico}</span>${T.name}</h4>${tiers}${LAWU[T.k]?`<div class="lawUnl on">✓ Odblokowano: ${bn}</div>`:`<button class="btn panel lawUnl" data-unl="${T.k}"${all&&ok?'':' disabled'}>Odblokuj · ${bn}</button>`}</section>`}).join('')}</div>`;
+  const done=m=>{hintEl.hidden=false;setHint(m,false,true);envDirty=true;powerDirty=true;save();renderOrd()};
+  for(const b of el.querySelectorAll('[data-law]'))b.onclick=()=>{const k=b.dataset.law;let c=null;for(const T of LAWS)for(const t of T.tiers)for(const q of t.cards)if(q.k===k)c=q;if(!c)return;
+    if(LAWB[k]){delete LAWB[k];done(`Uchylono: ${c.name}.`)}else{if(money<c.cost||!hallOK())return;spend(c.cost);LAWB[k]=1;done(`Wprowadzono ustawę: ${c.name}.`)}};
+  for(const b of el.querySelectorAll('[data-tier]'))b.onclick=()=>{const key=b.dataset.tier,T=LAWS.find(q=>key.startsWith(q.k)&&key.length===q.k.length+1),n=+key.slice(-1),t=T.tiers[n];if(LAWT[key]||research<t.rp||(n&&!LAWT[T.k+(n-1)])||!hallOK())return;research-=t.rp;LAWT[key]=1;done(`Zbadano poziom ${n+1}: ${T.name}.`)};
+  for(const b of el.querySelectorAll('[data-unl]'))b.onclick=()=>{const T=LAWS.find(q=>q.k===b.dataset.unl);if(!T||!T.tiers.every((t,n)=>LAWT[T.k+n])||!hallOK())return;LAWU[T.k]=1;try{refreshLocks()}catch(e){}done(`Odblokowano: ${DEF[T.unl].name}.`)}}
 /* ---------- shipping centre: every 6 hours trucks take the chosen goods from the warehouses, in bulk ---------- */
 /* 6.6: every run is one load: you set how many kilograms of each good go on it, at most 100 kg in total */
 const SHIP_LOAD=150,SHIP_STEP=5;
@@ -2945,7 +3067,7 @@ function freightRun(st){const c=grid[st];for(const R0 of frRamps(c)){if(R0.m==='
       cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n;float(st,`+${n} kg ${frName(k).toLowerCase()} (−${fmt(cost)} T¢)`,'mat')}
     else{const have=k==='mat'?matl:(goods[k]||0),n=Math.min(R0.n,Math.floor(have));if(n<=0){float(st,`eksport: brak towaru (${frName(k).toLowerCase()})`,'warn');continue}
       take(k,n,st);const inc=earn(Math.round(n*frPrice(k)*FR_EXP));cur.inc+=inc;cur.frExp=(cur.frExp||0)+inc;float(st,`−${n} kg ${frName(k).toLowerCase()} (+${fmt(inc)} T¢)`,'money')}}}
-function trainArrive(tr){const c=grid[tr.st];if(!c)return;if(tr.kind==='pass'){const n=Math.min(40,Math.round(visitorRate()*(c.up?1:0.6)*2));c.waiting=Math.min(60,(c.waiting||0)+n);float(tr.st,`pociąg: +${n} turystów`,'neutral')}else freightRun(tr.st)}
+function trainArrive(tr){const c=grid[tr.st];if(!c)return;if(tr.kind==='pass'){const n=Math.min(60,Math.round(visitorRate()*(c.up?1:0.6)*2*(LAW('tp_rail')?1.2:1)*(LAW('tr_train')?1.4:1)));c.waiting=Math.min(60,(c.waiting||0)+n);float(tr.st,`pociąg: +${n} turystów`,'neutral')}else freightRun(tr.st)}
 /* taxis: every tourist rides a taxi from the entry road or the station, to a hotel, entertainment or a shop, and back out */
 const TAXI_FARE=5,taxiCap=b=>4+(grid[b].up?4:0),taxiCount=b=>cars.filter(v=>!v.dead&&v.kind==='taxi'&&v.home===b).length;
 const taxiBases=()=>{const o=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.t==='taxi'&&stActive(i)&&entryOf(i)>=0)o.push(i)}return o};
@@ -3055,7 +3177,7 @@ function paxArrive(c){const t=c.tr,L=lineOf(t.line);c.tr=null;
 /* off the bus or train, on foot to where the trip was going */
 function paxOut(r,S,bus){const s0=bus?S:entryOf(S);if(s0<0)return;const b=bfs(s0);if(b.dist[r.fin]<0)return;const path=pathTo(b,r.fin),pl=walkPlan(path,bus?-1:S,r.phase==='go'?r.dest:r.home)||{s0:1,flip:-1};
   const w=createCar('walker',path,{walk:true,side:pl.s0,flip:pl.flip,tier:r.tier});w.kind=r.kind;w.speed=0.5;w.home=r.home;w.dest=r.dest;w.phase=r.phase;w.viaT=true}
-function payFare(L,n){const f=earn(n*(L.kind==='bus'?BUS_FARE:RAIL_FARE));cur.inc+=f;cur.fareInc=(cur.fareInc||0)+f;if(L.kind==='bus')cur.busPax=(cur.busPax||0)+n;else cur.railPax=(cur.railPax||0)+n;L.ph=(L.ph||0)+n}
+function payFare(L,n){const f=earn(n*(L.kind==='bus'?BUS_FARE+(LAW('tp_stop')?1:0):RAIL_FARE+(LAW('tp_rail')?2:0)));cur.inc+=f;cur.fareInc=(cur.fareInc||0)+f;if(L.kind==='bus')cur.busPax=(cur.busPax||0)+n;else cur.railPax=(cur.railPax||0)+n;L.ph=(L.ph||0)+n}
 function board(L,S,v,cap){const q=paxQ.get(S);let inn=0;if(q&&q.length){const keep=[];for(const r of q){if(r.line===L.id&&v.riders.length<cap){v.riders.push(r);inn++}else keep.push(r)}if(inn){paxQ.set(S,keep);payFare(L,inn)}}return inn}
 /* ---------- buses ---------- */
 function busPathFrom(L,R,S){const k=L.stops.indexOf(S),off=R.pos[k],p=R.path.slice(off).concat(R.path.slice(1,off+1)),m=new Map();
@@ -3067,7 +3189,7 @@ function spawnBus(L,S){const R=busRoute(L);if(!R||!L.stops.includes(S))return nu
 function busAtStop(c,S){const L=lineOf(c.line);if(!L)return;let out=0;
   c.riders=c.riders.filter(r=>{if(r.to===S||!L.stops.includes(r.to)){paxOut(r,S,true);out++;return false}return true});
   if(c.retire){for(const r of c.riders)paxOut(r,S,true);c.riders=[];stopVis(S);removeCar(c);return}
-  const inn=board(L,S,c,BUS_CAP);c.dwell=out||inn?Math.min(4,1+0.08*(out+inn)):0.5;if(out||inn)stopVis(S)}
+  const inn=board(L,S,c,BUS_CAP+(LAW('tp_stand')?5:0));c.dwell=out||inn?Math.min(4,1+0.08*(out+inn)):0.5;if(out||inn)stopVis(S)}
 /* end of the loop, back at the first stop: serve it and go round again on the line's current route */
 function busLoop(c){const L=lineOf(c.line),R=L&&L.on?busRoute(L):null,here=c.path[c.path.length-1];if(!R)return removeCar(c);
   if(!L.stops.includes(here)){c.stopMap=null;c.s0=L.stops[0];if(!sendTo(c,c.s0,'go'))removeCar(c);return}
@@ -3098,7 +3220,7 @@ function transitTick(dt){if(routeKey()!==routeSig)drawRoutes();if(linpEl&&!linpE
   for(const L of tLines){const all=live.get(L.id)||[],R=L.on?lineRoute(L):null;
     if(!R){for(const v of all){if(L.kind==='bus')removeCar(v);else removeTrain(v)}continue}
     const vs=all.filter(v=>!v.retire);if(vs.length>L.veh)vs.slice(L.veh).forEach(v=>v.retire=true);
-    else if(vs.length<L.veh+(L.kind==='bus'&&depotOn()?2:0)){L.spT=(L.spT||0)-0.5;if(L.spT<=0){L.spT=L.kind==='bus'?(depotOn()?1.5:3):8;const S=L.stops[Math.floor(vs.length*L.stops.length/L.veh)%L.stops.length];if(L.kind==='bus')spawnBus(L,S);else spawnLineTrain(L,S)}}}
+    else if(vs.length<L.veh+(L.kind==='bus'&&depotOn()?2:0)+(LAW('tp_budget')?1:0)){L.spT=(L.spT||0)-0.5;if(L.spT<=0){L.spT=L.kind==='bus'?(depotOn()?1.5:3):8;const S=L.stops[Math.floor(vs.length*L.stops.length/L.veh)%L.stops.length];if(L.kind==='bus')spawnBus(L,S);else spawnLineTrain(L,S)}}}
   /* nobody waits for ever: after an hour and a half at the stop the trip is given up */
   for(const[S,q]of paxQ){if(!q.length)continue;const keep=q.filter(r=>gameT-r.t0<PAX_WAIT&&lineOf(r.line));if(keep.length!==q.length){cur.paxLost=(cur.paxLost||0)+q.length-keep.length;paxQ.set(S,keep);stopVis(S)}}}
 function transitHour(){for(const L of tLines){L.pl=L.ph||0;L.ph=0}renderLines()}
@@ -3129,6 +3251,13 @@ function routePts(P,off,y){const T=[];for(const t of P){if(T.length&&T[T.length-
       const A=[c[0]-di[0]*0.1,c[1]-di[1]*0.1];for(let s=0;s<=10;s++){const th=Math.PI*s/10,u=[ri[0]*Math.cos(th)+di[0]*off*Math.sin(th),ri[1]*Math.cos(th)+di[1]*off*Math.sin(th)];add(A[0]+u[0],A[1]+u[1])}add(X[0],X[1]);continue}
     const t=(X[0]-E[0])*di[0]+(X[1]-E[1])*di[1],C=[E[0]+di[0]*t,E[1]+di[1]*t];for(let s=1;s<=8;s++){const u=s/8,v=1-u;add(v*v*E[0]+2*u*v*C[0]+u*u*X[0],v*v*E[1]+2*u*v*C[1]+u*u*X[1])}}
   return pts}
+/* 7.7.0: route lines follow the ground; through a tunnel they run over the hill (the top of the terrain), so the line stays visible */
+function routeY(x,z){const fx=x+HALF,fz=z+HALF,X=Math.max(0,Math.min(N-1,Math.floor(fx))),Z=Math.max(0,Math.min(N-1,Math.floor(fz))),i=Z*N+X,c=grid[i];
+  if(c&&c.t==='tunnel'){const u=Math.max(0,Math.min(1,fx-X)),v=Math.max(0,Math.min(1,fz-Z)),k=i*4;return Math.max(lvY(hgt[i]),(cornH[k]*(1-u)+cornH[k+3]*u)*(1-v)+(cornH[k+1]*(1-u)+cornH[k+2]*u)*v,lvY(rh(i)))}
+  return gY(x,z)}
+function liftPts(pts,y){/* keep the near-edge points off the wrong tile: sample a hair toward the previous point */
+  const out=pts.map((p,k)=>{const q=pts[k?k-1:Math.min(1,pts.length-1)],dx=q[0]-p[0],dz=q[2]-p[2],l=Math.hypot(dx,dz)||1;return[p[0],y+Math.max(routeY(p[0]+dx/l*0.02,p[2]+dz/l*0.02),routeY(p[0]-dx/l*0.02,p[2]-dz/l*0.02)),p[2]]});
+  return out}
 /* a flat ribbon along the points */
 function ribbonGeo(pts,w){const pos=[],ix=[];for(let k=0;k<pts.length;k++){const a=pts[Math.max(0,k-1)],b=pts[Math.min(pts.length-1,k+1)];let tx=b[0]-a[0],tz=b[2]-a[2];const l=Math.hypot(tx,tz)||1;tx/=l;tz/=l;
     const nx=-tz*w/2,nz=tx*w/2,p=pts[k];pos.push(p[0]+nx,p[1],p[2]+nz,p[0]-nx,p[1],p[2]-nz);if(k)ix.push(2*k-2,2*k-1,2*k,2*k-1,2*k+1,2*k)}
@@ -3136,18 +3265,18 @@ function ribbonGeo(pts,w){const pos=[],ix=[];for(let k=0;k<pts.length;k++){const
 function drawRoutes(){routeSig=routeKey();for(const o of[...routeG.children]){routeG.remove(o);if(o.material&&o.material.userData.own)o.material.dispose();if(o.geometry&&o.geometry.userData.own)o.geometry.dispose()}
   if(routeSig==='off'){routeG.visible=false;return}routeG.visible=true;const kind=tool==='busLine'?'bus':tool==='railLine'?'rail':'all',slot={bus:0,rail:0},own=(c,side)=>{const m=new THREE.MeshBasicMaterial({color:c,transparent:true,depthWrite:false});if(side)m.side=THREE.DoubleSide;m.userData.own=true;return m};
   const ring=own('#ffffff');ring.opacity=0.85;
-  if(kind==='bus'){for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].bus){const r=new THREE.Mesh(tPinG,ring);r.position.set(cx(i),0.13,cz(i));r.scale.set(1.25,0.6,1.25);r.renderOrder=6;routeG.add(r)}}
-  else for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].t==='trainSt'){const[x,z]=stCenter(i);const r=new THREE.Mesh(tPinG,ring);r.position.set(x,0.42,z);r.scale.set(2,0.6,2);r.renderOrder=6;routeG.add(r)}
+  if(kind==='bus'){for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].bus){const r=new THREE.Mesh(tPinG,ring);r.position.set(cx(i),gY(cx(i),cz(i))+0.13,cz(i));r.scale.set(1.25,0.6,1.25);r.renderOrder=6;routeG.add(r)}}
+  else for(let i=0;i<N*N;i++)if(grid[i]&&grid[i].t==='trainSt'){const[x,z]=stCenter(i);const r=new THREE.Mesh(tPinG,ring);r.position.set(x,gY(x,z)+0.42,z);r.scale.set(2,0.6,2);r.renderOrder=6;routeG.add(r)}
   for(const L of tLines){const sl=slot[L.kind]++,R=lineRoute(L);if(!R)continue;const mine=kind==='all'||L.kind===kind,sel=L.id===lineEdit,focus=mine&&(sel||lineEdit==null),bus=L.kind==='bus',y=bus?0.15:0.36;
-    const off=bus?0.19+(sl%3)*0.045:0.08+(sl%3)*0.045,pts=routePts(R.path,off,y);if(pts.length<2)continue;
+    const off=bus?0.19+(sl%3)*0.045:0.08+(sl%3)*0.045,pts=liftPts(routePts(R.path,off,y),y);if(pts.length<2)continue;
     const op=!mine?0.18:!L.on?0.35:focus?0.95:0.4,edge=own('#ffffff',true),m=own(L.col,true),arr=own('#ffffff',true);edge.opacity=op*0.85;m.opacity=op;arr.opacity=op;
     const w=sel?0.085:0.065,g0=ribbonGeo(pts,w+0.04),g1=ribbonGeo(pts.map(p=>[p[0],p[1]+0.004,p[2]]),w);g0.userData.own=g1.userData.own=true;
     const e=new THREE.Mesh(g0,edge);e.renderOrder=7;routeG.add(e);const r=new THREE.Mesh(g1,m);r.renderOrder=8;routeG.add(r);
     /* small arrows every ~0.9 tile along the line, pointing the way the vehicle goes */
     if(mine){let acc=0.45;for(let k=1;k<pts.length;k++){const a=pts[k-1],b=pts[k],dx=b[0]-a[0],dz=b[2]-a[2],l=Math.hypot(dx,dz);let t=acc;
-        while(t<l){const t0=new THREE.Mesh(tArrG,arr);t0.rotation.y=-Math.atan2(dz,dx);t0.position.set(a[0]+dx*t/l,y+0.009,a[2]+dz*t/l);t0.scale.setScalar(sel?0.5:0.42);t0.renderOrder=9;routeG.add(t0);t+=0.9}acc=t-l}}
-    L.stops.forEach((S,k)=>{const[x,z]=bus?[cx(S),cz(S)]:stCenter(S);const p=new THREE.Mesh(tPinG,m);p.position.set(x,y+0.03,z);p.scale.set(bus?0.8:1.4,0.6,bus?0.8:1.4);p.renderOrder=8;routeG.add(p);
-      if(mine){const tx=numTexOf(L.col,k+1);if(tx){const sm=new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true,opacity:focus?1:0.55});sm.userData.own=true;const sp=new THREE.Sprite(sm);sp.position.set(x,y+(bus?0.42:0.6),z);sp.scale.set(0.42,0.42,1);sp.renderOrder=10;routeG.add(sp)}}})}
+        while(t<l){const t0=new THREE.Mesh(tArrG,arr);t0.rotation.y=-Math.atan2(dz,dx);t0.position.set(a[0]+dx*t/l,a[1]+(b[1]-a[1])*t/l+0.009,a[2]+dz*t/l);t0.scale.setScalar(sel?0.5:0.42);t0.renderOrder=9;routeG.add(t0);t+=0.9}acc=t-l}}
+    L.stops.forEach((S,k)=>{const[x,z]=bus?[cx(S),cz(S)]:stCenter(S);const p=new THREE.Mesh(tPinG,m);p.position.set(x,routeY(x,z)+y+0.03,z);p.scale.set(bus?0.8:1.4,0.6,bus?0.8:1.4);p.renderOrder=8;routeG.add(p);
+      if(mine){const tx=numTexOf(L.col,k+1);if(tx){const sm=new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true,opacity:focus?1:0.55});sm.userData.own=true;const sp=new THREE.Sprite(sm);sp.position.set(x,routeY(x,z)+y+(bus?0.42:0.6),z);sp.scale.set(0.42,0.42,1);sp.renderOrder=10;routeG.add(sp)}}})}
   if(lineDraft&&lineDraft.kind===kind){const S=lineDraft.stops[0],[x,z]=kind==='bus'?[cx(S),cz(S)]:stCenter(S),m=own('#ffd23a');m.opacity=0.95;const p=new THREE.Mesh(tPinG,m);p.position.set(x,kind==='bus'?0.24:0.46,z);p.scale.set(1.6,1.6,1.6);p.renderOrder=8;routeG.add(p)}}
 /* building a line: click the stops in order; the line exists from the second stop on and always loops back to the first */
 function lineStopAt(i,bus){if(bus)return grid[i]&&grid[i].bus?i:-1;const m=mainOf(i);return grid[m]&&grid[m].t==='trainSt'?m:-1}
@@ -3301,12 +3430,12 @@ function deliverInmates(c){const pr=grid[c.dest];if(pr&&isPrisonT(pr.t)){pr.inbo
     for(const q of c.pass){q.w=pr.up2&&Math.random()<0.3?1+((Math.random()*3)|0):0;pr.jail.push(q)}float(c.dest,`+${c.pass.length} więźniów`,'neutral')}
   else{const st=grid[c.home];if(st&&st.jail)st.jail.push(...c.pass)}c.pass=[]}
 function policeTick(dt,night){if(!dt)return;polFlash+=dt;jailTick(dt);
-  for(const st of stations()){const g=grid[st];const pc=polCars(st).filter(c=>c.role==='patrol').length;if(pc<POL[g.t].patrol+(ordOn('police')?1:0)&&cars.length<MAX_CARS&&(g.spawnT=(g.spawnT||0)-dt)<=0){g.spawnT=1.5;spawnPatrol(st,'patrol')}}
+  for(const st of stations()){const g=grid[st];const pc=polCars(st).filter(c=>c.role==='patrol').length;if(pc<POL[g.t].patrol+(LAW('pl_fast')?1:0)&&cars.length<MAX_CARS&&(g.spawnT=(g.spawnT||0)-dt)<=0){g.spawnT=1.5;spawnPatrol(st,'patrol')}}
   for(const c of cars)if(!c.dead&&c.kind==='police'&&c.mesh.userData.bar){const on=!!c.task,f=Math.floor(polFlash*6)%2;const[r,b]=c.mesh.userData.bar;r.visible=!on||f===0;b.visible=!on||f===1}
   if(crimeRate(night)&&!firstDay()&&hazOn('pol')){crimeT-=dt;if(crimeT<=0){crimeT=60/crimeRate(night)*rnd(0.6,1.4);const pool=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&(HLV[c.t]||isShop(c.t)||((isWH(c.t)||isWork(c.t))&&Math.random()<0.5))&&!c.off&&entryOf(i)>=0)pool.push(i)}if(pool.length){const ci=pool[(Math.random()*pool.length)|0];if(!policed(ci)||Math.random()<0.5)newCrime(ci,false)}}}
   if(counts.bank+counts.bankG&&!firstDay()&&hazOn('pol')){heistT-=dt;if(heistT<=0){heistT=rnd(150,330);if(Math.random()<Math.min(0.85,0.3*(counts.bank+counts.bankG))*0.5){const bs=[];for(let i=0;i<N*N;i++)if(grid[i]&&(grid[i].t==='bank'||grid[i].t==='bankG')&&entryOf(i)>=0)bs.push(i);if(bs.length){const bi=bs[(Math.random()*bs.length)|0];if(!policed(bi)||Math.random()<0.5)newCrime(bi,true)}}}}
   for(const cr of [...crimes]){cr.t-=dt;cr.pin.el.classList.toggle('blink',Math.floor(polFlash*3)%2===0);if(cr.sent<cr.need&&Math.random()<dt)dispatch(cr);if(cr.t<=0)endCrime(cr,false)}}
-function visitorRate(){return visitorRate0()*tourMul()*(ordOn('tour')?1.5:1)}
+function visitorRate(){return visitorRate0()*tourMul()*(LAW('tr_promo')?1.25:1)*(LAW('tr_week')?1.2:1)*(counts.airport&&grid.some(c=>c&&c.t==='airport'&&!c.off)?1.6:1)}
 function visitorRate0(){let r=3;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||(c.t!=='hotelS'&&c.t!=='hotelB'))continue;r+=(c.t==='hotelS'?4:10)*(1+0.25*hotelStars(i))}return r}
 function spawnVisitor(i){const b=bfs(i);const list=candidates(b,SERVICES).filter(o=>{const g=grid[o.i];return g.t==='hotelS'||g.t==='hotelB'||entR(g)>0||isShop(g.t)});
   for(const o of list){const g=grid[o.i];o.m=(o.m||1)*(g.t==='hotelS'||g.t==='hotelB'?2.5*(1+0.5*hotelStars(o.i)):entR(g)>0?1.5:1)}
@@ -3350,7 +3479,7 @@ function spawnCommuter(h){const e=entryOf(h);if(e<0)return;const b=bfs(e);const 
   if(Math.random()<0.15){const l=candidates(b,SERVICES).filter(o=>entR(grid[o.i])>0);const t=pickWeighted(l);if(t){cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3,foot});return}}
   const low=stored()<matCap()*0.35;let types;const r=Math.random();
   const SH=['shop','shop1','bakery','supermarket','gallery','restaurant'];if((counts.factory+counts.smallfac+counts.factoryB+counts.mine+counts.mineB)&&(low||!(counts.shop||counts.gallery||counts.supermarket)))types=r<0.75?WORK_T:SH;else types=r<0.6?SH:WORK_T;
-  if(types===SH&&Math.random()<1-0.6*buyMul()*(ordOn('consum')?1.1:1))return;
+  if(types===SH&&Math.random()<1-0.6*buyMul())return;
   /* 6.6.2: 7.3.1: residents always go shopping; a shop that sells something they still need is preferred */
   if(types===SH){const H=needs(grid[h]);const l0=candidates(b,SH),l=l0.filter(o=>{const d=grid[o.i];try{return sellsOf(d).some(k=>wantsGood(H,k))}catch(e){return true}});const t=pickWeighted(l.length?l:l0);if(!t)return;
     if(grid[t.i]&&grid[t.i].t==='shop1'&&Math.random()<1/3)return;cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3,foot});return}
@@ -3369,11 +3498,11 @@ function walkPlan(p,from,to){if(p.length<2)return{s0:1,flip:-1};const L=p.length
 function goTrip(kind,b,t,o){if(o&&o.foot){o.kid=o.foot==='kid';o.old=o.foot==='old';delete o.foot;const path=pathTo(b,t.e),pl=walkPlan(path,o.home,t.i);if(!pl)return null;/* 7.4.0: no zebra crossing on the way: children and seniors stay home instead of crossing anywhere */const v=createCar('walker',path,Object.assign({walk:true,side:pl.s0,flip:pl.flip},o));v.kind=kind;v.speed=0.5;cur.walks=(cur.walks||0)+1;return v}
   if(kind==='commuter'&&tLines.length){const tp=planTrip(b,t.e),near=t.d<=WALK_FAR;
     if(tp&&tp.cost<t.d*(near?0.85:1.1)&&(near||Math.random()<TRANSIT_P))return startTransit(kind,b,t,o,tp)}
-  if(t.d<=WALK_MAX||(kind==='commuter'&&t.d<=WALK_FAR&&Math.random()<WALK_FAR_P)){const path=pathTo(b,t.e),pl=walkPlan(path,o&&o.home,t.i);
+  if(t.d<=WALK_MAX||(kind==='commuter'&&t.d<=WALK_FAR&&Math.random()<WALK_FAR_P*(LAW('hl_move')?1.1:1))){const path=pathTo(b,t.e),pl=walkPlan(path,o&&o.home,t.i);
     if(pl){const v=createCar('walker',path,Object.assign({walk:true,side:pl.s0,flip:pl.flip},o));v.kind=kind;v.speed=0.5;cur.walks=(cur.walks||0)+1;return v}}return createCar(kind,pathTo(b,t.e),o)}
 /* ---------- waste ---------- */
 const trashEvery=t=>TRASH[t].every*60*(0.85+Math.random()*0.3);
-const TRASH_MUL=0.3;function addTrash(c,x){x*=TRASH_MUL;if(ordOn('eco'))x*=0.9;const T=TRASH[c.t];if(!T)return;const before=c.trash;c.trash=Math.min(T.cap,c.trash+x);cur.gGen+=c.trash-before;
+const TRASH_MUL=0.3;function addTrash(c,x){x*=TRASH_MUL;if(LAW('eco_sort'))x*=0.95;if(LAW('eco_dep'))x*=0.95;const T=TRASH[c.t];if(!T)return;const before=c.trash;c.trash=Math.min(T.cap*(LAW('eco_space')?1.1:1),c.trash+x);cur.gGen+=c.trash-before;
   if(c.trash>=T.cap){c.want=true;if(before<T.cap&&PARKS.includes(c.t))envDirty=true}}
 function releaseG(c){if(c.rel)return;c.rel=true;const f=grid[c.home];if(f&&FAC[f.t]){f.gtrucks=Math.max(0,f.gtrucks-1);f.gin=Math.max(0,f.gin-c.res)}
   if(c.phase==='go'){for(const j of[c.dest,...(c.stops||[])]){const b=grid[j];if(b&&TRASH[b.t])b.truckOn=false}}}
@@ -3420,7 +3549,7 @@ function wasteTick(dt,night){
         if(!counts.landfill&&!counts.incinerator&&!counts.recycler&&inspI<0){setHint('<b>Kosze się zapełniają</b> · postaw wysypisko (zakładka Odpady, 200 T¢) przy ulicy, inaczej pełne fabryki i sklepy staną.',true,true);hintTimer=8}}}}
     if(isFac(c)){const F=FAC[c.t];if(!F.rate)continue;if(DEMAND[c.t]&&!c.powered){if(c.t==='incinerator')c.model.userData.off=true;continue}
       const x=Math.min(c.gstock,fRate(c)*dt/60);c.gstock-=x;
-      if(c.t==='recycler'){cur.gRec+=x;cur.matRec+=addMat(x*REC_YIELD,i)}else cur.gBurn+=x;
+      if(c.t==='recycler'||c.t==='recycB'){cur.gRec+=x;cur.matRec+=addMat(x*REC_YIELD,i)}else cur.gBurn+=x;
       if(c.t==='incinerator')c.model.userData.off=c.gstock<0.05}}}
 
 /* ---------- goods ---------- */
@@ -3474,10 +3603,10 @@ function lacks(i,d,IN){const miss=IN&&Object.keys(IN).find(q=>have(q)<IN[q]);if(
 function mixPick(){let tot=0;const SOLD=MIXG.filter(k=>{const r=mixIn(k);return Object.keys(r).every(q=>have(q)>=r[q])});if(!SOLD.length)return'toys';const w=SOLD.map(k=>{const v=1/(1+goods[k]);tot+=v;return v});let r=Math.random()*tot;for(let k=0;k<SOLD.length;k++){r-=w[k];if(r<=0)return SOLD[k]}return SOLD[0]}
 function produce(i,d){
   if(isMine(d.t)){const units=MINE_T[d.t]*(d.techB?1.05:1)*prodMul('mat');if(!spawnTruck(i,'mat',units)){d.work=2;return}d.work-=2;cur.made.mat=(cur.made.mat||0)+units;addTrash(d,TRASH[d.t].per);float(i,`+${mw(Math.round(units*10)/10)} kg materiałów →`,'mat');return}
-  if(d.t==='factoryB'){const ls=d.lines&&d.lines.length?d.lines:['mix'];d.li=(d.li||0)%ls.length;const k=ls[d.li],L=LINES[k];
+  if(isBigF(d.t)){if(d.t==='combine'&&!(d.lines&&d.lines.length)){d.work=Math.min(d.work,2);return}const ls=d.lines&&d.lines.length?d.lines:['mix'];d.li=(d.li||0)%ls.length;const k=ls[d.li],L=LINES[k];
     const pid=k==='mix'?mixPick():k,IN=k==='mix'?mixIn(pid):L.in;
     if(lacks(i,d,IN)){d.li++;return}const AT=i;
-    const units=(TRUCK_LOAD*(k==='mix'?1:1.5)*(d.up2?1.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid);
+    const units=(TRUCK_LOAD*(k==='mix'?1:1.5)*(d.up2?1.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid)*(d.t==='combine'?2:1);
     if(!startBatch(i,d,pid,IN,units))return;d.li++;return}
   /* 7.4.0: with the smaller line every other batch makes its own product at half size */
   const two=d.t==='factory'&&d.up&&d.up3&&d.line2&&LINES[d.line2],sec=two&&d.alt2,ln=sec?d.line2:d.line;
@@ -3494,12 +3623,12 @@ function startBatch(i,d,pid,IN,units){if(d.prod)return false;
   let bread=0;if(have('grain')>=3){take('grain',3,i);cur.used.grain=(cur.used.grain||0)+3;bread=3*prodMul('bread')}
   d.prod={k:pid,u:units,t:PROC_T,b:bread};d.work-=2;float(i,used.length?`−${used.join(', ')}`:`produkcja: ${GOODS[pid].name.toLowerCase()}`,'neutral');return true}
 /* 7.4.0: a workplace runs only with its minimum crew on site; every worker above the full crew adds 2% */
-const CREW={smallfac:{min:3,max:5},mine:{min:3,max:5},factory:{min:4,max:8},mineB:{min:4,max:8},factoryB:{min:10,max:16}};
-const crewOf=t=>CREW[t]||{min:3,max:5},SHIFT_RATE=0.18;
-function crewBoost(d){const n=(d.staff||[]).length,S=crewOf(d.t);return n<S.min?0:1+0.02*Math.max(0,n-S.max)}
+const CREW={combine:{min:14,max:22},smallfac:{min:3,max:5},mine:{min:3,max:5},factory:{min:4,max:8},mineB:{min:4,max:8},factoryB:{min:10,max:16}};
+const crewOf=t=>{const C=CREW[t]||{min:3,max:5};return LAW('cm_plan')?{min:Math.max(1,C.min-1),max:C.max}:C},SHIFT_RATE=0.18;
+function crewBoost(d){const n=(d.staff||[]).length,S=crewOf(d.t);return n<S.min?0:1+(LAW('cm_hero')?0.03:0.02)*Math.max(0,n-S.max)}
 function shiftEnd(i,d,w){const h=w.h,hc=grid[h];if(!hc||!hc.pp)return;const e=entryOf(i);if(e<0)return;const b=bfs(e);
   /* a worker short of something goes shopping first, then home */
-  let low=false;try{const H=needs(hc);low=NEEDS.some(n=>H[n.k]<0.6)}catch(err){}
+  let low=false;try{const H=needs(hc);low=!LAW('cm_canteen')&&NEEDS.some(n=>H[n.k]<0.6)}catch(err){}
   if(low&&cars.length<MAX_CARS){const SHP=['shop','shop1','bakery','supermarket','gallery'];const l=candidates(b,SHP);const t=pickWeighted(l);if(t){createCar('commuter',pathTo(b,t.e),{home:h,dest:t.i,tier:w.tier});return}}
   const he=entryOf(h);if(he>=0&&b.dist[he]>=0&&cars.length<MAX_CARS)createCar('commuter',pathTo(b,he),{home:h,dest:h,tier:w.tier})}
 function staffTick(dt){for(let i=0;i<N*N;i++){const d=grid[i];if(!d||!isWork(d.t)||!d.staff)continue;
@@ -3560,13 +3689,13 @@ function spawnTruck(f,pid='mat',units=TRUCK_LOAD){const e=entryOf(f);if(e<0)retu
   list.sort((a,b)=>a.d-b.d);cur.trucks++;const car=createCar('truck',pathTo(b,list[0].e),{home:f,dest:list[0].i,pid,units});car.mesh.userData.cargo.material=GM[pid];return true}
 /* big factory: up to 3 different lines; the general line is free and can be switched off, product lines are bought once */
 function paintLines(c){const sg=c.model&&c.model.userData.lineSigns;if(!sg)return;sg.forEach((o,j)=>{const k=c.lines[j];o.material=k?GM[k]:mat.facDark})}
-function toggleLineB(i,k){const c=grid[i];if(!c||c.t!=='factoryB')return;c.lines=c.lines||['mix'];c.owned=c.owned||[];
+function toggleLineB(i,k){const c=grid[i];if(!c||!isBigF(c.t))return;const big=c.t==='combine',LM=big?4:LINES_MAX;if(big&&k==='mix'){setHint('Kombinat nie robi towarów ogólnych – wybierz linie specjalistyczne.',true,true);hintEl.hidden=false;return}c.lines=c.lines||(big?[]:['mix']);c.owned=c.owned||[];
   if(c.lines.includes(k)){if(k!=='mix'){setHint('Wykupionej linii nie da się zamknąć. Wyłączyć można tylko linię ogólną.',true,true);hintEl.hidden=false;return}if(c.lines.length<2)return;c.lines=c.lines.filter(x=>x!=='mix')}
-  else{if(c.lines.length>=LINES_MAX){setHint('Duża fabryka ma najwyżej 3 linie.',true,true);hintEl.hidden=false;return}
+  else{if(c.lines.length>=LM){setHint(big?'Kombinat ma najwyżej 4 linie.':'Duża fabryka ma najwyżej 3 linie.',true,true);hintEl.hidden=false;return}
     if(k!=='mix'&&!c.owned.includes(k)){if(money<LINE_COST){setHint(`Brakuje ${fmt(LINE_COST-money)} T¢ na linię.`,true,true);hintEl.hidden=false;return}spend(LINE_COST);c.owned.push(k);float(i,`+ linia: ${GOODS[k].name}`,'neutral')}
     c.lines.push(k)}
   c.li=0;paintLines(c);save();renderInsp()}
-function setLine(i,k){const c=grid[i];if(c&&c.t==='factoryB')return toggleLineB(i,k);if(c&&c.t==='smallfac'){if(k!=='mix'){setHint('Mała fabryka robi tylko towary ogólne (losowe).',true,true);hintEl.hidden=false}return}if(!c||!isFactory(c.t)||c.line===k)return;
+function setLine(i,k){const c=grid[i];if(c&&isBigF(c.t))return toggleLineB(i,k);if(c&&c.t==='smallfac'){if(k!=='mix'){setHint('Mała fabryka robi tylko towary ogólne (losowe).',true,true);hintEl.hidden=false}return}if(!c||!isFactory(c.t)||c.line===k)return;
   if(!FREE_LINES[k]&&!c.up){setHint('Ten produkt wymaga ulepszenia „Linia specjalistyczna” (przycisk w karcie fabryki).',true,true);hintEl.hidden=false;return}c.line=k;c.work=0;paintModel(c,GM[k]);save();renderInsp()}
 function buyCinema(i){const c=grid[i];if(!c||c.t!=='gallery'||c.cinema)return;if(galFull(c)){setHint('Parter mieści 4 lokale. Dobuduj piętro, by dodać kino.',true,true);hintEl.hidden=false;return}if(money<CINEMA_COST){setHint(`Brakuje ${fmt(CINEMA_COST-money)} T¢ na kino.`,true,true);hintEl.hidden=false;return}
   spend(CINEMA_COST);c.cinema=true;cinemaVisual(c);envDirty=true;float(i,'+ Kino','neutral');save();renderInsp()}
@@ -3693,7 +3822,7 @@ function computePower(dt){if(topoDirty||powerSig()!==topoSig)rebuildHV();compute
    All water used becomes sewage: plants treat it, outlets dump the rest into the river. Night halves use. Units: m³ per game hour. */
 /* water users that return no sewage (the geothermal plant turns its water into steam) */
 const NOSEW={hydrogen:1};
-const WATER={busDepot:0.8,cityHall:2,heliB:6,trainSt:1,fireS:2,fireB:4,clinic:2,hosp:6,hospC:15,crem:2,schoolS:1,school:2,lyceum:4,techn:4,bankG:1,shop1:0.8,prisonS:2.5,prison:5,policeS:1,policeB:2,bakery:0.8,factoryB:4,mine:0.5,mineB:1.5,supermarket:2,hydrogen:10,smallfac:1.5,house:1,tenement:2.5,block:5,modern:5,shop:0.5,gallery:1.5,restaurant:1.5,hotelS:2,hotelB:5,factory:3,cinema:1,theater:1,casino:1.5,bank:0.5};
+const WATER={combine:6,airport:5,recycB:2,retire:4,stadium:4,hqPolice:3,busDepot:0.8,cityHall:2,heliB:6,trainSt:1,fireS:2,fireB:4,clinic:2,hosp:6,hospC:15,crem:2,schoolS:1,school:2,lyceum:4,techn:4,bankG:1,shop1:0.8,prisonS:2.5,prison:5,policeS:1,policeB:2,bakery:0.8,factoryB:4,mine:0.5,mineB:1.5,supermarket:2,hydrogen:10,smallfac:1.5,house:1,tenement:2.5,block:5,modern:5,shop:0.5,gallery:1.5,restaurant:1.5,hotelS:2,hotelB:5,factory:3,cinema:1,theater:1,casino:1.5,bank:0.5};
 const PUMP_R=40,TOWER_R=15,TREAT_R=30;
 const pipe=new Uint8Array(N*N),riverDirty=new Uint8Array(N*N),riverDirt=new Float32Array(N*N);let riverSrc=[],riverT=0;
 /* sewage enters at the outlets and drifts downstream about one tile every 3 game minutes; when the outlets stop, the river slowly washes itself clean */
@@ -3758,7 +3887,7 @@ function xrayNew(g){if(!xray)return;const set=new Set();xrayMats(g,true,set);for
 /* ---------- environment & happiness ----------
    Pollution (Chebyshev distance): factory 1 = yellow, 2 = yellow-green; coal plant 1 = yellow, 2–3 = yellow-green.
    House: 3 base, +1 shop within 5 tiles, +1 park in its range, −1 / −2 for the tile's pollution, −1 without power; clamped 1–5. */
-const roadRangeT=t=>!!(MED[t]||EDU[t]||POL[t]||FIRE[t]||t==='roadSvc'||ENT_R[t]||SHOPS_R.has(t)||t==='hotelB');
+const roadRangeT=t=>!!(MED[t]||EDU[t]||POL[t]||FIRE[t]||t==='roadSvc'||ENT_R[t]||SHOPS_R.has(t)||t==='hotelB'||t==='retire');
 /* the tiles a service reaches: along the roads from its entrances, one block per road tile, and every 4 side branches passed cost one more block;
    the tiles around a reached road are covered */
 function reachFrom(tiles,R,sp=1,sq=0){const out=new Uint8Array(N*N);for(const t of tiles)out[t]=1;const own=new Set(tiles),dist=new Map(),H=[];
@@ -3775,13 +3904,13 @@ const reachC=new Map();let reachVer=-1;
 function reachOf(i,R){if(grid[i]&&grid[i].t==='part')i=grid[i].main;const v=roadVer+'|'+gridVer();if(v!==reachVer){reachC.clear();reachVer=v}const ts0=tilesOf(i),sp=reachSp(grid[i]&&grid[i].t),sq=sqOf(grid[i]&&grid[i].t,ts0.length,grid[i]),k=i+'|'+R+'|'+sp+'|'+sq;let o=reachC.get(k);if(!o){o=reachFrom(ts0,R,sp,sq);reachC.set(k,o)}return o}
 /* fire crews and road crews also work a little off the road (two tiles), the others serve the tiles along it */
 /* 7.2.0: the surround (a square of the given diameter around the building) next to the road reach */
-const OBD={clinic:5,hosp:5,hospC:5,fireS:9,fireB:9,policeS:9,policeB:9,shop:5,shop1:5,bakery:5,supermarket:9,gallery:11,restaurant:5,cinema:7,theater:9,casino:12};
+const OBD={hqPolice:63,stadium:13,retire:9,clinic:5,hosp:5,hospC:5,fireS:9,fireB:9,policeS:9,policeB:9,shop:5,shop1:5,bakery:5,supermarket:9,gallery:11,restaurant:5,cinema:7,theater:9,casino:12};
 function obrD(t,c){let d=t==='hotelB'?(c&&c.attr?OBD[c.attr]:null):OBD[t];if(d==null)return null;if(c){if((FIRE[t]||POL[t])&&c.up2)d+=2;if((t==='restaurant'||t==='cinema')&&c.up)d+=2}return d}
 const sqOf=(t,n,c)=>{const d=obrD(t,c);if(d!=null)return Math.ceil((d-1)/2);return EDU[t]?(n>=4?6:5):0};
 const reachSp=t=>FIRE[t]||t==='roadSvc'?2:1;
 const gridVer=()=>gridVerN;
 function computeEnv(){try{computeEnv0()}finally{try{dryTrees()}catch(e){}}}
-function computeEnv0(){eduP.fill(0);eduS.fill(0);lycCov.fill(0);techCov.fill(0);medCov.fill(0);crowdCov.fill(0);pol.fill(0);entCov.fill(0);noiseCov.fill(0);shopCov.fill(0);parkCov.fill(0);
+function computeEnv0(){retCov.fill(0);for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.t==='retire'&&!c.off&&c.powered!==false){const cv=reachOf(i,15);for(let j=0;j<N*N;j++)if(cv[j])retCov[j]=1}}eduP.fill(0);eduS.fill(0);lycCov.fill(0);techCov.fill(0);medCov.fill(0);crowdCov.fill(0);pol.fill(0);entCov.fill(0);noiseCov.fill(0);shopCov.fill(0);parkCov.fill(0);
   const stamp=(arr,i,r,v,max)=>{const x=i%N,z=(i/N)|0;for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);
     const d=Math.max(Math.abs(dx),Math.abs(dz));const val=typeof v==='function'?v(d):v;if(max)arr[j]=Math.max(arr[j],val);else arr[j]=val}};
   for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off)continue;
@@ -3800,10 +3929,10 @@ const TAX_BASE=10;let taxRate=12;
 /* taxes: on homes by building type (%), on every purchase (%), a tourist tax per visit (T¢) and a communal tax on residents (%) */
 const TAX0={house:12,tenement:12,block:12,modern:12,buy:20,tour:5,util:5};let TAX={...TAX0};
 const buyMul=()=>Math.max(0.4,Math.min(1.25,1-(TAX.buy-20)*0.02)),tourMul=()=>Math.max(0.25,Math.min(1.25,1-(TAX.tour-5)*0.05)),litterP=()=>Math.max(0,TAX.util-5)*0.02;const taxHappy=r=>r<=10?2:r<=11?1:r<=13?0:-Math.min(6,Math.round((r-13)*6/7));
-function happyParts(i){const c=grid[i],ts=tilesOf(i);const ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]);const e=entryOf(i);return{ord:-(ordOn('consum')?1:0)-(ordOn('police')?1:0),needs:needPen(c),litter:e>=0&&grid[e]&&grid[e].litter>0?-1:0,edu:ep&&es?1:ep?0.5:0,ill:(c.pp||[]).some(q=>q.s===1)?-1:0,dead:c.dead>0?-1:0,tax:taxHappy(TAX[c.t]??taxRate),base:HOUSING[c.t].base,shop:ts.some(k=>shopCov[k])?1:0,park:ts.some(k=>parkCov[k])?1:0,ent:ts.some(k=>entCov[k])?1:0,pol:-Math.max(...ts.map(k=>pol[k])),pow:c.powered?0:-1,trash:c.trash>=TRASH[c.t].cap?-1:0,water:c.water==='dirty'?-3:c.water==='ok'?0:-1,sewer:c.sewer?-1:0,noise:ts.some(k=>noiseCov[k])?-1:0,crowd:ts.some(k=>crowdCov[k])?-1:0}}
+function happyParts(i){const c=grid[i],ts=tilesOf(i);const ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]);const e=entryOf(i);return{ord:-(LAW('pl_foot')?1:0)-(LAW('cm_hero')?1:0),ret:ts.some(k=>retCov[k])&&(c.pp||[]).some(q=>stageOf(q.a)===4)?1:0,needs:needPen(c),litter:e>=0&&grid[e]&&grid[e].litter>0?-1:0,edu:ep&&es?1:ep?0.5:0,ill:(c.pp||[]).some(q=>q.s===1)?-1:0,dead:c.dead>0?-1:0,tax:taxHappy(TAX[c.t]??taxRate),base:HOUSING[c.t].base,shop:ts.some(k=>shopCov[k])?1:0,park:ts.some(k=>parkCov[k])?1:0,ent:ts.some(k=>entCov[k])?1:0,pol:-Math.max(...ts.map(k=>pol[k])),pow:c.powered?0:-1,trash:c.trash>=TRASH[c.t].cap?-1:0,water:c.water==='dirty'?-3:c.water==='ok'?0:-1,sewer:c.sewer?-1:0,noise:ts.some(k=>noiseCov[k])?-1:0,crowd:ts.some(k=>crowdCov[k])?-1:0}}
 function computeHappy(){if(envDirty)computeEnv();const dist=new Array(HMAX+1).fill(0);let sum=0,n=0;
   for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!HOUSING[c.t]||c.off)continue;const p=happyParts(i);
-    c.happy=Math.round(Math.max(0,Math.min(HMAX,p.base+p.shop+p.park+p.ent+p.pol+p.pow+p.trash+p.water+p.sewer+p.noise+p.crowd+p.tax+p.edu+p.ill+p.dead)));dist[c.happy]++;sum+=c.happy;n++}
+    c.happy=Math.round(Math.max(0,Math.min(HMAX,p.ord+p.ret+p.base+p.shop+p.park+p.ent+p.pol+p.pow+p.trash+p.water+p.sewer+p.noise+p.crowd+p.tax+p.edu+p.ill+p.dead)));dist[c.happy]++;sum+=c.happy;n++}
   pw.happy=n?sum/n:0;pw.dist=dist}
 
 /* ---------- floating labels ---------- */
@@ -4150,6 +4279,7 @@ function apply(i,painting){
     if(money<DEF.rail.cost){setHint(`Brakuje ${fmt(DEF.rail.cost-money)} T¢ na tory.`,true,true);return}spend(DEF.rail.cost);
     if(c){c.rail=true;railVer++;drawCrossing(i);railRefreshNear(i)}else addCell(i,'rail',false);save();return}
   if(tool==='cityHall'&&counts.cityHall>0){setHint('W mieście może stać tylko jeden urząd.',true,true);hintEl.hidden=false;return}
+  if(LAW_UNL[tool]&&counts[tool]>0&&moveSrc<0){setHint('Ten budynek może stać tylko jeden w mieście.',true,true);hintEl.hidden=false;return}
   if(FP(tool)){if(painting)return;pendA=i;updateGhost();return}
   if(tool==='bulldoze'&&c&&c.edge){if(!painting)setHint(c.t==='rail'?'To tory wjazdowe do miasta. Nie da się ich wyburzyć.':'To droga wjazdowa do miasta dla przejezdnych. Możesz ją poszerzyć, ale nie wyburzyć.',true,true);return}
   if(tool==='bulldoze'){if(!c){if(deco.has(i)){clearDeco(i);save()}return}
@@ -4310,16 +4440,16 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
   const full=TRASH[c.t]&&c.trash>=TRASH[c.t].cap;
   let pick='';
   if(isMine(c.t)){R('Produkcja',`${mw(Math.round(MINE_T[c.t]*10)/10)} kg materiałów na 2 zmiany`);R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':'pracuje',full||!c.powered?'warnv':'')}
-  if(c.t==='factoryB'){const ls=c.lines||['mix'];R('Linie',`${ls.length} / ${LINES_MAX}`+(c.owned&&c.owned.length?` · utrzymanie +${LINE_UPK*c.owned.length} T¢/godz.`:''));
-    for(const k of ls){const L=LINES[k],u=TRUCK_LOAD*(k==='mix'?1:1.5)*(c.up2?1.5:1)*(fOn(c)?0.9:1)+1;R(`<span class="sw2" style="background:${LMETA(k).col}"></span>${LMETA(k).name}`,`${mw(Math.round(u*10)/10)} kg`+(L.in?' · z '+Object.entries(L.in).map(([q,v])=>`${v} kg ${GOODS[q].name.toLowerCase()}`).join(', '):''),L.in&&Object.entries(L.in).some(([q,v])=>have(q)<v)?'warnv':'')}
+  if(isBigF(c.t)){const ls=c.lines||(c.t==='combine'?[]:['mix']),LMX=c.t==='combine'?4:LINES_MAX;R('Linie',`${ls.length} / ${LMX}`+(c.owned&&c.owned.length?` · utrzymanie +${LINE_UPK*c.owned.length} T¢/godz.`:''));
+    for(const k of ls){const L=LINES[k],u=(TRUCK_LOAD*(k==='mix'?1:1.5)*(c.up2?1.5:1)*(fOn(c)?0.9:1)+1)*(c.t==='combine'?2:1);R(`<span class="sw2" style="background:${LMETA(k).col}"></span>${LMETA(k).name}`,`${mw(Math.round(u*10)/10)} kg`+(L.in?' · z '+Object.entries(L.in).map(([q,v])=>`${v} kg ${GOODS[q].name.toLowerCase()}`).join(', '):''),L.in&&Object.entries(L.in).some(([q,v])=>have(q)<v)?'warnv':'')}
     R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':'pracuje',full||!c.powered?'warnv':'');
-    pick=`<div class="chips">${Object.keys(LINES).map(k=>{const on=ls.includes(k),own=k==='mix'||(c.owned||[]).includes(k),dis=!on&&(ls.length>=LINES_MAX||(!own&&money<LINE_COST));
+    pick=`<div class="chips">${Object.keys(LINES).filter(k=>!(c.t==='combine'&&k==='mix')).map(k=>{const on=ls.includes(k),own=k==='mix'||(c.owned||[]).includes(k),dis=!on&&(ls.length>=LMX||(!own&&money<LINE_COST));
       return`<button class="chipb" data-line="${k}" aria-pressed="${on}"${dis?' disabled style="opacity:.5"':''}><i style="background:${LMETA(k).col}"></i>${on?'✓ ':own?'':'+ '}${LMETA(k).name}${!on&&!own?` · ${LINE_COST} T¢`:''}</button>`}).join('')}</div>`}
   if(c.t==='smallfac')c.line='mix';
   if(isWork(c.t)){const S=crewOf(c.t),n=(c.staff||[]).length,bo=crewBoost(c);R('Pracownicy na zmianie',`${n} (obsada ${S.min}–${S.max})`+(n<S.min?' · za mało, linia stoi':n>S.max?` · +${Math.round((bo-1)*100)}% wydajności`:''),n<S.min?'warnv':'')}
   if(isFactory(c.t)){R('Przetwarzanie',c.prod?`${GOODS[c.prod.k].name}: ${mw(Math.round(c.prod.u*10)/10)} kg · gotowe za ${Math.max(1,Math.ceil(c.prod.t))} min`:'czeka na zmianę pracowników i surowce');
     const ok=Object.entries(c.out||{}).filter(([k,v])=>v>0.05);R('Gotowe do odbioru',ok.length?ok.map(([k,v])=>`${mw(Math.round(v*10)/10)} kg ${GOODS[k].name.toLowerCase()}`).join(', '):'nic')}
-  if(isFactory(c.t)&&c.t!=='factoryB'){const L=LINES[c.line]||LINES.mix;R('Produkuje',`<span class="sw2" style="background:${LMETA(c.line).col}"></span>${LMETA(c.line).name}`);R('Partia',`${mw(Math.round((TRUCK_LOAD*(c.up?1.5:1)*(c.up2?1.5:1)*(c.t==='smallfac'?0.5:1)*(fOn(c)?0.9:1)*(c.techB?1.05:1)+1)*10)/10)} kg`);
+  if(isFactory(c.t)&&!isBigF(c.t)){const L=LINES[c.line]||LINES.mix;R('Produkuje',`<span class="sw2" style="background:${LMETA(c.line).col}"></span>${LMETA(c.line).name}`);R('Partia',`${mw(Math.round((TRUCK_LOAD*(c.up?1.5:1)*(c.up2?1.5:1)*(c.t==='smallfac'?0.5:1)*(fOn(c)?0.9:1)*(c.techB?1.05:1)+1)*10)/10)} kg`);
     R('Surowiec',L.in?Object.entries(L.in).map(([k,v])=>`${v} kg ${GOODS[k].name.toLowerCase()} (w magazynach ${fmt(have(k))})`).join(', '):'nie potrzebuje',L.in&&Object.entries(L.in).some(([k,v])=>have(k)<v)?'warnv':'');
     R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':'pracuje',full||!c.powered?'warnv':'');
     if(c.t!=='smallfac')pick=`<div class="chips">${Object.keys(LINES).map(k=>{const lock=!FREE_LINES[k]&&!c.up;return`<button class="chipb" data-line="${k}" aria-pressed="${k===c.line}"${lock?' style="opacity:.5"':''}><i style="background:${LMETA(k).col}"></i>${lock?'🔒 ':''}${LMETA(k).name}</button>`}).join('')}</div>`;
@@ -4470,6 +4600,12 @@ const toolsEl=document.getElementById('tools'),catsEl=document.getElementById('c
 const toolBtns={},catBtns=[];let curCat=0;
 /* line icons for the build menu, 20×20, drawn with currentColor */
 const ICO={
+combine:'<path d="M2.5 17.5V9l4 2.5V9l4 2.5V9l4 2.5v6z"/><path d="M14.5 11.5V3h2.5v14.5M2.5 17.5h15"/><path d="M6 14.5h1.5M9.5 14.5H11"/>',
+airport:'<path d="M10 2.5c.9 0 1.3 1 1.3 2.2v3.6l6 3.4v1.6l-6-1.8v3.3l1.8 1.4v1.3L10 16.6l-3.1.9v-1.3l1.8-1.4v-3.3l-6 1.8v-1.6l6-3.4V4.7c0-1.2.4-2.2 1.3-2.2z"/>',
+recycB:'<path d="M7.5 4.5l2.5-2 2.5 2M10 2.5v5"/><path d="M4 9.5l-1.5 3 3 .8M3 12.3l4.2-2.4"/><path d="M16 9.5l1.5 3-3 .8M17 12.3l-4.2-2.4"/><rect x="5.5" y="12.5" width="9" height="5" rx="1"/>',
+retire:'<path d="M3 9.5L10 4l7 5.5"/><path d="M5 8v9.5h10V8"/><path d="M8.5 17.5v-4h3v4"/><path d="M14.5 3.5v3"/>',
+stadium:'<ellipse cx="10" cy="10" rx="7.5" ry="5"/><ellipse cx="10" cy="10" rx="4.2" ry="2.4"/><path d="M10 7.6v4.8M2.5 10v3.5c0 2.5 3.4 4 7.5 4s7.5-1.5 7.5-4V10"/>',
+hqPolice:'<path d="M10 2.5l6.5 2.5v4.5c0 4-2.8 6.8-6.5 8-3.7-1.2-6.5-4-6.5-8V5z"/><path d="M10 6.5l1.1 2.3 2.4.3-1.8 1.6.5 2.4L10 12l-2.2 1.1.5-2.4-1.8-1.6 2.4-.3z"/>',
 cityHall:'<path d="M2.5 17.5h15M3.5 8h13L10 3.5z"/><path d="M5 8v8M8.3 8v8M11.7 8v8M15 8v8"/>',
 shipC:'<path d="M2.5 13.5V6.5h9v7M11.5 9h3.2l2.8 2.8v1.7"/><circle cx="6" cy="14.5" r="1.4"/><circle cx="14" cy="14.5" r="1.4"/>',
 ord:'<path d="M5.5 2.5h7l3 3v12h-10z"/><path d="M12.5 2.5v3h3M8 9h5M8 12h5M8 15h3"/>',
@@ -4611,7 +4747,7 @@ function paintRouteBtn(){const b=document.getElementById('tool-routes');if(!b)re
   b.innerHTML=`<span class="sw" style="background:${routeAll?'#2f8f5a':'var(--chip)'};color:${routeAll?'#fff':'var(--fg)'}"><svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15c3-8 6 2 9-6s3-3 5-4"/><circle cx="3" cy="15" r="1.4"/><circle cx="17" cy="5" r="1.4"/></svg></span><span class="nm">Podgląd linii</span><span class="ct">${routeAll?'wł.':'wył.'}</span>`}
 /* a category tab exists only once something in it is unlocked */
 function refreshLocks(){CATS.forEach((c,k)=>{catBtns[k].hidden=!c.tools.some(unlocked)});showCat(curCat);if(linBtn)linBtn.hidden=!unlocked('busLine')}
-function selectTool(t){if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel'||underOn);if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=reachHide();for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
+function selectTool(t){if(!unlocked(t)&&LAW_UNL[t]){const T=LAWS.find(q=>q.k===LAW_UNL[t]);setHint(`Odblokujesz to w ustawach urzędu miasta: zbadaj całe drzewko „${T.name}”.`,true,true);hintEl.hidden=false;return}if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel'||underOn);if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=reachHide();for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));
   const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);if(t==='bulldoze'&&delMode==='pipe')setXray(true);setHint(toolHint());if(lmsg)setHint(lmsg,true,true);hl.visible=false;renderModes();
   if(linpEl){linpEl.hidden=!isLineT(t);if(linBtn)linBtn.setAttribute('aria-expanded',String(isLineT(t)));renderLines()}}
 showCat(0);
@@ -4785,7 +4921,7 @@ function barChart(f,unit){
     if(d.h%6===0)g+=`<text x="${x+cw/2}" y="${H-4}" text-anchor="middle">${pad2(d.h%24)}:00</text>`});
   if(!hist.length)g+=`<text x="${(W+L)/2}" y="${T+14}" text-anchor="middle">Pierwsza pełna godzina gry za ${60-Math.floor(cur.secs)} s</text>`;
   return g+'</svg>'}
-function newCity(type,d,name){TAX={...TAX0};ORD={};saveBlocked=false;oldSave=false;if(!window.__testUnlock)msLevel=0;if(name)cityName=String(name).trim().slice(0,24)||cityName;closeTitle();loan=null;imports={};setTimeout(tutStart,0);gameOver=false;toggleStats(false);closeHouse();clearCity();for(const k of [...deco])clearDeco(k);preset(type,d);seedDeco();refreshLocks();try{centerOnEntry()}catch(e){}save();setHint(`Nowe miasto „${esc(cityName)}” gotowe.`,false,true);
+function newCity(type,d,name){TAX={...TAX0};ORD={};LAWB={};LAWT={};LAWU={};research=0;saveBlocked=false;oldSave=false;if(!window.__testUnlock)msLevel=0;if(name)cityName=String(name).trim().slice(0,24)||cityName;closeTitle();loan=null;imports={};setTimeout(tutStart,0);gameOver=false;toggleStats(false);closeHouse();clearCity();for(const k of [...deco])clearDeco(k);preset(type,d);seedDeco();refreshLocks();try{centerOnEntry()}catch(e){}save();setHint(`Nowe miasto „${esc(cityName)}” gotowe.`,false,true);
   /* a new city always starts with the radio on */
   try{radio.want=true;audioOK=true;radioSave();radioSync()}catch(e){}}
 /* the bigger map starts with the camera at the inner end of an entry road, where the first street goes */
@@ -5002,7 +5138,7 @@ for(const r of document.querySelectorAll('.res')){const mv=()=>{if(r.hasAttribut
   r.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')showTip(r)});r.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&tipSrc===r)hideTip()});
   r.addEventListener('click',()=>{if(tipSrc===r&&!tipEl.hidden)return hideTip();showTip(r);clearTimeout(tipT);tipT=setTimeout(()=>{if(tipSrc===r)hideTip()},5000)})}
 /* the buttons on the left: the same info boxes, shown beside the button on mouse hover */
-{const RT={ordBtn:'Uchwały · Zasady miasta z urzędu: konsumpcjonizm, miasto policyjne i inne · Każda uchwała ma swoje plusy i minusy',
+{const RT={ordBtn:'Ustawy · Drzewka ustaw z urzędu miasta · Punkty nauki od uczniów otwierają poziomy, a pełne drzewko odblokowuje wyjątkowy budynek',
   msBtn:'Kamienie milowe · Kolejne cele rozwoju miasta · Każdy kamień milowy odblokowuje nowe budynki',
   ovlBtn:'Nakładki · Pokazują zasięgi i strefy na mapie · Szpitale, szkoły, policja, straż, smog, hałas, parki i rozrywka',
   taxBtn:'Podatki · Podatki dla każdego rodzaju domu · Pożyczki i import towarów',
@@ -5171,7 +5307,7 @@ let saveReq=false,saveRT=0;
 function save(){if(window.__testUnlock||saveBlocked||window.__LT_EDITOR)return writeSave();saveReq=true}
 function writeSave(){saveReq=false;saveRT=0;if(saveBlocked||window.__LT_EDITOR)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
   const old=localStorage.getItem(KEY);if(old)localStorage.setItem(KEY+'-prev',old);
-  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,taxes:TAX,ord:ORD,loan,pend:[Math.round(pendIn),Math.round(pendOut)],sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),bus:[...grid.keys()].filter(i=>grid[i]&&grid[i].bus).map(i=>[i,grid[i].bus,stopAxOf(i)]),tl:tLines.map(L=>({id:L.id,kind:L.kind,name:L.name,col:L.col,stops:[...L.stops],veh:L.veh,on:L.on?1:0})),tls:lineSeq,litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),dep:[...dep.keys()].filter(i=>dep[i]).map(i=>[i,dep[i]]),hg:hgtStr(),wv:[...wlv.keys()].filter(i=>water[i]&&wlv[i]!==hgt[i]).map(i=>[i,wlv[i]]),fl:[...fld.keys()].filter(i=>fld[i]).map(i=>[i,fld[i]]),ms:msLevel,n:N,whst:1,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
+  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,taxes:TAX,ord:ORD,law:{b:Object.keys(LAWB),t:Object.keys(LAWT),u:Object.keys(LAWU),rp:Math.round(research*10)/10},loan,pend:[Math.round(pendIn),Math.round(pendOut)],sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),bus:[...grid.keys()].filter(i=>grid[i]&&grid[i].bus).map(i=>[i,grid[i].bus,stopAxOf(i)]),tl:tLines.map(L=>({id:L.id,kind:L.kind,name:L.name,col:L.col,stops:[...L.stops],veh:L.veh,on:L.on?1:0})),tls:lineSeq,litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),dep:[...dep.keys()].filter(i=>dep[i]).map(i=>[i,dep[i]]),hg:hgtStr(),wv:[...wlv.keys()].filter(i=>water[i]&&wlv[i]!==hgt[i]).map(i=>[i,wlv[i]]),fl:[...fld.keys()].filter(i=>fld[i]).map(i=>[i,fld[i]]),ms:msLevel,n:N,whst:1,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
 function load(){if(loadKey(KEY))return true;if(oldSave){try{const r=localStorage.getItem(KEY);if(r&&!localStorage.getItem(KEY+'-pre4'))localStorage.setItem(KEY+'-pre4',r)}catch(e){}saveBlocked=true;return false}if(loadKey(KEY+'-prev')){setHint('Ostatni zapis był uszkodzony, wczytano poprzedni.',true,true);return true}
   let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
   if(raw){saveBlocked=true;try{localStorage.setItem(KEY+'-broken',raw)}catch(e){}setHint('Nie udało się wczytać zapisu. Kopia jest bezpieczna i gra jej nie nadpisze. Tylko „Zresetuj miasto” zaczyna od nowa.',true,true);hintTimer=12}
@@ -5187,7 +5323,7 @@ function placeRow(row,anim){let[i,t,p,st,up,tr,gs,sec,x]=row;mvNext=x&&typeof x.
     if(x&&x.line2&&t==='factory'&&LINES[x.line2])c.line2=x.line2;
     if(x&&Array.isArray(x.staff)&&isWork(t))c.staff=x.staff.map(([h,tier,u])=>({h,tier,until:gameT+u}));
     if(x&&x.rth!=null&&t==='rail'){c.th=+x.rth;c.tun=true;refreshBuilding(i)}
-    if(x&&DCARE[t]){c.bodies=x.bodies||0;c.urn=Array.isArray(x.urn)?x.urn.map(v=>gameT+v):[]}if(HOUSING[t])c.off=false;if(x&&Array.isArray(x.jail))c.jail=x.jail.map(([rel,w])=>({rel,w}));if(x&&HLV[t]){c.xp=x.xp||0;if(x.lv){c.lv=Math.min(x.lv,HLV[t].res.length-1);setHousingModel(i)}}if(x&&Array.isArray(x.fr))c.fr=x.fr.filter(r0=>r0&&FR_GOODS.includes(r0.k)).map(r0=>({k:r0.k,m:['off','imp','exp'].includes(r0.m)?r0.m:'off',n:Math.max(FR_MIN,Math.min(FR_MAX,r0.n|0))}));if(x&&x.waiting)c.waiting=x.waiting|0;if(x&&x.dirt)c.dirt=+x.dirt||0;if(x&&Array.isArray(x.ship))c.ship=x.ship.filter(k=>SHIP_GOODS.includes(k));if(x&&x.shipQ&&typeof x.shipQ==='object'){c.shipQ={};let left=SHIP_LOAD;for(const k in x.shipQ){const v=Math.min(left,Math.round(+x.shipQ[k]/SHIP_STEP)*SHIP_STEP);if(SHIP_GOODS.includes(k)&&v>0){c.shipQ[k]=v;left-=v}}}if(x&&x.shipAuto)c.shipAuto=true;if(x&&x.shipAt!=null)loadShip.push([i,x.shipAt]);if(x&&x.need&&typeof x.need==='object')c.need={...x.need};if(x&&x.ruin)loadFires.push([i,-1]);else if(x&&x.burn!=null)loadFires.push([i,x.burn]);if(x&&t==='factoryB'){c.owned=(x.owned||[]).filter(k=>LINES[k]&&k!=='mix');c.lines=(x.lines||['mix']).filter(k=>k==='mix'||c.owned.includes(k)).slice(0,LINES_MAX);if(!c.lines.length)c.lines=['mix'];paintLines(c)}}
+    if(x&&DCARE[t]){c.bodies=x.bodies||0;c.urn=Array.isArray(x.urn)?x.urn.map(v=>gameT+v):[]}if(HOUSING[t])c.off=false;if(x&&Array.isArray(x.jail))c.jail=x.jail.map(([rel,w])=>({rel,w}));if(x&&HLV[t]){c.xp=x.xp||0;if(x.lv){c.lv=Math.min(x.lv,HLV[t].res.length-1);setHousingModel(i)}}if(x&&Array.isArray(x.fr))c.fr=x.fr.filter(r0=>r0&&FR_GOODS.includes(r0.k)).map(r0=>({k:r0.k,m:['off','imp','exp'].includes(r0.m)?r0.m:'off',n:Math.max(FR_MIN,Math.min(FR_MAX,r0.n|0))}));if(x&&x.waiting)c.waiting=x.waiting|0;if(x&&x.dirt)c.dirt=+x.dirt||0;if(x&&Array.isArray(x.ship))c.ship=x.ship.filter(k=>SHIP_GOODS.includes(k));if(x&&x.shipQ&&typeof x.shipQ==='object'){c.shipQ={};let left=SHIP_LOAD;for(const k in x.shipQ){const v=Math.min(left,Math.round(+x.shipQ[k]/SHIP_STEP)*SHIP_STEP);if(SHIP_GOODS.includes(k)&&v>0){c.shipQ[k]=v;left-=v}}}if(x&&x.shipAuto)c.shipAuto=true;if(x&&x.shipAt!=null)loadShip.push([i,x.shipAt]);if(x&&x.need&&typeof x.need==='object')c.need={...x.need};if(x&&x.ruin)loadFires.push([i,-1]);else if(x&&x.burn!=null)loadFires.push([i,x.burn]);if(x&&isBigF(t)){c.owned=(x.owned||[]).filter(k=>LINES[k]&&k!=='mix');c.lines=(x.lines||(t==='combine'?[]:['mix'])).filter(k=>(k==='mix'&&t!=='combine')||c.owned.includes(k)).slice(0,t==='combine'?4:LINES_MAX);if(!c.lines.length&&t!=='combine')c.lines=['mix'];paintLines(c)}}
 let loadFires=[],loadShip=[];
 /* a city saved on a smaller map: every index moves to the middle; rivers, entry roads and tracks are carried on to the new edge */
 function migrateSave(s,old){const off=(N-old)>>1,m=i=>typeof i==='number'&&i>=0?idx(i%old+off,((i/old)|0)+off):i;
@@ -5216,7 +5352,7 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
   hgtLoad(s);applyWater();drawFlood();
   for(const[i,t,p]of s.cells)if(DRIVE[t]){try{addCell(i,t,false);if(p)grid[i].pole=true}catch(e){console.warn('pole zapisu pominięte',i,t,e)}}
   for(const row of s.cells)if(!DRIVE[row[1]])try{placeRow(row)}catch(e){console.warn('budynek z zapisu pominięty',row[0],row[1],e)}
-  for(let i=0;i<N*N;i++)rebuildRoad(i);money=s.money||0;mapType=MAPS[s.map]?s.map:'standard';diff=DIFF[s.diff]?s.diff:'old';taxRate=s.tax>=10&&s.tax<=20?s.tax:12;ORD={};if(s.ord&&typeof s.ord==='object')for(const o of ORDS)if(s.ord[o.k])ORD[o.k]=1;TAX={...TAX0};if(s.taxes&&typeof s.taxes==='object'){for(const k in TAX0)if(Number.isFinite(s.taxes[k]))TAX[k]=s.taxes[k]}else for(const k of['house','tenement','block','modern'])TAX[k]=taxRate;loan=s.loan&&LOANS[s.loan.k]?s.loan:null;pendIn=s.pend?+s.pend[0]||0:0;pendOut=s.pend?+s.pend[1]||0:0;imports={};if(s.imports)for(const k in s.imports)imports[k]=(s.gameT||gameT)+s.imports[k];tut=s.tut&&s.tut.on?s.tut:null;matl=0;for(const k in goods)goods[k]=0;const POOL=s.whst?null:Object.assign({mat:s.matl||0},s.goods||{});
+  for(let i=0;i<N*N;i++)rebuildRoad(i);money=s.money||0;mapType=MAPS[s.map]?s.map:'standard';diff=DIFF[s.diff]?s.diff:'old';taxRate=s.tax>=10&&s.tax<=20?s.tax:12;ORD={};if(s.ord&&typeof s.ord==='object')for(const o of ORDS)if(s.ord[o.k])ORD[o.k]=1;LAWB={};LAWT={};LAWU={};research=0;if(s.law&&typeof s.law==='object'){for(const k of s.law.b||[])LAWB[k]=1;for(const k of s.law.t||[])LAWT[k]=1;for(const k of s.law.u||[])LAWU[k]=1;research=+s.law.rp||0}TAX={...TAX0};if(s.taxes&&typeof s.taxes==='object'){for(const k in TAX0)if(Number.isFinite(s.taxes[k]))TAX[k]=s.taxes[k]}else for(const k of['house','tenement','block','modern'])TAX[k]=taxRate;loan=s.loan&&LOANS[s.loan.k]?s.loan:null;pendIn=s.pend?+s.pend[0]||0:0;pendOut=s.pend?+s.pend[1]||0:0;imports={};if(s.imports)for(const k in s.imports)imports[k]=(s.gameT||gameT)+s.imports[k];tut=s.tut&&s.tut.on?s.tut:null;matl=0;for(const k in goods)goods[k]=0;const POOL=s.whst?null:Object.assign({mat:s.matl||0},s.goods||{});
   pipe.fill(0);if(Array.isArray(s.pipes))for(const i of s.pipes)pipe[i]=1;
   if(Array.isArray(s.litter))for(const[i,n]of s.litter)setLitter(i,n);
   if(Array.isArray(s.cross))for(const i of s.cross)if(grid[i]&&STREET[grid[i].t]){grid[i].cross=true;drawCross(i)}
@@ -7373,7 +7509,103 @@ const LT_TR=[
 ["+{} kg węgiel", "+{} kg coal", "+{} kg Kohle"],
 ["Zajezdnia autobusowa", "Bus depot", "Busdepot"],
 ["Zajmuje 2×2 pola. Garażuje i obsługuje autobusy: każda linia autobusowa dostaje +2 autobusy, a nowe autobusy wyjeżdżają na trasę dwa razy szybciej.", "Takes 2×2 tiles. Garages and services the buses: every bus line gets +2 buses, and new buses leave for their route twice as fast.", "Belegt 2×2 Felder. Stellt die Busse unter und wartet sie: jede Buslinie bekommt +2 Busse, und neue Busse fahren doppelt so schnell los."],
-["teren zbyt nierówny (ponad 3 poziomy różnicy)", "ground too uneven (more than 3 levels of difference)", "Gelände zu uneben (mehr als 3 Stufen Unterschied)"]
+["teren zbyt nierówny (ponad 3 poziomy różnicy)", "ground too uneven (more than 3 levels of difference)", "Gelände zu uneben (mehr als 3 Stufen Unterschied)"],
+["Ekologia", "Ecology", "Ökologie"],
+["Sortowanie", "Sorting", "Mülltrennung"],
+["Przestrzeń publiczna", "Public space", "Öffentlicher Raum"],
+["Produkty kaucyjne", "Deposit products", "Pfandprodukte"],
+["Warzywne", "Veggie week", "Gemüsewoche"],
+["Piramida żywieniowa", "Food pyramid", "Ernährungspyramide"],
+["Ruch to zdrowie", "Exercise is health", "Bewegung ist Gesundheit"],
+["Badania okresowe", "Regular check-ups", "Vorsorgeuntersuchungen"],
+["Transport publiczny", "Public transport", "Öffentlicher Verkehr"],
+["Miejsca stojące", "Standing room", "Stehplätze"],
+["Atrakcyjna kolej", "Attractive rail", "Attraktive Bahn"],
+["Budżet na transport", "Transport budget", "Verkehrsbudget"],
+["Nawyki komunistyczne", "Communist habits", "Kommunistische Gewohnheiten"],
+["Kolektywna produkcja", "Collective production", "Kollektive Produktion"],
+["Plan pięcioletni", "Five-year plan", "Fünfjahresplan"],
+["Przodownicy pracy", "Shock workers", "Bestarbeiter"],
+["Wspólne stołówki", "Shared canteens", "Gemeinschaftskantinen"],
+["Promocja miasta", "City promotion", "Stadtwerbung"],
+["Szlaki turystyczne", "Tourist trails", "Wanderwege"],
+["Pakiety weekendowe", "Weekend packages", "Wochenendpakete"],
+["Kolej turystyczna", "Tourist railway", "Touristenbahn"],
+["Patrole piesze", "Foot patrols", "Fußstreifen"],
+["Monitoring", "CCTV", "Videoüberwachung"],
+["Godzina policyjna", "Curfew", "Ausgangssperre"],
+["Szybkie reagowanie", "Rapid response", "Schnelle Eingreiftruppe"],
+["−5% produkcji śmieci", "−5% waste produced", "−5% Müllaufkommen"],
+["+2% opłat za utrzymanie budynków z zakładki Odpady", "+2% upkeep of buildings from the Waste tab", "+2% Unterhalt der Gebäude aus dem Reiter Abfall"],
+["+10% pojemności koszy w budynkach", "+10% bin capacity in buildings", "+10% Mülltonnen-Kapazität in Gebäuden"],
+["+5 T¢/godz. utrzymania", "+5 T¢/h upkeep", "+5 T¢/Std. Unterhalt"],
+["+10 T¢/godz. utrzymania", "+10 T¢/h upkeep", "+10 T¢/Std. Unterhalt"],
+["+20 T¢/godz. utrzymania", "+20 T¢/h upkeep", "+20 T¢/Std. Unterhalt"],
+["+25 T¢/godz. utrzymania", "+25 T¢/h upkeep", "+25 T¢/Std. Unterhalt"],
+["+30 T¢/godz. utrzymania", "+30 T¢/h upkeep", "+30 T¢/Std. Unterhalt"],
+["+2 T¢/godz. kary za każde pole smogu", "+2 T¢/h fine for every smog tile", "+2 T¢/Std. Strafe je Smogfeld"],
+["+3 T¢/godz. kary za każde pole smogu", "+3 T¢/h fine for every smog tile", "+3 T¢/Std. Strafe je Smogfeld"],
+["−10 T¢/godz. utrzymania każdego budynku z włączonym filtrem", "−10 T¢/h upkeep for every building with filters on", "−10 T¢/Std. Unterhalt je Gebäude mit eingeschaltetem Filter"],
+["+1% zarobków przy zakupach", "+1% income from purchases", "+1% Einnahmen aus Einkäufen"],
+["+1 kg warzyw przy każdym zakupie warzyw", "+1 kg of vegetables with every vegetable purchase", "+1 kg Gemüse bei jedem Gemüsekauf"],
+["+3 T¢ przy każdym zakupie spożywczym", "+3 T¢ on every food purchase", "+3 T¢ bei jedem Lebensmittelkauf"],
+["+1 kg nabiału przy zakupie nabiału", "+1 kg of dairy with a dairy purchase", "+1 kg Milchprodukte beim Kauf von Milchprodukten"],
+["+10% częściej idą pieszo lub jadą komunikacją", "+10% more often walk or take public transport", "+10% öfter zu Fuß oder mit dem ÖPNV"],
+["+10% długości życia", "+10% lifespan", "+10% Lebensdauer"],
+["+10 T¢/godz. utrzymania każdego budynku zdrowia", "+10 T¢/h upkeep for every health building", "+10 T¢/Std. Unterhalt je Gesundheitsgebäude"],
+["Każdy przystanek ma automat biletowy", "Every stop has a ticket machine", "Jede Haltestelle hat einen Fahrkartenautomaten"],
+["+1 T¢ za każdy przejazd autobusem", "+1 T¢ per bus ride", "+1 T¢ je Busfahrt"],
+["+5 miejsc w autobusach", "+5 places on buses", "+5 Plätze in Bussen"],
+["+2 T¢/godz. za każdy autobus", "+2 T¢/h for every bus", "+2 T¢/Std. je Bus"],
+["+20% turystów przyjeżdżających pociągiem", "+20% tourists arriving by train", "+20% Touristen mit dem Zug"],
+["+2 T¢ za bilet kolejowy", "+2 T¢ per rail ticket", "+2 T¢ je Bahnfahrkarte"],
+["+2% kosztów utrzymania transportu publicznego", "+2% public transport upkeep", "+2% Unterhalt des öffentlichen Verkehrs"],
+["+1 pojazd na każdą linię", "+1 vehicle on every line", "+1 Fahrzeug je Linie"],
+["+25% produkcji przemysłu (bez żywności)", "+25% industrial output (except food)", "+25% Industrieproduktion (ohne Lebensmittel)"],
+["−15% produkcji żywności", "−15% food output", "−15% Lebensmittelproduktion"],
+["Minimalna obsada fabryk −1 osoba", "Minimum factory crew −1 person", "Mindestbelegschaft der Fabriken −1 Person"],
+["Każdy pracownik ponad obsadę daje +3% zamiast +2%", "Each worker above the crew gives +3% instead of +2%", "Jeder Arbeiter über der Belegschaft bringt +3% statt +2%"],
+["Pracownicy po zmianie nie jadą do sklepu (zaspokaja ich zakład)", "Workers don't go shopping after a shift (the plant provides)", "Arbeiter gehen nach der Schicht nicht einkaufen (der Betrieb versorgt sie)"],
+["+25% turystów", "+25% tourists", "+25% Touristen"],
+["+20% turystów", "+20% tourists", "+20% Touristen"],
+["−40% nowych mieszkańców", "−40% new residents", "−40% neue Einwohner"],
+["Turyści wydają +15% w sklepach, rozrywce i hotelach", "Tourists spend +15% in shops, entertainment and hotels", "Touristen geben +15% in Läden, Unterhaltung und Hotels aus"],
+["Pociąg pasażerski przywozi +40% turystów", "Passenger trains bring +40% tourists", "Personenzüge bringen +40% Touristen"],
+["+3 bloki zasięgu po drogach każdego komisariatu", "+3 blocks of road reach for every police station", "+3 Blöcke Straßenreichweite je Polizeiwache"],
+["Przestępstwo trwa 50% dłużej: więcej czasu na dojazd policji", "A crime lasts 50% longer: more time for police to arrive", "Eine Straftat dauert 50% länger: mehr Zeit für die Anfahrt der Polizei"],
+["+2 T¢/godz. za każdy komisariat", "+2 T¢/h for every police station", "+2 T¢/Std. je Polizeiwache"],
+["−50% przestępstw nocą", "−50% crime at night", "−50% Kriminalität nachts"],
+["Wielki kombinat", "Great combine", "Großkombinat"],
+["Zajmuje 2×3 pola. Do 4 linii specjalistycznych naraz (pracują po kolei), bez towarów ogólnych. Partie 2× większe niż w dużej fabryce, obsada 14–22. Jeden na miasto (ustawy: Nawyki komunistyczne).", "Takes 2×3 tiles. Up to 4 specialist lines at once (they work in turn), no general goods. Batches 2× bigger than in a large factory, crew 14–22. One per city (laws: Communist habits).", "Belegt 2×3 Felder. Bis zu 4 Speziallinien gleichzeitig (sie arbeiten nacheinander), keine allgemeinen Waren. Chargen 2× größer als in der großen Fabrik, Belegschaft 14–22. Eines pro Stadt (Gesetze: Kommunistische Gewohnheiten)."],
+["Lotnisko", "Airport", "Flughafen"],
+["Zajmuje 4×7 pól. Samoloty przywożą turystów: +60% przyjezdnych w całym mieście, loty dają +150 T¢/godz. Jedno na miasto (ustawy: Transport publiczny).", "Takes 4×7 tiles. Planes bring tourists: +60% visitors in the whole city, flights earn +150 T¢/h. One per city (laws: Public transport).", "Belegt 4×7 Felder. Flugzeuge bringen Touristen: +60% Besucher in der ganzen Stadt, Flüge bringen +150 T¢/Std. Einer pro Stadt (Gesetze: Öffentlicher Verkehr)."],
+["Wielkie centrum recyklingu", "Great recycling centre", "Großes Recyclingzentrum"],
+["Zajmuje 2×3 pola. Przerabia 40 kg odpadów na godz. na materiały (bufor 240 kg), 4 śmieciarki. Jedno na miasto (ustawy: Ekologia).", "Takes 2×3 tiles. Turns 40 kg of waste per hour into materials (240 kg buffer), 4 garbage trucks. One per city (laws: Ecology).", "Belegt 2×3 Felder. Verarbeitet 40 kg Abfall pro Stunde zu Material (240 kg Puffer), 4 Müllwagen. Eines pro Stadt (Gesetze: Ökologie)."],
+["Dom spokojnej starości", "Retirement home", "Seniorenheim"],
+["Zajmuje 3×2 pola. W zasięgu 15 bloków po drogach i obrębie 9×9 seniorzy żyją o 25% dłużej, a domy z seniorami mają +1 zadowolenia. Jeden na miasto (ustawy: Zdrowe nawyki).", "Takes 3×2 tiles. Within 15 road blocks and a 9×9 surround, seniors live 25% longer and homes with seniors get +1 happiness. One per city (laws: Healthy habits).", "Belegt 3×2 Felder. Im Umkreis von 15 Straßenblöcken und 9×9 Feldern leben Senioren 25% länger, Häuser mit Senioren erhalten +1 Zufriedenheit. Eines pro Stadt (Gesetze: Gesunde Gewohnheiten)."],
+["Stadion piłkarski", "Football stadium", "Fußballstadion"],
+["Zajmuje 4×3 pola. Rozrywka: 25 bloków po drogach i obręb 13×13 (+1 zadowolenia), bilet 40 T¢. Codziennie o 18:00 mecz: duży przychód z biletów. Jeden na miasto (ustawy: Turystyka).", "Takes 4×3 tiles. Entertainment: 25 road blocks and a 13×13 surround (+1 happiness), ticket 40 T¢. A match every day at 18:00: big ticket income. One per city (laws: Tourism).", "Belegt 4×3 Felder. Unterhaltung: 25 Straßenblöcke und 13×13 Umkreis (+1 Zufriedenheit), Ticket 40 T¢. Jeden Tag um 18:00 ein Spiel: hohe Ticketeinnahmen. Eines pro Stadt (Gesetze: Tourismus)."],
+["Komenda stołeczna", "Police headquarters", "Polizeipräsidium"],
+["Zajmuje 5×3 pola. Obręb połowy mapy i 40 bloków po drogach, 90 cel, 8 radiowozów. Zatrzymani zostają w jej celach. Jedna na miasto (ustawy: Miasto policyjne).", "Takes 5×3 tiles. Covers half the map and 40 road blocks, 90 cells, 8 patrol cars. Arrested suspects stay in its cells. One per city (laws: Police city).", "Belegt 5×3 Felder. Deckt die halbe Karte und 40 Straßenblöcke ab, 90 Zellen, 8 Streifenwagen. Festgenommene bleiben in ihren Zellen. Eines pro Stadt (Gesetze: Polizeistadt)."],
+["Projekty ustaw", "Bills", "Gesetzentwürfe"],
+["Uchyl ustawę", "Repeal law", "Gesetz aufheben"],
+["Ustawy", "Laws", "Gesetze"],
+["Ustawy (urząd miasta)", "Laws (city hall)", "Gesetze (Rathaus)"],
+["Urząd miasta nie działa – ustawy są zawieszone.", "City hall is not working – laws are suspended.", "Das Rathaus arbeitet nicht – Gesetze sind ausgesetzt."],
+["Punkty nauki otwierają kolejne poziomy, a ustawę wprowadzasz jednorazową opłatą (uchylenie jest darmowe). Po zbadaniu obu poziomów odblokujesz wyjątkowy budynek (jeden na miasto).", "Research points open the tiers, and you pass a law with a one-off fee (repealing is free). Research both tiers to unlock a unique building (one per city).", "Forschungspunkte öffnen die Stufen, ein Gesetz wird gegen eine einmalige Gebühr erlassen (Aufheben ist kostenlos). Nach beiden Stufen wird ein einzigartiges Gebäude freigeschaltet (eines pro Stadt)."],
+["Punkty nauki: każdy uczeń w zasięgu szkoły daje punkty co godzinę", "Research points: every pupil within a school's reach gives points every hour", "Forschungspunkte: jeder Schüler im Einzugsbereich einer Schule bringt stündlich Punkte"],
+["Ten budynek może stać tylko jeden w mieście.", "Only one of this building is allowed per city.", "Von diesem Gebäude ist nur eines pro Stadt erlaubt."],
+["Ustawy · Drzewka ustaw z urzędu miasta · Punkty nauki od uczniów otwierają poziomy, a pełne drzewko odblokowuje wyjątkowy budynek", "Laws · Law trees from city hall · Research points from pupils open the tiers, and a full tree unlocks a unique building", "Gesetze · Gesetzesbäume aus dem Rathaus · Forschungspunkte von Schülern öffnen die Stufen, ein vollständiger Baum schaltet ein einzigartiges Gebäude frei"],
+["Zbadaj · {} 📖", "Research · {} 📖", "Erforschen · {} 📖"],
+["🔒 Poziom {}", "🔒 Tier {}", "🔒 Stufe {}"],
+["Odblokuj · {}", "Unlock · {}", "Freischalten · {}"],
+["✓ Odblokowano: {}", "✓ Unlocked: {}", "✓ Freigeschaltet: {}"],
+["Odblokowano: {}.", "Unlocked: {}.", "Freigeschaltet: {}."],
+["Wprowadzono ustawę: {}.", "Law passed: {}.", "Gesetz erlassen: {}."],
+["Zbadano poziom {}: {}.", "Researched tier {}: {}.", "Stufe {} erforscht: {}."],
+["+{}/godz.", "+{}/h", "+{}/Std."],
+["mecz! {} kibiców · +{} T¢", "match! {} fans · +{} T¢", "Spiel! {} Fans · +{} T¢"],
+["Odblokujesz to w ustawach urzędu miasta: zbadaj całe drzewko „{}”.", "Unlock this in the city hall laws: research the whole “{}” tree.", "Wird in den Rathausgesetzen freigeschaltet: erforsche den ganzen Baum „{}“."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
