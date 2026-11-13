@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.7.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -328,20 +328,20 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .lawGrid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(300px,1fr);gap:12px;overflow-x:auto;overflow-y:hidden;padding-bottom:10px;min-height:0;scrollbar-color:#bdbdbd #3a3b3d}
 .lawGrid::-webkit-scrollbar{height:12px}.lawGrid::-webkit-scrollbar-track{background:#3a3b3d;border-radius:8px}.lawGrid::-webkit-scrollbar-thumb{background:#bdbdbd;border-radius:8px}
 .lawT{background:var(--lw);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0}
-.lawIco{font-size:58px;line-height:1;text-align:center;filter:saturate(1.2);margin-top:2px}
+.lawIco{display:flex;justify-content:center;color:var(--lc);margin-top:2px}.lawIco svg{width:62px;height:62px;stroke-width:1.5}.lawRp svg,.lawRpB svg{width:16px;height:16px;flex:none}
 .lawName{align-self:center;background:var(--lw2);border-radius:6px;padding:8px 18px;min-width:70%;text-align:center;font-weight:700;font-size:14px;color:#d6d6d6}
 .lawTier{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 12px}
 .lawc{background:var(--lw2);border-radius:6px;padding:8px 8px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-height:150px;border:2px solid transparent}
 .lawc b{font-size:14px;color:#cfcfcf;line-height:1.15}.ordp .lawc ul{list-style:none;margin:0;padding:0;font-size:11.5px;color:#cdcdcd;line-height:1.3;flex:1}
 .lawc .lawBuy{margin-top:auto;width:100%;background:#1e1f20;color:#e6e6e6;border:0;border-radius:5px;padding:5px 6px;font-size:12px;font-weight:600;cursor:pointer;min-height:0}
-.lawc .lawBuy:disabled{opacity:.45;cursor:default}.lawc .lawBuy:not(:disabled):hover{background:#111}
+.lawc .lawBuy:disabled{opacity:.45;cursor:default}.lawc:not(.on) .lawBuy:not(:disabled):hover{background:#111}.lawc.on .lawBuy:hover{filter:brightness(1.12)}
 .lawc.on{border-color:var(--lc)}.lawc.on b{color:#fff}.lawc.on .lawBuy{background:var(--lc);color:#111}
 .lawc.lock{opacity:.62}.ordp .lawc.lock ul{color:#b9b9b9}
 .lawBar{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px}
 .lawRpB{display:flex;align-items:center;gap:6px;background:#1e1f20;color:#e6e6e6;border:0;border-radius:6px;padding:4px 12px 4px 6px;font-size:12.5px;font-weight:600;min-width:96px;cursor:pointer}
-.lawRpB:disabled{cursor:default;opacity:.8}.lawRpB:not(:disabled){outline:2px solid var(--lc)}.lawRpB i{font-style:normal;background:#2c2f8a;border-radius:3px;padding:0 3px;font-size:11px}
-.lawTrack{position:relative;height:8px;border-radius:6px;background:#2a2b2c}.lawTrack::after{content:attr(data-ic);position:absolute;left:50%;top:50%;transform:translate(-50%,-55%);font-size:15px;filter:grayscale(1) brightness(1.6)}
-.lawTrack.on{background:var(--lc)}.lawTrack.on::after{filter:none}
+.lawRpB:disabled{cursor:default;opacity:.8}.lawRpB:not(:disabled){outline:2px solid var(--lc)}.lawRpB svg{color:#8fa3ff}
+.lawTrack{position:relative;height:8px;border-radius:6px;background:#2a2b2c}.lawTrack svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;color:#e6e6e6;background:#3c3d3f;border-radius:50%;padding:2px;stroke-width:2.2}
+.lawTrack.on{background:var(--lc)}.lawTrack.on svg{background:var(--lc);color:#111}
 .lawUnl{align-self:center;margin-top:auto;background:var(--lw2);color:#d6d6d6;border:0;border-radius:6px;padding:8px 14px;font-weight:700;font-size:13.5px;line-height:1.25;text-align:center;min-width:60%;cursor:pointer}
 .lawUnl:disabled{opacity:.7;cursor:default}.lawUnl:not(:disabled):not(.on){outline:2px solid var(--lc)}.lawUnl.on{background:var(--lc);color:#111}
 .lawX{position:absolute;right:12px;top:10px;background:#3a3b3d;color:#ddd;border:0;border-radius:8px;width:32px;height:32px;font-size:18px;cursor:pointer}
@@ -2892,9 +2892,21 @@ const LAWS=[
   {rp:3500,cards:[
    {k:'pl_curfew',name:'Godzina policyjna',cost:2000,fx:['−50% przestępstw nocą']},
    {k:'pl_fast',name:'Szybkie reagowanie',cost:2500,fx:['+1 radiowóz w każdym komisariacie','−10% produkcji w całym mieście']}]}]}];
+const LAW_ICO={
+eco:'<path d="M11.2 5.1l4 7.1M12.9 11.2l2.3 1 .3-2.5"/><path d="M15.3 15.5H5.2M7.2 14l-2 1.5 2 1.5"/><path d="M3.9 13.6l4.4-7.7M8.6 8.4l-.3-2.5-2.3 1"/>',
+hl:'<path d="M10 17s-6.5-3.9-6.5-8.5A3.6 3.6 0 0 1 10 6.3a3.6 3.6 0 0 1 6.5 2.2C16.5 13.1 10 17 10 17z"/><path d="M3.8 10.5h3l1.2-2.2 1.8 4.2 1.4-2.6h5"/>',
+tp:'<rect x="4" y="2.5" width="12" height="13" rx="2.2"/><path d="M4 9.5h12M6.5 15.5v2M13.5 15.5v2M7 5.2h6"/><circle cx="7" cy="12.6" r=".8"/><circle cx="13" cy="12.6" r=".8"/>',
+cm:'<path d="M2.5 17.5V9l4 2.5V9l4 2.5V9l4 2.5v6z"/><path d="M14.5 11.5V3h2.5v14.5M2.5 17.5h15"/><path d="M10 2.6l.6 1.3 1.4.2-1 1 .2 1.4-1.2-.7-1.2.7.2-1.4-1-1 1.4-.2z"/>',
+tr:'<ellipse cx="10" cy="10" rx="7.5" ry="5"/><ellipse cx="10" cy="10" rx="4.2" ry="2.4"/><path d="M10 7.6v4.8M2.5 10v3.5c0 2.5 3.4 4 7.5 4s7.5-1.5 7.5-4V10"/>',
+pl:'<path d="M10 2.5l6.5 2.5v4.5c0 4-2.8 6.8-6.5 8-3.7-1.2-6.5-4-6.5-8V5z"/><path d="M10 6.5l1.1 2.3 2.4.3-1.8 1.6.5 2.4L10 12l-2.2 1.1.5-2.4-1.8-1.6 2.4-.3z"/>',
+book:'<path d="M3 4.5c2.5-1 4.8-.8 7 .8 2.2-1.6 4.5-1.8 7-.8v11c-2.5-1-4.8-.8-7 .8-2.2-1.6-4.5-1.8-7-.8z"/><path d="M10 5.3v11"/>',
+lock:'<rect x="4.5" y="9" width="11" height="8" rx="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/>',
+ok:'<path d="M4.5 10.5l3.5 3.5 7.5-8"/>'};
+const lawI=(k,cls='')=>`<svg class="${cls}" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${LAW_ICO[k]}</svg>`;
 const LAW_UNL={};for(const T of LAWS)LAW_UNL[T.unl]=T.k;
 let LAWB={},LAWT={},LAWU={},research=0;
-let ORD={};const hallOK=()=>grid.some(c=>c&&c.t==='cityHall'&&!c.off&&!c.ruin&&c.powered);const ordOn=k=>false;const LAW=k=>!!LAWB[k]&&hallOK();
+let ORD={};const hallOK=()=>grid.some(c=>c&&c.t==='cityHall'&&!c.off&&!c.ruin&&c.powered);
+function hallWhy(){const h=grid.find(c=>c&&c.t==='cityHall');if(!h)return'Brak urzędu miasta.';if(h.ruin)return'Urząd miasta jest zniszczony.';if(h.off)return'Urząd miasta jest wyłączony – włącz go w inspektorze.';if(!h.powered)return'Urząd miasta nie ma prądu – podłącz go do sieci.';return''}const ordOn=k=>false;const LAW=k=>!!LAWB[k]&&hallOK();
 const FOODG=new Set(['veg','dairy','bread','grain','drinks']);
 const prodMul=g=>(LAW('pl_fast')?0.9:1)*(LAW('cm_coll')?(FOODG.has(g)?0.85:1.25):1);
 function ordHour(){researchHour();if(!hallOK())return;let f=0,n=0;for(let i=0;i<N*N;i++)if(pol[i]>0&&!water[i])n++;
@@ -2911,20 +2923,20 @@ function researchHour(){const r=researchRate();research+=r;cur.rp=(cur.rp||0)+r}
 function researchRate(){let r=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!HLV[c.t]||!c.pp||c.off)continue;const ts=tilesOf(i),P=ts.some(k=>eduP[k]),S=ts.some(k=>eduS[k]),X=ts.some(k=>lycCov[k]||techCov[k]);
     for(const q of c.pp){const st=stageOf(q.a);if(st===1&&P)r+=0.5;else if(st===2&&S)r+=X?1.25:1}}return r}
 function renderOrd(){const el=document.getElementById('ordp');if(!el||el.hidden)return;const ok=hallOK(),rr=researchRate();const sc=el.querySelector('.lawGrid'),sx=sc?sc.scrollLeft:0;
-  const card=(c,open)=>{const on=!!LAWB[c.k];return`<div class="lawc${on?' on':''}${open?'':' lock'}"><b>${c.name}</b><ul>${c.fx.map(f=>`<li>${f}</li>`).join('')}</ul><button class="lawBuy" data-law="${c.k}" title="${on?'Uchyl ustawę':'Wprowadź ustawę'}"${on?'':!open||money<c.cost||!ok?' disabled':''}>${on?'✓ Uchyl':`${fmt(c.cost)} T¢`}</button></div>`};
-  el.innerHTML=`<button class="lawX" data-close aria-label="Zamknij">✕</button><div class="lawHead"><h3>Projekty ustaw</h3><span class="lawRp" title="Punkty nauki: każdy uczeń w zasięgu szkoły daje punkty co godzinę">📖 ${fmt(Math.floor(research))} <small>+${(Math.round(rr*10)/10).toLocaleString()}/godz.</small></span></div>
-  <div class="lawNote">${ok?'Punkty nauki otwierają kolejne poziomy, a ustawę wprowadzasz jednorazową opłatą (uchylenie jest darmowe). Po zbadaniu obu poziomów odblokujesz wyjątkowy budynek (jeden na miasto).':'<span class="neg">Urząd miasta nie działa – ustawy są zawieszone.</span>'}</div>
+  const card=(c,open)=>{const on=!!LAWB[c.k];return`<div class="lawc${on?' on':''}${open?'':' lock'}"><b>${c.name}</b><ul>${c.fx.map(f=>`<li>${f}</li>`).join('')}</ul><button class="lawBuy" data-law="${c.k}" title="${on?'Uchyl ustawę':'Wprowadź ustawę'}"${on?'':!open||money<c.cost?' disabled':''}>${on?'✓ Uchyl':`${fmt(c.cost)} T¢`}</button></div>`};
+  el.innerHTML=`<button class="lawX" data-close aria-label="Zamknij">✕</button><div class="lawHead"><h3>Projekty ustaw</h3><span class="lawRp" title="Punkty nauki: każdy uczeń w zasięgu szkoły daje punkty co godzinę">${lawI('book')} ${fmt(Math.floor(research))} <small>+${(Math.round(rr*10)/10).toLocaleString()}/godz.</small></span></div>
+  <div class="lawNote">${ok?'Punkty nauki otwierają kolejne poziomy, a ustawę wprowadzasz jednorazową opłatą (uchylenie jest darmowe). Po zbadaniu obu poziomów odblokujesz wyjątkowy budynek (jeden na miasto).':`<span class="neg">${hallWhy()} Ustawy są zawieszone, ale możesz je już badać i wprowadzać.</span>`}</div>
   <div class="lawGrid">${LAWS.map(T=>{let prev=true;const tiers=T.tiers.map((t,n)=>{const key=T.k+n,open=!!LAWT[key];
-      const h=`<div class="lawTier">${t.cards.map(c=>card(c,open)).join('')}</div><div class="lawBar"><button class="lawRpB" data-tier="${key}" title="${open?'Poziom zbadany':'Zbadaj poziom za punkty nauki'}"${open||!prev||research<t.rp||!ok?' disabled':''}><i>📖</i>${fmt(t.rp)}</button><div class="lawTrack${open?' on':''}" data-ic="${open?'✔️':'🔒'}"></div></div>`;prev=open;return h}).join('');
+      const h=`<div class="lawTier">${t.cards.map(c=>card(c,open)).join('')}</div><div class="lawBar"><button class="lawRpB" data-tier="${key}" title="${open?'Poziom zbadany':'Zbadaj poziom za punkty nauki'}"${open||!prev||research<t.rp?' disabled':''}>${lawI('book')}${fmt(t.rp)}</button><div class="lawTrack${open?' on':''}">${lawI(open?'ok':'lock')}</div></div>`;prev=open;return h}).join('');
     const all=T.tiers.every((t,n)=>LAWT[T.k+n]),bn=DEF[T.unl].name;
-    return`<section class="lawT" style="--lc:${T.col}"><div class="lawIco">${T.ico}</div><div class="lawName">${T.name}</div>${tiers}${LAWU[T.k]?`<div class="lawUnl on">✓ Odblokowano<br>${bn}</div>`:`<button class="lawUnl" data-unl="${T.k}"${all&&ok?'':' disabled'}>Odblokuj<br>${bn}</button>`}</section>`}).join('')}</div>`;
+    return`<section class="lawT" style="--lc:${T.col}"><div class="lawIco">${lawI(T.k)}</div><div class="lawName">${T.name}</div>${tiers}${LAWU[T.k]?`<div class="lawUnl on">✓ Odblokowano<br>${bn}</div>`:`<button class="lawUnl" data-unl="${T.k}"${all?'':' disabled'}>Odblokuj<br>${bn}</button>`}</section>`}).join('')}</div>`;
   const g2=el.querySelector('.lawGrid');if(g2)g2.scrollLeft=sx;
   const done=m=>{hintEl.hidden=false;setHint(m,false,true);envDirty=true;powerDirty=true;save();renderOrd()};
   const cl=el.querySelector('[data-close]');if(cl)cl.onclick=()=>{el.hidden=true;const ob=document.getElementById('ordBtn');if(ob)ob.setAttribute('aria-expanded','false')};
   for(const b of el.querySelectorAll('[data-law]'))b.onclick=()=>{const k=b.dataset.law;let c=null;for(const T of LAWS)for(const t of T.tiers)for(const q of t.cards)if(q.k===k)c=q;if(!c)return;
-    if(LAWB[k]){delete LAWB[k];done(`Uchylono: ${c.name}.`)}else{if(money<c.cost||!hallOK())return;spend(c.cost);LAWB[k]=1;done(`Wprowadzono ustawę: ${c.name}.`)}};
-  for(const b of el.querySelectorAll('[data-tier]'))b.onclick=()=>{const key=b.dataset.tier,T=LAWS.find(q=>key.startsWith(q.k)&&key.length===q.k.length+1),n=+key.slice(-1),t=T.tiers[n];if(LAWT[key]||research<t.rp||(n&&!LAWT[T.k+(n-1)])||!hallOK())return;research-=t.rp;LAWT[key]=1;done(`Zbadano poziom ${n+1}: ${T.name}.`)};
-  for(const b of el.querySelectorAll('[data-unl]'))b.onclick=()=>{const T=LAWS.find(q=>q.k===b.dataset.unl);if(!T||!T.tiers.every((t,n)=>LAWT[T.k+n])||!hallOK())return;LAWU[T.k]=1;try{refreshLocks()}catch(e){}done(`Odblokowano: ${DEF[T.unl].name}.`)}}
+    if(LAWB[k]){delete LAWB[k];done(`Uchylono: ${c.name}.`)}else{if(money<c.cost)return;spend(c.cost);LAWB[k]=1;done(`Wprowadzono ustawę: ${c.name}.`)}};
+  for(const b of el.querySelectorAll('[data-tier]'))b.onclick=()=>{const key=b.dataset.tier,T=LAWS.find(q=>key.startsWith(q.k)&&key.length===q.k.length+1),n=+key.slice(-1),t=T.tiers[n];if(LAWT[key]||research<t.rp||(n&&!LAWT[T.k+(n-1)]))return;research-=t.rp;LAWT[key]=1;done(`Zbadano poziom ${n+1}: ${T.name}.`)};
+  for(const b of el.querySelectorAll('[data-unl]'))b.onclick=()=>{const T=LAWS.find(q=>q.k===b.dataset.unl);if(!T||!T.tiers.every((t,n)=>LAWT[T.k+n]))return;LAWU[T.k]=1;try{refreshLocks()}catch(e){}done(`Odblokowano: ${DEF[T.unl].name}.`)}}
 /* ---------- shipping centre: every 6 hours trucks take the chosen goods from the warehouses, in bulk ---------- */
 /* 6.6: every run is one load: you set how many kilograms of each good go on it, at most 100 kg in total */
 const SHIP_LOAD=150,SHIP_STEP=5;
@@ -7639,7 +7651,12 @@ const LT_TR=[
 ["Poziom zbadany", "Tier researched", "Stufe erforscht"],
 ["Zbadaj poziom za punkty nauki", "Research the tier with research points", "Stufe mit Forschungspunkten erforschen"],
 ["✓ Odblokowano", "✓ Unlocked", "✓ Freigeschaltet"],
-["Odblokuj", "Unlock", "Freischalten"]
+["Odblokuj", "Unlock", "Freischalten"],
+["Brak urzędu miasta.", "No city hall.", "Kein Rathaus."],
+["Urząd miasta jest zniszczony.", "City hall is destroyed.", "Das Rathaus ist zerstört."],
+["Urząd miasta jest wyłączony – włącz go w inspektorze.", "City hall is switched off – turn it on in the inspector.", "Das Rathaus ist ausgeschaltet – schalte es im Inspektor ein."],
+["Urząd miasta nie ma prądu – podłącz go do sieci.", "City hall has no power – connect it to the grid.", "Das Rathaus hat keinen Strom – schließe es ans Netz an."],
+["Ustawy są zawieszone, ale możesz je już badać i wprowadzać.", "Laws are suspended, but you can already research and pass them.", "Gesetze sind ausgesetzt, du kannst sie aber schon erforschen und erlassen."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
