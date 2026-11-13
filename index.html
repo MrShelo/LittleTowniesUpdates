@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.7.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -3790,6 +3790,15 @@ const conductive=i=>{const c=grid[i];return !!c&&((POLEABLE[c.t]&&c.pole)||c.t==
 /* 7.4.0: local poles and transformers bridge at most 2 levels of height; only HV lines take big height changes */
 const LV_DH=4,lvH=(a,b)=>Math.abs(hgt[a]-hgt[b])<=LV_DH;
 const isHV=i=>!!grid[i]&&grid[i].t==='hvpole';
+/* 7.7.6: conductors next to this one that would link, but the height difference is too big */
+function lvBlocked(a){if(!grid[a]||!conductive(a)||isHV(a))return[];const c=nbrs8(a).filter(j=>conductive(j)&&!isHV(j)&&(orth(a,j)||isTrafo(a)||isTrafo(j)));
+  if(isTrafo(a)&&grid[a].up)for(const j of inRange(a,2,j=>conductive(j)&&!isHV(j)))if(!c.includes(j))c.push(j);
+  if(!isTrafo(a))for(const j of inRange(a,2,j=>isTrafo(j)&&!grid[j].off&&grid[j].up))if(!c.includes(j))c.push(j);
+  return c.filter(j=>!lvH(a,j))}
+const lvName=j=>grid[j].t==='transformer'?'z transformatorem':'ze słupem';
+const lvDiff=(a,b)=>{const d=Math.abs(hgt[a]-hgt[b])/2;return(Number.isInteger(d)?d:d.toFixed(1).replace('.',','))};
+function lvWhy(i){const out=[],seen=new Set();const add=(a,j)=>{const k=Math.min(a,j)+'-'+Math.max(a,j);if(seen.has(k))return;seen.add(k);out.push(`Nie łączy się ${lvName(j)} – różnica ${lvDiff(a,j)} poz. (słupy i transformatory pokonują najwyżej 2 poziomy, większe różnice tylko linia WN).`)};
+  if(conductive(i))for(const j of lvBlocked(i))add(i,j);else for(const t of tilesOf(i))for(const a of nbrs8(t))if(conductive(a))for(const j of lvBlocked(a))add(a,j);return out}
 /* HV reach: 3 tiles each way, 5 after the upgrade; two poles link when either reaches the other */
 const hvR=i=>HV_R+(grid[i]&&grid[i].up?3:0),cheb=(a,b)=>Math.max(Math.abs(a%N-b%N),Math.abs(((a/N)|0)-((b/N)|0))),HV_MAX=HV_R+3;
 const hvReach=(p,j)=>cheb(p,j)<=hvR(p);
@@ -4381,7 +4390,7 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
       coal:'<b>El. węglowa</b> · '+(c.net<0?'<b>niepodłączona</b>: postaw obok transformator':c.running?`pracuje, ${COAL_MW} MW`:'czeka: wiatraki wystarczają albo brak węgla')+` · ${UPKEEP.coal} T¢/godz.`,house:'<b>Rezydencja</b>',factory:`<b>Fabryka</b> · zmiany do kolejnej ciężarówki: ${c.work}/2`,
       bakery:`<b>Piekarnia</b> · ${c.shelf?c.shelf.bread||0:0} bochenków`,gallery:'<b>Galeria handlowa</b>',restaurant:'<b>Restauracja</b>',cinema:'<b>Kino</b>',theater:'<b>Teatr</b>',casino:'<b>Kasyno</b>',hotelS:'<b>Mały hotel</b>',hotelB:'<b>Duży hotel</b>',tenement:'<b>Kamienica</b>',block:'<b>Tani blok</b>',modern:'<b>Apartamentowiec</b>',
       shop:`<b>Sklep</b> · półki ${c.shelf?shelfTotal(c):0}/${slotsOf(c)}`,bank:`<b>Bank</b> · +${fmt(BANK_CAP)} T¢ limitu`,warehouse:`<b>Magazyn</b> · +${fmt(whCap(c))} kg limitu`,smallwh:`<b>Mały magazyn</b> · +${WHCAP.smallwh} kg limitu`,
-      park1:`<b>Skwer</b> · zasięg 5×5 · ${UPKEEP.park1} T¢/godz.`,park2:`<b>Park</b> · zasięg 7×7 · ${UPKEEP.park2} T¢/godz.`,park3:`<b>Park miejski</b> · zasięg 9×9 · ${UPKEEP.park3} T¢/godz.`}[c.t]+pwr+no;
+      park1:`<b>Skwer</b> · zasięg 5×5 · ${UPKEEP.park1} T¢/godz.`,park2:`<b>Park</b> · zasięg 7×7 · ${UPKEEP.park2} T¢/godz.`,park3:`<b>Park miejski</b> · zasięg 9×9 · ${UPKEEP.park3} T¢/godz.`}[c.t]+pwr+no+((conductive(i)||(DEMAND[c.t]&&!c.powered))&&lvWhy(i).length?' · <b>Wysokość:</b> '+lvWhy(i).slice(0,2).map(w=>`<span>${w}</span>`).join(' '):'');
     if(DEF[c.t].r||DEF[c.t].area)showArea(i,DEF[c.t].r?parkR(c):c.t==='hvpole'?hvR(i):DEF[c.t].area,true);
     if(pol[i]&&!isFactory(c.t)&&c.t!=='coal')s+=pol[i]===2?' · silny smog (szare pole)':' · lekki smog'}
   if(c&&c.bus)s+=stopInfo(i);
@@ -4482,6 +4491,7 @@ function renderInsp(){const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHous
       `<div class="upc"><button class="btn panel up upb" id="inspHU"${money<L.cost[lv]?' disabled':''}>Rozbuduj: ${L.name[lv+1]} · ${fmt(L.cost[lv])} T¢</button><div class="upd2">+${L.res[lv+1]-L.res[lv]} mieszkańców, więcej kursów i wody</div></div>`:
       `<div class="xp"><span>Doświadczenie do rozbudowy</span><b>${Math.floor(xp*100)}%</b><div class="bar"><i style="width:${xp*100}%;background:var(--accent)"></i></div><small>${h>0?`ok. ${Math.ceil((1-xp)*L.xp/(h/6)/60)} min przy zadowoleniu ${h}/${HMAX} (im wyższe, tym szybciej)`:'zadowolenie 0: brak postępu'}</small></div>`)}}
   if(c.off)R('Stan','wyłączony','warnv');
+  {const lw=(conductive(i)||(DEMAND[c.t]&&!c.powered))?lvWhy(i):[];if(lw.length)for(const w of lw.slice(0,3))R('Wysokość',w,'warnv')}
   if(DEMAND[c.t]&&!c.off)R('Prąd',c.powered?`zasilany · ${mw(DEMAND[c.t]*nightDem(c.t))} MW`:c.net>=0?'za mało mocy w sieci':UTIL_R[c.t]?'brak słupa lub transformatora w promieniu 2 pól':'brak słupa lub transformatora obok',c.powered?'':'warnv');
   if(!NOROAD[c.t]&&entryOf(i)<0)R('Dojazd','brak ulicy obok','warnv');
   const full=TRASH[c.t]&&c.trash>=TRASH[c.t].cap;
@@ -7672,7 +7682,19 @@ const LT_TR=[
 ["Kliknij jezdnię, by postawić wiatę po pokazanej stronie.", "Click the road to place the shelter on the side shown.", "Klicke auf die Fahrbahn, um das Wartehäuschen auf der gezeigten Seite aufzustellen."],
 ["Zaznacz wszystkie", "Select all", "Alle auswählen"],
 ["Odznacz wszystkie", "Deselect all", "Alle abwählen"],
-["Magazyn nic nie przyjmuje – zaznacz towary, które ma przyjmować.", "The warehouse accepts nothing – select the goods it should accept.", "Das Lager nimmt nichts an – wähle die Waren aus, die es annehmen soll."]
+["Magazyn nic nie przyjmuje – zaznacz towary, które ma przyjmować.", "The warehouse accepts nothing – select the goods it should accept.", "Das Lager nimmt nichts an – wähle die Waren aus, die es annehmen soll."],
+["Wysokość", "Height", "Höhe"],
+["Wysokość:", "Height:", "Höhe:"],
+["nie łączy się z {} – różnica {} poz. (słupy i transformatory pokonują najwyżej {} poziomy, większe różnice tylko linia WN)", "does not connect to {} – {} level difference (poles and transformers bridge at most {} levels, bigger differences only an HV line)", "verbindet sich nicht mit {} – {} Ebenen Unterschied (Masten und Transformatoren überbrücken höchstens {} Ebenen, größere Unterschiede nur eine HS-Leitung)"],
+["transformatorem", "the transformer", "dem Transformator"],
+["słupem", "the pole", "dem Mast"],
+["słupem przy {}", "the pole by the {}", "dem Mast an der {}"],
+["nie łączy się z transformatorem – różnica {} poz. (słupy i transformatory pokonują najwyżej {} poziomy, większe różnice tylko linia WN)", "does not connect to the transformer – {} level difference (poles and transformers bridge at most {} levels, bigger differences only an HV line)", "verbindet sich nicht mit dem Transformator – {} Ebenen Unterschied (Masten und Transformatoren überbrücken höchstens {} Ebenen, größere Unterschiede nur eine HS-Leitung)"],
+["nie łączy się ze słupem – różnica {} poz. (słupy i transformatory pokonują najwyżej {} poziomy, większe różnice tylko linia WN)", "does not connect to the pole – {} level difference (poles and transformers bridge at most {} levels, bigger differences only an HV line)", "verbindet sich nicht mit dem Mast – {} Ebenen Unterschied (Masten und Transformatoren überbrücken höchstens {} Ebenen, größere Unterschiede nur eine HS-Leitung)"],
+["Nie łączy się z transformatorem – różnica {} poz. (słupy i transformatory pokonują najwyżej {} poziomy, większe różnice tylko linia WN).", "Does not connect to the transformer – {} level difference (poles and transformers bridge at most {} levels, bigger differences only an HV line).", "Verbindet sich nicht mit dem Transformator – {} Ebenen Unterschied (Masten und Transformatoren überbrücken höchstens {} Ebenen, größere Unterschiede nur eine HS-Leitung)."],
+["Nie łączy się ze słupem – różnica {} poz. (słupy i transformatory pokonują najwyżej {} poziomy, większe różnice tylko linia WN).", "Does not connect to the pole – {} level difference (poles and transformers bridge at most {} levels, bigger differences only an HV line).", "Verbindet sich nicht mit dem Mast – {} Ebenen Unterschied (Masten und Transformatoren überbrücken höchstens {} Ebenen, größere Unterschiede nur eine HS-Leitung)."],
+["Nie łączy się z transformatorem – różnica {} poz. (słupy i transformatory pokonują najwyżej 2 poziomy, większe różnice tylko linia WN).", "Does not connect to the transformer – {} level difference (poles and transformers bridge at most 2 levels, bigger differences only an HV line).", "Verbindet sich nicht mit dem Transformator – {} Ebenen Unterschied (Masten und Transformatoren überbrücken höchstens 2 Ebenen, größere Unterschiede nur eine HS-Leitung)."],
+["Nie łączy się ze słupem – różnica {} poz. (słupy i transformatory pokonują najwyżej 2 poziomy, większe różnice tylko linia WN).", "Does not connect to the pole – {} level difference (poles and transformers bridge at most 2 levels, bigger differences only an HV line).", "Verbindet sich nicht mit dem Mast – {} Ebenen Unterschied (Masten und Transformatoren überbrücken höchstens 2 Ebenen, größere Unterschiede nur eine HS-Leitung)."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
