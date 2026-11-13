@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.5.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.5.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -108,6 +108,8 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
   padding-top:10px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .hud > *{pointer-events:auto}
+/* 7.5.4: on wider screens the clock/radio/speed group is pinned top-right and the resource tiles wrap beside it, so nothing jumps between rows */
+.hud.sideAbs{padding-right:var(--sideW,16px)}.hud.sideAbs .side{position:absolute;top:10px;right:max(16px,env(safe-area-inset-right,0px));margin-left:0;flex-wrap:nowrap}
 body.cine .hud,body.cine .dock,body.cine .rail,body.cine #tut,body.cine #tutInfo{opacity:0;pointer-events:none;transition:opacity .7s}
 .hud,.dock,.rail{transition:opacity .7s}
 #cineHint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);padding:8px 16px;border-radius:20px;background:rgba(0,0,0,.55);color:#fff;font:13px system-ui,sans-serif;opacity:0;pointer-events:none;z-index:9}
@@ -4946,6 +4948,8 @@ function setTipHTML(el,h){if(el.__tipH===h)return;el.__tipH=h;if(tipSrc===el&&!t
 function showTipAt(x,y,text,src){if(tipSrc!==src||tipEl.hidden){tipEl.innerHTML=tipHTML(text)}tipSrc=src;tipEl.hidden=false;placeTip(x,y,false)}
 function hideTip(){tipEl.hidden=true;tipSrc=null;clearTimeout(tipT)}
 /* 7.4.1: the inspector's right edge lines up with the right edge of the build toolbar */
+function hudFit(){try{const h=document.querySelector('.hud'),sd=h&&h.querySelector('.side');if(!sd)return;const on=innerWidth>=900;h.classList.toggle('sideAbs',on);if(on)h.style.setProperty('--sideW',(sd.offsetWidth+24)+'px')}catch(e){}}
+addEventListener('resize',hudFit);setTimeout(hudFit,300);try{new ResizeObserver(()=>hudFit()).observe(document.querySelector('.hud .side'))}catch(e){}
 function alignInsp(){try{const b=document.querySelector('.dock .build'),d=document.querySelector('.dock');if(!b||!d)return;const ie=document.getElementById('insp');let r=d.getBoundingClientRect().right-b.getBoundingClientRect().right;d.style.setProperty('--inspR',Math.max(0,Math.round(r))+'px');if(!ie.hidden){const diff=b.getBoundingClientRect().right-ie.getBoundingClientRect().right;r-=diff;d.style.setProperty('--inspR',Math.max(0,Math.round(r))+'px')}}catch(e){}}
 addEventListener('resize',alignInsp);try{new MutationObserver(()=>{if(!document.getElementById('insp').hidden)alignInsp()}).observe(document.getElementById('insp'),{attributes:true,attributeFilter:['hidden']})}catch(e){}setTimeout(alignInsp,500);try{new ResizeObserver(()=>alignInsp()).observe(document.querySelector('.dock .build'))}catch(e){}
 /* 7.4.0: readable hints on the build-mode buttons (single, many, line, along a road) and brush/level buttons */
