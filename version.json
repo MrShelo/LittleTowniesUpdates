@@ -1,1 +1,1 @@
-{"v": "7.7.17", "notes": "7.7.17: przystanki mają własną kartę w inspektorze – nazwa (do zmiany), linie, czekający pasażerowie, strona ulicy, przeniesienie i usuwanie; nazwy widać w panelu linii"}
+{"v": "7.7.18", "notes": "7.7.18: nowy panel Komunikacji miejskiej (styl jak Gospodarka, ikony, przeciąganie przystanków, wstawianie + między przystankami, podgląd na mapie i ukrywanie pojedynczych linii); linie i podgląd zniknęły z paska narzędzi; słupy wzdłuż drogi nie mają limitu wysokości"}
