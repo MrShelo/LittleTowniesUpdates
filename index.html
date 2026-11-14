@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.7.11';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.12';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -3071,9 +3071,10 @@ function railFull(st){const k=st+'|'+railVer;if(railFullC.has(k))return railFull
     const far=T.ends.find(e=>e>=0&&j2adj(e,last)&&!p.includes(e)&&isRailT(e));
     if(far==null){const e=T.ends.find(e=>e>=0&&!p.includes(e));why={none:e!=null?e:-1}}
     if(far!=null){const startK=far*N*N+last,prevS=new Map([[startK,-1]]),q=[[far,last]];let goal=null;
-      for(let h=0;h<q.length&&goal==null;h++){const[t,pr]=q[h],x=t%N,z=(t/N)|0;if(x===0||z===0||x===N-1||z===N-1){goal=t*N*N+pr;break}
+      let back=false;/* 7.7.12: a turning loop: the train goes round it, comes back past the platform end and leaves the way it came */
+      for(let h=0;h<q.length&&goal==null;h++){const[t,pr]=q[h],x=t%N,z=(t/N)|0;if(h&&t===far&&pr!==last){goal=t*N*N+pr;back=true;break}if(x===0||z===0||x===N-1||z===N-1){goal=t*N*N+pr;break}
         for(const j of railNext(t,rows)){if(j===pr||rowSet.has(j)||!isRailT(j))continue;const kk=j*N*N+t;if(prevS.has(kk))continue;prevS.set(kk,t*N*N+pr);q.push([j,t])}}
-      if(goal!=null){const ex=[];for(let kk=goal;kk!==-1;kk=prevS.get(kk))ex.push(Math.floor(kk/(N*N)));ex.reverse();out={p:p.concat(ex),stopU:p.length-1}}
+      if(goal!=null){const ex=[];for(let kk=goal;kk!==-1;kk=prevS.get(kk))ex.push(Math.floor(kk/(N*N)));ex.reverse();out={p:back?p.concat(ex,p.slice().reverse()):p.concat(ex),stopU:p.length-1,loop:back}}
       else{const ends=q.map(([t,pr])=>t).filter(t=>railNext(t,rows).filter(j=>!rowSet.has(j)).length<=1);why={cut:ends.length?ends[ends.length-1]:q[q.length-1][0],n:q.length,from:far}}}}}catch(e){out=null}
   railFullC.set(k,out);railWhyC.set(k,why);return out}
 function railWhy(st){railFull(st);return railWhyC.get(st+'|'+railVer)||null}
