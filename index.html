@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.7.16';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.17';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -3428,10 +3428,27 @@ if(linpEl){linpEl.addEventListener('pointerdown',()=>{linDown=performance.now()}
   linpEl.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'&&e.target.blur)e.target.blur()})}
 if(linBtn)linBtn.addEventListener('click',()=>selectTool(isLineT(tool)?'view':'busLine'));
 /* a stop is named after the nearest building beside it (a public one before houses) */
-function stopLabel(L,S){if(L.kind==='rail')return`Dworzec · pole ${S%N+1}, ${((S/N)|0)+1}`;const x=S%N,z=(S/N)|0;let best=null,bs=9;
+/* 7.7.17: bus stops have names and their own card in the inspector */
+const stopList=()=>{const o=[];for(let j=0;j<N*N;j++)if(grid[j]&&grid[j].bus)o.push(j);return o};
+function stopName(S){const c=grid[S];if(c&&c.sname)return c.sname;const k=stopList().indexOf(S);return`Przystanek ${k+1}`}
+function removeStop(i){const c=grid[i];if(!c||!c.bus)return;c.bus=0;c.busAx=null;c.sname=undefined;drawStop(i);stopGone(i);const n=addMoney(Math.floor(DEF.busStop.cost/2));cur.refund+=n;save()}
+function renderStopInsp(i){const c=grid[i];const inp=document.getElementById('stopNm');if(inp&&document.activeElement===inp)return;
+  const q=paxQ.get(i)||[],ls=tLines.filter(L=>L.stops.includes(i)),list=stopList(),k=list.indexOf(i),side=stopAxOf(i)===0?(c.bus<0?'północna':'południowa'):(c.bus<0?'zachodnia':'wschodnia');
+    const html=`<div class="top"><b>${esc(stopName(i))}</b><small>${k+1}. z ${list.length} przystanków · pole ${i%N+1}, ${((i/N)|0)+1}</small><button class="btn icon panel x" id="inspX" aria-label="Zamknij">×</button></div>
+  ${isec('stopName','Nazwa',`<div style="display:flex;gap:6px"><input id="stopNm" maxlength="32" value="${esc(c.sname||'').replace(/"/g,'&quot;')}" placeholder="${esc(stopName(i)).replace(/"/g,'&quot;')}" style="flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit"><button class="btn panel" id="stopNmOk">Zmień</button></div>`)}
+  ${isec('info','Informacje',`<div class="facts"><span>Linie</span><span>${ls.length?ls.map(L=>`<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${L.col};margin:0 4px 0 6px"></span>${esc(L.name)}`).join(''):'żadna linia tu nie staje'}</span><span>Czeka pasażerów</span><span>${q.length}</span><span>Strona ulicy</span><span>${side}</span><span>Utrzymanie</span><span>${STOP_UPK} T¢/godz.</span></div>`)}
+  ${isec('opts','Opcje',`<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn panel" id="stopFlip">↻ Przenieś na drugą stronę</button><button class="btn panel" id="stopDel">Usuń przystanek (+${fmt(Math.floor(DEF.busStop.cost/2))} T¢)</button></div>`)}`;
+  if(html===inspEl.__html)return;inspEl.__html=html;inspEl.innerHTML=html;
+  document.getElementById('inspX').onclick=closeHouse;
+  const nm=document.getElementById('stopNm'),ok=()=>{const v=nm.value.replace(/[<>"]/g,'').trim().slice(0,32);c.sname=v||undefined;transVer++;save();inspEl.__html='';nm.blur();renderStopInsp(i);try{renderLines()}catch(e){}};
+  if(nm){document.getElementById('stopNmOk').onclick=ok;nm.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')ok();if(e.key==='Escape'){nm.value=c.sname||'';nm.blur()}};nm.onkeyup=e=>e.stopPropagation()}
+  {const b=document.getElementById('stopFlip');if(b)b.onclick=()=>{c.bus=-c.bus;drawStop(i);transVer++;save();inspEl.__html='';renderStopInsp(i)};}
+  {const b=document.getElementById('stopDel');if(b)b.onclick=()=>{removeStop(i);closeHouse()}}
+  for(const h of inspEl.querySelectorAll('[data-fold]'))h.onclick=()=>{const k=h.dataset.fold;inspFold.has(k)?inspFold.delete(k):inspFold.add(k);try{localStorage.setItem('lt-insp-fold',JSON.stringify([...inspFold]))}catch(e){}inspEl.__html=null;renderStopInsp(i)}}
+function stopLabel(L,S){if(L.kind==='rail')return`Dworzec · pole ${S%N+1}, ${((S/N)|0)+1}`;if(grid[S]&&grid[S].sname)return`${grid[S].sname} · pole ${S%N+1}, ${((S/N)|0)+1}`;const x=S%N,z=(S/N)|0;let best=null,bs=9;
   for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const m=mainOf(idx(nx,nz)),c=grid[m];if(!c||DRIVE[c.t]||!DEF[c.t])continue;const sc=(HOUSING[c.t]?4:0)+Math.abs(dx)+Math.abs(dz);if(sc<bs){bs=sc;best=c.t}}
   return`${best?'przy: '+DEF[best].name:'ulica'} · pole ${x+1}, ${z+1}`}
-function stopInfo(i){const q=paxQ.get(i)||[],ls=tLines.filter(L=>L.stops.includes(i));return` · <b>przystanek</b>${ls.length?' linii '+ls.map(L=>esc(L.name)).join(', '):' bez linii'} · czeka ${q.length}`}
+function stopInfo(i){const q=paxQ.get(i)||[],ls=tLines.filter(L=>L.stops.includes(i));return` · <b>${esc(stopName(i))}</b>${ls.length?' linii '+ls.map(L=>esc(L.name)).join(', '):' bez linii'} · czeka ${q.length}`}
 /* ---------- fire service: random fires by building group, spread to one neighbour at a time, trucks put them out, ruins after 6 h ---------- */
 const FIRE={fireS:{r:13,trucks:1,extra:1},fireB:{r:13,trucks:2,extra:2}};const isFireSt=t=>t==='fireS'||t==='fireB';const fireRad=c=>FIRE[c.t].r+(c.up2?3:0);
 const FIRE_P={ind:0.0075,svc:0.005,res:0.0025,oth:0.00125},FIRE_SPREAD=0.2,FIRE_EXT=30,FIRE_RUIN=360;
@@ -4350,7 +4367,7 @@ function apply(i,painting){
   if(moveSrc>=0){if(painting)return;if(!grid[moveSrc]){moveSrc=-1;return}pendA=i;updateGhost();return}
   if(tool==='busStop'){if(!painting)placeStop(i);return}
   if(isLineT(tool)){if(!painting)lineClick(i);return}
-  if(tool==='view')return grid[i]&&!DRIVE[grid[i].t]?openHouse(i):inspect(i);
+  if(tool==='view')return grid[i]&&(!DRIVE[grid[i].t]||grid[i].bus)?openHouse(i):inspect(i);
   if(tool==='pipe'){if(water[i]&&!(grid[i]&&grid[i].t==='bridge')){if(!painting)setHint('Przez rzekę rurę prowadzi się mostem: postaw most i połóż rurę na nim.',true,true);return}if(pipe[i])return;
     if(money<DEF.pipe.cost){setHint(`Brakuje ${fmt(DEF.pipe.cost-money)} T¢ na rurę.`,true,true);return}spend(DEF.pipe.cost);pipe[i]=1;powerDirty=true;save();return}
   if(tool==='pipeDel'){if(!pipe[i])return;pipe[i]=0;const n=addMoney(2);cur.refund+=n;powerDirty=true;save();return}
@@ -4371,7 +4388,7 @@ function apply(i,painting){
     if(tool==='roundabout'){if(!painting)setHint('Rondo stawia się na istniejącej ulicy, najlepiej na skrzyżowaniu.',true,true);return}}
   if(tool==='crosswalk'){if(!c||!STREET[c.t]){if(!painting)setHint('Przejście stawia się na zwykłej ulicy.',true,true);return}if(c.cross)return;if(c.bus){if(!painting)setHint('Tu stoi przystanek – przejście postaw obok.',true,true);return}if(!crossOK(i)){if(!painting)setHint('Przejścia nie da się postawić na skrzyżowaniu ani zakręcie – tylko na prostym odcinku.',true,true);return}
     if(money<DEF.crosswalk.cost){setHint(`Brakuje ${fmt(DEF.crosswalk.cost-money)} T¢.`,true,true);return}spend(DEF.crosswalk.cost);c.cross=true;drawCross(i);save();return}
-  if(tool==='crossDel'&&c&&c.bus&&!c.cross){c.bus=0;c.busAx=null;drawStop(i);stopGone(i);const n=addMoney(Math.floor(DEF.busStop.cost/2));cur.refund+=n;save();return}
+  if(tool==='crossDel'&&c&&c.bus&&!c.cross){removeStop(i);return}
   if(tool==='crossDel'){if(!c||!c.cross){if(!painting)setHint('Tu nie ma przejścia ani przystanku.',true,true);return}c.cross=false;drawCross(i);const n=addMoney(Math.floor(DEF.crosswalk.cost/2));cur.refund+=n;save();return}
   if(tool==='rail'){if(c&&c.t==='rail')return;if(c&&(!STREET[c.t]||c.rail||c.edge)){if(!painting)setHint(c.rail?'Tu już są tory.':'Tory przejdą tylko przez zwykłą ulicę (przejazd kolejowy) albo wolne pole i wodę.',true,true);return}
     {if(!c)roadAlign(i,2,painting);const why=c?crossWhy(i,painting?paintPrev:-1):railNearWhy(i)||slopeWhy(i,'rail');if(why){if(!painting)setHint(why,true,true);return}}
@@ -4512,7 +4529,7 @@ const NEED_SVG=['<path d="M10 6.5c-3.6-2-6 .8-5.5 4.2.5 3.3 3 6 5.5 5 2.5 1 5-1.
   '<path d="M5.5 7h9a3 3 0 0 1 3 3.2l-.4 3.2a1.8 1.8 0 0 1-3.1.9L12.5 13h-5L6 14.3a1.8 1.8 0 0 1-3.1-.9l-.4-3.2A3 3 0 0 1 5.5 7z"/><path d="M6.5 9v2.5M5.2 10.2h2.6"/>'].map(d=>`<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`);
 /* demolish from the inspector: the same rules and refund as the bulldozer */
 function demolishAt(i){const sv=tool,sd=delMode;tool='bulldoze';delMode='all';try{apply(i,false)}finally{tool=sv;delMode=sd}if(!grid[i])closeHouse();else{inspEl.__html=null;renderInsp()}}
-function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];if(!c||DRIVE[c.t])return closeHouse();
+function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];if(c&&DRIVE[c.t]&&c.bus)return renderStopInsp(i);if(!c||DRIVE[c.t])return closeHouse();
   if(c.ruin){const html=`<div class="top"><b>Zgliszcza · ${DEF[c.t].name}</b><small>pole ${i%N+1}, ${((i/N)|0)+1}</small><button class="btn icon panel x" id="inspX" aria-label="Zamknij">×</button></div><div class="eff">Budynek spłonął i nie działa. Wyburz go narzędziem Wyburz, żeby zwolnić miejsce.</div>`;
     if(html!==inspEl.__html){inspEl.__html=html;inspEl.innerHTML=html;document.getElementById('inspX').onclick=closeHouse}return}
   const ccat=catOfT(c.t),list=catList(ccat),k=list.indexOf(i),rows=[],night=isNight(),nt=nextType(c.t);
@@ -5413,7 +5430,7 @@ let saveReq=false,saveRT=0;
 function save(){if(window.__testUnlock||saveBlocked||window.__LT_EDITOR)return writeSave();saveReq=true}
 function writeSave(){saveReq=false;saveRT=0;if(saveBlocked||window.__LT_EDITOR)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
   const old=localStorage.getItem(KEY);if(old)localStorage.setItem(KEY+'-prev',old);
-  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,taxes:TAX,ord:ORD,law:{b:Object.keys(LAWB),t:Object.keys(LAWT),u:Object.keys(LAWU),rp:Math.round(research*10)/10},loan,pend:[Math.round(pendIn),Math.round(pendOut)],sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),bus:[...grid.keys()].filter(i=>grid[i]&&grid[i].bus).map(i=>[i,grid[i].bus,stopAxOf(i)]),tl:tLines.map(L=>({id:L.id,kind:L.kind,name:L.name,col:L.col,stops:[...L.stops],veh:L.veh,on:L.on?1:0})),tls:lineSeq,litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),dep:[...dep.keys()].filter(i=>dep[i]).map(i=>[i,dep[i]]),hg:hgtStr(),wv:[...wlv.keys()].filter(i=>water[i]&&wlv[i]!==hgt[i]).map(i=>[i,wlv[i]]),fl:[...fld.keys()].filter(i=>fld[i]).map(i=>[i,fld[i]]),ms:msLevel,n:N,whst:1,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
+  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),map:mapType,diff,tut,tax:taxRate,taxes:TAX,ord:ORD,law:{b:Object.keys(LAWB),t:Object.keys(LAWT),u:Object.keys(LAWU),rp:Math.round(research*10)/10},loan,pend:[Math.round(pendIn),Math.round(pendOut)],sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),bus:[...grid.keys()].filter(i=>grid[i]&&grid[i].bus).map(i=>grid[i].sname?[i,grid[i].bus,stopAxOf(i),grid[i].sname]:[i,grid[i].bus,stopAxOf(i)]),tl:tLines.map(L=>({id:L.id,kind:L.kind,name:L.name,col:L.col,stops:[...L.stops],veh:L.veh,on:L.on?1:0})),tls:lineSeq,litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),dep:[...dep.keys()].filter(i=>dep[i]).map(i=>[i,dep[i]]),hg:hgtStr(),wv:[...wlv.keys()].filter(i=>water[i]&&wlv[i]!==hgt[i]).map(i=>[i,wlv[i]]),fl:[...fld.keys()].filter(i=>fld[i]).map(i=>[i,fld[i]]),ms:msLevel,n:N,whst:1,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
 function load(){if(loadKey(KEY))return true;if(oldSave){try{const r=localStorage.getItem(KEY);if(r&&!localStorage.getItem(KEY+'-pre4'))localStorage.setItem(KEY+'-pre4',r)}catch(e){}saveBlocked=true;return false}if(loadKey(KEY+'-prev')){setHint('Ostatni zapis był uszkodzony, wczytano poprzedni.',true,true);return true}
   let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
   if(raw){saveBlocked=true;try{localStorage.setItem(KEY+'-broken',raw)}catch(e){}setHint('Nie udało się wczytać zapisu. Kopia jest bezpieczna i gra jej nie nadpisze. Tylko „Zresetuj miasto” zaczyna od nowa.',true,true);hintTimer=12}
@@ -5436,7 +5453,7 @@ function migrateSave(s,old){const off=(N-old)>>1,m=i=>typeof i==='number'&&i>=0?
   s.cells=s.cells.map(r0=>{const q=r0.slice();q[0]=m(q[0]);if(Array.isArray(q[7]))q[7]=q[7].map(m);else if(typeof q[7]==='number'&&q[7]>=0)q[7]=m(q[7]);
     if(q[8]&&Array.isArray(q[8].pp))q[8]=Object.assign({},q[8],{pp:q[8].pp.map(a=>{const b=a.slice();if(b[4]>=0)b[4]=m(b[4]);return b})});return q});
   for(const k of['pipes','water','rails','cross'])if(Array.isArray(s[k]))s[k]=s[k].map(m);
-  if(Array.isArray(s.bus))s.bus=s.bus.map(([i,a,b])=>[m(i),a,b]);if(Array.isArray(s.tl))for(const L of s.tl)if(L&&Array.isArray(L.stops))L.stops=L.stops.map(m);
+  if(Array.isArray(s.bus))s.bus=s.bus.map(([i,a,b,n])=>n?[m(i),a,b,n]:[m(i),a,b]);if(Array.isArray(s.tl))for(const L of s.tl)if(L&&Array.isArray(L.stops))L.stops=L.stops.map(m);
   for(const k of['edges','litter','dep'])if(Array.isArray(s[k]))s[k]=s[k].map(([i,v])=>[m(i),v]);
   const lo=off,hi=off+old-1,outs=i=>{const x=i%N,z=(i/N)|0,o=[];if(x===lo)o.push([-1,0]);if(x===hi)o.push([1,0]);if(z===lo)o.push([0,-1]);if(z===hi)o.push([0,1]);return o};
   const ray=(i,[dx,dz])=>{const r=[];let x=i%N+dx,z=((i/N)|0)+dz;while(x>=0&&z>=0&&x<N&&z<N){r.push(idx(x,z));x+=dx;z+=dz}return r};
@@ -5462,7 +5479,7 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
   pipe.fill(0);if(Array.isArray(s.pipes))for(const i of s.pipes)pipe[i]=1;
   if(Array.isArray(s.litter))for(const[i,n]of s.litter)setLitter(i,n);
   if(Array.isArray(s.cross))for(const i of s.cross)if(grid[i]&&STREET[grid[i].t]){grid[i].cross=true;drawCross(i)}
-  if(Array.isArray(s.bus))for(const[i,sd,ax]of s.bus)if(grid[i]&&STREET[grid[i].t]&&!grid[i].cross){grid[i].bus=sd<0?-1:1;grid[i].busAx=ax===1?1:0;drawStop(i)}
+  if(Array.isArray(s.bus))for(const[i,sd,ax,nm]of s.bus)if(grid[i]&&STREET[grid[i].t]&&!grid[i].cross){grid[i].bus=sd<0?-1:1;grid[i].busAx=ax===1?1:0;if(typeof nm==='string'&&nm)grid[i].sname=nm.replace(/[<>]/g,'').slice(0,32);drawStop(i)}
   tLines=[];lineSeq=s.tls|0;if(Array.isArray(s.tl))for(const L of s.tl){if(!L||!['bus','rail'].includes(L.kind)||!Array.isArray(L.stops))continue;const st=L.stops.filter((S,k,a)=>a.indexOf(S)===k&&grid[S]&&(L.kind==='bus'?!!grid[S].bus:grid[S].t==='trainSt'));if(st.length<2)continue;
     tLines.push({id:L.id|0||++lineSeq,kind:L.kind,name:String(L.name||'Linia').slice(0,18),col:LINE_COL.includes(L.col)?L.col:LINE_COL[0],stops:st,veh:Math.max(1,Math.min(L.kind==='bus'?BUS_MAX:TRAIN_MAX,L.veh|0||1)),on:L.on!==0});lineSeq=Math.max(lineSeq,L.id|0)}transVer++;
   if(Array.isArray(s.rails))for(const i of s.rails)if(grid[i]&&STREET[grid[i].t])grid[i].rail=true;railVer++;try{railDecksAll()}catch(e){}railRefreshAll();
@@ -7749,7 +7766,20 @@ const LT_TR=[
 ["tor za peronem (od pola {}) urywa się na polu {}", "the track past the platform (from tile {}) ends at tile {}", "das Gleis hinter dem Bahnsteig (ab Feld {}) endet auf Feld {}"],
 ["pociąg wjeżdża od drugiej strony, a za peronem (pole {}) nie ma toru", "the train comes in from the other side, and past the platform (tile {}) there is no track", "der Zug kommt von der anderen Seite, und hinter dem Bahnsteig (Feld {}) liegt kein Gleis"],
 ["za peronem nie ma miejsca na tor", "there is no room for a track past the platform", "hinter dem Bahnsteig ist kein Platz für ein Gleis"],
-["Przejazd kolejowy stawia się na prostej ulicy – nie na skrzyżowaniu ani zakręcie.", "A level crossing goes on a straight street – not on a junction or a bend.", "Ein Bahnübergang kommt auf eine gerade Straße – nicht auf eine Kreuzung oder Kurve."]
+["Przejazd kolejowy stawia się na prostej ulicy – nie na skrzyżowaniu ani zakręcie.", "A level crossing goes on a straight street – not on a junction or a bend.", "Ein Bahnübergang kommt auf eine gerade Straße – nicht auf eine Kreuzung oder Kurve."],
+["{}. z {} przystanków · pole {}, {}", "{} of {} stops · tile {}, {}", "{} von {} Haltestellen · Feld {}, {}"],
+["Nazwa", "Name", "Name"],
+["Zmień", "Rename", "Umbenennen"],
+["żadna linia tu nie staje", "no line stops here", "keine Linie hält hier"],
+["Czeka pasażerów", "Passengers waiting", "Wartende Fahrgäste"],
+["Strona ulicy", "Side of the street", "Straßenseite"],
+["północna", "north", "Nord"],
+["południowa", "south", "Süd"],
+["zachodnia", "west", "West"],
+["wschodnia", "east", "Ost"],
+["↻ Przenieś na drugą stronę", "↻ Move to the other side", "↻ Auf die andere Seite verlegen"],
+["Usuń przystanek (+{} T¢)", "Remove stop (+{} T¢)", "Haltestelle entfernen (+{} T¢)"],
+["Przystanek {}", "Stop {}", "Haltestelle {}"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
