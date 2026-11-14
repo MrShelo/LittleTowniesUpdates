@@ -25,3 +25,6 @@ ukrycie), dodawać bryły i efekty (dym, para, ogień), ustawiać zachowanie cz�
 animacje z gry) oraz tworzyć warianty wyglądu, które gra losuje dla każdego budynku i pojazdu. Zapisane modele zostają na komputerze;
 zaznaczone można wysłać razem jako jedną aktualizację (potrzebny token GitHuba z uprawnieniem *Contents: Read and write*).
 Przy wydawaniu nowej wersji gry ręcznie użyj `python3 zachowaj_modele.py nowa.html` (po `git pull`), żeby nie skasować wysłanych modeli.
+
+## Podpowiedzi
+Teksty po najechaniu (przyciski, narzędzia, budynki) i ich tłumaczenia edytujesz w `podpowiedzi/podpowiedzi.tsv` – opis w `podpowiedzi/CZYTAJ.md`.

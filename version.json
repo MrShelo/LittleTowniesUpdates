@@ -1,1 +1,1 @@
-{"v": "8.0.1", "notes": "8.0.1: duża fabryka (3) i kombinat (4) wybierają produkt osobno dla każdej linii, jak mała fabryka; kombinat ma partie 2× większe od dużej fabryki"}
+{"v": "8.0.2", "notes": "8.0.2: podpowiedzi po najechaniu i opisy narzędzi/budynków (z tłumaczeniami EN/DE) są teraz w osobnym pliku podpowiedzi/podpowiedzi.tsv do edycji"}
