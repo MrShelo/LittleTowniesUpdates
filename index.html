@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.7.15';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.16';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -111,6 +111,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
 /* 7.5.4: on wider screens the clock/radio/speed group is pinned top-right and the resource tiles wrap beside it, so nothing jumps between rows */
 .hud.sideAbs{padding-right:var(--sideW,16px)}.hud.sideAbs .side{position:absolute;top:10px;right:max(16px,env(safe-area-inset-right,0px));margin-left:0;flex-wrap:nowrap}
 body.cine .hud,body.cine .dock,body.cine .rail,body.cine #tut,body.cine #tutInfo{opacity:0;pointer-events:none;transition:opacity .7s}
+body.cine #stat,body.cine #floats,body.cine #tip,body.cine .tip{display:none!important}
 .hud,.dock,.rail{transition:opacity .7s}
 #cineHint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);padding:8px 16px;border-radius:20px;background:rgba(0,0,0,.55);color:#fff;font:13px system-ui,sans-serif;opacity:0;pointer-events:none;z-index:9}
 body.cine #cineHint{animation:cineH 5s ease forwards}
@@ -4040,7 +4041,7 @@ const v3=new THREE.Vector3();
 const lastFloat=new Map();
 const hudEl=document.querySelector('.hud'),dockEl=document.querySelector('.dock'),gameEl=document.getElementById('game');
 function float(i,text,cls){
-  if(i==null||i<0)return;const now=performance.now();const key=i+(cls==='warn'?'w':'');
+  if(i==null||i<0)return;try{if(cine.on)return}catch(e){}/* 7.7.16: no pop-ups over buildings in the cinematic camera */const now=performance.now();const key=i+(cls==='warn'?'w':'');
   if(now-(lastFloat.get(key)||0)<(cls==='warn'?5000:1500))return;lastFloat.set(key,now);
   if(floats.length>=12){floats[0].el.remove();floats.shift()}
   const el=document.createElement('div');el.className='fl '+cls;el.textContent=text;el.style.visibility='hidden';floatsEl.appendChild(el);
@@ -4069,7 +4070,7 @@ function updateCamera(){const lim=HALF;cam.target.x=Math.max(-lim,Math.min(lim,c
 const cine={on:false,free:false,lim:false,t:0,dur:14,from:null,shot:null};
 /* 7.4.0: second mode – freecam: the interface stays hidden and you steer yourself (WSAD, Q/E, mouse); F switches between free and limited */
 function cineHint(){const h=document.getElementById('cineHint');if(h)h.textContent=cine.free?(cine.lim?'Wolna kamera (ograniczona) · F: bez ograniczeń · V lub Esc kończy':'Wolna kamera · F: z ograniczeniami · V lub Esc kończy'):'Kamera filmowa · V: wolna kamera · dowolny klawisz lub kliknięcie kończy'}
-function cineStart(free){if(titleOpen||!menuEl.hidden)return;cine.on=true;cine.free=!!free;cine.shot=null;cine.t=0;focus=null;camKeys.clear();cineHint();document.body.classList.remove('cine');void document.body.offsetWidth;document.body.classList.add('cine')}
+function cineStart(free){if(titleOpen||!menuEl.hidden)return;cine.on=true;for(const f of floats)f.el.remove();floats=[];cine.free=!!free;cine.shot=null;cine.t=0;focus=null;camKeys.clear();cineHint();document.body.classList.remove('cine');void document.body.offsetWidth;document.body.classList.add('cine')}
 function cineStop(){if(!cine.on)return;cine.on=false;cine.free=false;cam.target.y=0;document.body.classList.remove('cine');updateCamera()}
 function cineCycle(){if(!cine.on)cineStart(false);else if(!cine.free)cineStart(true);else cineStop()}
 function cineShot(){const bl=[];for(let i=0;i<N*N;i++){const c=grid[i];if(c&&DEF[c.t]&&c.t!=='road')bl.push(i)}
