@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.0.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.0.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -3753,17 +3753,19 @@ function lacks(i,d,IN){const miss=IN&&Object.keys(IN).find(q=>have(q)<IN[q]);if(
   if(!(d.lackT>gameT)){d.lackT=gameT+30;float(i,`czeka: brak ${(GOODS[miss]||{name:'materiałów'}).name.toLowerCase()}`,'warn')}return true}
 /* 8.0: what a factory is short of right now (live, from the warehouses), across all its lines; null when anything can be made */
 const canMix=g=>Object.entries(mixIn(g)).every(([q,v])=>have(q)>=v);
-function facLack(c){if(!c||!isFactory(c.t)||isMine(c.t))return null;if(c.pre&&c.pre.length)return null;const ls=isBigF(c.t)?(c.lines&&c.lines.length?c.lines:(c.t==='combine'?[]:['mix'])):[c.line||'mix'];if(!ls.length)return null;let miss=null;
+/* 8.0.1: big factory / combine lines are fixed slots (3 / 4); an empty slot is null */
+const lineSlots=c=>c.t==='combine'?4:LINES_MAX,actL=c=>(c.lines||[]).filter(Boolean);
+function facLack(c){if(!c||!isFactory(c.t)||isMine(c.t))return null;if(c.pre&&c.pre.length)return null;const ls=isBigF(c.t)?(actL(c).length?actL(c):(c.t==='combine'?[]:['mix'])):[c.line||'mix'];if(!ls.length)return null;let miss=null;
   for(const k of ls){if(k==='mix'){if(MIXG.some(canMix))return null;miss=miss||'mix';continue}const L=LINES[k];if(!L||!L.in)return null;const m=Object.keys(L.in).find(q=>have(q)<L.in[q]);if(!m)return null;miss=miss||m}return miss}
 const PRE_CAP=t=>t==='factoryB'||t==='combine'?4:3;
 /* 8.0: a factory making mixed goods gets its raw materials delivered in advance: up to 3 batches (4 at a large factory) waiting in its store */
-function preDeliver(i,d){const mixOnly=isBigF(d.t)?!(d.lines&&d.lines.length):(d.line||'mix')==='mix';if(!mixOnly||d.off||!d.powered)return;d.pre=d.pre||[];if(d.pre.length>=PRE_CAP(d.t)||d.preT>gameT)return;
+function preDeliver(i,d){const mixOnly=isBigF(d.t)?(actL(d).length?actL(d).every(k=>k==='mix'):d.t!=='combine'):(d.line||'mix')==='mix';if(!mixOnly||d.off||!d.powered)return;d.pre=d.pre||[];if(d.pre.length>=PRE_CAP(d.t)||d.preT>gameT)return;
   const pid=mixPick();if(!canMix(pid))return;const IN=mixIn(pid);for(const q in IN){take(q,IN[q],i);cur.used[q]=(cur.used[q]||0)+IN[q]}d.pre.push(pid);d.preT=gameT+20;d.lack=null;
   float(i,`dostawa surowców (${d.pre.length}/${PRE_CAP(d.t)} partii)`,'neutral')}
 function mixPick(){let tot=0;const SOLD=MIXG.filter(k=>{const r=mixIn(k);return Object.keys(r).every(q=>have(q)>=r[q])});if(!SOLD.length)return'toys';const w=SOLD.map(k=>{const v=1/(1+goods[k]);tot+=v;return v});let r=Math.random()*tot;for(let k=0;k<SOLD.length;k++){r-=w[k];if(r<=0)return SOLD[k]}return SOLD[0]}
 function produce(i,d){
   if(isMine(d.t)){const units=MINE_T[d.t]*(d.techB?1.05:1)*prodMul('mat');if(!spawnTruck(i,'mat',units)){d.work=2;return}d.work-=2;cur.made.mat=(cur.made.mat||0)+units;addTrash(d,TRASH[d.t].per);float(i,`+${mw(Math.round(units*10)/10)} kg materiałów →`,'mat');return}
-  if(isBigF(d.t)){if(d.t==='combine'&&!(d.lines&&d.lines.length)){d.work=Math.min(d.work,2);return}const ls=d.lines&&d.lines.length?d.lines:['mix'];d.li=(d.li||0)%ls.length;const k=ls[d.li],L=LINES[k];
+  if(isBigF(d.t)){if(d.t==='combine'&&!actL(d).length){d.work=Math.min(d.work,2);return}const ls=actL(d).length?actL(d):['mix'];d.li=(d.li||0)%ls.length;const k=ls[d.li],L=LINES[k];
     const pre=k==='mix'&&d.pre&&d.pre.length;const pid=pre?d.pre[0]:k==='mix'?mixPick():k,IN=pre?null:k==='mix'?mixIn(pid):L.in;
     if(!pre&&lacks(i,d,IN)){d.li++;return}const AT=i;
     const units=(TRUCK_LOAD*(k==='mix'?1:1.5)*(d.up2?1.5:1)*(fOn(d)?0.9:1)*(d.techB?1.05:1)+1)*prodMul(pid)*(d.t==='combine'?2:1);
@@ -3848,13 +3850,14 @@ function spawnTruck(f,pid='mat',units=TRUCK_LOAD){const e=entryOf(f);if(e<0)retu
   if(!list.length){float(f,!all.length?'brak magazynu':!acc.length?'żaden magazyn nie przyjmuje tego towaru':'magazyny pełne','warn');return false}
   list.sort((a,b)=>a.d-b.d);cur.trucks++;const car=createCar('truck',pathTo(b,list[0].e),{home:f,dest:list[0].i,pid,units});car.mesh.userData.cargo.material=GM[pid];return true}
 /* big factory: up to 3 different lines; the general line is free and can be switched off, product lines are bought once */
-function paintLines(c){const sg=c.model&&c.model.userData.lineSigns;if(!sg)return;sg.forEach((o,j)=>{const k=c.lines[j];o.material=k?GM[k]:mat.facDark})}
-function toggleLineB(i,k){const c=grid[i];if(!c||!isBigF(c.t))return;const big=c.t==='combine',LM=big?4:LINES_MAX;if(big&&k==='mix'){setHint('Kombinat nie robi towarów ogólnych – wybierz linie specjalistyczne.',true,true);hintEl.hidden=false;return}c.lines=c.lines||(big?[]:['mix']);c.owned=c.owned||[];
-  if(c.lines.includes(k)){if(k!=='mix'){setHint('Wykupionej linii nie da się zamknąć. Wyłączyć można tylko linię ogólną.',true,true);hintEl.hidden=false;return}if(c.lines.length<2)return;c.lines=c.lines.filter(x=>x!=='mix')}
-  else{if(c.lines.length>=LM){setHint(big?'Kombinat ma najwyżej 4 linie.':'Duża fabryka ma najwyżej 3 linie.',true,true);hintEl.hidden=false;return}
+function paintLines(c){const sg=c.model&&c.model.userData.lineSigns;if(!sg)return;sg.forEach((o,j)=>{const k=(c.lines||[])[j];o.material=k?GM[k]:mat.facDark})}
+function setSlot(i,j,k){const c=grid[i];if(!c||!isBigF(c.t))return;const n=lineSlots(c);c.lines=(c.lines||[]).slice(0,n);while(c.lines.length<n)c.lines.push(null);c.owned=c.owned||[];
+  if(k==='mix'&&c.t==='combine'){setHint('Kombinat nie robi towarów ogólnych – wybierz linie specjalistyczne.',true,true);hintEl.hidden=false;return}
+  if(c.lines[j]===k){c.lines[j]=null}else{
     if(k!=='mix'&&!c.owned.includes(k)){if(money<LINE_COST){setHint(`Brakuje ${fmt(LINE_COST-money)} T¢ na linię.`,true,true);hintEl.hidden=false;return}spend(LINE_COST);c.owned.push(k);float(i,`+ linia: ${GOODS[k].name}`,'neutral')}
-    c.lines.push(k)}
+    c.lines[j]=k}
   c.li=0;paintLines(c);save();renderInsp()}
+function toggleLineB(i,k){const c=grid[i];if(!c||!isBigF(c.t))return;const n=lineSlots(c);const L=(c.lines||[]).slice(0,n);let j=L.indexOf(k);if(j<0){j=L.indexOf(null);if(j<0)j=L.length<n?L.length:-1}if(j<0)return;setSlot(i,j,k)}
 function setLine(i,k){const c=grid[i];if(c&&isBigF(c.t))return toggleLineB(i,k);if(c&&c.t==='smallfac'){if(k!=='mix'){setHint('Mała fabryka robi tylko towary ogólne (losowe).',true,true);hintEl.hidden=false}return}if(!c||!isFactory(c.t)||c.line===k)return;
   if(!FREE_LINES[k]&&!c.up){setHint('Ten produkt wymaga ulepszenia „Linia specjalistyczna” (przycisk w karcie fabryki).',true,true);hintEl.hidden=false;return}c.line=k;c.work=0;paintModel(c,GM[k]);save();renderInsp()}
 function buyCinema(i){const c=grid[i];if(!c||c.t!=='gallery'||c.cinema)return;if(galFull(c)){setHint('Parter mieści 4 lokale. Dobuduj piętro, by dodać kino.',true,true);hintEl.hidden=false;return}if(money<CINEMA_COST){setHint(`Brakuje ${fmt(CINEMA_COST-money)} T¢ na kino.`,true,true);hintEl.hidden=false;return}
@@ -4624,11 +4627,12 @@ function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];i
   const full=TRASH[c.t]&&c.trash>=TRASH[c.t].cap;
   let pick='';
   if(isMine(c.t)){R('Produkcja',`${mw(Math.round(MINE_T[c.t]*10)/10)} kg materiałów na 2 zmiany`);R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':'pracuje',full||!c.powered?'warnv':'')}
-  if(isBigF(c.t)){const ls=c.lines||(c.t==='combine'?[]:['mix']),LMX=c.t==='combine'?4:LINES_MAX;R('Linie',`${ls.length} / ${LMX}`+(c.owned&&c.owned.length?` · utrzymanie +${LINE_UPK*c.owned.length} T¢/godz.`:''));
-    for(const k of ls){const L=LINES[k],u=(TRUCK_LOAD*(k==='mix'?1:1.5)*(c.up2?1.5:1)*(fOn(c)?0.9:1)+1)*(c.t==='combine'?2:1);R(`<span class="sw2" style="background:${LMETA(k).col}"></span>${LMETA(k).name}`,`${mw(Math.round(u*10)/10)} kg`+(L.in?' · z '+Object.entries(L.in).map(([q,v])=>`${v} kg ${GOODS[q].name.toLowerCase()}`).join(', '):''),L.in&&Object.entries(L.in).some(([q,v])=>have(q)<v)?'warnv':'')}
-    R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':'pracuje',full||!c.powered?'warnv':'');
-    pick=`<div class="chips">${Object.keys(LINES).filter(k=>!(c.t==='combine'&&k==='mix')).map(k=>{const on=ls.includes(k),own=k==='mix'||(c.owned||[]).includes(k),dis=!on&&(ls.length>=LMX||(!own&&money<LINE_COST));
-      return`<button class="chipb" data-line="${k}" aria-pressed="${on}"${dis?' disabled style="opacity:.5"':''}><i style="background:${LMETA(k).col}"></i>${on?'✓ ':own?'':'+ '}${LMETA(k).name}${!on&&!own?` · ${LINE_COST} T¢`:''}</button>`}).join('')}</div>`}
+  if(isBigF(c.t)){const LMX=lineSlots(c),SL=[...(c.lines||[])].slice(0,LMX);while(SL.length<LMX)SL.push(null);const ls=SL.filter(Boolean),K=c.t==='combine'?2:1;
+    R('Linie',`${ls.length} / ${LMX} czynne`+(c.owned&&c.owned.length?` · utrzymanie +${LINE_UPK*c.owned.length} T¢/godz.`:''));if(c.t==='combine')R('Wydajność','partie 2× większe niż w dużej fabryce');
+    for(const k of ls){const L=LINES[k],u=(TRUCK_LOAD*(k==='mix'?1:1.5)*(c.up2?1.5:1)*(fOn(c)?0.9:1)+1)*K;R(`<span class="sw2" style="background:${LMETA(k).col}"></span>${LMETA(k).name}`,`${mw(Math.round(u*10)/10)} kg`+(L.in?' · z '+Object.entries(L.in).map(([q,v])=>`${v} kg ${GOODS[q].name.toLowerCase()}`).join(', '):''),L.in&&Object.entries(L.in).some(([q,v])=>have(q)<v)?'warnv':'')}
+    {const fl=facLack(c);R('Zmiany do ciężarówki',`${mw(Math.round(c.work*100)/100)} / 2`);R('Stan',full?'stoi: pełno śmieci':!c.powered?'stoi: brak prądu':!ls.length&&c.t==='combine'?'czeka: wybierz linie':fl?(fl==='mix'?'czeka: w magazynach nie ma surowców na żaden towar':`czeka na surowiec z magazynów: <b>${GOODS[fl].name}</b>`):'pracuje',full||!c.powered||fl||!ls.length?'warnv':'')}
+    pick=SL.map((cur,j)=>`<div class="chips"><small style="width:100%">Linia ${j+1}${cur?'':' (pusta)'}:</small>${Object.keys(LINES).filter(k=>!(c.t==='combine'&&k==='mix')).map(k=>{const own=k==='mix'||(c.owned||[]).includes(k),on=k===cur;
+      return`<button class="chipb" data-slot="${j}" data-sk="${k}" aria-pressed="${on}"${!on&&!own&&money<LINE_COST?' disabled style="opacity:.5"':''}><i style="background:${LMETA(k).col}"></i>${LMETA(k).name}${!on&&!own?` · ${LINE_COST} T¢`:''}</button>`}).join('')}</div>`).join('')}
   if(c.t==='smallfac')c.line='mix';
   if(isFarm(c.t)&&c.cl){const h=grid[c.cl.hub],n=h?(h.staff||[]).length:0,S=crewOf(c.t),need=Math.max(1,Math.ceil(S.min*Math.min(3,1+(c.cl.tiles.length-1)/4))),f=farmCrew(c.cl);R('Pracownicy na farmie',`${n} (potrzeba ${need}) · wydajność ${Math.round(f*100)}%`,n<need?'warnv':'')}
   if(isWork(c.t)){const S=crewOf(c.t),n=(c.staff||[]).length,bo=crewBoost(c);R('Pracownicy na zmianie',`${n} (obsada ${S.min}–${S.max})`+(n<S.min?' · za mało, linia stoi':n>S.max?` · +${Math.round((bo-1)*100)}% wydajności`:''),n<S.min?'warnv':'')}
@@ -4754,6 +4758,7 @@ function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];i
   const ub=document.getElementById('inspUp');if(ub)ub.onclick=()=>buyUpgrade(i);
   for(const b of inspEl.querySelectorAll('[data-icat]'))b.onclick=()=>{const l=catList(b.dataset.icat);if(l.length)openHouse(l[0])};
   for(const b of inspEl.querySelectorAll('[data-line]'))b.onclick=()=>setLine(i,b.dataset.line);
+  for(const b of inspEl.querySelectorAll('[data-slot]'))b.onclick=()=>setSlot(i,+b.dataset.slot,b.dataset.sk);
   for(const b of inspEl.querySelectorAll('[data-line2]'))b.onclick=()=>{const g=grid[i];if(!g)return;g.line2=g.line2===b.dataset.line2?null:b.dataset.line2;g.alt2=false;save();renderInsp()};
   for(const b of inspEl.querySelectorAll('[data-whf]'))b.onclick=()=>{const g=grid[i],ks=b.dataset.whf.split(',');let l=g.whf?[...g.whf]:[...SHIP_GOODS];l=ks.every(k=>l.includes(k))?l.filter(x=>!ks.includes(x)):[...l,...ks.filter(k=>!l.includes(k))];g.whf=l.length===SHIP_GOODS.length?null:l;save();renderInsp()};
   {const wa=document.getElementById('whfAll');if(wa)wa.onclick=()=>{grid[i].whf=null;save();renderInsp()};const wn=document.getElementById('whfNone');if(wn)wn.onclick=()=>{grid[i].whf=[];save();renderInsp()}}
@@ -5529,7 +5534,7 @@ function placeRow(row,anim){let[i,t,p,st,up,tr,gs,sec,x]=row;mvNext=x&&typeof x.
     if(x&&x.line2&&t==='factory'&&LINES[x.line2])c.line2=x.line2;
     if(x&&Array.isArray(x.staff)&&(isWork(t)||isFarm(t)))c.staff=x.staff.map(([h,tier,u])=>({h,tier,until:gameT+u}));
     if(x&&x.rth!=null&&t==='rail'){c.th=+x.rth;c.tun=true;refreshBuilding(i)}
-    if(x&&DCARE[t]){c.bodies=x.bodies||0;c.urn=Array.isArray(x.urn)?x.urn.map(v=>gameT+v):[]}if(HOUSING[t])c.off=false;if(x&&Array.isArray(x.jail))c.jail=x.jail.map(([rel,w])=>({rel,w}));if(x&&HLV[t]){c.xp=x.xp||0;if(x.lv){c.lv=Math.min(x.lv,HLV[t].res.length-1);setHousingModel(i)}}if(x&&Array.isArray(x.fr))c.fr=x.fr.filter(r0=>r0&&FR_GOODS.includes(r0.k)).map(r0=>({k:r0.k,m:['off','imp','exp'].includes(r0.m)?r0.m:'off',n:Math.max(FR_MIN,Math.min(FR_MAX,r0.n|0))}));if(x&&x.waiting)c.waiting=x.waiting|0;if(x&&x.dirt)c.dirt=+x.dirt||0;if(x&&Array.isArray(x.ship))c.ship=x.ship.filter(k=>SHIP_GOODS.includes(k));if(x&&x.shipQ&&typeof x.shipQ==='object'){c.shipQ={};let left=SHIP_LOAD;for(const k in x.shipQ){const v=Math.min(left,Math.round(+x.shipQ[k]/SHIP_STEP)*SHIP_STEP);if(SHIP_GOODS.includes(k)&&v>0){c.shipQ[k]=v;left-=v}}}if(x&&x.shipAuto)c.shipAuto=true;if(x&&x.shipAt!=null)loadShip.push([i,x.shipAt]);if(x&&x.need&&typeof x.need==='object')c.need={...x.need};if(x&&x.ruin)loadFires.push([i,-1]);else if(x&&x.burn!=null)loadFires.push([i,x.burn]);if(x&&isBigF(t)){c.owned=(x.owned||[]).filter(k=>LINES[k]&&k!=='mix');c.lines=(x.lines||(t==='combine'?[]:['mix'])).filter(k=>(k==='mix'&&t!=='combine')||c.owned.includes(k)).slice(0,t==='combine'?4:LINES_MAX);if(!c.lines.length&&t!=='combine')c.lines=['mix'];paintLines(c)}}
+    if(x&&DCARE[t]){c.bodies=x.bodies||0;c.urn=Array.isArray(x.urn)?x.urn.map(v=>gameT+v):[]}if(HOUSING[t])c.off=false;if(x&&Array.isArray(x.jail))c.jail=x.jail.map(([rel,w])=>({rel,w}));if(x&&HLV[t]){c.xp=x.xp||0;if(x.lv){c.lv=Math.min(x.lv,HLV[t].res.length-1);setHousingModel(i)}}if(x&&Array.isArray(x.fr))c.fr=x.fr.filter(r0=>r0&&FR_GOODS.includes(r0.k)).map(r0=>({k:r0.k,m:['off','imp','exp'].includes(r0.m)?r0.m:'off',n:Math.max(FR_MIN,Math.min(FR_MAX,r0.n|0))}));if(x&&x.waiting)c.waiting=x.waiting|0;if(x&&x.dirt)c.dirt=+x.dirt||0;if(x&&Array.isArray(x.ship))c.ship=x.ship.filter(k=>SHIP_GOODS.includes(k));if(x&&x.shipQ&&typeof x.shipQ==='object'){c.shipQ={};let left=SHIP_LOAD;for(const k in x.shipQ){const v=Math.min(left,Math.round(+x.shipQ[k]/SHIP_STEP)*SHIP_STEP);if(SHIP_GOODS.includes(k)&&v>0){c.shipQ[k]=v;left-=v}}}if(x&&x.shipAuto)c.shipAuto=true;if(x&&x.shipAt!=null)loadShip.push([i,x.shipAt]);if(x&&x.need&&typeof x.need==='object')c.need={...x.need};if(x&&x.ruin)loadFires.push([i,-1]);else if(x&&x.burn!=null)loadFires.push([i,x.burn]);if(x&&isBigF(t)){c.owned=(x.owned||[]).filter(k=>LINES[k]&&k!=='mix');c.lines=(x.lines||(t==='combine'?[]:['mix'])).map(k=>k&&((k==='mix'&&t!=='combine')||c.owned.includes(k))?k:null).slice(0,t==='combine'?4:LINES_MAX);if(!c.lines.length&&t!=='combine')c.lines=['mix'];paintLines(c)}}
 let loadFires=[],loadShip=[];
 /* a city saved on a smaller map: every index moves to the middle; rivers, entry roads and tracks are carried on to the new edge */
 function migrateSave(s,old){const off=(N-old)>>1,m=i=>typeof i==='number'&&i>=0?idx(i%old+off,((i/old)|0)+off):i;
@@ -7925,7 +7930,13 @@ const LT_TR=[
 ["Ulepszono {} domów za {} T¢.", "Upgraded {} homes for {} T¢.", "{} Häuser für {} T¢ ausgebaut."],
 ["Ulepszono {} dom za {} T¢.", "Upgraded {} home for {} T¢.", "{} Haus für {} T¢ ausgebaut."],
 ["Ulepszono {} z {} domów za {} T¢ – na resztę zabrakło gotówki.", "Upgraded {} of {} homes for {} T¢ – not enough cash for the rest.", "{} von {} Häusern für {} T¢ ausgebaut – für den Rest fehlt das Geld."],
-["czeka na surowiec z magazynów:", "waiting for raw material from the warehouses:", "wartet auf Rohstoff aus den Lagern:"]
+["czeka na surowiec z magazynów:", "waiting for raw material from the warehouses:", "wartet auf Rohstoff aus den Lagern:"],
+["Linia {}:", "Line {}:", "Linie {}:"],
+["Linia {} (pusta):", "Line {} (empty):", "Linie {} (leer):"],
+["{} / {} czynne · utrzymanie +{} T¢/godz.", "{} / {} active · upkeep +{} T¢/h", "{} / {} aktiv · Unterhalt +{} T¢/Std."],
+["{} / {} czynne", "{} / {} active", "{} / {} aktiv"],
+["partie 2× większe niż w dużej fabryce", "batches 2× bigger than in a large factory", "Chargen 2× größer als in der großen Fabrik"],
+["czeka: wybierz linie", "waiting: choose the lines", "wartet: Linien auswählen"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
