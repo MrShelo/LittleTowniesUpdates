@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.7.10';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.11';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -3011,10 +3011,22 @@ const axOf=(i,j)=>Math.abs(j-i)===1?0:1,isCrossT=j=>{const g=grid[j];return!!g&&
 function axisBy(i,f){let a=-1;for(const j of nbrs(i))if(f(j)){const x=axOf(i,j);if(a>=0&&a!==x)return -2;a=x}return a}
 const roadAx=i=>axisBy(i,j=>{const g=grid[j];return!!g&&!!DRIVE[g.t]}),railAx=i=>axisBy(i,j=>isRailT(j)||stEndAt(i,j));
 function crossDir(j){const r=railAx(j);if(r>=0)return r;const a=roadAx(j);return a>=0?1-a:-1}
-function crossWhy(i,from=-1){if(grid[i]&&grid[i].bus)return'Tu stoi przystanek autobusowy – tory poprowadź obok.';for(const j of nbrs(i))if(isCrossT(j))return'Przejazdy nie mogą leżeć obok siebie – tory przechodzą tylko przez jedną ulicę naraz.';
-  const ra=roadAx(i),rr=railAx(i);if(ra===-2)return'Przejazd kolejowy stawia się na pojedynczej, prostej ulicy – nie na skrzyżowaniu, zakręcie ani kilku ulicach obok siebie.';
-  if(ra>=0&&from>=0&&from!==i){const dx=Math.abs(from%N-i%N),dz=Math.abs(((from/N)|0)-((i/N)|0));if((dx>=dz?0:1)===ra)return'Tory nie mogą biec wzdłuż ulicy – tylko przecinać ją w poprzek.'}
-  if(rr===-2)return'Na przejeździe tory muszą iść prosto, bez zakrętów.';if(ra>=0&&rr>=0&&ra===rr)return'Tory nie mogą biec wzdłuż ulicy – tylko przecinać ją w poprzek.';return null}
+/* 7.7.11: a level crossing may span a wide road (two or more road tiles side by side, crossed in one straight line);
+   the rails still never run along a road, never turn on a crossing and two crossings never lie side by side across the track */
+function crossWhy(i,from=-1){if(grid[i]&&grid[i].bus)return'Tu stoi przystanek autobusowy – tory poprowadź obok.';
+  const rr=railAx(i);if(rr===-2)return'Na przejeździe tory muszą iść prosto, bez zakrętów.';
+  let A=-1;if(from>=0&&from!==i){const dx=Math.abs(from%N-i%N),dz=Math.abs(((from/N)|0)-((i/N)|0));A=dx>=dz?0:1}else if(rr>=0)A=rr;else{const ra=roadAx(i);if(ra>=0)A=1-ra}
+  const isR=j=>{const g=grid[j];return!!g&&!!DRIVE[g.t]};const x=i%N,z=(i/N)|0;
+  if(A<0)return'Przejazd kolejowy stawia się na prostej ulicy – nie na skrzyżowaniu ani zakręcie.';
+  for(const j of nbrs(i))if(isCrossT(j)&&axOf(i,j)!==A)return'Przejazdy nie mogą leżeć obok siebie – tory przechodzą tylko przez jedną ulicę naraz.';
+  /* the road must run across the track here */
+  const P=A===0?[[0,-1],[0,1]]:[[-1,0],[1,0]],L=A===0?[[-1,0],[1,0]]:[[0,-1],[0,1]];const at=([dx,dz],k=1)=>{const nx=x+dx*k,nz=z+dz*k;return nx>=0&&nz>=0&&nx<N&&nz<N?idx(nx,nz):-1};
+  if(!P.some(d=>{const j=at(d);return j>=0&&isR(j)})&&L.some(d=>{const j=at(d);return j>=0&&isR(j)&&!isCrossT(j)}))return'Tory nie mogą biec wzdłuż ulicy – tylko przecinać ją w poprzek.';
+  /* a wide road: road tiles in line with the track are other lanes of the same road (at most 4 tiles across); a longer run means the road runs along the track */
+  let run=1;for(const d of L)for(let k=1;k<=6;k++){const j=at(d,k);if(j<0||!isR(j))break;run++}
+  if(run>4)return'Tory nie mogą biec wzdłuż ulicy – tylko przecinać ją w poprzek.';
+  if(run===1&&rr>=0&&roadAx(i)===rr)return'Tory nie mogą biec wzdłuż ulicy – tylko przecinać ją w poprzek.';
+  return null}
 function railNearWhy(k){for(const j of nbrs(k))if(isCrossT(j)){const d=crossDir(j);if(d>=0&&axOf(k,j)!==d)return'Tory nie mogą biec wzdłuż ulicy – tylko przecinać ją w poprzek.'}return null}
 function roadNearWhy(k){for(const j of nbrs(k))if(isCrossT(j)){const d=crossDir(j);if(d>=0&&axOf(k,j)===d)return'Ulica nie może biec wzdłuż torów za przejazdem – przejazd przecina tylko jedną ulicę.'}return null}
 function railModel(i,c){const m=c.model;if(!m)return;for(const ch of[...m.children]){m.remove(ch);if(ch.userData.baked)ch.geometry.dispose()}const onW=!!water[i],arms=railArms(i);railPiece(m,arms,onW?0.06:0.01);
@@ -7727,7 +7739,8 @@ const LT_TR=[
 ["Gdzie", "Where", "Wo"],
 ["tor za peronem (od pola {}) urywa się na polu {}", "the track past the platform (from tile {}) ends at tile {}", "das Gleis hinter dem Bahnsteig (ab Feld {}) endet auf Feld {}"],
 ["pociąg wjeżdża od drugiej strony, a za peronem (pole {}) nie ma toru", "the train comes in from the other side, and past the platform (tile {}) there is no track", "der Zug kommt von der anderen Seite, und hinter dem Bahnsteig (Feld {}) liegt kein Gleis"],
-["za peronem nie ma miejsca na tor", "there is no room for a track past the platform", "hinter dem Bahnsteig ist kein Platz für ein Gleis"]
+["za peronem nie ma miejsca na tor", "there is no room for a track past the platform", "hinter dem Bahnsteig ist kein Platz für ein Gleis"],
+["Przejazd kolejowy stawia się na prostej ulicy – nie na skrzyżowaniu ani zakręcie.", "A level crossing goes on a straight street – not on a junction or a bend.", "Ein Bahnübergang kommt auf eine gerade Straße – nicht auf eine Kreuzung oder Kurve."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
