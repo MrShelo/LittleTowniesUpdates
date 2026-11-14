@@ -2,7 +2,7 @@
 
 Tu edytujesz teksty, które gra pokazuje po najechaniu na przycisk albo narzędzie, razem z tłumaczeniami.
 
-**Plik:** `podpowiedzi.tsv` – otwórz w Excelu, LibreOffice, Google Sheets albo zwykłym edytorze (kolumny rozdziela tabulator).
+**Plik:** `podpowiedzi.xlsx` – zwykły plik Excela (działa też w LibreOffice i Google Sheets). Arkusz „Podpowiedzi”:
 
 | kolumna | co to |
 |---|---|
@@ -13,8 +13,7 @@ Tu edytujesz teksty, które gra pokazuje po najechaniu na przycisk albo narzędz
 | DE | tłumaczenie niemieckie (puste = zostaje polski) |
 
 Po zmianie PL popraw też EN i DE – tłumaczenie z tego pliku ma pierwszeństwo przed wbudowanym słownikiem.
+Usunięty wiersz = gra użyje swojego wbudowanego tekstu.
 
-**Jak to trafia do gry:** przy każdym wydaniu wersji plik jest wstawiany do `index.html` automatycznie.
-Żeby sprawdzić od razu u siebie: `python3 podpowiedzi/wstaw.py index.html`, potem otwórz `index.html`.
-
-Zapisując w Excelu wybierz „Tekst (rozdzielany znakami tabulacji)” i kodowanie UTF-8.
+**Jak to trafia do gry:** zapisz plik normalnie (ta sama nazwa, format .xlsx) i wypchnij na GitHub – przy każdym wydaniu wersji jest wstawiany do `index.html` automatycznie.
+Żeby sprawdzić od razu u siebie: `python3 podpowiedzi/wstaw.py index.html` (bez dodatkowych bibliotek), potem otwórz `index.html`.

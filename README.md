@@ -27,4 +27,4 @@ zaznaczone można wysłać razem jako jedną aktualizację (potrzebny token GitH
 Przy wydawaniu nowej wersji gry ręcznie użyj `python3 zachowaj_modele.py nowa.html` (po `git pull`), żeby nie skasować wysłanych modeli.
 
 ## Podpowiedzi
-Teksty po najechaniu (przyciski, narzędzia, budynki) i ich tłumaczenia edytujesz w `podpowiedzi/podpowiedzi.tsv` – opis w `podpowiedzi/CZYTAJ.md`.
+Teksty po najechaniu (przyciski, narzędzia, budynki) i ich tłumaczenia edytujesz w `podpowiedzi/podpowiedzi.xlsx` (Excel) – opis w `podpowiedzi/CZYTAJ.md`.
