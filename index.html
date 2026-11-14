@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='7.7.14';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='7.7.15';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -3034,10 +3034,10 @@ function crossWhy(i,from=-1){if(grid[i]&&grid[i].bus)return'Tu stoi przystanek a
   return null}
 function railNearWhy(k){for(const j of nbrs(k))if(isCrossT(j)){const d=crossDir(j);if(d>=0&&axOf(k,j)!==d)return'Tory nie mogą biec wzdłuż ulicy – tylko przecinać ją w poprzek.'}return null}
 function roadNearWhy(k){for(const j of nbrs(k))if(isCrossT(j)){const d=crossDir(j);if(d>=0&&axOf(k,j)===d)return'Ulica nie może biec wzdłuż torów za przejazdem – przejazd przecina tylko jedną ulicę.'}return null}
-function railModel(i,c){const m=c.model;if(!m)return;for(const ch of[...m.children]){m.remove(ch);if(ch.userData.baked)ch.geometry.dispose()}const onW=!!water[i],arms=railArms(i);railPiece(m,arms,onW?0.06:0.01);
+function railModel(i,c){const m=c.model;if(!m)return;for(const ch of[...m.children]){m.remove(ch);if(ch.userData.baked)ch.geometry.dispose()}const onW=!!water[i],arms=railArms(i);railPiece(m,arms,0.01);
   /* 7.7.13: a continuous concrete deck under the track on a bridge, reaching a bit past the tile edge so sloped spans meet without gaps */
-  if(onW){const dk=RAILM.deck||(RAILM.deck=M('#7d7a74'));for(const[dx,dz]of arms.length?arms:[[1,0],[-1,0]]){m.add(box(dx?0.56:0.4,0.06,dz?0.56:0.4,dk,dx*0.26,0.0,dz*0.26));for(const o of[-0.19,0.19])m.add(box(dx?0.56:0.03,0.05,dz?0.56:0.03,dk,dx*0.26+(dz?o:0),0.06,dz*0.26+(dx?o:0)))}m.add(box(0.4,0.06,0.4,dk,0,0,0))}
-  if(onW){const ph=Math.max(0.5,lvY(rh(i))-lvY(hgt[i])+0.5);m.add(box(0.12,ph,0.12,mat.concrete,0,0.06-ph,0));m.add(box(0.4,0.04,0.4,mat.concrete,0,0.03,0))}
+  if(onW){const dk=RAILM.deck||(RAILM.deck=M('#7d7a74'));for(const[dx,dz]of arms.length?arms:[[1,0],[-1,0]]){m.add(box(dx?0.56:0.4,0.07,dz?0.56:0.4,dk,dx*0.26,-0.065,dz*0.26));for(const o of[-0.19,0.19])m.add(box(dx?0.56:0.03,0.04,dz?0.56:0.03,dk,dx*0.26+(dz?o:0),0.005,dz*0.26+(dx?o:0)))}m.add(box(0.4,0.07,0.4,dk,0,-0.065,0))}
+  if(onW){const ph=Math.max(0.5,lvY(rh(i))-lvY(hgt[i])+0.5);m.add(box(0.12,ph,0.12,mat.concrete,0,-0.06-ph,0));m.add(box(0.3,0.04,0.3,mat.concrete,0,-0.1,0))}
   if(c.tun){const ax=arms.some(a=>a[0]),az=arms.some(a=>a[1]);tunnelLook(m,i,ax||!az,arms.filter(a=>{const j=idx(i%N+a[0],((i/N)|0)+a[1]);return !(grid[j]&&grid[j].t==='rail'&&grid[j].tun)}))}
   bakeModel(m)}
 const barM={red:null,white:null,post:null,lamp:null};
