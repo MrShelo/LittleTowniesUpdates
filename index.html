@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2904,7 +2904,12 @@ function serve(c,d,i){
       const hh=c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t]?grid[c.home]:null,n=needOf(k),HH=hh&&n?needs(hh):null,per=hh?0.5/Math.max(1,popOf(hh)/4):0;
       let q=HH?Math.max(1,Math.min(4+Math.floor(popOf(hh)/10),Math.ceil(((PAIR(n)?0.5-shareOf(HH,n,k):1-HH[n.k]))/per-0.01))):1;if(LAW('hl_veg')&&k==='veg')q+=1;if(LAW('hl_pyr')&&k==='dairy')q+=1;if(LAW('hl_pyr')&&FOODG.has(k)){const g=earn(3);cur.inc+=g}q=Math.max(1,Math.min(q,Math.floor(d.shelf[k]||0)||1));
       d.shelf[k]=Math.max(0,(d.shelf[k]||0)-q);cur.sales+=q;cur.sold[k]=(cur.sold[k]||0)+q;if(HH){if(PAIR(n)){HH['g:'+k]=Math.min(0.5,shareOf(HH,n,k)+per*q);HH[n.k]=n.goods.reduce((a,g)=>a+shareOf(HH,n,g),0)}else HH[n.k]=Math.min(1,HH[n.k]+per*q)}
-      const pr=d.t==='restaurant'?priceAt(d,k):priceAt(d,k)*TAX.buy/20;pay+=pr*q;cur.buyTax=(cur.buyTax||0)+(d.t==='restaurant'?0:pr*q)}
+      const pr=d.t==='restaurant'?priceAt(d,k):priceAt(d,k)*TAX.buy/20;pay+=pr*q;cur.buyTax=(cur.buyTax||0)+(d.t==='restaurant'?0:pr*q);
+      /* 8.1.2: one visit fills the basket with every good the household is short of (up to 5 kinds), not just one */
+      if(HH&&d.t!=='restaurant')for(let x=0;x<4;x++){const k2=pickShelf(d,c.home);if(k2===undefined||!(d.shelf[k2]>=1))break;const n2=needOf(k2);if(!n2)break;
+        let q2=Math.max(1,Math.min(4+Math.floor(popOf(hh)/10),Math.ceil(((PAIR(n2)?0.5-shareOf(HH,n2,k2):1-HH[n2.k]))/per-0.01)));q2=Math.max(1,Math.min(q2,Math.floor(d.shelf[k2])));
+        d.shelf[k2]-=q2;cur.sales+=q2;cur.sold[k2]=(cur.sold[k2]||0)+q2;if(PAIR(n2)){HH['g:'+k2]=Math.min(0.5,shareOf(HH,n2,k2)+per*q2);HH[n2.k]=n2.goods.reduce((a,g)=>a+shareOf(HH,n2,g),0)}else HH[n2.k]=Math.min(1,HH[n2.k]+per*q2);
+        const p2=priceAt(d,k2)*TAX.buy/20;pay+=p2*q2;cur.buyTax=(cur.buyTax||0)+p2*q2}}
     else if(c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t]&&shelfTotal(d)>=1&&(()=>{try{return sellsOf(d).every(g=>!wantsGood(needs(grid[c.home]),g))}catch(e){return false}})()){/* nothing needed here: they just look around */}
     else if(!(d.t==='gallery'&&d.cinema)){cur.noStock++;float(i,d.t==='restaurant'?'brak jedzenia':'brak towaru','warn');return}}
   if(d.t==='gallery'&&d.cinema&&(Math.random()<0.4||!pay)){pay+=PRICE.cinema;ent+=PRICE.cinema}
@@ -3046,7 +3051,7 @@ function ordHour(){researchHour();if(!hallOK())return;let f=0,n=0;for(let i=0;i<
   if(counts.airport&&grid.some(c=>c&&c.t==='airport'&&!c.off&&c.powered!==false)){const g=earn(150);cur.inc+=g;cur.tourInc+=g}
   if(Math.floor(gameT/60)%24===18)for(let i=0;i<N*N;i++){const c=grid[i];if(c&&c.t==='stadium'&&!c.off&&c.powered!==false&&entryOf(i)>=0)playMatch(i,c)}}
 /* 8.1: the daily match fills the stadium (1200 seats) by how it was promoted; tickets 20–30 T¢; a win draws more tourists for a day */
-const STAD_CAP=1200,PROMO={news:{name:'Gazety',cost:300,lo:10,hi:20},post:{name:'Plakaty',cost:700,lo:25,hi:30},tv:{name:'Telewizja',cost:200,lo:35,hi:40}};
+const STAD_CAP=1200,PROMO={news:{name:'Gazety',cost:300,lo:10,hi:20},post:{name:'Plakaty',cost:700,lo:25,hi:30},tv:{name:'Telewizja',cost:1200,lo:35,hi:40}};
 function playMatch(i,c){const P=c.promo||{};let f=0;for(const k in PROMO)if(P[k])f+=rnd(PROMO[k].lo,PROMO[k].hi);if(!f)f=rnd(5,10);f=Math.min(100,f);
   const fans=Math.round(STAD_CAP*f/100),g=earn(fans*rnd(20,30));cur.inc+=g;cur.entInc+=g;const win=Math.random()<0.5;c.lastMatch={fans,g:Math.round(g),win,t:gameT};
   if(win){tourB={v:f/2/100,until:gameT+1440};float(i,`mecz wygrany! ${fans} kibiców · +${fmt(g)} T¢ · turystyka +${Math.round(f/2)}% na dobę`,'money')}else float(i,`mecz przegrany · ${fans} kibiców · +${fmt(g)} T¢`,'money');
@@ -3405,8 +3410,8 @@ function busAtStop(c,S){const L=lineOf(c.line);if(!L)return;let out=0;
   c.riders=c.riders.filter(r=>{if(r.to===S||!L.stops.includes(r.to)){paxOut(r,S,true);out++;return false}return true});
   if(c.retire){for(const r of c.riders)paxOut(r,S,true);c.riders=[];stopVis(S);removeCar(c);return}
   const inn=board(L,S,c,BUS_CAP+(LAW('tp_stand')?5:0));c.dwell=out||inn?Math.min(4,1+0.08*(out+inn)):0;if(out||inn)stopVis(S);
-  /* 8.1.1: buses of one line keep apart: one that comes too soon after the previous bus waits at the stop (at most 3 min) */
-  const Rb=busRoute(L),n=Math.max(1,lineVeh(L));if(Rb&&n>1){const H=Rb.len/1.25/n;L.dep=L.dep||{};const last=L.dep[S];if(last!=null){const gap=gameT-last;if(gap<H*0.7)c.dwell=Math.max(c.dwell,Math.min(3,H*0.7-gap))}L.dep[S]=gameT+c.dwell}}
+  /* 8.1.1: buses of one line keep apart: one that comes too soon after the previous bus waits (at most 3 min) – 8.1.2: only at the first stop, so empty stops are passed without stopping */
+  const Rb=busRoute(L),n=Math.max(1,lineVeh(L));if(Rb&&n>1&&S===L.stops[0]){const H=Rb.len/1.25/n;L.dep=L.dep||{};const last=L.dep[S];if(last!=null){const gap=gameT-last;if(gap<H*0.7)c.dwell=Math.max(c.dwell,Math.min(3,H*0.7-gap))}L.dep[S]=gameT+c.dwell}}
 /* end of the loop, back at the first stop: serve it and go round again on the line's current route */
 function busLoop(c){const L=lineOf(c.line),R=L&&L.on?busRoute(L):null,here=c.path[c.path.length-1];if(!R)return removeCar(c);
   if(!L.stops.includes(here)){c.stopMap=null;c.s0=L.stops[0];if(!sendTo(c,c.s0,'go'))removeCar(c);return}
