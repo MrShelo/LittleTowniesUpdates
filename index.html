@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -110,7 +110,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
 .menuBg{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:rgba(10,14,15,.45);padding:16px}
 .menu{width:min(320px,100%);padding:18px 18px 16px;display:grid;gap:10px;background:var(--panel2)}
 .menu h2{margin:0;font:600 22px var(--font-d)}
-.diffs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.diffs .btn{display:grid;gap:1px;padding:7px 4px;text-align:center;height:auto}.diffs small{font-size:11.5px;color:var(--muted)}.diffs .btn[aria-checked="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.diffs .btn[aria-checked="true"] small{color:#fff}
+.diffs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.diffs .btn{display:grid;gap:1px;padding:7px 4px;text-align:center;height:auto}.diffs small{font-size:11.5px;color:var(--muted)}.diffs small+small{font-size:10px;line-height:1.2}.diffs .btn[aria-checked="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.diffs .btn[aria-checked="true"] small{color:#fff}
 .mapb{display:grid;gap:2px;text-align:left;padding:9px 12px;height:auto}.mapb small{color:var(--muted);font-size:12px;font-weight:500;line-height:1.3}
 #over .menu{border-color:var(--warn)}#overT{color:var(--warn)}
 .menu .sub{margin:-6px 0 4px;color:var(--muted);font-size:13px}
@@ -550,7 +550,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="menuBg" id="maps" hidden><section class="menu panel" role="dialog" aria-modal="true" aria-labelledby="mapsT">
   <h2 id="mapsT">Nowe miasto</h2><p class="sub" id="mapsSub">Nazwij miasto, wybierz trudność i ukształtowanie terenu.</p>
   <label class="mapsName" for="cityIn">Nazwa miasta<input id="cityIn" maxlength="24" autocomplete="off" spellcheck="false"></label>
-  <div class="diffs" role="radiogroup" aria-label="Trudność startu"><button class="btn panel" data-diff="easy" role="radio"><b>Łatwy</b><small>8 500 T¢</small></button><button class="btn panel" data-diff="std" role="radio"><b>Standard</b><small>6 500 T¢</small></button><button class="btn panel" data-diff="hard" role="radio"><b>Ciężki</b><small>2 500 T¢</small></button></div>
+  <div class="diffs" role="radiogroup" aria-label="Trudność startu"><button class="btn panel" data-diff="easy" role="radio"><b>Łatwy</b><small>8 500 T¢</small><small>koszty −20% · przychody +20%</small></button><button class="btn panel" data-diff="std" role="radio"><b>Średni</b><small>6 500 T¢</small><small>przychody +20%</small></button><button class="btn panel" data-diff="hard" role="radio"><b>Ciężki</b><small>3 000 T¢</small><small>przychody −10%</small></button></div>
   <span class="mapsH">Światy</span>
   <button class="btn panel mbtn mapb" data-map="carib"><b>Karaiby</b><small>Archipelag: kilka dużych i wiele małych wysp z plażami i palmami, droga startowa wjeżdża mostem</small></button>
   <button class="btn panel mbtn mapb" data-map="bigriver"><b>Wielka rzeka</b><small>Szeroka rzeka przez całą mapę z piaszczystymi wyspami</small></button>
@@ -1968,7 +1968,7 @@ const opNet=o=>o.inc-o.upkeep-(o.crimeLoss||0);
 /* 6.1.16: finance panels leave out building and upgrade costs (player spending, not the city's running balance) */
 const netOf=o=>o.inc+o.refund+(o.reward||0)-o.upkeep-(o.crimeLoss||0)+(o.loanIn||0)-(o.loanPay||0);
 const upkeepRate=night=>{let s=IMPORT_FEE*importKinds().length+transitUpk();for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part'||c.off)continue;if(UPKEEP[c.t])s+=UPKEEP[c.t]*(night&&PARKS.includes(c.t)?0.5:1);
-  if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t]/ROAD_PER;if(c.bus)s+=STOP_UPK;if(c.jail)s+=JAIL_FEE*c.jail.length;if(jailOver(c))s+=OVERJAIL;if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(c.up3&&UPG3[c.t])s+=UPG3[c.t].upkeep;if(fOn(c)&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s};
+  if(ROAD_UPK[c.t]&&!c.edge)s+=ROAD_UPK[c.t]/ROAD_PER;if(c.bus)s+=STOP_UPK;if(c.jail)s+=JAIL_FEE*c.jail.length;if(jailOver(c))s+=OVERJAIL;if(c.up&&UPG[c.t])s+=UPG[c.t].upkeep||0;if(c.owned)s+=LINE_UPK*c.owned.length;if(c.up2&&UPG2[c.t])s+=UPG2[c.t].upkeep||0;if(c.up3&&UPG3[c.t])s+=UPG3[c.t].upkeep;if(fOn(c)&&UPGF[c.t])s+=UPGF[c.t].upkeep||0}return s*expMul()};
 /* day and night: 1 real minute = 1 game hour; people sleep 22:00–06:00 */
 const hourOf=t=>(t/60)%24;
 const isNight=()=>{const h=hourOf(gameT);return h>=22||h<6};
@@ -2345,14 +2345,16 @@ function constructTick(dt){for(let k=constructs.length-1;k>=0;k--){const C=const
     if(u<0.3){C.sc.scale.y=Math.max(0.001,u/0.3);C.cr.scale.y=Math.min(1,0.05+u/0.12);C.m.visible=false}
     else if(u<0.85){C.sc.scale.y=1;C.cr.scale.y=1;C.m.visible=true;C.m.scale.set(C.s0.x,C.s0.y*Math.max(0.02,(u-0.3)/0.55),C.s0.z)}
     else{C.m.scale.copy(C.s0);const f=1-(u-0.85)/0.15;C.sc.scale.y=Math.max(0.001,f);C.cr.scale.y=Math.max(0.001,f)}}}
-const DIFF={easy:{name:'Łatwy',m:2},std:{name:'Standard',m:1.5},hard:{name:'Ciężki',m:0.95},old:{name:'Standard',m:1}};let diff='std',diffPick='std';
-const START_CASH={easy:8500,std:6500,hard:2500,old:4200},startCash=()=>START_CASH[diff]||6500;
+/* 8.1.3: difficulty sets the starting cash and multiplies income (inc) and running costs (exp: upkeep and imports) */
+const DIFF={easy:{name:'Łatwy',m:2,inc:1.2,exp:0.8},std:{name:'Średni',m:1.5,inc:1.2,exp:1},hard:{name:'Ciężki',m:0.95,inc:0.9,exp:1},old:{name:'Średni',m:1,inc:1,exp:1}};
+const incMul=()=>(DIFF[diff]||DIFF.old).inc,expMul=()=>(DIFF[diff]||DIFF.old).exp;let diff='std',diffPick='std';
+const START_CASH={easy:8500,std:6500,hard:3000,old:4200},startCash=()=>START_CASH[diff]||6500;
 const baseCash=()=>Math.round(startCash()*1.5);const moneyCap=()=>baseCash()+(pw.bankCap||0);
 const matCap=()=>pw.matCap;
 /* 6.1.12: running income and costs (sales, fares, exports, taxes / upkeep, imports, fines, losses) wait on the hour's account and are settled at the end of every game hour; building, demolition refunds and loans stay immediate */
 let pendIn=0,pendOut=0;const cashNow=()=>money+pendIn-pendOut;
 /* 6.1.18: income and costs flow in continuously again (pendIn/pendOut stay 0; kept so old saves load) */
-function earn(x){if(!(x>0))return 0;return addMoney(x)}
+function earn(x){if(!(x>0))return 0;return addMoney(x*incMul())}
 function owe(x){if(x>0)money-=x}
 function settleHour(){const inc=pendIn,out=pendOut;pendIn=0;pendOut=0;if(!inc&&!out)return;let net=inc-out;
   if(net>0){const room=Math.max(0,moneyCap()-money),add=Math.min(net,room);if(add<net){cur.inc-=net-add;cur.capLost=(cur.capLost||0)+(net-add)}money+=add;net=add}else money+=net;
@@ -3089,7 +3091,7 @@ const SHIP_EVERY=120,SHIP_P=0.6,SHIP_GOODS=['mat',...Object.keys(GOODS).filter(k
 function shipImport(i){const c=grid[i],Q=shipQ(c),sel=c.ship;let tot=0,cost=0;
   for(const k of sel){const unit=frPrice(k)*SHIP_IMP,room=Math.floor(whFreeFor(k));const n0=Math.min(Q[k]||0,room,Math.floor(Math.max(0,cashNow()-cost)/unit));if(n0<=0)continue;
     const n=addGood(k,n0,i);tot+=n;cost+=n*unit;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
-  if(!tot){float(i,sel.every(k=>whFreeFor(k)<1)?'spedycja: magazyny pełne':'spedycja: brak gotówki lub towaru do sprowadzenia','warn');return}cost=Math.round(cost);owe(cost);cur.upkeep+=cost;cur.shipImp=(cur.shipImp||0)+cost;float(i,`sprowadzono ${fmt(tot)} kg · −${fmt(cost)} T¢`,'mat');
+  if(!tot){float(i,sel.every(k=>whFreeFor(k)<1)?'spedycja: magazyny pełne':'spedycja: brak gotówki lub towaru do sprowadzenia','warn');return}cost=Math.round(cost*expMul());owe(cost);cur.upkeep+=cost;cur.shipImp=(cur.shipImp||0)+cost;float(i,`sprowadzono ${fmt(tot)} kg · −${fmt(cost)} T¢`,'mat');
   if(c.t==='airport'){planeFly(i,true);return}const e=entryOf(i);if(e>=0){const b=bfs(e);const outs=edgeOuts().filter(o=>b.dist[o]>=0);for(let k=0;k<Math.min(5,Math.ceil(tot/20))&&outs.length&&cars.length<MAX_CARS;k++){const v=createCar('truck',pathTo(b,outs[k%outs.length]).reverse(),{home:i,dest:-1});v.kind='export';v.mesh.userData.cargo&&(v.mesh.userData.cargo.material=GM[sel[k%sel.length]]||GM.mix)}}}
 function shipRun(i){const c=grid[i];if(!c)return;if(c.shipM==='imp')return shipImport(i);const Q=shipQ(c),sel=c.ship;let tot=0,inc=0;for(const k of sel){const n=Math.min(Q[k]||0,Math.floor(have(k)));if(n<=0)continue;take(k,n,i);tot+=n;inc+=n*frPrice(k)*SHIP_P;cur.shipped=cur.shipped||{};cur.shipped[k]=(cur.shipped[k]||0)+n}
   if(!tot){float(i,'spedycja: nic do wywiezienia','warn');return}const got=earn(Math.round(inc));cur.inc+=got;cur.shipInc=(cur.shipInc||0)+got;float(i,`wywieziono ${fmt(tot)} kg · +${fmt(got)} T¢`,'money');
@@ -3266,7 +3268,7 @@ const frName=k=>k==='mat'?'Materiały':GOODS[k].name,frPrice=k=>k==='mat'?8:GOOD
 const frRamps=c=>{c.fr=c.fr||[{k:'mat',m:'off',n:FR_MIN}];if(c.up&&c.fr.length<2)c.fr.push({k:'veg',m:'off',n:FR_MIN});return c.fr.slice(0,c.up?2:1)};
 function freightRun(st){const c=grid[st];for(const R0 of frRamps(c)){if(R0.m==='off')continue;const k=R0.k;
     if(R0.m==='imp'){const room=Math.floor(whFreeFor(k)),unit=frPrice(k)*FR_IMP;let n=Math.min(R0.n,room,Math.floor(Math.max(0,cashNow())/unit));
-      if(n<=0){float(st,room<=0?'import: magazyny pełne':'import: brak gotówki','warn');continue}n=Math.floor(addGood(k,n,st));const cost=Math.round(n*unit);owe(cost);cur.upkeep+=cost;cur.frImp=(cur.frImp||0)+cost;
+      if(n<=0){float(st,room<=0?'import: magazyny pełne':'import: brak gotówki','warn');continue}n=Math.floor(addGood(k,n,st));const cost=Math.round(n*unit*expMul());owe(cost);cur.upkeep+=cost;cur.frImp=(cur.frImp||0)+cost;
       cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n;float(st,`+${n} kg ${frName(k).toLowerCase()} (−${fmt(cost)} T¢)`,'mat')}
     else{const have=k==='mat'?matl:(goods[k]||0),n=Math.min(R0.n,Math.floor(have));if(n<=0){float(st,`eksport: brak towaru (${frName(k).toLowerCase()})`,'warn');continue}
       take(k,n,st);const inc=earn(Math.round(n*frPrice(k)*FR_EXP));cur.inc+=inc;cur.frExp=(cur.frExp||0)+inc;float(st,`−${n} kg ${frName(k).toLowerCase()} (+${fmt(inc)} T¢)`,'money')}}}
@@ -4716,7 +4718,7 @@ function loanUI(){const el=document.getElementById('loanBox');if(!el)return;if(l
 const IMPORT_FEE=0;let imports={};
 /* imports cost per kilogram: a shop pays 70% of the shelf price, power plants twice the export price of their fuel */
 const SHOP_IMP=0.5,FUEL_IMP={coal:24,wood:16};
-function payImport(k,n,cost){owe(cost);cur.upkeep+=cost;cur.impCost=(cur.impCost||0)+cost;imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
+function payImport(k,n,cost){cost=Math.round(cost*expMul());owe(cost);cur.upkeep+=cost;cur.impCost=(cur.impCost||0)+cost;imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
 function importGood(k,n){if(n<=0)return;addGood(k,n);imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
 const importKinds=()=>Object.keys(imports).filter(k=>gameT-imports[k]<60);
 function taxIncome(){let t=0;for(const c of grid)if(c&&HLV[c.t]&&!c.aband)t+=popOf(c)*(TAX[c.t]??taxRate)/100*TAX_BASE*(c.lyc?1.05:1);return Math.round(t)}
@@ -8175,7 +8177,11 @@ const LT_TR=[
 ["Powtarzaj tę promocję przed każdym meczem", "Repeat this promotion before every match", "Diese Werbung vor jedem Spiel wiederholen"],
 ["Brakuje {} T¢ na promocję.", "You need {} T¢ more for the promotion.", "Dir fehlen {} T¢ für die Werbung."],
 ["mecz wygrany! {} kibiców · +{} T¢ · turystyka +{}% na dobę", "match won! {} fans · +{} T¢ · tourism +{}% for a day", "Spiel gewonnen! {} Fans · +{} T¢ · Tourismus +{}% für einen Tag"],
-["mecz przegrany · {} kibiców · +{} T¢", "match lost · {} fans · +{} T¢", "Spiel verloren · {} Fans · +{} T¢"]
+["mecz przegrany · {} kibiców · +{} T¢", "match lost · {} fans · +{} T¢", "Spiel verloren · {} Fans · +{} T¢"],
+["Średni", "Medium", "Mittel"],
+["koszty −20% · przychody +20%", "costs −20% · income +20%", "Kosten −20% · Einnahmen +20%"],
+["przychody +20%", "income +20%", "Einnahmen +20%"],
+["przychody −10%", "income −10%", "Einnahmen −10%"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
