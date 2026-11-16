@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1785,7 +1785,7 @@ mat.ghF=M('#e9ece9');mat.stub=M('#c9a85a');mat.cotton=M('#f7f5ee');mat.cottonL=M
 const VEGC=[M('#5fae45'),M('#d9533a'),M('#f0a030'),M('#7a4fa0'),M('#3f8f3a')];
 function seeded(n){let a=(n*2654435761)>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
 function part(geo,m,sx,sy,sz,x,y,z,ry=0){const o=new THREE.Mesh(geo,m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);o.rotation.y=ry;o.castShadow=true;return o}
-function animal(kind,x,z,ry){const a=new THREE.Group();
+function animal0(kind,x,z,ry){const a=new THREE.Group();
   if(kind==='cow'){a.add(part(FK.body,mat.cowB,0.25,0.11,0.115,0,0.13,0));a.add(part(FK.body,mat.cowB,0.075,0.075,0.08,0.155,0.17,0));
     a.add(part(FK.body,mat.cow,0.035,0.045,0.065,0.198,0.155,0));for(const z of[-0.03,0.03])a.add(part(FK.body,mat.cow,0.012,0.025,0.012,0.15,0.215,z));
     a.add(part(FK.body,mat.cow,0.08,0.07,0.119,-0.05,0.14,0));a.add(part(FK.body,mat.cow,0.05,0.05,0.119,0.07,0.115,0));a.add(part(FK.body,mat.cow,0.06,0.006,0.06,0.02,0.188,0.02));
@@ -1796,7 +1796,9 @@ function animal(kind,x,z,ry){const a=new THREE.Group();
     for(const[p,q]of[[-0.05,-0.03],[0.05,-0.03],[-0.05,0.03],[0.05,0.03]])a.add(part(FK.body,mat.pigD,0.025,0.04,0.025,p,0.02,q))}
   else{a.add(part(FK.ball,mat.wool,0.09,0.065,0.065,0,0.1,0));a.add(part(FK.body,mat.dark,0.045,0.05,0.045,0.1,0.11,0));
     for(const[p,q]of[[-0.04,-0.025],[0.04,-0.025],[-0.04,0.025],[0.04,0.025]])a.add(part(FK.body,mat.dark,0.018,0.06,0.018,p,0.03,q))}
-  a.position.set(x,0.03,z);a.rotation.y=ry;return a}
+  return a}
+/* 8.1.6: farm animals, editable in the model editor (obj:cow, obj:pig, obj:sheep) */
+function animal(kind,x,z,ry){const a=applyOvr('obj:'+(kind==='cow'||kind==='pig'?kind:'sheep'),animal0(kind,0,0,0),Math.random());a.position.set(x,0.03,z);a.rotation.y=ry;return a}
 function barn(d,x,z,big){const w=big?0.42:0.26,h=big?0.3:0.2;d.add(part(FK.body,big?mat.barn:mat.shed,w,h,w*0.8,x,0.03+h/2,z));
   const r=part(FK.cone,mat.roofD,w*0.78,big?0.16:0.11,w*0.62,x,0.03+h+(big?0.08:0.055),z,Math.PI/4);d.add(r);if(big)d.add(part(FK.body,mat.white,0.1,0.14,0.01,x,0.1,z+w*0.4+0.003))}
 function silo(d,x,z,big){const r=big?0.13:0.09,h=big?0.85:0.5;d.add(part(FK.cyl,mat.silo,r,h,r,x,0.04+h/2,z));d.add(part(FK.ball,mat.siloR,r,r*0.7,r,x,0.04+h,z));
@@ -1842,8 +1844,11 @@ function farmFence(i){const c=grid[i];const f=c.model.userData.fence;f.clear();c
   for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;const nb=nx>=0&&nz>=0&&nx<N&&nz<N?grid[idx(nx,nz)]:null;if(nb&&nb.t===c.t)continue;
     if(c.t==='landfill'){for(let k=0;k<4;k++){const o=-0.36+k*0.24,pn=new THREE.Mesh(dx?FG.px:FG.pz,k%2?mat.sheet:mat.sheet2);pn.position.set(dx?dx*0.48:o,0.15,dz?dz*0.48:o);pn.castShadow=true;f.add(pn)}
       for(const o of[-0.48,-0.24,0,0.24,0.48]){const p=new THREE.Mesh(FG.mpost,mat.dark);p.position.set(dx?dx*0.48:o,0.15,dz?dz*0.48:o);f.add(p)}continue}
+    if(MODEL_OVR['obj:fence']){const p=applyOvr('obj:fence',fenceSide());if(dx){p.rotation.y=Math.PI/2;p.position.set(dx*0.48,0,0)}else p.position.set(0,0,dz*0.48);f.add(p);continue}
     const r=new THREE.Mesh(dx?FG.x:FG.z,mat.fence);r.position.set(dx*0.48,0.12,dz*0.48);f.add(r);
     for(const o of[-0.45,0,0.45]){const p=new THREE.Mesh(FG.post,mat.fence);p.position.set(dx?dx*0.48:o,0.08,dz?dz*0.48:o);f.add(p)}}}
+/* 8.1.6: one side of a farm fence (along x, at z=0), editable in the model editor (obj:fence) */
+function fenceSide(){const s=new THREE.Group(),r=new THREE.Mesh(FG.z,mat.fence);r.position.set(0,0.12,0);s.add(r);for(const o of[-0.45,0,0.45]){const p=new THREE.Mesh(FG.post,mat.fence);p.position.set(o,0.08,0);s.add(p)}return s}
 function buildRestaurant(){const g=new THREE.Group();g.add(box(0.7,0.3,0.55,M('#e9c99a'),0,0,-0.12));g.add(box(0.74,0.04,0.59,mat.roofD,0,0.3,-0.12));
   for(let k=0;k<5;k++)g.add(box(0.148,0.03,0.18,k%2?mat.white:M('#c9433a'),-0.296+k*0.148,0.24,0.24));g.add(box(0.12,0.18,0.02,mat.door,0,0,0.16));g.add(box(0.36,0.1,0.02,mat.glass,0,0.08,0.16).translateX(0.2));
   for(const x of[-0.28,0.28]){g.add(part(FK.cyl,mat.white,0.06,0.04,0.06,x,0.07,0.36));g.add(part(FK.cone,M('#e8503a'),0.11,0.06,0.11,x,0.2,0.36));g.add(part(FK.cyl,mat.dark,0.008,0.14,0.008,x,0.12,0.36))}return g}
@@ -2566,10 +2571,10 @@ function overLook(g,i,c){const dh=lvY(hgt[i])-lvY(rh(i)),X=c.ov==='x';const b=ne
   const P=0.5-WALK_W/2;for(const s of[-1,1]){const m=new THREE.Mesh(X?GW.x:GW.z,matWalk);m.position.set(X?0:s*P,dh,X?s*P:0);m.receiveShadow=true;g.add(m)}}
 /* 8.0.5: noise screens on every side of a highway tile with no road beyond it (looks only) */
 const SCRM={panel:M('#9cc4cf'),top:M('#c9d6d9'),post:M('#5b6168')};SCRM.panel.transparent=true;SCRM.panel.opacity=0.45;SCRM.panel.depthWrite=false;
+/* 8.1.6: one tile of noise screen (along x, at z=0), editable in the model editor (obj:screen) */
+function screenPanel(){const H=0.21,s=new THREE.Group();{const pn=box(1,H,0.012,SCRM.panel,0,0.04,0);pn.castShadow=false;s.add(pn)}s.add(box(1,0.02,0.022,SCRM.top,0,0.04+H,0));for(const o of[-0.48,0,0.48])s.add(box(0.025,H+0.02,0.03,SCRM.post,o,0.04,0));return s}
 function screenLook(g,conns){const has=(dx,dz)=>conns.some(([a,b])=>a===dx&&b===dz),H=0.21,P=0.48;
-  const ax=conns.some(c=>c[0]),az=conns.some(c=>c[1]);for(const[dx,dz]of DIRS){if(has(dx,dz)||(dx&&ax&&!az)||(dz&&az&&!ax))continue;const X=!dx;/* wall runs along x when the open side is north/south */
-    {const pn=X?box(1,H,0.012,SCRM.panel,0,0.04,dz*P):box(0.012,H,1,SCRM.panel,dx*P,0.04,0);pn.castShadow=false;g.add(pn)}g.add(X?box(1,0.02,0.022,SCRM.top,0,0.04+H,dz*P):box(0.022,0.02,1,SCRM.top,dx*P,0.04+H,0));
-    for(const o of[-0.48,0,0.48])g.add(X?box(0.025,H+0.02,0.03,SCRM.post,o,0.04,dz*P):box(0.03,H+0.02,0.025,SCRM.post,dx*P,0.04,o))}}
+  const ax=conns.some(c=>c[0]),az=conns.some(c=>c[1]);for(const[dx,dz]of DIRS){if(has(dx,dz)||(dx&&ax&&!az)||(dz&&az&&!ax))continue;const X=!dx;const p=applyOvr('obj:screen',screenPanel());if(X)p.position.set(0,0,dz*P);else{p.rotation.y=Math.PI/2;p.position.set(dx*P,0,0)}g.add(p)}}
 function rebuildRoad(i){const c=grid[i];if(!c||!DRIVE[c.t])return;const g=c.group;
   while(g.children.length>1){const o=g.children[g.children.length-1];g.remove(o);if(o.userData.baked)o.geometry.dispose()}
   const et=effType(i),x=i%N,z=(i/N)|0,hw=et==='highway',br=c.t==='bridge',y=hw?0.051:0.046;let n=0,ax=false,az=false;
@@ -3343,7 +3348,9 @@ function disembark(i,c){if(requestTaxi({st:i})){c.waiting--;return}if(Math.rando
   const w=createCar('walker',pathTo(b,t.e),{walk:true,home:-1,dest:t.i});w.kind='visitor';w.speed=0.5;cur.walks=(cur.walks||0)+1;cur.tour++;c.waiting--}
 /* a plane lands on (or takes off from) the airport's runway */
 let planes=[];
-function planeFly(i,land){const c=grid[i];if(!c||!c.model)return;const g=new THREE.Group(),wh=mat.white;g.add(box(0.12,0.12,0.9,wh,0,0,0));g.add(box(0.95,0.03,0.22,wh,0,0.04,0.02));g.add(box(0.36,0.025,0.12,wh,0,0.09,-0.38));g.add(box(0.025,0.2,0.14,M('#c0392b'),0,0.1,-0.38));
+/* 8.1.6: the airliner, editable in the model editor (obj:plane); nose towards +z */
+function planeMesh0(){const g=new THREE.Group(),wh=mat.white;g.add(box(0.12,0.12,0.9,wh,0,0,0));g.add(box(0.95,0.03,0.22,wh,0,0.04,0.02));g.add(box(0.36,0.025,0.12,wh,0,0.09,-0.38));g.add(box(0.025,0.2,0.14,M('#c0392b'),0,0.1,-0.38));return g}
+function planeFly(i,land){const c=grid[i];if(!c||!c.model)return;const g=applyOvr('obj:plane',planeMesh0(),Math.random());
   scene.add(g);planes.push({g,i,u:0,land})}
 function planeTick(dt){for(const p of[...planes]){p.u+=dt/4;const c=grid[p.i];if(!c||!c.model||p.u>=1){scene.remove(p.g);planes=planes.filter(q=>q!==p);continue}
     const u=p.land?p.u:1-p.u,z=-7+u*10,y=u<0.45?0.06+(0.45-u)/0.45*1.6:0.06,v=new THREE.Vector3(-1.25,y,z);c.model.updateMatrixWorld();c.model.localToWorld(v);
@@ -3370,11 +3377,13 @@ function flipStopSide(){const i=hoverI;stopSide=stopSide==null?-(i>=0?sideAt0(i,
 function stopDir(i){const c=grid[i];if(!c||!c.bus)return null;const s=c.bus;return stopAxOf(i)===0?[s,0]:[0,-s]}
 /* the shelter: pad, glass back wall, blue roof, bench and a sign; up to five people wait next to it */
 const stopM={};
+/* 8.1.6: the shelter itself, editable in the model editor (obj:stop) */
+function stopShell(){if(!stopM.blue){stopM.blue=M('#2f8fd8');stopM.glass=new THREE.MeshLambertMaterial({color:'#bfe0f2',transparent:true,opacity:0.6});stopM.bench=M('#8a6a4a')}const S=stopM,q=new THREE.Group(),y0=0.062;
+  q.add(box(0.52,0.008,0.08,mat.concrete,0,y0,0.458));q.add(box(0.46,0.17,0.01,S.glass,0,y0+0.008,0.493));for(const x of[-0.235,0.235])q.add(box(0.014,0.21,0.014,mat.steel,x,y0,0.492));
+  q.add(box(0.54,0.016,0.115,S.blue,0,y0+0.21,0.448));q.add(box(0.3,0.014,0.035,S.bench,0,y0+0.05,0.472));q.add(box(0.01,0.3,0.01,mat.steel,0.31,y0,0.44));q.add(box(0.075,0.075,0.01,S.blue,0.31,y0+0.28,0.44));return q}
 function stopModel(ax,s,ppl){if(!stopM.blue){stopM.blue=M('#2f8fd8');stopM.glass=new THREE.MeshLambertMaterial({color:'#bfe0f2',transparent:true,opacity:0.6});stopM.bench=M('#8a6a4a')}
   /* 6.3.5: slim, standing on the sidewalk strip at the edge of the tile (0.42–0.5 from the centre); only the roof reaches a little over the kerb */
-  const S=stopM,g=new THREE.Group(),q=new THREE.Group(),y0=0.062;
-  q.add(box(0.52,0.008,0.08,mat.concrete,0,y0,0.458));q.add(box(0.46,0.17,0.01,S.glass,0,y0+0.008,0.493));for(const x of[-0.235,0.235])q.add(box(0.014,0.21,0.014,mat.steel,x,y0,0.492));
-  q.add(box(0.54,0.016,0.115,S.blue,0,y0+0.21,0.448));q.add(box(0.3,0.014,0.035,S.bench,0,y0+0.05,0.472));q.add(box(0.01,0.3,0.01,mat.steel,0.31,y0,0.44));q.add(box(0.075,0.075,0.01,S.blue,0.31,y0+0.28,0.44));
+  const S=stopM,g=new THREE.Group(),q=new THREE.Group(),y0=0.062;q.add(applyOvr('obj:stop',stopShell()));
   const pp=[];if(ppl)for(let k=0;k<5;k++){const p=new THREE.Group();p.add(box(0.04,0.075,0.032,WALKC[(k*3+1)%WALKC.length],0,y0,0));p.add(box(0.032,0.032,0.032,SKIN[k%SKIN.length],0,y0+0.075,0));
     p.position.set([-0.32,-0.38,0.37,-0.44,0.43][k],0,0.455);p.rotation.y=Math.PI+(k%2?0.4:-0.3);p.visible=false;q.add(p);pp.push(p)}
   if(s<0)q.rotation.y=Math.PI;g.add(q);if(ax===1)g.rotation.y=Math.PI/2;g.userData.ppl=pp;return g}
@@ -5951,14 +5960,19 @@ if(!ED)requestAnimationFrame(frame);
 const VEH_LIST=[['car','Samochód mieszkańca','Pojazdy','Samochody'],['taxi','Taksówka','Pojazdy','Samochody'],['visitor','Auto turysty','Pojazdy','Samochody'],['van','Dostawczak (kolor sklepu)','Pojazdy','Dostawy'],['truck','Ciężarówka (kolor linii fabryki)','Pojazdy','Dostawy'],['semi','Ciężarówka przegubowa (galerie i supermarkety)','Pojazdy','Dostawy'],
   ['garbage','Śmieciarka','Pojazdy','Służby'],['sweeper','Zamiatarka','Pojazdy','Służby'],['police','Radiowóz','Pojazdy','Służby'],['fire','Wóz strażacki','Pojazdy','Służby'],['hearse','Karawan','Pojazdy','Służby'],['heli','Helikopter gaśniczy','Pojazdy','Lotnictwo'],
   ['bus','Autobus','Pojazdy','Komunikacja'],['loco','Lokomotywa','Pojazdy','Kolej'],['coach','Wagon pasażerski','Pojazdy','Kolej'],['wagon','Wagon towarowy','Pojazdy','Kolej'],['walker','Pieszy','Piesi',null]];
+/* 8.1.6: small things in the model editor: the plane, the bus shelter, noise screens, farm fences and animals */
+const OBJ_LIST=[['plane','Samolot pasażerski','Pojazdy','Lotnictwo'],['stop','Wiata przystanku','Drobne','Ulica'],['screen','Ekran akustyczny (1 pole)','Drobne','Ulica'],['fence','Płot farmy (1 bok)','Drobne','Farmy'],['cow','Krowa','Drobne','Zwierzęta'],['pig','Świnia','Drobne','Zwierzęta'],['sheep','Owca','Drobne','Zwierzęta']];
+const OBJ_BUILD={plane:planeMesh0,stop:stopShell,screen:screenPanel,fence:fenceSide,cow:()=>animal0('cow',0,0,0),pig:()=>animal0('pig',0,0,0),sheep:()=>animal0('sheep',0,0,0)};
 window.__ltModelAPI={THREE,version:LT_VERSION,ovr:MODEL_OVR,
   list(){const o=[];for(const t of Object.keys(BUILD)){if(!DEF[t]||HBUILD[t])continue;o.push({key:t,name:DEF[t].name,cat:TCAT[t]||(t==='incS'?TCAT.incinerator:null)||'Inne',grp:DEF[t].name,leaf:'Budynek',pt:t==='shop'||t==='shop1'||isFactory(t)})}
     for(const t in HBUILD)HLV[t].res.forEach((r,lv)=>o.push({key:t+'@'+lv,name:`${DEF[t].name} · poziom ${lv+1}`,cat:'Domy',grp:DEF[t].name,leaf:`Poziom ${lv+1}`}));
     for(const[k,n,c,gp]of VEH_LIST)o.push({key:'veh:'+k,name:n,cat:c,grp:gp,leaf:n,veh:true,pt:k==='van'||k==='truck'||k==='semi'});
+    for(const[k,n,c,gp]of OBJ_LIST)o.push({key:'obj:'+k,name:n,cat:c,grp:gp,leaf:n,veh:true});
     for(const k in NAT_NAMES)o.push({key:'nat:'+k,name:NAT_NAMES[k],cat:'Natura',grp:k==='rock'?'Złoża':'Drzewa',leaf:NAT_NAMES[k],nat:true,lodD:k==='rock'?45:55});return o},
   animLib:ANIM_LIB,fxLib:FX_LIB,rcDef:RC_DEF,makeFx,fxApply,animApply,animReset,
   build(key,withOvr){if(key.startsWith('veh:')){const k=key.slice(4),T=trainM;let g;if(k==='heli')g=heliMesh0();else if(k==='loco')g=trainLoco(T.blue,T.white);else if(k==='coach')g=trainCoach(T.blue,T.white);else if(k==='wagon')g=trainWagon(T.fr[0]);else{g=carMesh0(k);scene.remove(g);g.scale.setScalar(1)}
     return withOvr?applyOvr(key,g):g}
+    if(key.startsWith('obj:')){const g=OBJ_BUILD[key.slice(4)]();return withOvr?applyOvr(key,g):g}
     if(key.startsWith('nat:')){const g=natBase(key.slice(4));return withOvr?applyOvr(key,g):g}if(key.includes('#'))return upgModel(key,withOvr);const[t,lv]=key.split('@');const g=lv!=null&&HBUILD[t]?HBUILD[t](+lv):BUILD[t]();return withOvr?applyOvr(key,g):g},
   upgrades(){const o=[];const SL=[['up',UPG,'ulepszenie'],['up2',UPG2,'ulepszenie'],['filt',UPGF,'filtry']];
     for(const t of Object.keys(BUILD)){if(!DEF[t]||HBUILD[t])continue;for(const[sl,src]of SL){if(!src[t])continue;for(const k of t==='incinerator'?['incinerator','incS']:[t]){const key=k+'#'+sl,bn=k==='incS'?DEF.incS.name:DEF[t].name;
