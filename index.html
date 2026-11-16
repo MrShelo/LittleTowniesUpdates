@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2733,7 +2733,7 @@ const laneN=i=>grid[i]?LANES[effType(i)]||1:1;
 const laneIx=(c,i)=>Math.min(c.li,laneN(i)-1);
 const laneOff=(c,i)=>OFFS[laneN(i)][laneIx(c,i)];
 const segKey=(a,b,l)=>(a*N*N+b)*4+l;
-function buildOcc(){occ.clear();for(const c of cars){if(c.dead||c.walk||c.dwell>0||c.seg>=c.path.length-1)continue;const a=c.path[c.seg];const k=segKey(a,c.path[c.seg+1],laneIx(c,a));
+function buildOcc(){occ.clear();for(const c of cars){if(c.dead||c.walk||(c.dwell>0&&c.kind==='police')||c.seg>=c.path.length-1)continue;const a=c.path[c.seg];const k=segKey(a,c.path[c.seg+1],laneIx(c,a));
   let l=occ.get(k);if(!l)occ.set(k,l=[]);l.push(c)}}
 /* distance to the next car in the same lane, this segment or the next one */
 /* on entering a tile the car takes the lane with the fewest cars on this stretch, staying put on a tie */
@@ -2902,7 +2902,7 @@ function serve(c,d,i){
   let pay=0,ent=0;
   if(isShop(d.t)&&(d.t!=='gallery'||d.stores.length)){const k=shelfTotal(d)>=1?pickShelf(d,c.kind==='commuter'?c.home:null):undefined;{/* demand: what the customer came for, even when the shelf is empty */const w=k!==undefined?k:wantedGood(d,c.kind==='commuter'?c.home:null);if(w!==undefined){cur.want=cur.want||{};cur.want[w]=(cur.want[w]||0)+1}}if(k!==undefined){/* 7.3.1: the bigger the need, the more they buy: up to 4 kg of one good in a visit */
       const hh=c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t]?grid[c.home]:null,n=needOf(k),HH=hh&&n?needs(hh):null,per=hh?0.5/Math.max(1,popOf(hh)/4):0;
-      let q=HH?Math.max(1,Math.min(4,Math.ceil(((PAIR(n)?0.5-shareOf(HH,n,k):1-HH[n.k]))/per-0.01))):1;if(LAW('hl_veg')&&k==='veg')q+=1;if(LAW('hl_pyr')&&k==='dairy')q+=1;if(LAW('hl_pyr')&&FOODG.has(k)){const g=earn(3);cur.inc+=g}q=Math.max(1,Math.min(q,Math.floor(d.shelf[k]||0)||1));
+      let q=HH?Math.max(1,Math.min(4+Math.floor(popOf(hh)/10),Math.ceil(((PAIR(n)?0.5-shareOf(HH,n,k):1-HH[n.k]))/per-0.01))):1;if(LAW('hl_veg')&&k==='veg')q+=1;if(LAW('hl_pyr')&&k==='dairy')q+=1;if(LAW('hl_pyr')&&FOODG.has(k)){const g=earn(3);cur.inc+=g}q=Math.max(1,Math.min(q,Math.floor(d.shelf[k]||0)||1));
       d.shelf[k]=Math.max(0,(d.shelf[k]||0)-q);cur.sales+=q;cur.sold[k]=(cur.sold[k]||0)+q;if(HH){if(PAIR(n)){HH['g:'+k]=Math.min(0.5,shareOf(HH,n,k)+per*q);HH[n.k]=n.goods.reduce((a,g)=>a+shareOf(HH,n,g),0)}else HH[n.k]=Math.min(1,HH[n.k]+per*q)}
       const pr=d.t==='restaurant'?priceAt(d,k):priceAt(d,k)*TAX.buy/20;pay+=pr*q;cur.buyTax=(cur.buyTax||0)+(d.t==='restaurant'?0:pr*q)}
     else if(c.kind==='commuter'&&grid[c.home]&&HLV[grid[c.home].t]&&shelfTotal(d)>=1&&(()=>{try{return sellsOf(d).every(g=>!wantsGood(needs(grid[c.home]),g))}catch(e){return false}})()){/* nothing needed here: they just look around */}
@@ -3378,7 +3378,7 @@ const lineRoute=L=>L.kind==='bus'?busRoute(L):railRoute(L);
 /* ---------- passengers ---------- */
 /* the best line for a trip: a stop within walking reach of both ends, the cost counts walking, waiting and riding (a ride is far easier than walking) */
 function planTrip(b,eTo){let best=null;
-  for(const L of tLines){if(!L.on)continue;const R=lineRoute(L);if(!R)continue;const bus=L.kind==='bus',W=bus?STOP_WALK:ST_WALK,A=[],B=[];
+  for(const L of tLines){if(!L.on||!lineVeh(L))continue;const R=lineRoute(L);if(!R)continue;const bus=L.kind==='bus',W=bus?STOP_WALK:ST_WALK,A=[],B=[];
     L.stops.forEach((s,k)=>{const e=bus?s:entryOf(s);if(e<0)return;const w1=b.dist[e];if(w1>=0&&w1<=W)A.push([k,w1,e]);const w2=bfs(e).dist[eTo];if(w2>=0&&w2<=W)B.push([k,w2])});
     for(const[ka,wa,ea]of A)for(const[kb,wb]of B){if(ka===kb)continue;const ride=(R.pos[kb]-R.pos[ka]+R.len)%R.len,cost=wa+wb+ride*(bus?0.3:0.15)+(bus?4:6);
       if(!best||cost<best.cost)best={L,cost,walk:ea,at:L.stops[ka],to:L.stops[kb]}}}
@@ -3388,10 +3388,10 @@ function startTransit(kind,b,t,o,tp){const path=pathTo(b,tp.walk),pl=walkPlan(pa
 /* at the stop the walker joins the queue; with the line gone it just walks on */
 function paxArrive(c){const t=c.tr,L=lineOf(t.line);c.tr=null;
   if(!L||!L.on||!lineRoute(L)||!L.stops.includes(t.at)||!L.stops.includes(t.to)){c.flip=-1;if(!sendTo(c,t.fin,c.phase))removeCar(c);return}
-  let q=paxQ.get(t.at);if(!q)paxQ.set(t.at,q=[]);q.push({line:t.line,to:t.to,fin:t.fin,kind:c.kind,home:c.home,dest:c.dest,tier:c.tier,phase:c.phase,t0:gameT});removeCar(c);stopVis(t.at)}
+  let q=paxQ.get(t.at);if(!q)paxQ.set(t.at,q=[]);q.push({line:t.line,to:t.to,fin:t.fin,kind:c.kind,home:c.home,dest:c.dest,tier:c.tier,phase:c.phase,t0:gameT,wk:c.wk});removeCar(c);stopVis(t.at)}
 /* off the bus or train, on foot to where the trip was going */
 function paxOut(r,S,bus){const s0=bus?S:entryOf(S);if(s0<0)return;const b=bfs(s0);if(b.dist[r.fin]<0)return;const path=pathTo(b,r.fin),pl=walkPlan(path,bus?-1:S,r.phase==='go'?r.dest:r.home)||{s0:1,flip:-1};
-  const w=createCar('walker',path,{walk:true,side:pl.s0,flip:pl.flip,tier:r.tier});w.kind=r.kind;w.speed=0.5;w.home=r.home;w.dest=r.dest;w.phase=r.phase;w.viaT=true}
+  const w=createCar('walker',path,{walk:true,side:pl.s0,flip:pl.flip,tier:r.tier});w.kind=r.kind;w.speed=0.5;w.home=r.home;w.dest=r.dest;w.phase=r.phase;w.viaT=true;if(r.wk!=null)w.wk=r.wk}
 function payFare(L,n){const f=earn(n*(L.kind==='bus'?BUS_FARE+(LAW('tp_stop')?1:0):RAIL_FARE+(LAW('tp_rail')?2:0)));cur.inc+=f;cur.fareInc=(cur.fareInc||0)+f;if(L.kind==='bus')cur.busPax=(cur.busPax||0)+n;else cur.railPax=(cur.railPax||0)+n;L.ph=(L.ph||0)+n}
 function board(L,S,v,cap){const q=paxQ.get(S);let inn=0;if(q&&q.length){const keep=[];for(const r of q){if(r.line===L.id&&v.riders.length<cap){v.riders.push(r);inn++}else keep.push(r)}if(inn){paxQ.set(S,keep);payFare(L,inn)}}return inn}
 /* ---------- buses ---------- */
@@ -3404,7 +3404,9 @@ function spawnBus(L,S){const R=busRoute(L);if(!R||!L.stops.includes(S))return nu
 function busAtStop(c,S){const L=lineOf(c.line);if(!L)return;let out=0;
   c.riders=c.riders.filter(r=>{if(r.to===S||!L.stops.includes(r.to)){paxOut(r,S,true);out++;return false}return true});
   if(c.retire){for(const r of c.riders)paxOut(r,S,true);c.riders=[];stopVis(S);removeCar(c);return}
-  const inn=board(L,S,c,BUS_CAP+(LAW('tp_stand')?5:0));c.dwell=out||inn?Math.min(4,1+0.08*(out+inn)):0.5;if(out||inn)stopVis(S)}
+  const inn=board(L,S,c,BUS_CAP+(LAW('tp_stand')?5:0));c.dwell=out||inn?Math.min(4,1+0.08*(out+inn)):0;if(out||inn)stopVis(S);
+  /* 8.1.1: buses of one line keep apart: one that comes too soon after the previous bus waits at the stop (at most 3 min) */
+  const Rb=busRoute(L),n=Math.max(1,lineVeh(L));if(Rb&&n>1){const H=Rb.len/1.25/n;L.dep=L.dep||{};const last=L.dep[S];if(last!=null){const gap=gameT-last;if(gap<H*0.7)c.dwell=Math.max(c.dwell,Math.min(3,H*0.7-gap))}L.dep[S]=gameT+c.dwell}}
 /* end of the loop, back at the first stop: serve it and go round again on the line's current route */
 function busLoop(c){const L=lineOf(c.line),R=L&&L.on?busRoute(L):null,here=c.path[c.path.length-1];if(!R)return removeCar(c);
   if(!L.stops.includes(here)){c.stopMap=null;c.s0=L.stops[0];if(!sendTo(c,c.s0,'go'))removeCar(c);return}
@@ -3728,16 +3730,16 @@ function makeRailEntries(){if(grid.some(c=>c&&c.edge&&c.t==='rail'))return;const
 /* 7.0.1: who goes out: a random resident at home; pupils (7–18) and seniors (65+) never drive, they walk all the way */
 function onFoot(h){const c=grid[h];if(!c||!c.pp||!c.pp.length)return false;const q=c.pp[(Math.random()*c.pp.length)|0];const st=stageOf(q.a);return st===1||st===2?'kid':st===4?'old':false}
 function spawnCommuter(h){const e=entryOf(h);if(e<0)return;const b=bfs(e);const foot=onFoot(h);
-  {const H=grid[h],ws=(H.pp||[]).filter(q=>q.j>=0&&q.s===0&&!(q.sh>gameT)&&isJobB(q.j,grid[q.j]));if(ws.length&&Math.random()<0.75){const q=ws[(Math.random()*ws.length)|0],ej=entryOf(q.j);
+  {const H=grid[h],ws=(H.pp||[]).filter(q=>q.j>=0&&q.s===0&&!(q.sh>gameT)&&isJobB(q.j,grid[q.j]));if(ws.length&&Math.random()<(BASIC.some(k=>needs(H)[k]<0.5)?0.4:0.6)){const q=ws[(Math.random()*ws.length)|0],ej=entryOf(q.j);
     if(ej>=0&&b.dist[ej]>=0){q.sh=gameT+720;cur.trips++;goTrip('commuter',b,{i:q.j,e:ej,d:b.dist[ej]},{home:h,dest:q.j,tier:H.happy??3,wk:EFF[q.ed||0]});return}}}
   if(Math.random()<0.15){const l=candidates(b,SERVICES).filter(o=>entR(grid[o.i])>0);const t=pickWeighted(l);if(t){cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3,foot});return}}
   const low=stored()<matCap()*0.35;let types;const r=Math.random();
   const SH=['shop','shop1','bakery','supermarket','gallery','restaurant'];if((counts.factory+counts.smallfac+counts.factoryB+counts.mine+counts.mineB+FARM_T.reduce((a,t)=>a+(counts[t]||0),0))&&(low||!(counts.shop||counts.gallery||counts.supermarket)))types=r<0.75?WORK_T:SH;else types=r<0.6?SH:WORK_T;
-  if(types===SH&&Math.random()<1-0.6*buyMul())return;
+  if(types===SH&&Math.random()<0.5*(1-buyMul()*0.8))return;
   /* 6.6.2: 7.3.1: residents always go shopping; a shop that sells something they still need is preferred */
   if(types===SH){const H=needs(grid[h]);const l0=candidates(b,SH),l=l0.filter(o=>{const d=grid[o.i];try{return sellsOf(d).some(k=>wantsGood(H,k))}catch(e){return true}});const t=pickWeighted(l.length?l:l0);if(!t)return;
     if(grid[t.i]&&grid[t.i].t==='shop1'&&Math.random()<1/3)return;cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3,foot});return}
-  if(types===WORK_T)return;const t=pickWeighted(candidates(b,types))||pickWeighted(candidates(b,['shop','supermarket','gallery']));if(!t)return;
+  if(types===WORK_T)types=SH;const t=pickWeighted(candidates(b,types))||pickWeighted(candidates(b,['shop','supermarket','gallery']));if(!t)return;
   if(grid[t.i]&&grid[t.i].t==='shop1'&&Math.random()<1/3)return;
   cur.trips++;goTrip('commuter',b,t,{home:h,dest:t.i,tier:grid[h].happy??3,foot})}
 /* short trips (up to 8 tiles) are walked along the pavement instead of driven */
@@ -3751,7 +3753,7 @@ function walkPlan(p,from,to){if(p.length<2)return{s0:1,flip:-1};const L=p.length
   const k=p.findIndex(j=>grid[j]&&grid[j].cross);return k<0?null:{s0,flip:k}}
 function goTrip(kind,b,t,o){if(o&&o.foot){o.kid=o.foot==='kid';o.old=o.foot==='old';delete o.foot;const path=pathTo(b,t.e),pl=walkPlan(path,o.home,t.i);if(!pl)return null;/* 7.4.0: no zebra crossing on the way: children and seniors stay home instead of crossing anywhere */const v=createCar('walker',path,Object.assign({walk:true,side:pl.s0,flip:pl.flip},o));v.kind=kind;v.speed=0.5;cur.walks=(cur.walks||0)+1;return v}
   if(kind==='commuter'&&tLines.length){const tp=planTrip(b,t.e),near=t.d<=WALK_FAR;
-    if(tp&&tp.cost<t.d*(near?0.85:1.1)&&(near||Math.random()<TRANSIT_P))return startTransit(kind,b,t,o,tp)}
+    if(tp&&tp.cost<t.d)return startTransit(kind,b,t,o,tp)}
   if(t.d<=WALK_MAX||(kind==='commuter'&&t.d<=WALK_FAR&&Math.random()<WALK_FAR_P*(LAW('hl_move')?1.1:1))){const path=pathTo(b,t.e),pl=walkPlan(path,o&&o.home,t.i);
     if(pl){const v=createCar('walker',path,Object.assign({walk:true,side:pl.s0,flip:pl.flip},o));v.kind=kind;v.speed=0.5;cur.walks=(cur.walks||0)+1;return v}}return createCar(kind,pathTo(b,t.e),o)}
 /* ---------- waste ---------- */
@@ -3915,7 +3917,7 @@ const crewOf=t=>{const C=CREW[t]||{min:3,max:5};return LAW('cm_plan')?{min:Math.
 function crewBoost(d){const n=(d.staff||[]).length,S=crewOf(d.t);return n<S.min?0:1+(LAW('cm_hero')?0.03:0.02)*Math.max(0,n-S.max)}
 function shiftEnd(i,d,w){const h=w.h,hc=grid[h];if(!hc||!hc.pp)return;const e=entryOf(i);if(e<0)return;const b=bfs(e);
   /* a worker short of something goes shopping first, then home */
-  let low=false;try{const H=needs(hc);low=!LAW('cm_canteen')&&NEEDS.some(n=>H[n.k]<0.6)}catch(err){}
+  let low=false;try{const H=needs(hc);low=!LAW('cm_canteen')&&NEEDS.some(n=>H[n.k]<0.85)}catch(err){}
   if(low&&cars.length<MAX_CARS){const SHP=['shop','shop1','bakery','supermarket','gallery'];const l=candidates(b,SHP);const t=pickWeighted(l);if(t){createCar('commuter',pathTo(b,t.e),{home:h,dest:t.i,tier:w.tier});return}}
   const he=entryOf(h);if(he>=0&&b.dist[he]>=0&&cars.length<MAX_CARS)createCar('commuter',pathTo(b,he),{home:h,dest:h,tier:w.tier})}
 function staffTick(dt){jobTick(dt);for(let i=0;i<N*N;i++){const d=grid[i];if(!d||!(isWork(d.t)||isFarm(d.t)||JOBX(d.t))||!d.staff)continue;
