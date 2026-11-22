@@ -1,1 +1,1 @@
-{"v": "8.1.11", "notes": "8.1.11: tunel pod istniejącą ulicą lub autostradą na wzgórzu (droga zostaje na górze), autostrada nad tunelem; wysokość tunelu liczona od najniższej sąsiedniej drogi"}
+{"v": "8.1.12", "notes": "8.1.12: drogi nad tunelami nie znikają po wczytaniu gry (zapis wysokości tuneli i mostów), autobusy nie skręcają w drogi, które nie są połączone (inna wysokość)"}
