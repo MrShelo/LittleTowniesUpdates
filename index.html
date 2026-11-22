@@ -27,10 +27,39 @@
 .msp.linp .mhz{font-size:11.5px;color:var(--warn)}
 .msp.linp .pb{height:6px;border-radius:3px;background:var(--chip);overflow:hidden;margin-top:6px}
 .msp.linp .pb i{display:block;height:100%;background:var(--accent)}
+
+/* 8.1.16: budget panel */
+.taxp.linp{width:min(400px,calc(100% - 80px))}
+.taxp .tsum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.taxp .tsum>div{display:grid;gap:1px;padding:8px 9px;border-radius:11px;background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.taxp .tsum small{font-size:11px;color:var(--muted)}
+.taxp .tsum b{font:700 15px var(--font-d);font-variant-numeric:tabular-nums}
+.taxp .pos{color:#2f8f5a}.taxp .neg{color:var(--warn)}
+.taxp .tcard{display:grid;gap:8px;padding:10px 11px;border-radius:12px;background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.taxp .tch{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.taxp .tch b{font:700 14px var(--font-d)}
+.taxp .tch span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.taxp .trow{display:grid;grid-template-columns:24px 1fr auto;gap:2px 8px;align-items:center}
+.taxp .trow .ti{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+.taxp .trow .tn{font-size:13px;font-weight:600}
+.taxp .trow .tv{font:700 14px var(--font-d);font-variant-numeric:tabular-nums;background:var(--chip);border-radius:7px;padding:2px 8px;min-width:44px;text-align:center}
+.taxp .trow input[type=range]{grid-column:1/-1;width:100%;height:6px;-webkit-appearance:none;appearance:none;border-radius:3px;background:linear-gradient(90deg,var(--accent) var(--tp,50%),var(--chip) var(--tp,50%));outline:none;margin:4px 0 0}
+.taxp .trow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.3);cursor:pointer}
+.taxp .trow input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent);cursor:pointer}
+.taxp .trow .te{grid-column:1/-1;font-size:11.5px;color:var(--muted)}
+.taxp .trow .te.pos{color:#2f8f5a}.taxp .trow .te.neg{color:var(--warn)}
+.taxp .trow+.trow{border-top:1px solid var(--line);padding-top:8px}
+.taxp .lnc .btn{min-height:36px}
+.taxp .lnc.lock{opacity:.65}
+.taxp .lnc.on{outline:2px solid var(--accent)}
+.taxp .lnf{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
+.taxp .lnf b{color:var(--fg)}
+.taxp .lnbar{height:8px;border-radius:4px;background:var(--chip);overflow:hidden}.taxp .lnbar i{display:block;height:100%;background:#2f8f5a}
+#loanBox{display:grid;gap:8px}
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.15';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.16';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -465,7 +494,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="hazard" id="hazard" hidden aria-hidden="true"></div>
 <aside class="tut panel" id="tut" hidden aria-label="Samouczek"></aside>
 <div class="tutInfo panel" id="tutInfo" hidden role="dialog" aria-label="Samouczek"></div>
-<div class="ovl panel taxp" id="taxp" hidden><b>Podatki</b><div id="taxBox"></div><input type="range" id="taxR" min="10" max="20" step="1" value="12" hidden><small id="taxN" hidden></small><span class="bh">Pożyczki</span><div id="loanBox"></div><span class="bh">Import</span><small id="impN"></small></div>
+<div class="ovl panel taxp linp" id="taxp" hidden><div class="lhd"><h2>Budżet i podatki</h2><button class="btn icon panel lx" type="button" id="taxX" aria-label="Zamknij">×</button></div><div id="taxSum" class="tsum"></div><div class="ltabs" id="taxTabs"><button class="chipb" type="button" data-ttab="tax" aria-pressed="true">Podatki</button><button class="chipb" type="button" data-ttab="loan" aria-pressed="false">Pożyczki</button><button class="chipb" type="button" data-ttab="imp" aria-pressed="false">Import</button></div><div data-tpan="tax"><div id="taxBox"></div><input type="range" id="taxR" min="10" max="20" step="1" value="12" hidden><small id="taxN" hidden></small></div><div data-tpan="loan" hidden><div id="loanBox"></div></div><div data-tpan="imp" hidden><div class="tcard"><small id="impN"></small></div></div></div>
 <nav class="rail" aria-label="Widoki"><button class="btn icon panel" id="gestBtn" hidden aria-pressed="false" aria-label="Gest dwoma palcami: przybliżanie" title="Gest dwoma palcami: przybliżanie (stuknij, by obracać)"></button><button class="btn icon panel" id="ordBtn" hidden aria-expanded="false" aria-label="Ustawy" title="Ustawy (urząd miasta)"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 2.5h7l3 3v12h-10z"/><path d="M12.5 2.5v3h3M8 9h5M8 12h5M8 15h3"/></svg></button><button class="btn icon panel" id="terBtn" aria-expanded="false" aria-label="Teren" title="Teren: podnoszenie, obniżanie, wyrównywanie, wygładzanie, zalewanie"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16.5l5.5-9 3.5 5.5 2.2-3.2 4.8 6.7z"/><path d="M6 10l1.5 1.4L9 10"/></svg></button><button class="btn icon panel" id="linBtn" hidden aria-expanded="false" aria-label="Komunikacja miejska" title="Komunikacja miejska: linie autobusowe i kolejowe"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="13" rx="2.2"/><path d="M4 9.5h12M6.5 15.5v2M13.5 15.5v2M7 5.2h6"/><circle cx="7" cy="12.6" r=".8"/><circle cx="13" cy="12.6" r=".8"/></svg></button><button class="btn icon panel" id="msBtn" aria-expanded="false" aria-label="Kamienie milowe" title="Kamienie milowe"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h8v4.2a4 4 0 0 1-8 0z"/><path d="M6 5H3.5v1.2A2.8 2.8 0 0 0 6.3 9M14 5h2.5v1.2A2.8 2.8 0 0 1 13.7 9"/><path d="M10 11.7v2.8M7 17.5h6M8 14.5h4v3H8z"/></svg></button><button class="btn icon panel" id="ovlBtn" aria-expanded="false" aria-label="Nakładki" title="Nakładki: zasięgi i strefy"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.8l7.5 4-7.5 4-7.5-4z"/><path d="M2.5 10.2l7.5 4 7.5-4"/><path d="M2.5 13.6l7.5 4 7.5-4"/></svg></button><button class="btn icon panel" id="taxBtn" aria-expanded="false" aria-label="Podatki i pożyczki" title="Podatki i pożyczki"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="15" height="10.5" rx="1.6"/><path d="M7 6.5V4.6a1.1 1.1 0 0 1 1.1-1.1h3.8A1.1 1.1 0 0 1 13 4.6v1.9"/><path d="M8 13.8l4-4.2"/><circle cx="8.3" cy="10" r=".8"/><circle cx="11.7" cy="13.4" r=".8"/></svg></button><button class="btn icon panel" id="statsBtn" aria-expanded="false" aria-label="Gospodarka" title="Gospodarka"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="10" width="15" height="7.5" rx="1.2"/><path d="M4.5 10V5.5h8V10"/><path d="M6.5 7.6h4"/><path d="M14.5 10V3.5h2.5V10"/><path d="M6 13.6h1.5M9.3 13.6h1.5M12.6 13.6h1.5"/></svg></button></nav>
 <div class="ovl panel msp linp" id="msp" hidden aria-label="Kamienie milowe"></div>
 <div class="ovl panel msp linp" id="linp" hidden aria-label="Komunikacja miejska"></div>
@@ -4808,9 +4837,10 @@ function takeLoan(k){const L=LOANS[k];if(loan||!L||(L.need&&!counts[L.need]))ret
 function payLoanOff(){if(!loan)return;const v=loan.left;if(money<v){setHint(`Brakuje ${fmt(v-money)} T¢ na spłatę.`,true,true);hintEl.hidden=false;return}money-=v;cur.loanPay=(cur.loanPay||0)+v;loan=null;setHint('Pożyczka spłacona.',false,true);hintEl.hidden=false;save();loanUI()}
 function loanDay(){if(!loan)return;const L=LOANS[loan.k],inst=Math.round(loan.left/Math.max(1,loan.daysLeft)),int=Math.round(loan.left*L.rate);money-=inst+int;cur.loanPay=(cur.loanPay||0)+inst+int;loan.left=Math.max(0,loan.left-inst);loan.daysLeft--;
   setHint(`Rata pożyczki: −${fmt(inst+int)} T¢ (${fmt(inst)} kapitału + ${fmt(int)} odsetek)`,true,true);hintEl.hidden=false;if(loan.daysLeft<=0||loan.left<=0)loan=null;loanUI()}
-function loanUI(){const el=document.getElementById('loanBox');if(!el)return;if(loan){const L=LOANS[loan.k];el.innerHTML=`<div class="loan"><span><b>${L.name}</b> · zostało ${fmt(loan.left)} T¢, ${loan.daysLeft} ${loan.daysLeft===1?'dzień':'dni'}</span><span>Najbliższa rata o północy: <b>${fmt(loanDue())} T¢</b> (odsetki ${mw(L.rate*100)}% dziennie od reszty)</span><button class="btn panel" id="loanPay"${money<loan.left?' disabled':''}>Spłać teraz ${fmt(loan.left)} T¢</button></div>`;document.getElementById('loanPay').onclick=payLoanOff;return}
-  el.innerHTML='<div class="loan">'+Object.entries(LOANS).map(([k,L])=>{const lock=L.need&&!counts[L.need];return`<button class="btn panel" data-loan="${k}"${lock?' disabled':''}>${L.name} na ${L.days} dni · ${mw(L.rate*100)}% dziennie${lock?'<br><small>wymaga banku rezerw złota</small>':''}</button>`}).join('')+'<small>Naraz możesz mieć jedną pożyczkę.</small></div>';
-  for(const b of el.querySelectorAll('[data-loan]'))b.onclick=()=>takeLoan(b.dataset.loan);
+function loanUI(){const el=document.getElementById('loanBox');if(!el)return;if(loan){const L=LOANS[loan.k],pc=Math.round((1-loan.left/L.amt)*100);el.innerHTML=`<div class="tcard lnc on"><div class="tch"><b>${L.name}</b><span>${mw(L.rate*100)}% dziennie</span></div><div class="lnbar"><i style="width:${pc}%"></i></div><div class="lnf"><span>Spłacono <b>${pc}%</b></span><span>Zostało <b>${fmt(loan.left)} T¢</b></span><span>${loan.daysLeft} ${loan.daysLeft===1?'dzień':'dni'}</span></div><small class="lst">Najbliższa rata o północy: <b>${fmt(loanDue())} T¢</b> (rata i odsetki od reszty).</small><button class="btn panel" id="loanPay"${money<loan.left?' disabled':''}>Spłać teraz ${fmt(loan.left)} T¢</button></div>`;document.getElementById('loanPay').onclick=payLoanOff;loanImp();return}
+  el.innerHTML=Object.entries(LOANS).map(([k,L])=>{const lock=L.need&&!counts[L.need],tot=Math.round(L.amt*(1+L.rate*(L.days+1)/2));return`<div class="tcard lnc${lock?' lock':''}"><div class="tch"><b>${fmt(L.amt)} T¢</b><span>${L.days} dni · ${mw(L.rate*100)}% dziennie</span></div><div class="lnf"><span>Rata ok. <b>${fmt(Math.round(L.amt/L.days))} T¢</b> + odsetki</span><span>Łącznie ok. <b>${fmt(tot)} T¢</b></span></div>${lock?'<small class="lst">Wymaga banku rezerw złota.</small>':''}<button class="btn panel" data-loan="${k}"${lock?' disabled':''}>Weź pożyczkę</button></div>`}).join('')+'<small class="lst">Naraz możesz mieć jedną pożyczkę. Raty pobierane są codziennie o północy.</small>';loanImp();
+  for(const b of el.querySelectorAll('[data-loan]'))b.onclick=()=>takeLoan(b.dataset.loan)}
+function loanImp(){
   const im=document.getElementById('impN');if(im){const ks=importKinds();im.innerHTML=(ks.length?`Importowane w ostatniej godzinie: ${ks.map(k=>GOODS[k].name.toLowerCase()).join(', ')}. `:'Brak importu. ')+`Spoza miasta kupują tylko sklepy (bez magazynu albo gdy w magazynach przez godzinę brakuje ich towaru, za ${Math.round(SHOP_IMP*100)}% ceny półkowej) oraz elektrownie węglowa i na biomasę (gdy brak paliwa: węgiel ${FUEL_IMP.coal} T¢/kg, drewno ${FUEL_IMP.wood} T¢/kg). Fabryki nie importują: bez surowca czekają.`+(cur.impCost?` Ta godzina: −${fmt(Math.round(cur.impCost))} T¢ za import.`:'')}}
 /* automatic imports: a missing input is brought in, and each imported kind adds to the upkeep for an hour */
 const IMPORT_FEE=0;let imports={};
@@ -5639,18 +5669,25 @@ function setOvl(m){ovlMode=m;underOn=m==='under';setXray(underOn||(tool==='bulld
   document.getElementById('ovlBtn').classList.toggle('on',m!=='none');drawOvl()}
 for(const b of document.querySelectorAll('[data-ovl]'))b.addEventListener('click',()=>setOvl(b.dataset.ovl));
 const TAXUI=[['house','Domy jednorodzinne',10,20,1,'%'],['tenement','Kamienice',10,20,1,'%'],['block','Tanie bloki',10,20,1,'%'],['modern','Apartamentowce',10,20,1,'%'],['buy','Od zakupów',0,40,1,'%'],['tour','Turystyczny',0,20,1,' T¢/os.'],['util','Komunalny',0,20,1,'%']];
+function taxSum(){const el=document.getElementById('taxSum');if(!el)return;const H=hist.length?hist[hist.length-1]:cur,inc=Math.round(H.inc||0),out=Math.round(H.upkeep||0),bal=inc-out;
+  el.innerHTML=`<div><small>Przychody</small><b class="pos">+${fmt(inc)}</b><small>T¢/godz.</small></div><div><small>Wydatki</small><b class="neg">−${fmt(out)}</b><small>T¢/godz.</small></div><div><small>Bilans</small><b class="${bal>=0?'pos':'neg'}">${bal>=0?'+':'−'}${fmt(Math.abs(bal))}</b><small>T¢/godz.</small></div><div><small>Kasa</small><b>${fmt(Math.round(money))}</b><small>T¢</small></div>`}
 function taxUI(){const box=document.getElementById('taxBox');if(box){const P=k=>TAX[k];
     const hap=k=>{const h=taxHappy(P(k));return`zadowolenie ${h>0?'+':''}${h}`};
     const note={house:hap('house'),tenement:hap('tenement'),block:hap('block'),modern:hap('modern'),
       buy:`wpływy ze sklepów ×${mw(TAX.buy/20)} · klienci ${buyMul()>=1?'+':''}${Math.round((buyMul()-1)*100)}%`,
       tour:`od turysty w hotelu i rozrywce · turyści ${tourMul()>=1?'+':''}${Math.round((tourMul()-1)*100)}%`,
       util:`${fmt(utilIncome())} T¢/godz. · ${TAX.util<=5?'nikt nie śmieci':'śmiecenie na ulicach: '+Math.round(litterP()*100)+'% domów na godz.'}`};
-    const row=([k,nm,a,b,st,u])=>`<label class="vol"><span>${nm}</span><b>${P(k)}${u}</b></label><input type="range" min="${a}" max="${b}" step="${st}" value="${P(k)}" data-tax="${k}"><small>${note[k]}</small>`;
-    if(box.__ks!=='1'||document.activeElement==null||!box.contains(document.activeElement)){box.innerHTML=`<span class="bh">Podatek od mieszkań · ${fmt(taxIncome())} T¢/godz.</span>`+TAXUI.slice(0,4).map(row).join('')+`<span class="bh">Pozostałe podatki</span>`+TAXUI.slice(4).map(row).join('');box.__ks='1';
-      for(const r of box.querySelectorAll('[data-tax]'))r.addEventListener('input',e=>{TAX[e.target.dataset.tax]=+e.target.value;envDirty=true;powerDirty=true;const lb=e.target.previousElementSibling;if(lb)lb.querySelector('b').textContent=e.target.value+TAXUI.find(x=>x[0]===e.target.dataset.tax)[5];save()});
+    /* 8.1.16: budget panel in the style of the other side panels (and a city-builder budget screen): one card per tax group, a coloured slider per tax */
+    const TI={house:'house',tenement:'tenement',block:'block',modern:'modern',buy:'shop',tour:'suitcase',util:'waste'};
+    const tone=k=>{if(k==='buy'||k==='tour'||k==='util')return'';const h=taxHappy(P(k));return h>0?'pos':h<0?'neg':''};
+    const row=([k,nm,a,b,st,u])=>`<div class="trow"><span class="ti">${svgI(TI[k],16)}</span><span class="tn">${nm}</span><b class="tv">${P(k)}${u}</b><input type="range" min="${a}" max="${b}" step="${st}" value="${P(k)}" data-tax="${k}" style="--tp:${Math.round((P(k)-a)/(b-a)*100)}%"><small class="te ${tone(k)}">${note[k]}</small></div>`;
+    if(box.__ks!=='1'||document.activeElement==null||!box.contains(document.activeElement)){box.innerHTML=`<div class="tcard"><div class="tch"><b>Mieszkaniowe</b><span>${fmt(taxIncome())} T¢/godz.</span></div>`+TAXUI.slice(0,4).map(row).join('')+`</div><div class="tcard"><div class="tch"><b>Handel, turystyka i usługi</b></div>`+TAXUI.slice(4).map(row).join('')+`</div><small class="lst">Każdy punkt podatku od mieszkań to więcej T¢, ale mniej zadowolenia: 10% daje +2, 12–13% nic, a od 14% coraz więcej minusów (do −6 przy 20%).</small>`;box.__ks='1';
+      for(const r of box.querySelectorAll('[data-tax]'))r.addEventListener('input',e=>{const T0=TAXUI.find(x=>x[0]===e.target.dataset.tax);TAX[e.target.dataset.tax]=+e.target.value;envDirty=true;powerDirty=true;const rw=e.target.closest('.trow');if(rw)rw.querySelector('.tv').textContent=e.target.value+T0[5];e.target.style.setProperty('--tp',Math.round((+e.target.value-T0[2])/(T0[3]-T0[2])*100)+'%');save()});
       for(const r of box.querySelectorAll('[data-tax]'))r.addEventListener('change',()=>{box.__ks='';taxUI()})}}
-  document.getElementById('taxR').value=taxRate;const h=taxHappy(taxRate);
+  taxSum();document.getElementById('taxR').value=taxRate;const h=taxHappy(taxRate);
   document.getElementById('taxN').innerHTML=`Zadowolenie w każdym domu: <b>${h>0?'+':''}${h}</b>. Wpływy: ok. <b>${fmt(taxIncome())} T¢/godz.</b> (${mw(taxRate/100*TAX_BASE)} T¢ od mieszkańca).<br>10%: +2 · 11%: +1 · 12–13%: 0 · 14%: −1 · 15%: −2 · 16%: −3 · 17%: −3 · 18%: −4 · 19%: −5 · 20%: −6 (zadowolenie nie spada poniżej 0)`;loanUI()}
+{const tp=document.getElementById('taxp');for(const b of tp.querySelectorAll('[data-ttab]'))b.onclick=()=>{for(const x of tp.querySelectorAll('[data-ttab]'))x.setAttribute('aria-pressed',String(x===b));for(const p of tp.querySelectorAll('[data-tpan]'))p.hidden=p.dataset.tpan!==b.dataset.ttab;taxUI()};
+  document.getElementById('taxX').onclick=()=>{tp.hidden=true;document.getElementById('taxBtn').setAttribute('aria-expanded','false')}}
 document.getElementById('taxR').addEventListener('input',e=>{taxRate=+e.target.value;envDirty=true;powerDirty=true;taxUI();save()});
 const msBtn=document.getElementById('msBtn'),mspEl=document.getElementById('msp'),orderEl=document.getElementById('order');
 function medalSVG(n,big){return`<svg viewBox="0 0 100 120" aria-hidden="true"><path d="M30 0h16l10 40H40z" fill="#c8372d"/><path d="M54 0h16L60 40H44z" fill="#2f6fe0"/><circle cx="50" cy="74" r="40" fill="#a8760c"/><circle cx="50" cy="74" r="36" fill="url(#mg${big?'b':''})"/><circle cx="50" cy="74" r="28" fill="none" stroke="#a8760c" stroke-width="2" stroke-dasharray="3 3"/><defs><radialGradient id="mg${big?'b':''}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff2b8"/><stop offset=".55" stop-color="#e8b52a"/><stop offset="1" stop-color="#b8860b"/></radialGradient></defs><text x="50" y="88" text-anchor="middle" font-family="Chakra Petch,Trebuchet MS,sans-serif" font-weight="700" font-size="40" fill="#5a3d00">${n}</text></svg>`}
@@ -8323,7 +8360,25 @@ const LT_TR=[
 ["{} · {} mieszkańców", "{} · {} residents", "{} · {} Einwohner"],
 ["Do etapu „{}”: {} mieszkańców ({}%)", "To “{}”: {} residents ({}%)", "Bis „{}“: {} Einwohner ({}%)"],
 ["Wszystkie etapy osiągnięte.", "All stages reached.", "Alle Etappen erreicht."],
-["Od teraz: {}", "From now on: {}", "Ab jetzt: {}"]
+["Od teraz: {}", "From now on: {}", "Ab jetzt: {}"],
+["Budżet i podatki", "Budget and taxes", "Haushalt und Steuern"],
+["Przychody", "Income", "Einnahmen"],
+["Wydatki", "Expenses", "Ausgaben"],
+["Kasa", "Cash", "Kasse"],
+["Mieszkaniowe", "Residential", "Wohnen"],
+["Handel, turystyka i usługi", "Trade, tourism and services", "Handel, Tourismus und Dienste"],
+["zadowolenie {}", "happiness {}", "Zufriedenheit {}"],
+["Każdy punkt podatku od mieszkań to więcej T¢, ale mniej zadowolenia: 10% daje +2, 12–13% nic, a od 14% coraz więcej minusów (do −6 przy 20%).", "Each point of residential tax brings more T¢ but less happiness: 10% gives +2, 12–13% nothing, and from 14% more and more minus (down to −6 at 20%).", "Jeder Punkt Wohnsteuer bringt mehr T¢, aber weniger Zufriedenheit: 10% gibt +2, 12–13% nichts, ab 14% immer mehr Abzüge (bis −6 bei 20%)."],
+["{} dni · {}% dziennie", "{} days · {}% a day", "{} Tage · {}% pro Tag"],
+["Rata ok. {} T¢ + odsetki", "Instalment about {} T¢ + interest", "Rate ca. {} T¢ + Zinsen"],
+["Łącznie ok. {} T¢", "About {} T¢ in total", "Insgesamt ca. {} T¢"],
+["Wymaga banku rezerw złota.", "Needs a gold reserve bank.", "Braucht eine Goldreservebank."],
+["Weź pożyczkę", "Take the loan", "Kredit aufnehmen"],
+["Naraz możesz mieć jedną pożyczkę. Raty pobierane są codziennie o północy.", "You can have one loan at a time. Instalments are taken every day at midnight.", "Du kannst nur einen Kredit gleichzeitig haben. Die Raten werden jeden Tag um Mitternacht abgebucht."],
+["Spłacono {}%", "Repaid {}%", "Getilgt {}%"],
+["Zostało {} T¢", "{} T¢ left", "Noch {} T¢"],
+["{}% dziennie", "{}% a day", "{}% pro Tag"],
+["Najbliższa rata o północy: {} T¢ (rata i odsetki od reszty).", "Next instalment at midnight: {} T¢ (instalment and interest on the rest).", "Nächste Rate um Mitternacht: {} T¢ (Rate und Zinsen auf den Rest)."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
