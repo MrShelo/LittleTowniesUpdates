@@ -4,10 +4,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#bfe0ee">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}
+/* 8.1.15: milestones panel, same look as the other side panels */
+.msp.linp .mssum{display:grid;grid-template-columns:54px 1fr;gap:10px;align-items:center;padding:10px 11px;border-radius:12px;background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.msp.linp .mssum b{font:700 16px var(--font-d)}
+.msp.linp .mssum small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.msp.linp .msmed svg{width:48px;height:58px;display:block}
+.msp.linp .mrow{display:grid;grid-template-columns:30px 1fr;gap:5px 9px;padding:9px 10px;border:0;border-radius:11px;background:color-mix(in srgb,var(--fg) 6%,transparent);margin-top:0}
+.msp.linp .mrow>:not(.md){grid-column:2}
+.msp.linp .mrow.next{outline:2px solid var(--accent)}
+.msp.linp .mrow.lock{opacity:.72}
+.msp.linp .md{width:28px;height:28px;font-size:13px;grid-row:span 4;align-self:start}
+.msp.linp .mt{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.msp.linp .mt b{font:700 14px var(--font-d)}
+.msp.linp .mst{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;color:var(--muted);font-weight:600}
+.msp.linp .mrow.ok .mst{color:#2f8f5a}.msp.linp .mrow.next .mst{color:var(--accent)}
+.msp.linp .mst svg{width:13px;height:13px}
+.msp.linp .mtags,.msp.linp .mun{display:flex;flex-wrap:wrap;gap:4px}
+.msp.linp .mtags span,.msp.linp .mun span{font-size:11.5px;background:color-mix(in srgb,var(--fg) 7%,transparent);border-radius:7px;padding:2px 7px;font-variant-numeric:tabular-nums}
+.msp.linp .mtags .rw{background:color-mix(in srgb,#e0a91c 22%,transparent);color:var(--fg);font-weight:600}
+.msp.linp .mun span{color:var(--muted)}
+.msp.linp .mhz{font-size:11.5px;color:var(--warn)}
+.msp.linp .pb{height:6px;border-radius:3px;background:var(--chip);overflow:hidden;margin-top:6px}
+.msp.linp .pb i{display:block;height:100%;background:var(--accent)}
+</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.14';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.15';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -444,7 +467,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="tutInfo panel" id="tutInfo" hidden role="dialog" aria-label="Samouczek"></div>
 <div class="ovl panel taxp" id="taxp" hidden><b>Podatki</b><div id="taxBox"></div><input type="range" id="taxR" min="10" max="20" step="1" value="12" hidden><small id="taxN" hidden></small><span class="bh">Pożyczki</span><div id="loanBox"></div><span class="bh">Import</span><small id="impN"></small></div>
 <nav class="rail" aria-label="Widoki"><button class="btn icon panel" id="gestBtn" hidden aria-pressed="false" aria-label="Gest dwoma palcami: przybliżanie" title="Gest dwoma palcami: przybliżanie (stuknij, by obracać)"></button><button class="btn icon panel" id="ordBtn" hidden aria-expanded="false" aria-label="Ustawy" title="Ustawy (urząd miasta)"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 2.5h7l3 3v12h-10z"/><path d="M12.5 2.5v3h3M8 9h5M8 12h5M8 15h3"/></svg></button><button class="btn icon panel" id="terBtn" aria-expanded="false" aria-label="Teren" title="Teren: podnoszenie, obniżanie, wyrównywanie, wygładzanie, zalewanie"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16.5l5.5-9 3.5 5.5 2.2-3.2 4.8 6.7z"/><path d="M6 10l1.5 1.4L9 10"/></svg></button><button class="btn icon panel" id="linBtn" hidden aria-expanded="false" aria-label="Komunikacja miejska" title="Komunikacja miejska: linie autobusowe i kolejowe"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="13" rx="2.2"/><path d="M4 9.5h12M6.5 15.5v2M13.5 15.5v2M7 5.2h6"/><circle cx="7" cy="12.6" r=".8"/><circle cx="13" cy="12.6" r=".8"/></svg></button><button class="btn icon panel" id="msBtn" aria-expanded="false" aria-label="Kamienie milowe" title="Kamienie milowe"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h8v4.2a4 4 0 0 1-8 0z"/><path d="M6 5H3.5v1.2A2.8 2.8 0 0 0 6.3 9M14 5h2.5v1.2A2.8 2.8 0 0 1 13.7 9"/><path d="M10 11.7v2.8M7 17.5h6M8 14.5h4v3H8z"/></svg></button><button class="btn icon panel" id="ovlBtn" aria-expanded="false" aria-label="Nakładki" title="Nakładki: zasięgi i strefy"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.8l7.5 4-7.5 4-7.5-4z"/><path d="M2.5 10.2l7.5 4 7.5-4"/><path d="M2.5 13.6l7.5 4 7.5-4"/></svg></button><button class="btn icon panel" id="taxBtn" aria-expanded="false" aria-label="Podatki i pożyczki" title="Podatki i pożyczki"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="15" height="10.5" rx="1.6"/><path d="M7 6.5V4.6a1.1 1.1 0 0 1 1.1-1.1h3.8A1.1 1.1 0 0 1 13 4.6v1.9"/><path d="M8 13.8l4-4.2"/><circle cx="8.3" cy="10" r=".8"/><circle cx="11.7" cy="13.4" r=".8"/></svg></button><button class="btn icon panel" id="statsBtn" aria-expanded="false" aria-label="Gospodarka" title="Gospodarka"><svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="10" width="15" height="7.5" rx="1.2"/><path d="M4.5 10V5.5h8V10"/><path d="M6.5 7.6h4"/><path d="M14.5 10V3.5h2.5V10"/><path d="M6 13.6h1.5M9.3 13.6h1.5M12.6 13.6h1.5"/></svg></button></nav>
-<div class="ovl panel msp" id="msp" hidden aria-label="Kamienie milowe"></div>
+<div class="ovl panel msp linp" id="msp" hidden aria-label="Kamienie milowe"></div>
 <div class="ovl panel msp linp" id="linp" hidden aria-label="Komunikacja miejska"></div>
 <div class="ovl panel msp linp terp" id="terp" hidden aria-label="Teren"></div>
 <div class="ovl panel msp ordp" id="ordp" hidden aria-label="Ustawy"></div>
@@ -5633,10 +5656,17 @@ const msBtn=document.getElementById('msBtn'),mspEl=document.getElementById('msp'
 function medalSVG(n,big){return`<svg viewBox="0 0 100 120" aria-hidden="true"><path d="M30 0h16l10 40H40z" fill="#c8372d"/><path d="M54 0h16L60 40H44z" fill="#2f6fe0"/><circle cx="50" cy="74" r="40" fill="#a8760c"/><circle cx="50" cy="74" r="36" fill="url(#mg${big?'b':''})"/><circle cx="50" cy="74" r="28" fill="none" stroke="#a8760c" stroke-width="2" stroke-dasharray="3 3"/><defs><radialGradient id="mg${big?'b':''}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff2b8"/><stop offset=".55" stop-color="#e8b52a"/><stop offset="1" stop-color="#b8860b"/></radialGradient></defs><text x="50" y="88" text-anchor="middle" font-family="Chakra Petch,Trebuchet MS,sans-serif" font-weight="700" font-size="40" fill="#5a3d00">${n}</text></svg>`}
 const msUnlocks=k=>Object.keys(MS_OF).filter(t=>MS_OF[t]===k&&DEF[t]&&!/Del$/.test(t)).map(t=>DEF[t].name);
 const msHaz=k=>Object.keys(HAZ).filter(h=>hazAt(h)===k&&HAZ[h].tools.some(t=>DEF[t])).map(h=>HAZ[h].name);
-function renderMS(){const p=popNow();mspEl.innerHTML=`<b>Kamienie milowe · ${esc(cityName)}</b><small>${fmt(p)} mieszkańców. Kolejne etapy odblokowują budynki; nagrodą jest order i premia w T¢.</small>`+MS.map((m,k)=>{
-    const ok=k<=msLevel,nx=k===msLevel+1,un=msUnlocks(k),hz=msHaz(k);
-    return`<div class="mrow ${ok?'ok':nx?'next':''}"><span class="md">${k}</span><div class="mt">${esc(m.name)}<span>${k?fmt(m.pop)+' mieszk.':'start'}${MS_REWARD[k]?` · +${fmt(MS_REWARD[k])} T¢`:''}${ok?' · ✓':''}</span></div>
-      <div class="ml">${un.length?un.join(', '):'—'}${hz.length?`<br><i>Od teraz: ${hz.join(', ')}</i>`:''}${nx?`<div class="pb"><i style="width:${Math.min(100,Math.round((p-MS[k-1].pop)/Math.max(1,m.pop-MS[k-1].pop)*100))}%"></i></div>`:''}</div></div>`}).join('')}
+/* 8.1.15: milestones in the same style as the terrain, lines and economy panels: header with close, a summary card, one card per stage */
+function renderMS(){const p=popNow(),L=msLevel,nx=MS[L+1],cur=MS[L]||MS[0];const pct=nx?Math.max(0,Math.min(100,Math.round((p-cur.pop)/Math.max(1,nx.pop-cur.pop)*100))):100;
+  const ok='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg>',lock='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="9" width="11" height="8" rx="1.6"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg>';
+  mspEl.innerHTML=`<div class="lhd"><h2>Kamienie milowe</h2><button class="btn icon panel lx" type="button" data-mx aria-label="Zamknij">×</button></div>
+    <div class="mssum"><span class="msmed">${medalSVG(L)}</span><div><b>${esc(cur.name)}</b><small>${esc(cityName)} · ${fmt(p)} mieszkańców</small>${nx?`<div class="pb"><i style="width:${pct}%"></i></div><small>Do etapu „${esc(nx.name)}”: ${fmt(Math.max(0,nx.pop-p))} mieszkańców (${pct}%)</small>`:'<small>Wszystkie etapy osiągnięte.</small>'}</div></div>
+    <div class="lsec">Etapy</div>`+MS.map((m,k)=>{const done=k<=L,isN=k===L+1,un=msUnlocks(k),hz=msHaz(k);
+    return`<div class="mrow ${done?'ok':isN?'next':'lock'}"><span class="md">${k}</span><div class="mt"><b>${esc(m.name)}</b><span class="mst">${done?ok+'osiągnięty':isN?'następny':lock+'zablokowany'}</span></div>
+      <div class="mtags"><span>${k?fmt(m.pop)+' mieszk.':'start'}</span>${MS_REWARD[k]?`<span class="rw">+${fmt(MS_REWARD[k])} T¢</span>`:''}</div>
+      ${un.length?`<div class="mun">${un.map(n=>`<span>${esc(n)}</span>`).join('')}</div>`:''}${hz.length?`<div class="mhz">Od teraz: ${hz.join(', ')}</div>`:''}
+      ${isN?`<div class="pb"><i style="width:${pct}%"></i></div>`:''}</div>`}).join('');
+  const x=mspEl.querySelector('[data-mx]');if(x)x.onclick=()=>setRail('msp')}
 function setRail(which){for(const[id,btn]of[['terp',document.getElementById('terBtn')],['msp',msBtn],['ordp',document.getElementById('ordBtn')],['ovl',document.getElementById('ovlBtn')],['taxp',document.getElementById('taxBtn')]]){const el=document.getElementById(id);const on=id===which&&el.hidden;if(id===which)el.hidden=!on;else el.hidden=true;btn.setAttribute('aria-expanded',String(!el.hidden))}}
 msBtn.addEventListener('click',()=>{setRail('msp');if(!mspEl.hidden)renderMS()});
 /* 8.0: terrain tools live in their own panel on the left, not in the bottom tabs */
@@ -8285,7 +8315,15 @@ const LT_TR=[
 ["Bez skrzyżowań: nowa droga łączy się tylko z drogą, od której ją ciągniesz, i nie wyrównuje terenu", "No junctions: a new road joins only the road you drag it from and does not level the ground", "Ohne Kreuzungen: eine neue Straße verbindet sich nur mit der Straße, von der du sie ziehst, und ebnet kein Gelände ein"],
 ["Bez skrzyżowań", "No junctions", "Ohne Kreuzungen"],
 ["<b>Bez skrzyżowań</b> · nowa droga łączy się tylko z drogą, od której ją ciągniesz. Nie tworzy skrzyżowań z drogami obok i nie wyrównuje terenu.", "<b>No junctions</b> · a new road joins only the road you drag it from. It makes no junctions with roads beside it and does not level the ground.", "<b>Ohne Kreuzungen</b> · eine neue Straße verbindet sich nur mit der Straße, von der du sie ziehst. Sie bildet keine Kreuzungen mit Straßen daneben und ebnet kein Gelände ein."],
-["<b>Skrzyżowania włączone</b> · nowa droga łączy się ze wszystkimi drogami obok.", "<b>Junctions on</b> · a new road joins every road beside it.", "<b>Kreuzungen an</b> · eine neue Straße verbindet sich mit allen Straßen daneben."]
+["<b>Skrzyżowania włączone</b> · nowa droga łączy się ze wszystkimi drogami obok.", "<b>Junctions on</b> · a new road joins every road beside it.", "<b>Kreuzungen an</b> · eine neue Straße verbindet sich mit allen Straßen daneben."],
+["Etapy", "Stages", "Etappen"],
+["osiągnięty", "reached", "erreicht"],
+["następny", "next", "nächste"],
+["zablokowany", "locked", "gesperrt"],
+["{} · {} mieszkańców", "{} · {} residents", "{} · {} Einwohner"],
+["Do etapu „{}”: {} mieszkańców ({}%)", "To “{}”: {} residents ({}%)", "Bis „{}“: {} Einwohner ({}%)"],
+["Wszystkie etapy osiągnięte.", "All stages reached.", "Alle Etappen erreicht."],
+["Od teraz: {}", "From now on: {}", "Ab jetzt: {}"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
