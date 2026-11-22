@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.8';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.9';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2905,7 +2905,7 @@ function arrive(c){
   if(c.mover){if(d&&HLV[d.t])moveIn(c.dest,d,c.mover);c.mover=null;return removeCar(c)}
   if(c.kind==='visitor'){if(d&&SERVICES.includes(d.t))serve(c,d,c.dest);return c.walk?removeCar(c):visitorLeave(c)}
   if(c.kind==='commuter'){
-    if(c.wk!=null){if(d&&(isWork(d.t)||isFarm(d.t)||JOBX(d.t))){d.staff=d.staff||[];if(d.staff.length<crewOf(d.t).max+10){d.staff.push({h:c.home,tier:c.tier??3,until:gameT+240+Math.random()*360,e:c.wk});return removeCar(c)}}if(c.dest===c.home)return removeCar(c);return goBack(c,c.dest,c.home)}
+    if(c.wk!=null){if(d&&(isWork(d.t)||isFarm(d.t)||JOBX(d.t))){d.staff=d.staff||[];if(d.staff.length<crewOf(d.t).max+10){d.staff.push({h:c.home,tier:c.tier??3,until:gameT+420+Math.random()*120,e:c.wk});return removeCar(c)}}if(c.dest===c.home)return removeCar(c);return goBack(c,c.dest,c.home)}
     if(d&&SERVICES.includes(d.t))serve(c,d,c.dest);
     else if(d&&isWork(d.t)&&!d.powered)float(c.dest,'brak prądu','warn');
     else if(d&&(isWork(d.t)||isFarm(d.t))&&d.trash>=TRASH[d.t].cap)float(c.dest,'pełno śmieci','warn');
@@ -3948,21 +3948,29 @@ const isJobB=(i,c)=>!!c&&!c.off&&!c.ruin&&(isWork(c.t)||JOBX(c.t)||(isFarm(c.t)&
 const canWork=q=>q.a>=19&&q.a<65&&!q.us;
 /* every working-age resident keeps one job; the jobless, and the extra hands of a place above its minimum crew, look for work where a crew is short */
 let jobAcc=0,jobStat={emp:0,idle:0};
+/* 8.1.9: jobs per place: 1.5× the crew on site, because each worker is there 8 hours out of 12 */
+const JC=t=>{const S=crewOf(t);return{min:Math.ceil(S.min*1.5),max:Math.ceil(S.max*1.5)}};
 function jobTick(dt){jobAcc+=dt;if(jobAcc<10)return;jobAcc=0;const places=[],asg=new Map();
   for(let i=0;i<N*N;i++){const c=grid[i];if(isJobB(i,c)&&entryOf(i)>=0){places.push(i);asg.set(i,0)}}
   let emp=0,idle=0;
-  for(const c of grid){if(!c||!c.pp||!HLV[c.t])continue;for(const q of c.pp){if(q.j==null)q.j=-1;if(q.j<0)continue;if(!canWork(q)||!asg.has(q.j)){q.j=-1;continue}const n=asg.get(q.j)+1;if(n>crewOf(grid[q.j].t).max){q.j=-1;continue}asg.set(q.j,n)}}
-  for(let h=0;h<N*N;h++){const c=grid[h];if(!c||!c.pp||!HLV[c.t]||c.aband)continue;const lazy=c.pp.filter(q=>canWork(q)&&q.j<0),extra=c.pp.filter(q=>q.j>=0&&asg.get(q.j)>crewOf(grid[q.j].t).min);
+  for(const c of grid){if(!c||!c.pp||!HLV[c.t])continue;for(const q of c.pp){if(q.j==null)q.j=-1;if(q.j<0)continue;if(!canWork(q)||!asg.has(q.j)){q.j=-1;continue}const n=asg.get(q.j)+1;if(n>JC(grid[q.j].t).max){q.j=-1;continue}asg.set(q.j,n)}}
+  for(let h=0;h<N*N;h++){const c=grid[h];if(!c||!c.pp||!HLV[c.t]||c.aband)continue;const lazy=c.pp.filter(q=>canWork(q)&&q.j<0),extra=c.pp.filter(q=>q.j>=0&&asg.get(q.j)>JC(grid[q.j].t).min);
     if(lazy.length||extra.length){const e=entryOf(h);if(e>=0&&places.length){const b=bfs(e);
-      for(const q of lazy){let best=-1,bs=-1e9;for(const p of places){const d=b.dist[entryOf(p)];if(d<0)continue;const S=crewOf(grid[p].t),n=asg.get(p);if(n>=S.max)continue;const sc=(n<S.min?1000:0)+(S.max-n)*4-d*0.5;if(sc>bs){bs=sc;best=p}}if(best<0)break;q.j=best;asg.set(best,asg.get(best)+1)}
+      for(const q of lazy){let best=-1,bs=-1e9;for(const p of places){const d=b.dist[entryOf(p)];if(d<0)continue;const S=JC(grid[p].t),n=asg.get(p);if(n>=S.max)continue;const sc=(n<S.min?1000-500*n/S.min:0)+(1-n/S.max)*100-d*0.5;if(sc>bs){bs=sc;best=p}}if(best<0)break;q.j=best;asg.set(best,asg.get(best)+1)}
       /* 8.1.8: a worker from a full place (above its minimum crew) moves, from the next shift, to a place short of hands: first one below its minimum crew,
          else the emptiest one, as long as the move leaves the new place still emptier than the old one */
-      for(const q of extra){const S0=crewOf(grid[q.j].t),n0=asg.get(q.j);if(n0<=S0.min)continue;const r0=(n0-1)/S0.max;let best=-1,bs=-1e9;
-        for(const p of places){if(p===q.j)continue;const S=crewOf(grid[p].t),n=asg.get(p);if(n>=S.max)continue;const d=b.dist[entryOf(p)];if(d<0)continue;const r=(n+1)/S.max;if(n>=S.min&&r>r0+1e-9)continue;
+      for(const q of extra){const S0=JC(grid[q.j].t),n0=asg.get(q.j);if(n0<=S0.min)continue;const r0=(n0-1)/S0.max;let best=-1,bs=-1e9;
+        for(const p of places){if(p===q.j)continue;const S=JC(grid[p].t),n=asg.get(p);if(n>=S.max)continue;const d=b.dist[entryOf(p)];if(d<0)continue;const r=(n+1)/S.max;if(n>=S.min&&r>r0+1e-9)continue;
           const sc=(n<S.min?1000:0)+(r0-r)*100-d*0.3;if(sc>bs){bs=sc;best=p}}
         if(best>=0){asg.set(q.j,n0-1);q.j=best;asg.set(best,asg.get(best)+1);q.mv=1}}}}
     for(const q of c.pp)if(canWork(q)){if(q.j>=0)emp++;else idle++}}
-  jobStat={emp,idle};for(const p of places)grid[p].jobs=asg.get(p)}
+  jobStat={emp,idle};for(const p of places)grid[p].jobs=asg.get(p);
+  /* 8.1.9: every employed worker goes to work on their own shift (8 h on, 4 h off), not only when the house happens to send someone out;
+     with the car limit reached the worker gets there without a car on the map */
+  for(let h=0;h<N*N;h++){const c=grid[h];if(!c||!c.pp||!HLV[c.t]||c.aband)continue;for(const q of c.pp)if(q.j>=0&&q.s===0&&!(q.sh>gameT)&&isJobB(q.j,grid[q.j])&&Math.random()<0.5)goShift(h,c,q)}}
+function goShift(h,c,q){const d=grid[q.j],eff=EFF[q.ed||0];q.sh=gameT+720;const e=entryOf(h),ej=entryOf(q.j);
+  if(cars.length<PEOPLE_CARS*0.85&&e>=0&&ej>=0){const b=bfs(e);if(b.dist[ej]>=0){cur.trips++;goTrip('commuter',b,{i:q.j,e:ej,d:b.dist[ej]},{home:h,dest:q.j,tier:c.happy??3,wk:eff});return}}
+  d.staff=d.staff||[];if(d.staff.length<crewOf(d.t).max+10)d.staff.push({h,tier:c.happy??3,until:gameT+480,e:eff})}
 const effAvg=d=>{const s=d&&d.staff||[];return s.length?s.reduce((a,w)=>a+(w.e??1),0)/s.length:1};
 const crewOf=t=>{const C=CREW[t]||{min:3,max:5};return LAW('cm_plan')?{min:Math.max(1,C.min-1),max:C.max}:C},SHIFT_RATE=0.18;
 function crewBoost(d){const n=(d.staff||[]).length,S=crewOf(d.t);return n<S.min?0:1+(LAW('cm_hero')?0.03:0.02)*Math.max(0,n-S.max)}
@@ -4835,8 +4843,8 @@ function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];i
       return`<button class="chipb" data-slot="${j}" data-sk="${k}" aria-pressed="${on}"${!on&&!own&&money<LINE_COST?' disabled style="opacity:.5"':''}><i style="background:${LMETA(k).col}"></i>${LMETA(k).name}${!on&&!own?` · ${LINE_COST} T¢`:''}</button>`}).join('')}</div>`).join('')}
   if(c.t==='smallfac')c.line='mix';
   if(isFarm(c.t)&&c.cl){const h=grid[c.cl.hub],n=h?(h.staff||[]).length:0,S=crewOf(c.t),need=Math.max(1,Math.ceil(S.min*Math.min(3,1+(c.cl.tiles.length-1)/4))),f=farmCrew(c.cl);R('Pracownicy na farmie',`${n} (potrzeba ${need}) · wydajność ${Math.round(f*100)}%`,n<need?'warnv':'')}
-  if(JOBX(c.t)){const S=crewOf(c.t),n=(c.staff||[]).length;R('Pracownicy na zmianie',`${n} (obsada ${S.min}–${S.max})`+(n<S.min?' · zamknięte':''),n<S.min?'warnv':'');R('Zatrudnieni',`${c.jobs||0} / ${S.max}`)}
-  if(isJobB(i,c)&&!JOBX(c.t)&&c.jobs!=null)R('Zatrudnieni',`${c.jobs} / ${crewOf(c.t).max} · wydajność ${Math.round(effAvg(isFarm(c.t)&&c.cl?grid[c.cl.hub]:c)*100)}%`);
+  if(JOBX(c.t)){const S=crewOf(c.t),n=(c.staff||[]).length;R('Pracownicy na zmianie',`${n} (obsada ${S.min}–${S.max})`+(n<S.min?' · zamknięte':''),n<S.min?'warnv':'');R('Zatrudnieni',`${c.jobs||0} / ${JC(c.t).max}`)}
+  if(isJobB(i,c)&&!JOBX(c.t)&&c.jobs!=null)R('Zatrudnieni',`${c.jobs} / ${JC(c.t).max} · wydajność ${Math.round(effAvg(isFarm(c.t)&&c.cl?grid[c.cl.hub]:c)*100)}%`);
   if(isWork(c.t)){const S=crewOf(c.t),n=(c.staff||[]).length,bo=crewBoost(c);R('Pracownicy na zmianie',`${n} (obsada ${S.min}–${S.max})`+(n<S.min?' · za mało, linia stoi':n>S.max?` · +${Math.round((bo-1)*100)}% wydajności`:''),n<S.min?'warnv':'')}
   if(isFactory(c.t)){R('Przetwarzanie',c.prod?`${GOODS[c.prod.k].name}: ${mw(Math.round(c.prod.u*10)/10)} kg · gotowe za ${Math.max(1,Math.ceil(c.prod.t))} min`:facLack(c)?'czeka na surowce':'zbiera zmianę (2 zmiany = partia)');
     const ok=Object.entries(c.out||{}).filter(([k,v])=>v>0.05);R('Gotowe do odbioru',ok.length?ok.map(([k,v])=>`${mw(Math.round(v*10)/10)} kg ${GOODS[k].name.toLowerCase()}`).join(', '):'nic')}
