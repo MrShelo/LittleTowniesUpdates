@@ -1,1 +1,1 @@
-{"v": "8.1.12", "notes": "8.1.12: drogi nad tunelami nie znikają po wczytaniu gry (zapis wysokości tuneli i mostów), autobusy nie skręcają w drogi, które nie są połączone (inna wysokość)"}
+{"v": "8.1.13", "notes": "8.1.13: tryb „Bez skrzyżowań” dla dróg (łączy tylko z drogą, od której ciągniesz, bez wyrównywania terenu); nowe ikony podglądu, wyburzania i trybów budowy"}
