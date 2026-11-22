@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0;height:100%}body{font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.13';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.14';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -615,13 +615,13 @@ function main(){
 const N=90, HALF=N/2;
 const DIRS=[[0,1],[1,0],[0,-1],[-1,0]];
 const DEF={
-  road:{name:'Jednojezdniowa',cost:10,desc:'Łączy budynki. Przeciągnij palcem, by położyć kilka pól naraz.',sw:'#3d4248'},
+  road:{name:'Jednopasmowa',cost:10,desc:'Łączy budynki. Przeciągnij palcem, by położyć kilka pól naraz.',sw:'#3d4248'},
   house:{name:'Dom jednorodzinny',cost:120,desc:'1 rodzina. Podstawa zadowolenia 3. Musi stać przy ulicy.',sw:'#efcfae'},
   tenement:{name:'Kamienica',cost:300,desc:'3 rodziny: 2× więcej kursów niż dom. Podstawa zadowolenia 3.',sw:'#b9785a'},
   block:{name:'Tani blok',cost:450,desc:'Zajmuje 2 pola. 18 mieszkańców (po rozbudowie do 54), 3× więcej kursów. Ciasno: podstawa zadowolenia 2.',sw:'#c9c6bd',size:2},
   modern:{name:'Apartamentowiec',cost:2500,desc:'Zajmuje 2 pola. Nowoczesny, 3,5× więcej kursów. Podstawa zadowolenia 4.',sw:'#7fb6cf',size:2},
-  road2:{name:'Dwujezdniowa',cost:25,desc:'2 pasy w każdą stronę, auta jadą 1,1× szybciej i same wybierają luźniejszy pas. Postaw na zwykłej ulicy, by ją poszerzyć (płacisz różnicę).',sw:'#383d44'},
-  road3:{name:'Trzyjezdniowa',cost:45,desc:'3 pasy w każdą stronę, auta jadą 1,25× szybciej i same wybierają luźniejszy pas.',sw:'#30353b'},
+  road2:{name:'Dwupasmowa',cost:25,desc:'2 pasy w każdą stronę, auta jadą 1,1× szybciej i same wybierają luźniejszy pas. Postaw na zwykłej ulicy, by ją poszerzyć (płacisz różnicę).',sw:'#383d44'},
+  road3:{name:'Trzypasmowa',cost:45,desc:'3 pasy w każdą stronę, auta jadą 1,25× szybciej i same wybierają luźniejszy pas.',sw:'#30353b'},
   roundabout:{name:'Rondo',cost:80,desc:'Płynny przejazd przez skrzyżowanie (1,2× szybciej), auta objeżdżają wysepkę. Postaw na istniejącej ulicy.',sw:'#5f9b4a'},
   smallfac:{name:'Mała fabryka',cost:180,desc:'Połowa produkcji zwykłej fabryki (2 kg na partię), 40% taniej. Tylko linia ogólna: zabawki i kosmetyki z materiałów, a odzież, meble, elektronikę, narzędzia i napoje tylko wtedy, gdy w magazynach jest ich surowiec. Można dokupić nową technologię (+50%).',sw:'#a8b0bb'},
   factory:{name:'Fabryka',cost:300,desc:'Dwie zmiany pracowników + 2 kg materiałów z magazynu = ciężarówka z 5 kg towarów ogólnych. Z materiałów robi zabawki i kosmetyki; odzież, meble, elektronikę, narzędzia i napoje tylko z ich surowca, jeśli leży w magazynach (bawełna, drewno, chalkopiryt, warzywa). Ulepszenie odblokowuje wybór produktu i +50%.',sw:'#8d97a6'},
@@ -4739,10 +4739,10 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
   else{const no=!DRIVE[c.t]&&!NOROAD[c.t]&&entryOf(i)<0?' · <b>brak dojazdu</b>':'';
     const pwr=DEMAND[c.t]?(c.powered?` · zasilany (${mw(DEMAND[c.t])} MW)`:` · <b>bez prądu</b> (${mw(DEMAND[c.t])} MW)`):'';
     const jn='';
-    s=({road2:'<b>Dwujezdniowa</b> · 2 pasy w każdą stronę, 1,1× szybciej'+jn,road3:'<b>Trzyjezdniowa</b> · 3 pasy w każdą stronę, 1,25× szybciej'+jn,roundabout:'<b>Rondo</b> · płynny przejazd, 1,2× szybciej',
+    s=({road2:'<b>Dwupasmowa</b> · 2 pasy w każdą stronę, 1,1× szybciej'+jn,road3:'<b>Trzypasmowa</b> · 3 pasy w każdą stronę, 1,25× szybciej'+jn,roundabout:'<b>Rondo</b> · płynny przejazd, 1,2× szybciej',
       highway:'<b>Autostrada</b> · auta jadą tu 1,5× szybciej'+jn,bridge:`<b>Most</b> · jak ${DEF[c.bt||'road'].name.toLowerCase()}: ${laneN(i)} ${laneN(i)>1?'pasy':'pas'} w każdą stronę`,
       lpole:`<b>Słup</b> · połączenia: ${links(i).length} · zasila budynki obok`,
-      hvpole:`<b>Słup WN${c.up?' (wyższy)':''}</b> · połączenia w zasięgu ${c.up?'17×17':'11×11'}: ${links(i).length}`,road:(c.pole?'<b>Jednojezdniowa ze słupem</b> · przewodzi prąd':'<b>Jednojezdniowa</b> · dodaj słup, by poprowadzić prąd')+jn,
+      hvpole:`<b>Słup WN${c.up?' (wyższy)':''}</b> · połączenia w zasięgu ${c.up?'17×17':'11×11'}: ${links(i).length}`,road:(c.pole?'<b>Jednopasmowa ze słupem</b> · przewodzi prąd':'<b>Jednopasmowa</b> · dodaj słup, by poprowadzić prąd')+jn,
       wind:'<b>Wiatrak</b> · '+(c.net>=0?`${windMW(i)} MW do sieci`:'<b>niepodłączony</b>: postaw obok transformator')+` · ${UPKEEP.wind} T¢/godz.`,
       transformer:`<b>Transformator</b> · łączy elektrownie obok (też po skosie) ze słupami · ${UPKEEP.transformer} T¢/godz.`,
       coal:'<b>El. węglowa</b> · '+(c.net<0?'<b>niepodłączona</b>: postaw obok transformator':c.running?`pracuje, ${COAL_MW} MW`:'czeka: wiatraki wystarczają albo brak węgla')+` · ${UPKEEP.coal} T¢/godz.`,house:'<b>Rezydencja</b>',factory:`<b>Fabryka</b> · zmiany do kolejnej ciężarówki: ${c.work}/2`,
@@ -5664,7 +5664,7 @@ let tut=null;
 const TUT=[
   ['Przesuń mapę','Przeciągnij jednym palcem albo lewym przyciskiem myszy.',()=>!!(tut&&tut.moved>150)],
   ['Obróć widok','Dwa palce obracają się wokół siebie, na komputerze prawy przycisk myszy.',()=>!!(tut&&tut.turned>120)],
-  ['Połącz ulicę z drogą wjazdową','Drogi → Jednojezdniowa. Poprowadź ją od drogi wjazdowej przy krawędzi mapy.',()=>{let n=0;for(const c of grid)if(c&&STREET[c.t]&&!c.edge)n++;return n>=3}],
+  ['Połącz ulicę z drogą wjazdową','Drogi → Jednopasmowa. Poprowadź ją od drogi wjazdowej przy krawędzi mapy.',()=>{let n=0;for(const c of grid)if(c&&STREET[c.t]&&!c.edge)n++;return n>=3}],
   ['Postaw 4 domy przy ulicy','Domy → Dom jednorodzinny. 15 mieszkańców to pierwszy kamień milowy: odblokujesz nowe budynki.',()=>{let n=0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HLV[c.t]&&entryOf(i)>=0)n++}return n>=4}],
   ['Postaw wiatrak i transformator obok niego','Energia → Wiatrak, potem Transformator na sąsiednim polu.',()=>grid.some(c=>c&&c.t==='wind'&&c.net>=0)],
   ['Sprawdź wiatrak w podglądzie','Wybierz narzędzie Podgląd (oko) i stuknij wiatrak: zobaczysz, ile prądu daje.',()=>!!(tut&&tut.windSeen)],
@@ -6057,7 +6057,7 @@ const LT_TR=[
 ["Scena nie narysowała się w ciągu 12 s. Spróbuj odświeżyć stronę.", "The scene did not render within 12 s. Try refreshing the page.", "Die Szene wurde nicht innerhalb von 12 s gezeichnet. Lade die Seite neu."],
 ["Błąd skryptu.", "Script error.", "Skriptfehler."],
 ["Nie udało się wczytać biblioteki three.js. Sprawdź połączenie i odśwież stronę.", "Could not load the three.js library. Check your connection and refresh the page.", "Die Bibliothek three.js konnte nicht geladen werden. Prüfe die Verbindung und lade die Seite neu."],
-["Jednojezdniowa", "Single-lane road", "Einspurige Straße"],
+["Jednopasmowa", "Single-lane road", "Einspurige Straße"],
 ["Łączy budynki. Przeciągnij palcem, by położyć kilka pól naraz.", "Connects buildings. Drag your finger to lay several tiles at once.", "Verbindet Gebäude. Ziehe mit dem Finger, um mehrere Felder auf einmal zu legen."],
 ["Dom jednorodzinny", "Detached house", "Einfamilienhaus"],
 ["Kamienica", "Townhouse", "Stadthaus"],
@@ -6065,8 +6065,8 @@ const LT_TR=[
 ["Zajmuje 2 pola. 18 mieszkańców (po rozbudowie do 54), 3× więcej kursów. Ciasno: podstawa zadowolenia 2.", "Takes 2 tiles. 18 residents (54 after expansion), 3× more trips. Cramped: base happiness 2.", "Belegt 2 Felder. 18 Einwohner (nach Ausbau 54), 3× mehr Fahrten. Beengt: Grundzufriedenheit 2."],
 ["Apartamentowiec", "Apartment building", "Apartmenthaus"],
 ["Zajmuje 2 pola. Nowoczesny, 3,5× więcej kursów. Podstawa zadowolenia 4.", "Takes 2 tiles. Modern, 3.5× more trips. Base happiness 4.", "Belegt 2 Felder. Modern, 3,5× mehr Fahrten. Grundzufriedenheit 4."],
-["Dwujezdniowa", "Two-lane road", "Zweispurige Straße"],
-["Trzyjezdniowa", "Three-lane road", "Dreispurige Straße"],
+["Dwupasmowa", "Two-lane road", "Zweispurige Straße"],
+["Trzypasmowa", "Three-lane road", "Dreispurige Straße"],
 ["Rondo", "Roundabout", "Kreisverkehr"],
 ["Płynny przejazd przez skrzyżowanie (1,2× szybciej), auta objeżdżają wysepkę. Postaw na istniejącej ulicy.", "Smooth flow through the junction (1.2× faster), cars drive around the island. Place it on an existing street.", "Flüssige Fahrt durch die Kreuzung (1,2× schneller), Autos umfahren die Insel. Auf eine bestehende Straße setzen."],
 ["Mała fabryka", "Small factory", "Kleine Fabrik"],
@@ -6773,7 +6773,7 @@ const LT_TR=[
 ["Słup WN{}", "HV pylon{}", "HS-Mast{}"],
 ["· połączenia w zasięgu {}: {}", "· connections within {}: {}", "· Verbindungen im Bereich {}: {}"],
 ["(wyższy)", "(taller)", "(höher)"],
-["Jednojezdniowa ze słupem", "Single-lane road with a pole", "Einspurige Straße mit Mast"],
+["Jednopasmowa ze słupem", "Single-lane road with a pole", "Einspurige Straße mit Mast"],
 ["· przewodzi prąd", "· carries power", "· leitet Strom"],
 ["· dodaj słup, by poprowadzić prąd", "· add a pole to carry power", "· setze einen Mast, um Strom zu leiten"],
 ["{} MW do sieci", "{} MW to the grid", "{} MW ins Netz"],
@@ -7448,7 +7448,7 @@ const LT_TR=[
 ["Obróć widok", "Rotate the view", "Ansicht drehen"],
 ["Dwa palce obracają się wokół siebie, na komputerze prawy przycisk myszy.", "Two fingers turning around each other, on a computer the right mouse button.", "Zwei Finger umeinander drehen, am Computer die rechte Maustaste."],
 ["Połącz ulicę z drogą wjazdową", "Connect a street to the entry road", "Verbinde eine Straße mit der Zufahrtsstraße"],
-["Drogi → Jednojezdniowa. Poprowadź ją od drogi wjazdowej przy krawędzi mapy.", "Roads → Single-lane road. Run it from the entry road at the map edge.", "Straßen → Einspurige Straße. Führe sie von der Zufahrtsstraße am Kartenrand weg."],
+["Drogi → Jednopasmowa. Poprowadź ją od drogi wjazdowej przy krawędzi mapy.", "Roads → Single-lane road. Run it from the entry road at the map edge.", "Straßen → Einspurige Straße. Führe sie von der Zufahrtsstraße am Kartenrand weg."],
 ["Postaw 4 domy przy ulicy", "Build 4 houses by the street", "Baue 4 Häuser an der Straße"],
 ["Domy → Dom jednorodzinny. 15 mieszkańców to pierwszy kamień milowy: odblokujesz nowe budynki.", "Homes → Detached house. 15 residents is the first milestone: you will unlock new buildings.", "Wohnen → Einfamilienhaus. 15 Einwohner sind der erste Meilenstein: du schaltest neue Gebäude frei."],
 ["Postaw wiatrak i transformator obok niego", "Build a wind turbine and a transformer next to it", "Baue ein Windrad und daneben einen Trafo"],
