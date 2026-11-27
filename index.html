@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.20';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.2.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -641,6 +641,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <button class="btn panel mbtn" id="mOpt">Opcje</button>
   <div class="mOpts" id="mOpts" hidden>
   <div class="tgl langRow"><span data-notr>Język · Language · Sprache</span><div class="seg" id="langOpts" data-notr></div></div>
+  <div class="tgl langRow"><span>Jakość grafiki</span><div class="seg" id="gfxOpts"><button type="button" class="btn panel" data-gfx="low" title="Bez efektów – najszybsza, dla słabszych urządzeń">Niska</button><button type="button" class="btn panel" data-gfx="high" title="Tone mapping i poświata (bloom) lawy, świateł i okien nocą">Wysoka</button></div></div>
   <label class="gam" for="mGamma"><span>Gamma</span><b id="mGammaV">1,00</b></label>
   <input type="range" id="mGamma" min="0.6" max="1.6" step="0.05" value="1">
   <label class="vol" for="mVol"><span>Muzyka</span><b id="mVolV">60%</b></label>
@@ -672,6 +673,644 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="err panel" id="err"><b>Wczytywanie miasta…</b>Przygotowuję scenę 3D.</div>
 </main>
 
+<script id="lt-pp">/* three.js r128 postprocessing (EffectComposer, RenderPass, ShaderPass, UnrealBloomPass, CopyShader, LuminosityHighPassShader) – MIT License, Copyright © 2010-2021 three.js authors. Loaded on demand by the graphics setting. */
+window.__ltPPInit=function(THREE){if(THREE.EffectComposer)return;
+( function () {
+/**
+ * Full-screen textured quad shader
+ */
+var CopyShader = {
+uniforms: {
+'tDiffuse': {
+value: null
+},
+'opacity': {
+value: 1.0
+}
+},
+vertexShader:
+  /* glsl */
+  `
+varying vec2 vUv;
+void main() {
+vUv = uv;
+gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}`,
+fragmentShader:
+  /* glsl */
+  `
+uniform float opacity;
+uniform sampler2D tDiffuse;
+varying vec2 vUv;
+void main() {
+vec4 texel = texture2D( tDiffuse, vUv );
+gl_FragColor = opacity * texel;
+}`
+};
+THREE.CopyShader = CopyShader;
+} )();
+
+( function () {
+/**
+ * Luminosity
+ * http://en.wikipedia.org/wiki/Luminosity
+ */
+const LuminosityHighPassShader = {
+shaderID: 'luminosityHighPass',
+uniforms: {
+'tDiffuse': {
+value: null
+},
+'luminosityThreshold': {
+value: 1.0
+},
+'smoothWidth': {
+value: 1.0
+},
+'defaultColor': {
+value: new THREE.Color( 0x000000 )
+},
+'defaultOpacity': {
+value: 0.0
+}
+},
+vertexShader:
+  /* glsl */
+  `
+varying vec2 vUv;
+void main() {
+vUv = uv;
+gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}`,
+fragmentShader:
+  /* glsl */
+  `
+uniform sampler2D tDiffuse;
+uniform vec3 defaultColor;
+uniform float defaultOpacity;
+uniform float luminosityThreshold;
+uniform float smoothWidth;
+varying vec2 vUv;
+void main() {
+vec4 texel = texture2D( tDiffuse, vUv );
+vec3 luma = vec3( 0.299, 0.587, 0.114 );
+float v = dot( texel.xyz, luma );
+vec4 outputColor = vec4( defaultColor.rgb, defaultOpacity );
+float alpha = smoothstep( luminosityThreshold, luminosityThreshold + smoothWidth, v );
+gl_FragColor = mix( outputColor, texel, alpha );
+}`
+};
+THREE.LuminosityHighPassShader = LuminosityHighPassShader;
+} )();
+
+( function () {
+class EffectComposer {
+constructor( renderer, renderTarget ) {
+this.renderer = renderer;
+if ( renderTarget === undefined ) {
+const parameters = {
+minFilter: THREE.LinearFilter,
+magFilter: THREE.LinearFilter,
+format: THREE.RGBAFormat
+};
+const size = renderer.getSize( new THREE.Vector2() );
+this._pixelRatio = renderer.getPixelRatio();
+this._width = size.width;
+this._height = size.height;
+renderTarget = new THREE.WebGLRenderTarget( this._width * this._pixelRatio, this._height * this._pixelRatio, parameters );
+renderTarget.texture.name = 'EffectComposer.rt1';
+} else {
+this._pixelRatio = 1;
+this._width = renderTarget.width;
+this._height = renderTarget.height;
+}
+this.renderTarget1 = renderTarget;
+this.renderTarget2 = renderTarget.clone();
+this.renderTarget2.texture.name = 'EffectComposer.rt2';
+this.writeBuffer = this.renderTarget1;
+this.readBuffer = this.renderTarget2;
+this.renderToScreen = true;
+this.passes = []; // dependencies
+if ( THREE.CopyShader === undefined ) {
+console.error( 'THREE.EffectComposer relies on THREE.CopyShader' );
+}
+if ( THREE.ShaderPass === undefined ) {
+console.error( 'THREE.EffectComposer relies on THREE.ShaderPass' );
+}
+this.copyPass = new THREE.ShaderPass( THREE.CopyShader );
+this.clock = new THREE.Clock();
+}
+swapBuffers() {
+const tmp = this.readBuffer;
+this.readBuffer = this.writeBuffer;
+this.writeBuffer = tmp;
+}
+addPass( pass ) {
+this.passes.push( pass );
+pass.setSize( this._width * this._pixelRatio, this._height * this._pixelRatio );
+}
+insertPass( pass, index ) {
+this.passes.splice( index, 0, pass );
+pass.setSize( this._width * this._pixelRatio, this._height * this._pixelRatio );
+}
+removePass( pass ) {
+const index = this.passes.indexOf( pass );
+if ( index !== - 1 ) {
+this.passes.splice( index, 1 );
+}
+}
+isLastEnabledPass( passIndex ) {
+for ( let i = passIndex + 1; i < this.passes.length; i ++ ) {
+if ( this.passes[ i ].enabled ) {
+return false;
+}
+}
+return true;
+}
+render( deltaTime ) {
+if ( deltaTime === undefined ) {
+deltaTime = this.clock.getDelta();
+}
+const currentRenderTarget = this.renderer.getRenderTarget();
+let maskActive = false;
+for ( let i = 0, il = this.passes.length; i < il; i ++ ) {
+const pass = this.passes[ i ];
+if ( pass.enabled === false ) continue;
+pass.renderToScreen = this.renderToScreen && this.isLastEnabledPass( i );
+pass.render( this.renderer, this.writeBuffer, this.readBuffer, deltaTime, maskActive );
+if ( pass.needsSwap ) {
+if ( maskActive ) {
+const context = this.renderer.getContext();
+const stencil = this.renderer.state.buffers.stencil; //context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
+stencil.setFunc( context.NOTEQUAL, 1, 0xffffffff );
+this.copyPass.render( this.renderer, this.writeBuffer, this.readBuffer, deltaTime ); //context.stencilFunc( context.EQUAL, 1, 0xffffffff );
+stencil.setFunc( context.EQUAL, 1, 0xffffffff );
+}
+this.swapBuffers();
+}
+if ( THREE.MaskPass !== undefined ) {
+if ( pass instanceof THREE.MaskPass ) {
+maskActive = true;
+} else if ( pass instanceof THREE.ClearMaskPass ) {
+maskActive = false;
+}
+}
+}
+this.renderer.setRenderTarget( currentRenderTarget );
+}
+reset( renderTarget ) {
+if ( renderTarget === undefined ) {
+const size = this.renderer.getSize( new THREE.Vector2() );
+this._pixelRatio = this.renderer.getPixelRatio();
+this._width = size.width;
+this._height = size.height;
+renderTarget = this.renderTarget1.clone();
+renderTarget.setSize( this._width * this._pixelRatio, this._height * this._pixelRatio );
+}
+this.renderTarget1.dispose();
+this.renderTarget2.dispose();
+this.renderTarget1 = renderTarget;
+this.renderTarget2 = renderTarget.clone();
+this.writeBuffer = this.renderTarget1;
+this.readBuffer = this.renderTarget2;
+}
+setSize( width, height ) {
+this._width = width;
+this._height = height;
+const effectiveWidth = this._width * this._pixelRatio;
+const effectiveHeight = this._height * this._pixelRatio;
+this.renderTarget1.setSize( effectiveWidth, effectiveHeight );
+this.renderTarget2.setSize( effectiveWidth, effectiveHeight );
+for ( let i = 0; i < this.passes.length; i ++ ) {
+this.passes[ i ].setSize( effectiveWidth, effectiveHeight );
+}
+}
+setPixelRatio( pixelRatio ) {
+this._pixelRatio = pixelRatio;
+this.setSize( this._width, this._height );
+}
+}
+class Pass {
+constructor() {
+this.enabled = true; // if set to true, the pass indicates to swap read and write buffer after rendering
+this.needsSwap = true; // if set to true, the pass clears its buffer before rendering
+this.clear = false; // if set to true, the result of the pass is rendered to screen. This is set automatically by EffectComposer.
+this.renderToScreen = false;
+}
+setSize( ) {}
+render( ) {
+console.error( 'THREE.Pass: .render() must be implemented in derived pass.' );
+}
+} // Helper for passes that need to fill the viewport with a single quad.
+const _camera = new THREE.OrthographicCamera( - 1, 1, 1, - 1, 0, 1 ); // https://github.com/mrdoob/three.js/pull/21358
+const _geometry = new THREE.BufferGeometry();
+_geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( [ - 1, 3, 0, - 1, - 1, 0, 3, - 1, 0 ], 3 ) );
+_geometry.setAttribute( 'uv', new THREE.Float32BufferAttribute( [ 0, 2, 0, 0, 2, 0 ], 2 ) );
+class FullScreenQuad {
+constructor( material ) {
+this._mesh = new THREE.Mesh( _geometry, material );
+}
+dispose() {
+this._mesh.geometry.dispose();
+}
+render( renderer ) {
+renderer.render( this._mesh, _camera );
+}
+get material() {
+return this._mesh.material;
+}
+set material( value ) {
+this._mesh.material = value;
+}
+}
+THREE.EffectComposer = EffectComposer;
+THREE.FullScreenQuad = FullScreenQuad;
+THREE.Pass = Pass;
+} )();
+
+( function () {
+class ShaderPass extends THREE.Pass {
+constructor( shader, textureID ) {
+super();
+this.textureID = textureID !== undefined ? textureID : 'tDiffuse';
+if ( shader instanceof THREE.ShaderMaterial ) {
+this.uniforms = shader.uniforms;
+this.material = shader;
+} else if ( shader ) {
+this.uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+this.material = new THREE.ShaderMaterial( {
+defines: Object.assign( {}, shader.defines ),
+uniforms: this.uniforms,
+vertexShader: shader.vertexShader,
+fragmentShader: shader.fragmentShader
+} );
+}
+this.fsQuad = new THREE.FullScreenQuad( this.material );
+}
+render( renderer, writeBuffer, readBuffer
+/*, deltaTime, maskActive */
+) {
+if ( this.uniforms[ this.textureID ] ) {
+this.uniforms[ this.textureID ].value = readBuffer.texture;
+}
+this.fsQuad.material = this.material;
+if ( this.renderToScreen ) {
+renderer.setRenderTarget( null );
+this.fsQuad.render( renderer );
+} else {
+renderer.setRenderTarget( writeBuffer ); // TODO: Avoid using autoClear properties, see https://github.com/mrdoob/three.js/pull/15571#issuecomment-465669600
+if ( this.clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
+this.fsQuad.render( renderer );
+}
+}
+}
+THREE.ShaderPass = ShaderPass;
+} )();
+
+( function () {
+class RenderPass extends THREE.Pass {
+constructor( scene, camera, overrideMaterial, clearColor, clearAlpha ) {
+super();
+this.scene = scene;
+this.camera = camera;
+this.overrideMaterial = overrideMaterial;
+this.clearColor = clearColor;
+this.clearAlpha = clearAlpha !== undefined ? clearAlpha : 0;
+this.clear = true;
+this.clearDepth = false;
+this.needsSwap = false;
+this._oldClearColor = new THREE.Color();
+}
+render( renderer, writeBuffer, readBuffer
+/*, deltaTime, maskActive */
+) {
+const oldAutoClear = renderer.autoClear;
+renderer.autoClear = false;
+let oldClearAlpha, oldOverrideMaterial;
+if ( this.overrideMaterial !== undefined ) {
+oldOverrideMaterial = this.scene.overrideMaterial;
+this.scene.overrideMaterial = this.overrideMaterial;
+}
+if ( this.clearColor ) {
+renderer.getClearColor( this._oldClearColor );
+oldClearAlpha = renderer.getClearAlpha();
+renderer.setClearColor( this.clearColor, this.clearAlpha );
+}
+if ( this.clearDepth ) {
+renderer.clearDepth();
+}
+renderer.setRenderTarget( this.renderToScreen ? null : readBuffer ); // TODO: Avoid using autoClear properties, see https://github.com/mrdoob/three.js/pull/15571#issuecomment-465669600
+if ( this.clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
+renderer.render( this.scene, this.camera );
+if ( this.clearColor ) {
+renderer.setClearColor( this._oldClearColor, oldClearAlpha );
+}
+if ( this.overrideMaterial !== undefined ) {
+this.scene.overrideMaterial = oldOverrideMaterial;
+}
+renderer.autoClear = oldAutoClear;
+}
+}
+THREE.RenderPass = RenderPass;
+} )();
+
+( function () {
+/**
+ * UnrealBloomPass is inspired by the bloom pass of Unreal Engine. It creates a
+ * mip map chain of bloom textures and blurs them with different radii. Because
+ * of the weighted combination of mips, and because larger blurs are done on
+ * higher mips, this effect provides good quality and performance.
+ *
+ * Reference:
+ * - https://docs.unrealengine.com/latest/INT/Engine/Rendering/PostProcessEffects/Bloom/
+ */
+class UnrealBloomPass extends THREE.Pass {
+constructor( resolution, strength, radius, threshold ) {
+super();
+this.strength = strength !== undefined ? strength : 1;
+this.radius = radius;
+this.threshold = threshold;
+this.resolution = resolution !== undefined ? new THREE.Vector2( resolution.x, resolution.y ) : new THREE.Vector2( 256, 256 ); // create color only once here, reuse it later inside the render function
+this.clearColor = new THREE.Color( 0, 0, 0 ); // render targets
+const pars = {
+minFilter: THREE.LinearFilter,
+magFilter: THREE.LinearFilter,
+format: THREE.RGBAFormat, type: THREE.__ppHalf ? THREE.HalfFloatType : THREE.UnsignedByteType
+};
+this.renderTargetsHorizontal = [];
+this.renderTargetsVertical = [];
+this.nMips = 5;
+let resx = Math.round( this.resolution.x / 2 );
+let resy = Math.round( this.resolution.y / 2 );
+this.renderTargetBright = new THREE.WebGLRenderTarget( resx, resy, pars );
+this.renderTargetBright.texture.name = 'UnrealBloomPass.bright';
+this.renderTargetBright.texture.generateMipmaps = false;
+for ( let i = 0; i < this.nMips; i ++ ) {
+const renderTargetHorizonal = new THREE.WebGLRenderTarget( resx, resy, pars );
+renderTargetHorizonal.texture.name = 'UnrealBloomPass.h' + i;
+renderTargetHorizonal.texture.generateMipmaps = false;
+this.renderTargetsHorizontal.push( renderTargetHorizonal );
+const renderTargetVertical = new THREE.WebGLRenderTarget( resx, resy, pars );
+renderTargetVertical.texture.name = 'UnrealBloomPass.v' + i;
+renderTargetVertical.texture.generateMipmaps = false;
+this.renderTargetsVertical.push( renderTargetVertical );
+resx = Math.round( resx / 2 );
+resy = Math.round( resy / 2 );
+} // luminosity high pass material
+if ( THREE.LuminosityHighPassShader === undefined ) console.error( 'THREE.UnrealBloomPass relies on THREE.LuminosityHighPassShader' );
+const highPassShader = THREE.LuminosityHighPassShader;
+this.highPassUniforms = THREE.UniformsUtils.clone( highPassShader.uniforms );
+this.highPassUniforms[ 'luminosityThreshold' ].value = threshold;
+this.highPassUniforms[ 'smoothWidth' ].value = 0.01;
+this.materialHighPassFilter = new THREE.ShaderMaterial( {
+uniforms: this.highPassUniforms,
+vertexShader: highPassShader.vertexShader,
+fragmentShader: highPassShader.fragmentShader,
+defines: {}
+} ); // Gaussian Blur Materials
+this.separableBlurMaterials = [];
+const kernelSizeArray = [ 3, 5, 7, 9, 11 ];
+resx = Math.round( this.resolution.x / 2 );
+resy = Math.round( this.resolution.y / 2 );
+for ( let i = 0; i < this.nMips; i ++ ) {
+this.separableBlurMaterials.push( this.getSeperableBlurMaterial( kernelSizeArray[ i ] ) );
+this.separableBlurMaterials[ i ].uniforms[ 'texSize' ].value = new THREE.Vector2( resx, resy );
+resx = Math.round( resx / 2 );
+resy = Math.round( resy / 2 );
+} // Composite material
+this.compositeMaterial = this.getCompositeMaterial( this.nMips );
+this.compositeMaterial.uniforms[ 'blurTexture1' ].value = this.renderTargetsVertical[ 0 ].texture;
+this.compositeMaterial.uniforms[ 'blurTexture2' ].value = this.renderTargetsVertical[ 1 ].texture;
+this.compositeMaterial.uniforms[ 'blurTexture3' ].value = this.renderTargetsVertical[ 2 ].texture;
+this.compositeMaterial.uniforms[ 'blurTexture4' ].value = this.renderTargetsVertical[ 3 ].texture;
+this.compositeMaterial.uniforms[ 'blurTexture5' ].value = this.renderTargetsVertical[ 4 ].texture;
+this.compositeMaterial.uniforms[ 'bloomStrength' ].value = strength;
+this.compositeMaterial.uniforms[ 'bloomRadius' ].value = 0.1;
+this.compositeMaterial.needsUpdate = true;
+const bloomFactors = [ 1.0, 0.8, 0.6, 0.4, 0.2 ];
+this.compositeMaterial.uniforms[ 'bloomFactors' ].value = bloomFactors;
+this.bloomTintColors = [ new THREE.Vector3( 1, 1, 1 ), new THREE.Vector3( 1, 1, 1 ), new THREE.Vector3( 1, 1, 1 ), new THREE.Vector3( 1, 1, 1 ), new THREE.Vector3( 1, 1, 1 ) ];
+this.compositeMaterial.uniforms[ 'bloomTintColors' ].value = this.bloomTintColors; // copy material
+if ( THREE.CopyShader === undefined ) {
+console.error( 'THREE.UnrealBloomPass relies on THREE.CopyShader' );
+}
+const copyShader = THREE.CopyShader;
+this.copyUniforms = THREE.UniformsUtils.clone( copyShader.uniforms );
+this.copyUniforms[ 'opacity' ].value = 1.0;
+this.materialCopy = new THREE.ShaderMaterial( {
+uniforms: this.copyUniforms,
+vertexShader: copyShader.vertexShader,
+fragmentShader: copyShader.fragmentShader,
+blending: THREE.AdditiveBlending,
+depthTest: false,
+depthWrite: false,
+transparent: true
+} );
+this.enabled = true;
+this.needsSwap = false;
+this._oldClearColor = new THREE.Color();
+this.oldClearAlpha = 1;
+this.basic = new THREE.MeshBasicMaterial();
+this.fsQuad = new THREE.FullScreenQuad( null );
+}
+dispose() {
+for ( let i = 0; i < this.renderTargetsHorizontal.length; i ++ ) {
+this.renderTargetsHorizontal[ i ].dispose();
+}
+for ( let i = 0; i < this.renderTargetsVertical.length; i ++ ) {
+this.renderTargetsVertical[ i ].dispose();
+}
+this.renderTargetBright.dispose();
+}
+setSize( width, height ) {
+let resx = Math.round( width / 2 );
+let resy = Math.round( height / 2 );
+this.renderTargetBright.setSize( resx, resy );
+for ( let i = 0; i < this.nMips; i ++ ) {
+this.renderTargetsHorizontal[ i ].setSize( resx, resy );
+this.renderTargetsVertical[ i ].setSize( resx, resy );
+this.separableBlurMaterials[ i ].uniforms[ 'texSize' ].value = new THREE.Vector2( resx, resy );
+resx = Math.round( resx / 2 );
+resy = Math.round( resy / 2 );
+}
+}
+render( renderer, writeBuffer, readBuffer, deltaTime, maskActive ) {
+renderer.getClearColor( this._oldClearColor );
+this.oldClearAlpha = renderer.getClearAlpha();
+const oldAutoClear = renderer.autoClear;
+renderer.autoClear = false;
+renderer.setClearColor( this.clearColor, 0 );
+if ( maskActive ) renderer.state.buffers.stencil.setTest( false ); // Render input to screen
+if ( this.renderToScreen ) {
+this.fsQuad.material = this.basic;
+this.basic.map = readBuffer.texture;
+renderer.setRenderTarget( null );
+renderer.clear();
+this.fsQuad.render( renderer );
+} // 1. Extract Bright Areas
+this.highPassUniforms[ 'tDiffuse' ].value = readBuffer.texture;
+this.highPassUniforms[ 'luminosityThreshold' ].value = this.threshold;
+this.fsQuad.material = this.materialHighPassFilter;
+renderer.setRenderTarget( this.renderTargetBright );
+renderer.clear();
+this.fsQuad.render( renderer ); // 2. Blur All the mips progressively
+let inputRenderTarget = this.renderTargetBright;
+for ( let i = 0; i < this.nMips; i ++ ) {
+this.fsQuad.material = this.separableBlurMaterials[ i ];
+this.separableBlurMaterials[ i ].uniforms[ 'colorTexture' ].value = inputRenderTarget.texture;
+this.separableBlurMaterials[ i ].uniforms[ 'direction' ].value = UnrealBloomPass.BlurDirectionX;
+renderer.setRenderTarget( this.renderTargetsHorizontal[ i ] );
+renderer.clear();
+this.fsQuad.render( renderer );
+this.separableBlurMaterials[ i ].uniforms[ 'colorTexture' ].value = this.renderTargetsHorizontal[ i ].texture;
+this.separableBlurMaterials[ i ].uniforms[ 'direction' ].value = UnrealBloomPass.BlurDirectionY;
+renderer.setRenderTarget( this.renderTargetsVertical[ i ] );
+renderer.clear();
+this.fsQuad.render( renderer );
+inputRenderTarget = this.renderTargetsVertical[ i ];
+} // Composite All the mips
+this.fsQuad.material = this.compositeMaterial;
+this.compositeMaterial.uniforms[ 'bloomStrength' ].value = this.strength;
+this.compositeMaterial.uniforms[ 'bloomRadius' ].value = this.radius;
+this.compositeMaterial.uniforms[ 'bloomTintColors' ].value = this.bloomTintColors;
+renderer.setRenderTarget( this.renderTargetsHorizontal[ 0 ] );
+renderer.clear();
+this.fsQuad.render( renderer ); // Blend it additively over the input texture
+this.fsQuad.material = this.materialCopy;
+this.copyUniforms[ 'tDiffuse' ].value = this.renderTargetsHorizontal[ 0 ].texture;
+if ( maskActive ) renderer.state.buffers.stencil.setTest( true );
+if ( this.renderToScreen ) {
+renderer.setRenderTarget( null );
+this.fsQuad.render( renderer );
+} else {
+renderer.setRenderTarget( readBuffer );
+this.fsQuad.render( renderer );
+} // Restore renderer settings
+renderer.setClearColor( this._oldClearColor, this.oldClearAlpha );
+renderer.autoClear = oldAutoClear;
+}
+getSeperableBlurMaterial( kernelRadius ) {
+return new THREE.ShaderMaterial( {
+defines: {
+'KERNEL_RADIUS': kernelRadius,
+'SIGMA': kernelRadius
+},
+uniforms: {
+'colorTexture': {
+value: null
+},
+'texSize': {
+value: new THREE.Vector2( 0.5, 0.5 )
+},
+'direction': {
+value: new THREE.Vector2( 0.5, 0.5 )
+}
+},
+vertexShader: `varying vec2 vUv;
+void main() {
+vUv = uv;
+gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}`,
+fragmentShader: `#include <common>
+varying vec2 vUv;
+uniform sampler2D colorTexture;
+uniform vec2 texSize;
+uniform vec2 direction;
+float gaussianPdf(in float x, in float sigma) {
+return 0.39894 * exp( -0.5 * x * x/( sigma * sigma))/sigma;
+}
+void main() {
+vec2 invSize = 1.0 / texSize;
+float fSigma = float(SIGMA);
+float weightSum = gaussianPdf(0.0, fSigma);
+vec3 diffuseSum = texture2D( colorTexture, vUv).rgb * weightSum;
+for( int i = 1; i < KERNEL_RADIUS; i ++ ) {
+float x = float(i);
+float w = gaussianPdf(x, fSigma);
+vec2 uvOffset = direction * invSize * x;
+vec3 sample1 = texture2D( colorTexture, vUv + uvOffset).rgb;
+vec3 sample2 = texture2D( colorTexture, vUv - uvOffset).rgb;
+diffuseSum += (sample1 + sample2) * w;
+weightSum += 2.0 * w;
+}
+gl_FragColor = vec4(diffuseSum/weightSum, 1.0);
+}`
+} );
+}
+getCompositeMaterial( nMips ) {
+return new THREE.ShaderMaterial( {
+defines: {
+'NUM_MIPS': nMips
+},
+uniforms: {
+'blurTexture1': {
+value: null
+},
+'blurTexture2': {
+value: null
+},
+'blurTexture3': {
+value: null
+},
+'blurTexture4': {
+value: null
+},
+'blurTexture5': {
+value: null
+},
+'dirtTexture': {
+value: null
+},
+'bloomStrength': {
+value: 1.0
+},
+'bloomFactors': {
+value: null
+},
+'bloomTintColors': {
+value: null
+},
+'bloomRadius': {
+value: 0.0
+}
+},
+vertexShader: `varying vec2 vUv;
+void main() {
+vUv = uv;
+gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}`,
+fragmentShader: `varying vec2 vUv;
+uniform sampler2D blurTexture1;
+uniform sampler2D blurTexture2;
+uniform sampler2D blurTexture3;
+uniform sampler2D blurTexture4;
+uniform sampler2D blurTexture5;
+uniform sampler2D dirtTexture;
+uniform float bloomStrength;
+uniform float bloomRadius;
+uniform float bloomFactors[NUM_MIPS];
+uniform vec3 bloomTintColors[NUM_MIPS];
+float lerpBloomFactor(const in float factor) {
+float mirrorFactor = 1.2 - factor;
+return mix(factor, mirrorFactor, bloomRadius);
+}
+void main() {
+gl_FragColor = bloomStrength * ( lerpBloomFactor(bloomFactors[0]) * vec4(bloomTintColors[0], 1.0) * texture2D(blurTexture1, vUv) +
+lerpBloomFactor(bloomFactors[1]) * vec4(bloomTintColors[1], 1.0) * texture2D(blurTexture2, vUv) +
+lerpBloomFactor(bloomFactors[2]) * vec4(bloomTintColors[2], 1.0) * texture2D(blurTexture3, vUv) +
+lerpBloomFactor(bloomFactors[3]) * vec4(bloomTintColors[3], 1.0) * texture2D(blurTexture4, vUv) +
+lerpBloomFactor(bloomFactors[4]) * vec4(bloomTintColors[4], 1.0) * texture2D(blurTexture5, vUv) );
+}`
+} );
+}
+}
+UnrealBloomPass.BlurDirectionX = new THREE.Vector2( 1.0, 0.0 );
+UnrealBloomPass.BlurDirectionY = new THREE.Vector2( 0.0, 1.0 );
+THREE.UnrealBloomPass = UnrealBloomPass;
+} )();
+
+};
+</script>
 <script id="lt-tips">/* podpowiedzi z podpowiedzi/podpowiedzi.xlsx – nie edytuj tutaj, uruchom podpowiedzi/wstaw.py */
 const LT_TIPS={"el.gestBtn": ["Gest dwoma palcami: przybliżanie (stuknij, by obracać)", "Two-finger gesture: zoom (tap to rotate)", "Zwei-Finger-Geste: Zoomen (tippen zum Drehen)"], "el.ordBtn": ["Ustawy · Drzewka ustaw z urzędu miasta · Punkty nauki od uczniów otwierają poziomy, a pełne drzewko odblokowuje wyjątkowy budynek", "Laws · Law trees from city hall · Research points from pupils open the tiers, and a full tree unlocks a unique building", "Gesetze · Gesetzesbäume aus dem Rathaus · Forschungspunkte von Schülern öffnen die Stufen, ein vollständiger Baum schaltet ein einzigartiges Gebäude frei"], "el.terBtn": ["Teren: podnoszenie, obniżanie, wyrównywanie, wygładzanie, zalewanie", "Terrain: raise, lower, level, smooth, flood", "Gelände: anheben, absenken, einebnen, glätten, fluten"], "el.linBtn": ["Komunikacja miejska: linie autobusowe i kolejowe", "Public transport: bus and rail lines", "Nahverkehr: Bus- und Bahnlinien"], "el.msBtn": ["Kamienie milowe · Kolejne cele rozwoju miasta · Każdy kamień milowy odblokowuje nowe budynki", "Milestones · The next goals for your city · Every milestone unlocks new buildings", "Meilensteine · Die nächsten Ziele deiner Stadt · Jeder Meilenstein schaltet neue Gebäude frei"], "el.ovlBtn": ["Nakładki · Pokazują zasięgi i strefy na mapie · Szpitale, szkoły, policja, straż, smog, hałas, parki i rozrywka", "Overlays · Show ranges and zones on the map · Hospitals, schools, police, fire, smog, noise, parks and entertainment", "Overlays · Zeigen Reichweiten und Zonen auf der Karte · Krankenhäuser, Schulen, Polizei, Feuerwehr, Smog, Lärm, Parks und Unterhaltung"], "el.taxBtn": ["Podatki · Podatki dla każdego rodzaju domu · Pożyczki i import towarów", "Taxes · Taxes for each type of home · Loans and goods import", "Steuern · Steuern für jede Wohnart · Kredite und Warenimport"], "el.statsBtn": ["Gospodarka · Finanse, produkcja, mieszkańcy, odpady, ruch, prąd, woda · Bezpieczeństwo, zdrowie i edukacja", "Economy · Finance, production, residents, waste, traffic, power, water · Safety, health and education", "Wirtschaft · Finanzen, Produktion, Einwohner, Abfall, Verkehr, Strom, Wasser · Sicherheit, Gesundheit und Bildung"], "el.r-money": ["Gotówka (T¢): stan / limit", "Cash (T¢): balance / limit", "Bargeld (T¢): Stand / Limit"], "el.r-mat": ["Magazyny (kg): zapas / pojemność, pasek według produktów", "Warehouses (kg): stock / capacity, bar by product", "Lager (kg): Vorrat / Kapazität, Balken nach Produkten"], "el.r-pow": ["Prąd (MW): pobór / moc", "Power (MW): demand / capacity", "Strom (MW): Verbrauch / Leistung"], "el.r-happy": ["Średnie zadowolenie mieszkańców", "Residents' average happiness", "Durchschnittliche Zufriedenheit der Einwohner"], "el.rPlay": ["Radio", "", ""], "el.rSt": ["Zmień stację", "Change station", "Sender wechseln"], "el.rNext": ["Następna stacja", "Next station", "Nächster Sender"], "el.camBtn": ["Kamera filmowa (V)", "Cinematic camera (V)", "Kinokamera (V)"], "el.optBtn": ["Opcje (Esc)", "Options (Esc)", "Optionen (Esc)"], "el.pRot": ["Obróć (R)", "Rotate (R)", "Drehen (R)"], "el.pOk": ["Postaw (Enter)", "Build (Enter)", "Bauen (Enter)"], "el.pNo": ["Anuluj", "Cancel", "Abbrechen"], "tool.road": ["Łączy budynki. Przeciągnij palcem, by położyć kilka pól naraz.", "Connects buildings. Drag your finger to lay several tiles at once.", "Verbindet Gebäude. Ziehe mit dem Finger, um mehrere Felder auf einmal zu legen."], "tool.road2": ["2 pasy w każdą stronę, auta jadą 1,1× szybciej i same wybierają luźniejszy pas. Postaw na zwykłej ulicy, by ją poszerzyć (płacisz różnicę).", "2 lanes each way, cars drive 1.1× faster and pick the freer lane themselves. Place it on an ordinary street to widen it (you pay the difference).", "2 Spuren je Richtung, Autos fahren 1,1× schneller und wählen selbst die freiere Spur. Auf eine normale Straße setzen, um sie zu verbreitern (du zahlst die Differenz)."], "tool.road3": ["3 pasy w każdą stronę, auta jadą 1,25× szybciej i same wybierają luźniejszy pas.", "3 lanes each way, cars drive 1.25× faster and pick the freer lane themselves.", "3 Spuren je Richtung, Autos fahren 1,25× schneller und wählen selbst die freiere Spur."], "tool.roundabout": ["Płynny przejazd przez skrzyżowanie (1,2× szybciej), auta objeżdżają wysepkę. Postaw na istniejącej ulicy.", "Smooth flow through the junction (1.2× faster), cars drive around the island. Place it on an existing street.", "Flüssige Fahrt durch die Kreuzung (1,2× schneller), Autos umfahren die Insel. Auf eine bestehende Straße setzen."], "tool.highway": ["Auta jadą 1,5× szybciej. Bez słupów, budynki nie mają z niej wjazdu.", "Cars drive 1.5× faster. No poles, buildings have no access from it.", "Autos fahren 1,5× schneller. Keine Masten, Gebäude haben keine Zufahrt."], "tool.bridge": ["Przejazd przez wodę, tylko w linii prostej. Przejmuje pasy i prędkość najlepszej drogi na swoich końcach.", "Crossing over water, only in a straight line. Takes the lanes and speed of the best road at its ends.", "Überquerung von Wasser, nur geradeaus. Übernimmt Spuren und Tempo der besten Straße an ihren Enden."], "tool.tunnel": ["Droga pod wzniesieniem. Zaczyna się przy końcu drogi u stóp wzgórza i biegnie płasko na jej wysokości; nad tunelem musi być co najmniej półtora poziomu terenu. Na tunelu postawisz słup (kabel pod sufitem) i położysz rurę. Ulicą możesz też przejechać górą, w poprzek tunelu: poprowadź zwykłą ulicę przez wzgórze nad nim. Tunel przejdzie też pod istniejącą ulicą lub autostradą na wzgórzu (prosty odcinek) – droga zostaje na górze. Autostradę też możesz poprowadzić górą nad tunelem.", "A road under high ground. It starts at the end of a road at the foot of a hill and runs level at that road's height; there must be at least one and a half levels of ground above it. On a tunnel you can put a pole (a cable under the ceiling) and lay a pipe. A street can also cross over the top of the tunnel: run an ordinary street across the hill above it. A tunnel can also pass under a street or highway already on the hill (a straight stretch) – the road stays on top. You can also run a highway over the top of a tunnel.", "Eine Straße unter einer Anhöhe. Sie beginnt am Ende einer Straße am Fuß eines Hügels und verläuft eben auf deren Höhe; darüber müssen mindestens anderthalb Stufen Gelände liegen. Im Tunnel kannst du einen Mast (Kabel unter der Decke) setzen und ein Rohr verlegen. Eine Straße kann den Tunnel auch oben überqueren: führe eine normale Straße über den Hügel darüber. Ein Tunnel kann auch unter einer Straße oder Autobahn auf dem Hügel durchgehen (gerades Stück) – die Straße bleibt oben. Auch eine Autobahn kannst du oben über den Tunnel führen."], "tool.crosswalk": ["Pasy i znak na prostym odcinku ulicy. Nie stawia się ich na skrzyżowaniach. Usuwasz je w Wyburz → „Przejścia”.", "Stripes and a sign on a straight stretch of street. They are not placed at junctions. You remove them in Demolish → “Crossings”.", "Streifen und Schild auf einem geraden Straßenstück. Nicht an Kreuzungen. Entfernen mit Abreißen → „Übergänge“."], "tool.tUp": ["Podnosi pole o pół poziomu (najwyżej do poziomu 10). Przeciągnij: wszystkie pola dostaną poziom o pół wyżej niż pierwsze kliknięte (wyższe zostają). Na zajętym polu nie zadziała.", "Raises a tile by half a level (up to level 10). Drag: every tile gets half a level above the first one clicked (higher ones stay). Does not work on an occupied tile.", "Hebt ein Feld um eine halbe Ebene an (bis Ebene 10). Ziehen: alle Felder erhalten eine halbe Ebene über dem ersten angeklickten (höhere bleiben). Funktioniert nicht auf belegten Feldern."], "tool.tDown": ["Obniża pole o pół poziomu. Przeciągnij: wszystkie pola dostaną poziom o pół niżej niż pierwsze kliknięte (niższe zostają). Pole obniżone do poziomu wody obok rzeki zamienia się w wodę.", "Lowers a tile by half a level. Drag: every tile gets half a level below the first one clicked (lower ones stay). A tile lowered to the water level next to a river turns into water.", "Senkt ein Feld um eine halbe Ebene ab. Ziehen: alle Felder erhalten eine halbe Ebene unter dem ersten angeklickten (niedrigere bleiben). Ein bis auf Wasserhöhe abgesenktes Feld neben einem Fluss wird zu Wasser."], "tool.tLevel": ["Ustaw wysokość przyciskami − i + albo pobierz ją z pola pipetą, potem przeciągnij po terenie: pola dostaną tę wysokość. 5 T¢ za każde pół poziomu różnicy.", "Set the height with − and + or pick it from a tile with the eyedropper, then drag over the ground: the tiles get that height. 5 T¢ for every half level of difference.", "Stelle die Höhe mit − und + ein oder nimm sie mit der Pipette von einem Feld, dann ziehe über das Gelände: Die Felder bekommen diese Höhe. 5 T¢ pro halbe Stufe Unterschied."], "tool.tSmooth": ["Łagodzi skoki: każde pole pod pędzlem zbliża się do średniej wysokości sąsiadów. 5 T¢ za każde pół poziomu zmiany.", "Softens steps: every tile under the brush moves towards the average height of its neighbours. 5 T¢ for every half level of change.", "Mildert Stufen: Jedes Feld unter dem Pinsel nähert sich der mittleren Höhe seiner Nachbarn. 5 T¢ pro halbe Stufe Änderung."], "tool.fill": ["Zamienia pole wody przy brzegu w ląd. Uwaga: woda odcięta od ujścia za mapę zacznie się podnosić i może zalać okolicę.", "Turns a water tile at the bank into land. Careful: water cut off from its way off the map starts to rise and may flood the area.", "Verwandelt ein Wasserfeld am Ufer in Land. Achtung: Wasser ohne Abfluss aus der Karte beginnt zu steigen und kann die Umgebung überfluten."], "tool.busStop": ["Wiata na prostym odcinku zwykłej ulicy – nie na skrzyżowaniu, zakręcie, przejściu dla pieszych ani przejeździe kolejowym. Stronę ulicy wybierasz obracaniem (R lub ↻ Obróć) – podgląd pokazuje, gdzie stanie wiata. Kliknięcie istniejącego przystanku przenosi go na drugą stronę. Autobus staje przy niej, jadąc pasem przy wiacie.", "Wiata na prostym odcinku zwykłej ulicy – nie na skrzyżowaniu, zakręcie, przejściu dla pieszych ani przejeździe kolejowym. You pick the side of the street by rotating (R or ↻ Rotate) – the preview shows where the shelter will stand. Clicking an existing stop moves it to the other side. Bus staje przy niej, jadąc pasem przy wiacie.", "Wiata na prostym odcinku zwykłej ulicy – nie na skrzyżowaniu, zakręcie, przejściu dla pieszych ani przejeździe kolejowym. Die Straßenseite wählst du durch Drehen (R oder ↻ Drehen) – die Vorschau zeigt, wo das Wartehäuschen steht. Ein Klick auf eine bestehende Haltestelle verlegt sie auf die andere Seite. Bus staje przy niej, jadąc pasem przy wiacie."], "tool.busDepot": ["Zajmuje 2×2 pola. Garażuje i obsługuje autobusy: bez działającej zajezdni (z prądem i dojazdem) autobusy nie wyjeżdżają na linie. Każda linia ma tyle autobusów, ile jej przydzielisz.", "Takes 2×2 tiles. Garages and services buses: without a working depot (with power and road access) buses do not go out on the lines. Each line has as many buses as you assign to it.", "Belegt 2×2 Felder. Stellt Busse unter und wartet sie: ohne funktionierendes Depot (mit Strom und Zufahrt) fahren keine Busse auf die Linien. Jede Linie hat so viele Busse, wie du ihr zuteilst."], "tool.rail": ["Przeciągnij, by położyć tory. Przecinają w poprzek pojedynczą, prostą ulicę (przejazd) i rzeki (most kolejowy). Z dworcem łączą się tylko na końcach jego peronu (wjazd i wyjazd). Dworzec działa, gdy tory dochodzą do krawędzi mapy.", "Drag to lay rails. They cross a single straight street at right angles (level crossing) and rivers (railway bridge). They connect to a station only at the ends of its platform (entry and exit). A station works when the rails reach the map edge.", "Ziehen, um Gleise zu legen. Sie kreuzen eine einzelne gerade Straße quer (Bahnübergang) und Flüsse (Eisenbahnbrücke). Mit einem Bahnhof verbinden sie sich nur an den Enden seines Bahnsteigs (Ein- und Ausfahrt). Ein Bahnhof arbeitet, wenn die Gleise den Kartenrand erreichen."], "tool.railTunnel": ["Tory pod wzniesieniem. Zaczyna się przy końcu torów u stóp wzgórza i biegnie płasko na ich wysokości; nad tunelem musi być co najmniej półtora poziomu terenu.", "Track under a hill. It starts at the end of the track at the foot of the hill and runs level at its height; there must be at least one and a half levels of terrain above the tunnel.", "Gleis unter einer Anhöhe. Beginnt am Ende der Gleise am Fuß des Hügels und verläuft eben auf ihrer Höhe; über dem Tunnel muss mindestens anderthalb Geländestufen liegen."], "tool.trainSt": ["Zajmuje 3×2 pola. Gdy tory łączą go z krawędzią mapy, co 2 godziny przyjeżdża pociąg z turystami (+60% turystów). Taksówki odbierają ich z dworca.", "Takes 3×2 tiles. When rails connect it to the map edge, a train with tourists arrives every 2 hours (+60% tourists). Taxis pick them up at the station.", "Belegt 3×2 Felder. Wenn Gleise ihn mit dem Kartenrand verbinden, kommt alle 2 Stunden ein Zug mit Touristen (+60 % Touristen). Taxis holen sie am Bahnhof ab."], "tool.taxi": ["Zajmuje 2 pola. 4 taksówki wożą turystów z drogi wjazdowej i z dworca do hoteli, rozrywki i sklepów. Bez bazy taxi turyści nie przyjeżdżają. Kurs: 5 T¢.", "Takes 2 tiles. 4 taxis drive tourists from the entry road and the station to hotels, entertainment and shops. Without a taxi depot no tourists come. Fare: 5 T¢.", "Belegt 2 Felder. 4 Taxis fahren Touristen von der Zufahrtsstraße und vom Bahnhof zu Hotels, Unterhaltung und Läden. Ohne Taxizentrale kommen keine Touristen. Fahrt: 5 T¢."], "tool.freightSt": ["Zajmuje 3×2 pola. Pociąg towarowy co godzinę: stały import do magazynów albo eksport z magazynów wybranego towaru, od 10 kg/godz. co 5. Wymaga torów do krawędzi mapy.", "Takes 3×2 tiles. A freight train every hour: steady import into the warehouses or export from the warehouses of the chosen goods, from 10 kg/h in steps of 5. Needs rails to the map edge.", "Belegt 3×2 Felder. Jede Stunde ein Güterzug: fester Import ins Lager oder Export aus dem Lager der gewählten Ware, ab 10 kg/Std. in 5er-Schritten. Braucht Gleise bis zum Kartenrand."], "tool.shipC": ["Zajmuje 3×1 pola. Co 2 godziny ciężarówki wywożą hurtem wybrane towary z magazynów (60% ceny) albo – w trybie importu – sprowadzają je (50% ceny). Można włączyć automatyczne ponawianie.", "Takes 3×1 tiles. Every 2 hours trucks haul selected goods out of the warehouses in bulk (60% of the price) or – in import mode – bring them in (50% of the price). Automatic repeat can be turned on.", "Belegt 3×1 Felder. Alle 2 Stunden bringen Lkw ausgewählte Waren in großen Mengen aus den Lagern weg (60% des Preises) oder – im Importmodus – liefern sie an (50% des Preises). Automatische Wiederholung lässt sich einschalten."], "tool.airport": ["Zajmuje 4×7 pól. Co godzinę ląduje samolot z turystami – rozwożą ich taksówki, a bez taksówek idą pieszo do pobliskich atrakcji. Opłaty lotniskowe +150 T¢/godz. Ulepszenie: terminal towarowy (eksport/import 250 kg co godzinę). Jedno na miasto (ustawy: Transport publiczny).", "Takes 4×7 tiles. Every hour a plane lands with tourists – taxis take them around, and without taxis they walk to nearby attractions. Airport fees +150 T¢/h. Upgrade: cargo terminal (export/import 250 kg every hour). One per city (laws: Public transport).", "Belegt 4×7 Felder. Jede Stunde landet ein Flugzeug mit Touristen – Taxis bringen sie in die Stadt, ohne Taxis gehen sie zu Fuß zu nahen Attraktionen. Flughafengebühren +150 T¢/Std. Ausbau: Frachtterminal (Export/Import 250 kg pro Stunde). Einer pro Stadt (Gesetze: Öffentlicher Verkehr)."], "tool.house": ["1 rodzina. Podstawa zadowolenia 3. Musi stać przy ulicy.", "1 family. Base happiness 3. Must stand by a street.", "1 Familie. Grundzufriedenheit 3. Muss an einer Straße stehen."], "tool.tenement": ["3 rodziny: 2× więcej kursów niż dom. Podstawa zadowolenia 3.", "3 families: 2× more trips than a house. Base happiness 3.", "3 Familien: 2× mehr Fahrten als ein Haus. Grundzufriedenheit 3."], "tool.block": ["Zajmuje 2 pola. 18 mieszkańców (po rozbudowie do 54), 3× więcej kursów. Ciasno: podstawa zadowolenia 2.", "Takes 2 tiles. 18 residents (54 after expansion), 3× more trips. Cramped: base happiness 2.", "Belegt 2 Felder. 18 Einwohner (nach Ausbau 54), 3× mehr Fahrten. Beengt: Grundzufriedenheit 2."], "tool.modern": ["Zajmuje 2 pola. Nowoczesny, 3,5× więcej kursów. Podstawa zadowolenia 4.", "Takes 2 tiles. Modern, 3.5× more trips. Base happiness 4.", "Belegt 2 Felder. Modern, 3,5× mehr Fahrten. Grundzufriedenheit 4."], "tool.factory": ["Dwie zmiany pracowników + 2 kg materiałów z magazynu = ciężarówka z 5 kg towarów ogólnych. Z materiałów robi zabawki i kosmetyki; odzież, meble, elektronikę, narzędzia i napoje tylko z ich surowca, jeśli leży w magazynach (bawełna, drewno, chalkopiryt, warzywa). Ulepszenie odblokowuje wybór produktu i +50%.", "Two worker shifts + 2 kg of materials from the warehouse = a truck with 5 kg of general goods. Makes toys and cosmetics from materials; clothing, furniture, electronics, tools and drinks only from their raw material, if it is in the warehouses (cotton, wood, chalcopyrite, vegetables). The upgrade unlocks product choice and +50%.", "Zwei Arbeiterschichten + 2 kg Material aus dem Lager = ein Lkw mit 5 kg allgemeiner Waren. Aus Materialien entstehen Spielzeug und Kosmetik; Kleidung, Möbel, Elektronik, Werkzeuge und Getränke nur aus ihrem Rohstoff, wenn er im Lager liegt (Baumwolle, Holz, Chalkopyrit, Gemüse). Das Upgrade schaltet die Produktwahl und +50 % frei."], "tool.smallfac": ["Połowa produkcji zwykłej fabryki (2 kg na partię), 40% taniej. Tylko linia ogólna: zabawki i kosmetyki z materiałów, a odzież, meble, elektronikę, narzędzia i napoje tylko wtedy, gdy w magazynach jest ich surowiec. Można dokupić nową technologię (+50%).", "Half the output of a regular factory (2 kg per batch), 40% cheaper. General line only: toys and cosmetics from materials, and clothing, furniture, electronics, tools and drinks only when their raw material is in the warehouses. A new technology can be bought (+50%).", "Halbe Produktion einer normalen Fabrik (2 kg pro Charge), 40 % billiger. Nur allgemeine Linie: Spielzeug und Kosmetik aus Materialien, Kleidung, Möbel, Elektronik, Werkzeuge und Getränke nur, wenn ihr Rohstoff im Lager ist. Neue Technologie zukaufbar (+50 %)."], "tool.factoryB": ["Zajmuje 2 pola. Na start 1 linia ogólna; w karcie fabryki wykupujesz do 3 różnych linii (każda 400 T¢). Linie pracują po kolei.", "Takes 2 tiles. 1 general line to start; in the factory card you buy up to 3 different lines (400 T¢ each). The lines work in turn.", "Belegt 2 Felder. Zu Beginn 1 allgemeine Linie; in der Fabrikkarte kaufst du bis zu 3 verschiedene Linien (je 400 T¢). Die Linien arbeiten nacheinander."], "tool.mine": ["Hala produkcyjna: 2,7 kg materiałów na 2 zmiany pracowników. Obok recyklingu jedyne źródło materiałów dla fabryk.", "Production hall: 2.7 kg of materials for 2 worker shifts. Apart from recycling, the only source of materials for factories.", "Produktionshalle: 2,7 kg Material für 2 Arbeiterschichten. Neben dem Recycling die einzige Materialquelle für Fabriken."], "tool.mineB": ["Zajmuje 2×2 pola. 5× produkcja małej wytwórni: 13,3 kg materiałów na 2 zmiany.", "Takes 2×2 tiles. 5× the output of the small workshop: 13.3 kg of materials for 2 shifts.", "Belegt 2×2 Felder. 5× die Produktion der kleinen Werkstatt: 13,3 kg Material für 2 Schichten."], "tool.pitS": ["Stawiasz na złożu węgla albo chalkopirytu (widać je na mapie jako ciemne lub złotawe łaty ze skałami). Wydobywa 20 kg/godz. tego, co leży pod nią, i wozi do magazynów. Potrzebuje prądu i ulicy.", "Place it on a coal or chalcopyrite deposit (visible on the map as dark or golden patches with rocks). Mines 20 kg/h of whatever lies under it and takes it to the warehouses. Needs power and a street.", "Auf ein Kohle- oder Chalkopyritvorkommen setzen (auf der Karte dunkle oder goldene Flecken mit Felsen). Fördert 20 kg/Std. von dem, was darunter liegt, und bringt es ins Lager. Braucht Strom und eine Straße."], "tool.pitB": ["Zajmuje 2×1 pola, oba na tym samym złożu. Wydobywa 35 kg/godz. węgla albo chalkopirytu i wozi do magazynów. Potrzebuje prądu i ulicy.", "Takes 2×1 tiles, both on the same deposit. Mines 35 kg/h of coal or chalcopyrite and takes it to the warehouses. Needs power and a street.", "Belegt 2×1 Felder, beide auf demselben Vorkommen. Fördert 35 kg/Std. Kohle oder Chalkopyrit und bringt sie ins Lager. Braucht Strom und eine Straße."], "tool.warehouse": ["Własny zapas do 200 kg, działa bez prądu. Ciężarówki z farm i fabryk jadą do najbliższego magazynu, który ma miejsce; sklepy i fabryki biorą z najbliższego, który ma towar.", "Own stock up to 200 kg, works without power. Trucks from farms and factories go to the nearest warehouse with room; shops and factories take from the nearest one that has the goods.", "Eigener Vorrat bis 200 kg, arbeitet ohne Strom. Lkw von Farmen und Fabriken fahren zum nächsten Lager mit Platz; Läden und Fabriken nehmen aus dem nächsten, das die Ware hat."], "tool.smallwh": ["Własny zapas do 150 kg, działa bez prądu. Też przyjmuje ciężarówki.", "Own stock up to 150 kg, works without power. Also accepts trucks.", "Eigener Vorrat bis 150 kg, arbeitet ohne Strom. Nimmt auch Lkw an."], "tool.warehouseB": ["Zajmuje 2 pola, działa bez prądu. Własny zapas do 500 kg (2,5× magazyn). Ciężarówki zostawiają towar w magazynie, do którego przyjechały; sklepy i fabryki biorą z najbliższego, który go ma. Ulepszenie podwaja pojemność.", "Takes 2 tiles, works without power. Own stock up to 500 kg (2.5× a warehouse). Trucks leave goods in the warehouse they drove to; shops and factories take from the nearest one that has them. The upgrade doubles the capacity.", "Belegt 2 Felder, arbeitet ohne Strom. Eigener Vorrat bis 500 kg (2,5× ein Lager). Lkw laden die Ware im Lager ab, zu dem sie gefahren sind; Läden und Fabriken nehmen aus dem nächsten, das sie hat. Das Upgrade verdoppelt die Kapazität."], "tool.impDep": ["Kontrolowany import: sam wybierasz, jakie towary i ile kilogramów na godzinę sprowadzać spoza miasta. Ciężarówki przywożą je co godzinę i rozkładają po magazynach. Gdy stoi choć jeden, sklepy przestają importować same. Działa bez prądu.", "Controlled import: you choose which goods and how many kilograms per hour to bring in from outside the city. Trucks bring them every hour and spread them over the warehouses. While at least one stands, shops stop importing on their own. Works without power.", "Gesteuerter Import: du wählst, welche Waren und wie viele Kilogramm pro Stunde von außerhalb kommen. Lkw bringen sie stündlich und verteilen sie auf die Lager. Solange eins steht, importieren Läden nicht mehr selbst. Arbeitet ohne Strom."], "tool.combine": ["Zajmuje 2×3 pola. Do 4 linii specjalistycznych naraz (pracują po kolei), bez towarów ogólnych. Partie 2× większe niż w dużej fabryce, obsada 14–22. Jeden na miasto (ustawy: Nawyki komunistyczne).", "Takes 2×3 tiles. Up to 4 specialist lines at once (they work in turn), no general goods. Batches 2× bigger than in a large factory, crew 14–22. One per city (laws: Communist habits).", "Belegt 2×3 Felder. Bis zu 4 Speziallinien gleichzeitig (sie arbeiten nacheinander), keine allgemeinen Waren. Chargen 2× größer als in der großen Fabrik, Belegschaft 14–22. Eines pro Stadt (Gesetze: Kommunistische Gewohnheiten)."], "tool.farmveg": ["Grządki i szklarnie: warzywa i owoce, 2 kg/godz. Stawiaj pola obok siebie: multiblok daje +10% za każde kolejne pole (do +100%).", "Beds and greenhouses: vegetables and fruit, 2 kg/h. Place fields next to each other: a multiblock gives +10% for each further field (up to +100%).", "Beete und Gewächshäuser: Gemüse und Obst, 2 kg/Std. Felder nebeneinander setzen: Multiblock gibt +10 % pro weiterem Feld (bis +100 %)."], "tool.farmdairy": ["Krowy, świnie i owce: nabiał, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).", "Cows, pigs and sheep: dairy, 2 kg/h. Multiblock: +10% for each further field next to it (up to +100%).", "Kühe, Schweine und Schafe: Milchprodukte, 2 kg/Std. Multiblock: +10 % pro weiterem Feld daneben (bis +100 %)."], "tool.farmgrain": ["Zboże dla piekarni, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).", "Grain for bakeries, 2 kg/h. Multiblock: +10% for each further field next to it (up to +100%).", "Getreide für Bäckereien, 2 kg/Std. Multiblock: +10 % pro weiterem Feld daneben (bis +100 %)."], "tool.farmcotton": ["Krzewy bawełny: bawełna dla fabryk odzieży, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).", "Cotton bushes: cotton for clothing factories, 2 kg/h. Multiblock: +10% for each further field next to it (up to +100%).", "Baumwollsträucher: Baumwolle für Kleiderfabriken, 2 kg/Std. Multiblock: +10 % pro weiterem Feld daneben (bis +100 %)."], "tool.farmwood": ["Szkółka i wyrąb: drewno na meble i dla elektrowni na biomasę, 2 kg/godz. Multiblok: +10% za każde kolejne pole obok (do +100%).", "Nursery and logging: wood for furniture and for biomass power plants, 2 kg/h. Multiblock: +10% for each further field next to it (up to +100%).", "Baumschule und Holzeinschlag: Holz für Möbel und Biomassekraftwerke, 2 kg/Std. Multiblock: +10 % pro weiterem Feld daneben (bis +100 %)."], "tool.shop": ["80 miejsc na półkach, dzielonych po równo między sprzedawane towary. Na start wielobranżowy (wszystko), w karcie sklepu zmienisz go na specjalistyczny z cenami +25%. Furgonetki dowożą towar z magazynów.", "80 shelf places, split equally between the goods sold. A general store to start (everything); in the shop card you can turn it into a specialty shop with prices +25%. Vans bring goods from the warehouses.", "80 Regalplätze, gleich auf die verkauften Waren verteilt. Zu Beginn ein Gemischtwarenladen (alles); in der Ladenkarte machst du daraus ein Fachgeschäft mit Preisen +25 %. Lieferwagen bringen Ware aus dem Lager."], "tool.shop1": ["Jedna branża do wyboru (nie wielobranżowy), ceny +25%. 35 klientów/godz., z piętrem 50, z kasami SCO +5, z trzecią kasą +10. Półki 120, z piętrem 240.", "One trade of your choice (not a general store), prices +25%. 35 customers/h, 50 with a floor, +5 with SCO checkouts, +10 with a third checkout. Shelves 120, 240 with a floor.", "Eine Branche nach Wahl (kein Gemischtwarenladen), Preise +25 %. 35 Kunden/Std., mit Stockwerk 50, mit SB-Kassen +5, mit dritter Kasse +10. Regale 120, mit Stockwerk 240."], "tool.supermarket": ["Zajmuje 2 pola. 300 miejsc na półkach (po równo na każdy towar), obsłuży 60 klientów na godzinę (trzecia kasa +15). Ceny bazowe.", "Takes 2 tiles. 300 shelf places (split equally between goods), serves 60 customers per hour (third checkout +15). Base prices.", "Belegt 2 Felder. 300 Regalplätze (gleich auf alle Waren verteilt), bedient 60 Kunden pro Stunde (dritte Kasse +15). Grundpreise."], "tool.gallery": ["Zajmuje 2×2 pola. W karcie galerii wykupujesz lokale (sklep 100 T¢): na parterze 4 (np. 3 sklepy i kino), po dobudowie piętra wszystkie. Galeria ma 960 miejsc na półkach, dzielonych po równo między towary jej sklepów. Ceny +25% i więcej klientów.", "Takes 2×2 tiles. In the mall card you buy units (shop 100 T¢): 4 on the ground floor (e.g. 3 shops and a cinema), all of them after adding a floor. The mall has 960 shelf places, split equally between the goods of its shops. Prices +25% and more customers.", "Belegt 2×2 Felder. In der Karte des Zentrums kaufst du Läden (Laden 100 T¢): 4 im Erdgeschoss (z. B. 3 Läden und ein Kino), nach dem Ausbau eines Stockwerks alle. 960 Regalplätze, gleich auf die Waren der Läden verteilt. Preise +25 % und mehr Kunden."], "tool.bank": ["Podnosi limit gotówki o 6 000 T¢.", "Raises the cash limit by 6,000 T¢.", "Erhöht das Bargeldlimit um 6.000 T¢."], "tool.bankG": ["Zajmuje 2×2 pola. Limit gotówki +12 500 T¢, rozbudowa o skrzydło księgowości: +5 000 T¢. Napad na niego może zabrać 3 razy więcej.", "Takes 2×2 tiles. Cash limit +12,500 T¢, accounting wing expansion: +5,000 T¢. A robbery here can take 3 times more.", "Belegt 2×2 Felder. Bargeldlimit +12.500 T¢, Ausbau um einen Buchhaltungsflügel: +5.000 T¢. Ein Überfall kann hier das Dreifache erbeuten."], "tool.retire": ["Zajmuje 3×2 pola. Mieszkańcy całego miasta żyją o 10% dłużej. W zasięgu 15 bloków po drogach i obrębie 9×9 domy z seniorami mają +1 zadowolenia. Jeden na miasto (ustawy: Zdrowe nawyki).", "Takes 3×2 tiles. Residents of the whole city live 10% longer. Within 15 blocks along the roads and a 9×9 surround, homes with seniors get +1 happiness. One per city (laws: Healthy habits).", "Belegt 3×2 Felder. Die Bewohner der ganzen Stadt leben 10% länger. Im Umkreis von 15 Blöcken entlang der Straßen und einem Umfeld von 9×9 haben Häuser mit Senioren +1 Zufriedenheit. Eines pro Stadt (Gesetze: Gesunde Gewohnheiten)."], "tool.restaurant": ["Rozrywka: 15 bloków po drogach i obręb 5×5 (+1 zadowolenia). Zużywa jedzenie z magazynów, posiłek 30 T¢. Najtańsza w utrzymaniu.", "Entertainment: 15 blocks along the roads and a 5×5 surround (+1 happiness). Uses food from warehouses, meal 30 T¢. Cheapest to maintain.", "Unterhaltung: 15 Blöcke entlang der Straßen und Umfeld 5×5 (+1 Zufriedenheit). Verbraucht Essen aus den Lagern, Mahlzeit 30 T¢. Am günstigsten im Unterhalt."], "tool.cinema": ["Rozrywka: 17 bloków po drogach i obręb 7×7 (+1 zadowolenia). Bilet 30 T¢.", "Entertainment: 17 blocks along the roads and a 7×7 surround (+1 happiness). Ticket 30 T¢.", "Unterhaltung: 17 Blöcke entlang der Straßen und Umfeld 7×7 (+1 Zufriedenheit). Ticket 30 T¢."], "tool.theater": ["Rozrywka: 19 bloków po drogach i obręb 9×9 (+1 zadowolenia). Bilet 40 T¢.", "Entertainment: 19 blocks along the roads and a 9×9 surround (+1 happiness). Ticket 40 T¢.", "Unterhaltung: 19 Blöcke entlang der Straßen und Umfeld 9×9 (+1 Zufriedenheit). Ticket 40 T¢."], "tool.casino": ["Rozrywka: 21 bloków po drogach i obręb 12×12 (+1 zadowolenia). Gość przegrywa średnio ok. 130 T¢, ale co ósmy wygrywa i kasyno mu wypłaca. Drogie w utrzymaniu: 240 T¢/godz.", "Entertainment: 21 blocks along the roads and a 12×12 surround (+1 happiness). A guest loses about 130 T¢ on average, but every eighth one wins and the casino pays out. Expensive to maintain: 240 T¢/h.", "Unterhaltung: 21 Blöcke entlang der Straßen und Umfeld 12×12 (+1 Zufriedenheit). Ein Gast verliert im Schnitt etwa 130 T¢, aber jeder achte gewinnt und das Casino zahlt aus. Teuer im Unterhalt: 240 T¢/Std."], "tool.stadium": ["Zajmuje 4×3 pola. Rozrywka: 25 bloków po drogach i obręb 13×13 (+1 zadowolenia), bilet 40 T¢. Codziennie o 18:00 mecz na 1200 miejsc: każdy kibic płaci 20–30 T¢. Im lepiej wypromujesz mecz (gazety, plakaty, telewizja – w oknie stadionu), tym pełniejszy stadion. Wygrana drużyna przyciąga turystów przez dobę. Jeden na miasto (ustawy: Turystyka).", "Takes 4×3 tiles. Entertainment: 25 blocks along the roads and a 13×13 surround (+1 happiness), ticket 40 T¢. A match every day at 18:00 with 1200 seats: every fan pays 20–30 T¢. The better you promote the match (newspapers, posters, television – in the stadium window), the fuller the stadium. A winning team draws tourists for a day. One per city (laws: Tourism).", "Belegt 4×3 Felder. Unterhaltung: 25 Blöcke entlang der Straßen und ein Umfeld von 13×13 (+1 Zufriedenheit), Ticket 40 T¢. Jeden Tag um 18:00 ein Spiel mit 1200 Plätzen: jeder Fan zahlt 20–30 T¢. Je besser du das Spiel bewirbst (Zeitungen, Plakate, Fernsehen – im Stadionfenster), desto voller das Stadion. Ein Sieg zieht einen Tag lang Touristen an. Eines pro Stadt (Gesetze: Tourismus)."], "tool.hotelS": ["Ściąga przyjezdnych: +4 auta/godz. na każdym wjeździe, do +75% przy pełnej atrakcyjności (park, rozrywka, sklep obok). Nocleg 100 T¢. Utrzymanie 45 T¢/godz.", "Attracts visitors: +4 cars/h at every entrance, up to +75% at full attractiveness (park, entertainment, shop nearby). A night 100 T¢. Upkeep 45 T¢/h.", "Zieht Besucher an: +4 Autos/Std. an jeder Einfahrt, bis +75 % bei voller Attraktivität (Park, Unterhaltung, Laden daneben). Übernachtung 100 T¢. Unterhalt 45 T¢/Std."], "tool.hotelB": ["3×2 pola z podjazdem. +10 przyjezdnych/godz. na wjazd (do +75% przy pełnej atrakcyjności), nocleg 200 T¢, utrzymanie 130 T¢/godz. Można w nim otworzyć teatr, restaurację albo kasyno.", "3×2 tiles with a driveway. +10 visitors/h per entrance (up to +75% at full attractiveness), a night 200 T¢, upkeep 130 T¢/h. A theatre, restaurant or casino can be opened in it.", "3×2 Felder mit Auffahrt. +10 Besucher/Std. pro Einfahrt (bis +75 % bei voller Attraktivität), Übernachtung 200 T¢, Unterhalt 130 T¢/Std. Darin lässt sich ein Theater, Restaurant oder Kasino eröffnen."], "tool.policeS": ["Zasięg 17 bloków po drogach i obręb 9×9, cele na 10 osób. 2 radiowozy patrolują i jadą na interwencje. Ulepszenia: „Drugi garaż” (+2 radiowozy do interwencji), „Większy rewir” (+3 bloki po drogach, obręb +2).", "Range 17 blocks along the roads and a 9×9 surround, cells for 10 people. 2 patrol cars patrol and respond to calls. Upgrades: “Second garage” (+2 response cars), “Larger district” (+3 blocks along the roads, surround +2).", "Reichweite 17 Blöcke entlang der Straßen und Umfeld 9×9, Zellen für 10 Personen. 2 Streifenwagen patrouillieren und fahren zu Einsätzen. Upgrades: „Zweite Garage“ (+2 Einsatzwagen), „Größeres Revier“ (+3 Blöcke entlang der Straßen, Umfeld +2)."], "tool.policeB": ["Zajmuje 2×2 pola. Zasięg 17 bloków po drogach i obręb 9×9, cele na 25 osób, 4 radiowozy patrolowe. Ulepszenia: „Drugi garaż”, „Większy rewir”.", "Takes 2×2 tiles. Range 17 blocks along the roads and a 9×9 surround, cells for 25 people, 4 patrol cars. Upgrades: “Second garage”, “Larger district”.", "Belegt 2×2 Felder. Reichweite 17 Blöcke entlang der Straßen und Umfeld 9×9, Zellen für 25 Personen, 4 Streifenwagen. Upgrades: „Zweite Garage“, „Größeres Revier“."], "tool.prisonS": ["2×2 pola za płotem, 40 miejsc. Radiowozy przywożą zatrzymanych z komisariatów. Każdy więzień kosztuje 2 T¢/godz. i wychodzi po 2–3 dniach.", "2×2 tiles behind a fence, 40 places. Patrol cars bring detainees from the police stations. Każdy więzień kosztuje 2 T¢/h i wychodzi po 2–3 dniach.", "2×2 Felder hinter einem Zaun, 40 Plätze. Streifenwagen bringen Festgenommene von den Polizeiwachen. Każdy więzień kosztuje 2 T¢/Std. i wychodzi po 2–3 dniach."], "tool.prison": ["3×3 pola za drucianym płotem, 100 miejsc (ulepszenie: blok na +30). Radiowozy przywożą zatrzymanych z komisariatów. Każdy więzień kosztuje 2 T¢/godz. i wychodzi po 2–3 dniach.", "3×3 tiles behind a wire fence, 100 places (upgrade: a block for +30). Patrol cars bring detainees from the police stations. Each prisoner costs 2 T¢/h and leaves after 2–3 days.", "3×3 Felder hinter einem Drahtzaun, 100 Plätze (Upgrade: Block für +30). Streifenwagen bringen Festgenommene von den Polizeiwachen. Jeder Häftling kostet 2 T¢/Std. und kommt nach 2–3 Tagen frei."], "tool.hqPolice": ["Zajmuje 5×3 pola. Obręb połowy mapy i 40 bloków po drogach, 90 cel, 8 radiowozów. Zatrzymani zostają w jej celach. Jedna na miasto (ustawy: Miasto policyjne).", "Takes 5×3 tiles. Covers half the map and 40 road blocks, 90 cells, 8 patrol cars. Arrested suspects stay in its cells. One per city (laws: Police city).", "Belegt 5×3 Felder. Deckt die halbe Karte und 40 Straßenblöcke ab, 90 Zellen, 8 Streifenwagen. Festgenommene bleiben in ihren Zellen. Eines pro Stadt (Gesetze: Polizeistadt)."], "tool.fireS": ["Zasięg 13 bloków po drogach i obręb 9×9, 1 wóz strażacki. Gasi pożar w pół godziny od przyjazdu. Ulepszenia: „Drugi garaż” (+1 wóz), „Większy rewir” (+3 bloki po drogach, obręb +2).", "Range 13 blocks along the roads and a 9×9 surround, 1 fire engine. Puts out a fire within half an hour of arriving. Upgrades: “Second garage” (+1 engine), “Larger district” (+3 blocks along the roads, surround +2).", "Reichweite 13 Blöcke entlang der Straßen und Umfeld 9×9, 1 Löschfahrzeug. Löscht einen Brand eine halbe Stunde nach Ankunft. Upgrades: „Zweite Garage“ (+1 Fahrzeug), „Größeres Revier“ (+3 Blöcke entlang der Straßen, Umfeld +2)."], "tool.fireB": ["Zajmuje 2×2 pola. Zasięg 13 bloków po drogach i obręb 9×9, 2 wozy strażackie. Ulepszenia: „Drugi garaż” (+2 wozy), „Większy rewir”.", "Takes 2×2 tiles. Range 13 blocks along the roads and a 9×9 surround, 2 fire engines. Upgrades: “Second garage” (+2 engines), “Larger district”.", "Belegt 2×2 Felder. Reichweite 13 Blöcke entlang der Straßen und Umfeld 9×9, 2 Löschfahrzeuge. Upgrades: „Zweite Garage“ (+2 Fahrzeuge), „Größeres Revier“."], "tool.heliB": ["Zajmuje 2×2 pola. Helikopter gaśniczy leci prosto do pożaru w zasięgu 25 pól (51×51) i gasi go z góry – także tam, gdzie wóz nie dojedzie. Potrzebuje prądu i wody. Ulepszenie: drugi helikopter.", "Takes 2×2 tiles. The firefighting helicopter flies straight to a fire within 25 tiles (51×51) and puts it out from above – also where a fire engine cannot get. Needs power and water. Upgrade: a second helicopter.", "Belegt 2×2 Felder. Der Löschhubschrauber fliegt direkt zu einem Brand im Umkreis von 25 Feldern (51×51) und löscht von oben – auch dort, wo kein Löschfahrzeug hinkommt. Braucht Strom und Wasser. Upgrade: zweiter Hubschrauber."], "tool.clinic": ["Zajmuje 2×1 pola. Leczy chorych w zasięgu 17 bloków po drogach i obrębie 5×5 wokół budynku, do 30 pacjentów naraz.", "Takes 2×1 tiles. Treats the sick within 17 blocks along the roads and a 5×5 surround, up to 30 patients at a time.", "Belegt 2×1 Felder. Behandelt Kranke im Umkreis von 17 Blöcken entlang der Straßen und einem Umfeld von 5×5, bis zu 30 Patienten gleichzeitig."], "tool.hosp": ["Zajmuje 2×2 pola. Zasięg 21 bloków po drogach i obręb 5×5, do 100 pacjentów.", "Takes 2×2 tiles. Range 21 blocks along the roads and a 5×5 surround, up to 100 patients.", "Belegt 2×2 Felder. Reichweite 21 Blöcke entlang der Straßen und Umfeld 5×5, bis zu 100 Patienten."], "tool.hospC": ["Zajmuje 3×2 pola. Zasięg 21 bloków po drogach i obręb 5×5, do 300 pacjentów.", "Takes 3×2 tiles. Range 21 blocks along the roads and a 5×5 surround, up to 300 patients.", "Belegt 3×2 Felder. Reichweite 21 Blöcke entlang der Straßen und Umfeld 5×5, bis zu 300 Patienten."], "tool.cemS": ["Zajmuje 1×2 pola. Miejsce dla 60 zmarłych.", "Takes 1×2 tiles. Room for 60 deceased.", "Belegt 1×2 Felder. Platz für 60 Verstorbene."], "tool.cemB": ["Zajmuje 3×3 pola. 280 miejsc, z katakumbami 300.", "Takes 3×3 tiles. 280 places, 300 with catacombs.", "Belegt 3×3 Felder. 280 Plätze, mit Katakomben 300."], "tool.crem": ["Zajmuje 2×2 pola. 120 miejsc (z drugim piecem 160). Po 12 godz. prochy trafiają do urny i miejsce się zwalnia.", "Takes 2×2 tiles. 120 places (160 with a second furnace). After 12 h the ashes go into an urn and the place is freed.", "Belegt 2×2 Felder. 120 Plätze (mit zweitem Ofen 160). Nach 12 Std. kommt die Asche in eine Urne und der Platz wird frei."], "tool.schoolS": ["Dzieci 7–14 lat w zasięgu 16 pól chodzą do szkoły: +0,5 zadowolenia (z liceum lub technikum +1). Ukończenie (95% zdaje) pozwala uczyć się dalej w liceum lub technikum. Nie daje punktów nauki.", "Children aged 7–14 within 16 tiles go to school: +0.5 happiness (+1 with a lyceum or technical school). Finishing it (95% pass) lets them go on to a lyceum or technical school. Gives no research points.", "Kinder von 7–14 Jahren im Umkreis von 16 Feldern gehen zur Schule: +0,5 Zufriedenheit (+1 mit Gymnasium oder Fachschule). Der Abschluss (95% bestehen) erlaubt den Besuch eines Gymnasiums oder einer Fachschule. Bringt keine Forschungspunkte."], "tool.school": ["Zajmuje 1×2 pola. Zasięg 19 pól, +0,5 zadowolenia (z liceum lub technikum +1). Ukończenie (95% zdaje) pozwala uczyć się dalej w liceum lub technikum. Nie daje punktów nauki.", "Takes 1×2 tiles. Range 19 tiles, +0.5 happiness (+1 with a lyceum or technical school). Finishing it (95% pass) lets them go on to a lyceum or technical school. Gives no research points.", "Belegt 1×2 Felder. Reichweite 19 Felder, +0,5 Zufriedenheit (+1 mit Gymnasium oder Fachschule). Der Abschluss (95% bestehen) erlaubt den Besuch eines Gymnasiums oder einer Fachschule. Bringt keine Forschungspunkte."], "tool.lyceum": ["Zajmuje 2×3 pola. Zasięg 19: młodzież 15–18 lat po podstawówce się uczy (punkt nauki od ucznia), absolwent może iść na studia i pracuje z 80% wydajności. Zarobki (podatki i sprzedaż) w całym mieście +5% – kolejne licea tego nie zwiększają.", "Takes 2×3 tiles. Range 19: teenagers aged 15–18 who finished primary school study here (a research point per pupil); a graduate can go to university and works at 80% efficiency. Earnings (taxes and sales) in the whole city +5% – more lyceums add nothing.", "Belegt 2×3 Felder. Reichweite 19: Jugendliche von 15–18 Jahren nach der Grundschule lernen hier (ein Forschungspunkt pro Schüler); Absolventen können studieren und arbeiten mit 80% Leistung. Einnahmen (Steuern und Verkauf) in der ganzen Stadt +5% – weitere Gymnasien bringen nichts."], "tool.techn": ["Zajmuje 2×3 pola. Zasięg 19: młodzież 15–18 lat po podstawówce się uczy (punkt nauki od ucznia), absolwent może iść na studia i pracuje z 90% wydajności. Fabryki i wytwórnie +5% produkcji, magazyny +5% pojemności w całym mieście – kolejne technika tego nie zwiększają.", "Takes 2×3 tiles. Range 19: teenagers aged 15–18 who finished primary school study here (a research point per pupil); a graduate can go to university and works at 90% efficiency. Factories and workshops +5% output, warehouses +5% capacity in the whole city – more technical schools add nothing.", "Belegt 2×3 Felder. Reichweite 19: Jugendliche von 15–18 Jahren nach der Grundschule lernen hier (ein Forschungspunkt pro Schüler); Absolventen können studieren und arbeiten mit 90% Leistung. Fabriken und Werkstätten +5% Produktion, Lager +5% Kapazität in der ganzen Stadt – weitere Fachschulen bringen nichts."], "tool.uni": ["Zajmuje 3×3 pola. Zasięg 30 bloków po drogach: studiują absolwenci liceum lub technikum (19–23 lata). Student daje 1,5 punktu nauki i 3 T¢ czesnego na godzinę, a po studiach pracuje ze 100% wydajności. Działa też jak liceum i technikum. Pobiera 6 MW.", "Takes 3×3 tiles. Range 30 blocks along the roads: graduates of a lyceum or technical school study here (aged 19–23). A student brings 1.5 research points and 3 T¢ in fees per hour and after graduating works at 100% efficiency. Also works as a lyceum and a technical school. Uses 6 MW.", "Belegt 3×3 Felder. Reichweite 30 Blöcke entlang der Straßen: hier studieren Absolventen eines Gymnasiums oder einer Fachschule (19–23 Jahre). Ein Studierender bringt 1,5 Forschungspunkte und 3 T¢ Gebühren pro Stunde und arbeitet nach dem Studium mit 100% Leistung. Wirkt auch als Gymnasium und Fachschule. Braucht 6 MW."], "tool.pole": ["Stawiasz na ulicy albo na trawie. Słupy łączą się ze słupami obok i przewodzą prąd do budynków stojących obok.", "Place it on a street or on grass. Poles connect to poles next to them and carry power to the buildings beside them.", "Auf eine Straße oder Wiese setzen. Masten verbinden sich mit benachbarten Masten und leiten Strom zu den Gebäuden daneben."], "tool.poleline": ["Stuknij ulicę: słupy staną na całym prostym odcinku, 30 T¢ za sztukę.", "Tap a street: poles go up along the whole straight stretch, 30 T¢ each.", "Tippe auf eine Straße: Masten entstehen auf dem ganzen geraden Abschnitt, 30 T¢ pro Stück."], "tool.transformer": ["Łączy elektrownie ze słupami, także po przekątnej. Ulepszenie: zasięg 5×5.", "Connects power plants to poles, also diagonally. Upgrade: range 5×5.", "Verbindet Kraftwerke mit Masten, auch diagonal. Upgrade: Bereich 5×5."], "tool.hvpole": ["Wysokie napięcie: łączy się z innymi słupami WN, transformatorami i el. węglowymi w zasięgu 11×11 (po ulepszeniu 17×17). Nie z wiatrakami.", "High voltage: connects to other HV pylons, transformers and coal plants within 11×11 (17×17 after upgrade). Not to wind turbines.", "Hochspannung: verbindet sich mit anderen HS-Masten, Trafos und Kohlekraftwerken im Bereich 11×11 (nach Upgrade 17×17). Nicht mit Windrädern."], "tool.wind": ["Daje 2–10 MW: im wyżej stoi, tym więcej (2 MW na zwykłym terenie, 10 MW na najwyższych szczytach). Postaw obok transformatora.", "Gives 2–10 MW: the higher it stands, the more (2 MW on ordinary ground, 10 MW on the highest peaks). Build it next to a transformer.", "Liefert 2–10 MW: je höher, desto mehr (2 MW auf normalem Gelände, 10 MW auf den höchsten Gipfeln). Neben einen Transformator setzen."], "tool.coal": ["Daje 20 MW, spala 1 kg węgla co 8 min (węgiel z kopalni na złożu; gdy go brak, kupuje spoza miasta po 24 T¢/kg). Włącza się, gdy wiatraki nie wystarczają.", "Gives 20 MW, burns 1 kg of coal every 8 min (coal from a mine on a deposit; without it, buys from outside the city at 24 T¢/kg). Switches on when wind turbines are not enough.", "Liefert 20 MW, verbrennt 1 kg Kohle alle 8 Min. (Kohle aus einer Mine; fehlt sie, kauft es außerhalb für 24 T¢/kg). Schaltet sich ein, wenn Windräder nicht reichen."], "tool.biomass": ["Zajmuje 2×1 pola. 30 MW z drewna (z farmy drzew; gdy go brak, kupuje spoza miasta po 16 T¢/kg): spala 1 kg co 8 min, gdy wiatraki i inne źródła nie wystarczają. Dymi o połowę słabiej niż węglowa. Ulepszenie „Drugi komin”: +20 MW. Łączy się przez transformator obok albo słup WN.", "Takes 2×1 tiles. 30 MW from wood (from a tree farm; without it, buys from outside the city at 16 T¢/kg): burns 1 kg every 8 min when wind turbines and other sources are not enough. Smokes half as much as coal. Upgrade “Second chimney”: +20 MW. Connects through a transformer next to it or an HV pylon.", "Belegt 2×1 Felder. 30 MW aus Holz (von einer Baumfarm; fehlt es, kauft es außerhalb für 16 T¢/kg): verbrennt 1 kg alle 8 Min., wenn Windräder und andere Quellen nicht reichen. Raucht halb so stark wie Kohle. Upgrade „Zweiter Schornstein“: +20 MW. Anschluss über einen Trafo daneben oder einen HS-Mast."], "tool.hydro": ["Segment tamy stawiany na wodzie: 12 MW z każdego pola, bez paliwa. Przeciągnij w poprzek rzeki. Działa dopiero, gdy zamknie przepływ: przy kilku rzekach trzeba zatamować każde źródło. Za tamą woda opada o 15%, a pompy tam pobierają 20% mniej. Kolejne tamy niżej na tej samej rzece dostają mniej wody (każda następna −25% mocy) i znów obniżają poziom rzeki. Łączy się przez transformator obok albo słup WN.", "A dam segment placed on water: 12 MW from each tile, no fuel. Drag it across the river. It works only once it blocks the flow: with several rivers every source must be dammed. Behind the dam the water drops by 15%, and pumps there draw 20% less. Further dams lower down the same river get less water (each next one −25% power) and lower the river again. Connects through a transformer next to it or an HV pylon.", "Ein Dammsegment auf dem Wasser: 12 MW pro Feld, ohne Brennstoff. Quer über den Fluss ziehen. Es arbeitet erst, wenn es den Fluss sperrt: bei mehreren Flüssen muss jede Quelle gestaut werden. Hinter dem Damm sinkt das Wasser um 15 %, Pumpen dort fördern 20 % weniger. Weitere Dämme flussabwärts bekommen weniger Wasser (jeder nächste −25 % Leistung) und senken den Fluss erneut. Anschluss über einen Trafo daneben oder einen HS-Mast."], "tool.hydrogen": ["Zajmuje 2×2 pola. 60 MW z ciepła ziemi, drogie utrzymanie. Zużywa 10 m³/godz. czystej wody z rur na parę (z brudną daje połowę), ale nie oddaje ścieków. Ulepszenie: drugi odwiert. Łączy się przez transformator obok albo słup WN.", "Takes 2×2 tiles. 60 MW from the earth's heat, expensive upkeep. Uses 10 m³/h of clean water from pipes for steam (dirty water gives half), but returns no sewage. Upgrade: a second borehole. Connects through a transformer next to it or an HV pylon.", "Belegt 2×2 Felder. 60 MW aus Erdwärme, teurer Unterhalt. Verbraucht 10 m³/Std. sauberes Wasser aus Rohren für Dampf (mit schmutzigem die Hälfte), gibt aber kein Abwasser ab. Upgrade: zweite Bohrung. Anschluss über einen Trafo daneben oder einen HS-Mast."], "tool.park1": ["Zasięg 5×5 wokół parku. Domy w zasięgu +1 zadowolenia (parki się nie sumują).", "Range 5×5 around the park. Homes in range +1 happiness (parks do not add up).", "Bereich 5×5 um den Park. Häuser im Bereich +1 Zufriedenheit (Parks addieren sich nicht)."], "tool.park2": ["Zasięg 7×7 wokół parku. Domy w zasięgu +1 zadowolenia (parki się nie sumują).", "Range 7×7 around the park. Homes in range +1 happiness (parks do not add up).", "Bereich 7×7 um den Park. Häuser im Bereich +1 Zufriedenheit (Parks addieren sich nicht)."], "tool.park3": ["Zajmuje 2 pola. Zasięg 9×9 wokół każdego z nich. Domy w zasięgu +1 zadowolenia (parki się nie sumują).", "Takes 2 tiles. Range 9×9 around each of them. Homes in range +1 happiness (parks do not add up).", "Belegt 2 Felder. Bereich 9×9 um jedes davon. Häuser im Bereich +1 Zufriedenheit (Parks addieren sich nicht)."], "tool.landfill": ["300 kg odpadów na pole. Pola obok siebie łączą się w multiblok z jednym biurem przy ulicy: wspólna pojemność i więcej śmieciarek. Mocno brudzi okolicę.", "300 kg of waste per tile. Tiles next to each other join into a multiblock with one office by the street: shared capacity and more garbage trucks. Heavily pollutes the area.", "300 kg Abfall pro Feld. Felder nebeneinander bilden einen Multiblock mit einem Büro an der Straße: gemeinsame Kapazität und mehr Müllwagen. Verschmutzt die Umgebung stark."], "tool.incS": ["1 pole. Spala 40 kg odpadów na godz. (bufor 60 kg). Można dokupić drugi komin: 80 kg/godz. Pobiera 1 MW i dymi.", "1 tile. Burns 40 kg of waste per hour (buffer 60 kg). A second chimney can be bought: 80 kg/h. Uses 1 MW and smokes.", "1 Feld. Verbrennt 40 kg Abfall pro Std. (Puffer 60 kg). Zweiter Schornstein zukaufbar: 80 kg/Std. Verbraucht 1 MW und raucht."], "tool.incinerator": ["Zajmuje 2×3 pola. 1 komin: 40 kg odpadów na godz., dokupisz drugi i trzeci komin (+40 kg każdy). Bufor 150 kg, 2 śmieciarki. Pobiera 1 MW i dymi.", "Takes 2×3 tiles. 1 chimney: 40 kg of waste per hour, you can buy a second and third chimney (+40 kg each). Buffer 150 kg, 2 garbage trucks. Uses 1 MW and smokes.", "Belegt 2×3 Felder. 1 Schornstein: 40 kg Abfall pro Std., zweiter und dritter Schornstein zukaufbar (je +40 kg). Puffer 150 kg, 2 Müllwagen. Verbraucht 1 MW und raucht."], "tool.recycler": ["Przerabia 10 kg odpadów na godz. na 5 kg materiałów (bufor 60 kg), 2 śmieciarki. Pobiera 1,5 MW.", "Turns 10 kg of waste per hour into 5 kg of materials (buffer 60 kg), 2 garbage trucks. Uses 1.5 MW.", "Verarbeitet 10 kg Abfall pro Std. zu 5 kg Material (Puffer 60 kg), 2 Müllwagen. Verbraucht 1,5 MW."], "tool.recycB": ["Zajmuje 2×3 pola. Przerabia 40 kg odpadów na godz. na materiały (bufor 240 kg), 4 śmieciarki. Jedno na miasto (ustawy: Ekologia).", "Takes 2×3 tiles. Turns 40 kg of waste per hour into materials (240 kg buffer), 4 garbage trucks. One per city (laws: Ecology).", "Belegt 2×3 Felder. Verarbeitet 40 kg Abfall pro Stunde zu Material (240 kg Puffer), 4 Müllwagen. Eines pro Stadt (Gesetze: Ökologie)."], "tool.roadSvc": ["Zajmuje 2 pola. Zamiatarki sprzątają śmieci z ulic, a ekipy czyszczą parki i farmy zabrudzone smogiem w zasięgu 21×21.", "Takes 2 tiles. Sweepers clean litter from the streets, and crews clean parks and farms dirtied by smog within 21×21.", "Belegt 2 Felder. Kehrmaschinen beseitigen Müll von den Straßen, Trupps reinigen durch Smog verschmutzte Parks und Farmen im Bereich 21×21."], "tool.pipe": ["Rura wodno-kanalizacyjna pod ziemią. Kładź ją pod budynkami i ulicami, a przez rzekę po moście, przeciągnij, by położyć kilka pól. Budynek łączy się, gdy rura leży pod nim albo tuż obok.", "Underground water and sewage pipe. Lay it under buildings and streets, and across a river over a bridge; drag to lay several tiles. A building connects when a pipe lies under it or right next to it.", "Unterirdisches Wasser- und Abwasserrohr. Unter Gebäude und Straßen legen, über einen Fluss auf einer Brücke; ziehen, um mehrere Felder zu legen. Ein Gebäude ist angeschlossen, wenn ein Rohr darunter oder direkt daneben liegt."], "tool.tower": ["Czerpie 15 m³/godz. czystej wody z gruntu, w dowolnym miejscu. Prąd ze słupa lub transformatora w promieniu 2 pól.", "Draws 15 m³/h of clean groundwater, anywhere. Power from a pole or transformer within 2 tiles.", "Fördert 15 m³/Std. sauberes Grundwasser, überall. Strom von einem Mast oder Trafo im Umkreis von 2 Feldern."], "tool.pump": ["Pobiera 40 m³/godz. z rzeki. Postaw tuż przy wodzie. Prąd ze słupa lub transformatora w promieniu 2 pól. Gdy rzeka obok jest brudna od ścieków, pompuje brudną wodę.", "Draws 40 m³/h from the river. Place it right by the water. Power from a pole or transformer within 2 tiles. When the river next to it is dirty from sewage, it pumps dirty water.", "Fördert 40 m³/Std. aus dem Fluss. Direkt ans Wasser setzen. Strom von einem Mast oder Trafo im Umkreis von 2 Feldern. Ist der Fluss daneben durch Abwasser verschmutzt, pumpt sie schmutziges Wasser."], "tool.pumpB": ["Zajmuje 2 pola, oba muszą stać tuż przy wodzie (R obraca). Pobiera 240 m³/godz. z rzeki – jak 6 zwykłych pomp. Utrzymanie 50 T¢/godz., pobiera 2,5 MW. Prąd ze słupa lub transformatora w promieniu 2 pól.", "Takes 2 tiles, both must stand right by the water (R rotates). Draws 240 m³/h from the river – like 6 regular pumps. Upkeep 50 T¢/h, uses 2.5 MW. Power from a pole or transformer within 2 tiles.", "Belegt 2 Felder, beide direkt am Wasser (R dreht). Fördert 240 m³/Std. aus dem Fluss – wie 6 normale Pumpen. Unterhalt 50 T¢/Std., verbraucht 2,5 MW. Strom von einem Mast oder Trafo im Umkreis von 2 Feldern."], "tool.treatment": ["Prąd bierze ze słupa lub transformatora w promieniu 2 pól. Przerabia 30 m³/godz. ścieków: z każdych 10 m³ robi 3 m³ czystej wody z powrotem do sieci i 3 m³ brudnej do wylotu.", "Takes power from a pole or transformer within 2 tiles. Treats 30 m³/h of sewage: from every 10 m³ it makes 3 m³ of clean water back into the network and 3 m³ of dirty water to the outlet.", "Strom von einem Mast oder Trafo im Umkreis von 2 Feldern. Klärt 30 m³/Std. Abwasser: aus je 10 m³ werden 3 m³ sauberes Wasser zurück ins Netz und 3 m³ schmutziges Wasser zum Auslass."], "tool.outlet": ["Zrzuca do rzeki do 25 m³/godz. ścieków (z drugą rurą 50). Nadmiar się cofa: domy w sieci tracą 1 zadowolenia. Postaw tuż przy wodzie. Brudzi rzekę z prądem.", "Discharges up to 25 m³/h of sewage into the river (50 with a second pipe). The excess backs up: homes in the network lose 1 happiness. Place it right by the water. Pollutes the river downstream.", "Leitet bis zu 25 m³/Std. Abwasser in den Fluss (mit zweitem Rohr 50). Der Überschuss staut sich: Häuser im Netz verlieren 1 Zufriedenheit. Direkt ans Wasser setzen. Verschmutzt den Fluss stromabwärts."], "tool.cityHall": ["Zajmuje 2×2 pola. Otwiera zakładkę Uchwały: za opłatą wprowadzasz prawa, które zmieniają całe miasto. Jeden na miasto.", "Takes 2×2 tiles. Opens the Policies tab: for a fee you introduce laws that change the whole city. One per city.", "Belegt 2×2 Felder. Öffnet den Reiter Verordnungen: gegen Gebühr erlässt du Gesetze, die die ganze Stadt verändern. Eins pro Stadt."], "tool.pipeDel": ["Usuwa rurę z pola, zwraca 2 T¢. Przeciągnij, by usunąć kilka.", "Removes the pipe from a tile, refunds 2 T¢. Drag to remove several.", "Entfernt das Rohr von einem Feld, erstattet 2 T¢. Ziehen, um mehrere zu entfernen."], "tool.busLine": ["Klikaj po kolei przystanki, przez które ma jechać autobus. Linia powstaje od 2 przystanków i zawsze wraca do pierwszego. Trasy widać tylko w tym trybie.", "Click the stops the bus should drive through, in order. A line is created from 2 stops and always returns to the first one. Routes are visible only in this mode.", "Klicke nacheinander die Haltestellen an, die der Bus anfahren soll. Eine Linie entsteht ab 2 Haltestellen und kehrt immer zur ersten zurück. Routen sind nur in diesem Modus sichtbar."], "tool.railLine": ["Klikaj po kolei dworce kolejowe połączone torami. Pociąg pasażerski kursuje między nimi w pętli; mieszkańcy dojdą do dworca z 14 pól.", "Click train stations connected by rails, in order. A passenger train runs between them in a loop; residents will walk to a station from up to 14 tiles.", "Klicke nacheinander Bahnhöfe an, die durch Gleise verbunden sind. Ein Personenzug pendelt in einer Schleife zwischen ihnen; Einwohner gehen bis zu 14 Felder zum Bahnhof."], "tool.bakery": ["Sprzedaje pieczywo (ceny +25%). Sama piecze: 1 kg zboża z magazynów daje 3 bochenki na półce. Gdy brak zboża, bierze pieczywo z magazynu.", "Sells bread (prices +25%). Bakes it itself: 1 kg of grain from the warehouses makes 3 loaves on the shelf. Without grain it takes bread from the warehouse.", "Verkauft Brot (Preise +25 %). Backt selbst: 1 kg Getreide aus dem Lager ergibt 3 Brote im Regal. Ohne Getreide nimmt sie Brot aus dem Lager."], "tool.lpole": ["Słup na trawie.", "Pole on grass.", "Mast auf der Wiese."], "tool.poleDel": ["Zdejmuje słup z ulicy (ulica zostaje) albo usuwa słup z trawy. Zwraca połowę ceny.", "Takes the pole off a street (the street stays) or removes a pole from grass. Refunds half the price.", "Nimmt den Mast von der Straße (die Straße bleibt) oder entfernt einen Mast von der Wiese. Erstattet den halben Preis."], "tool.outletB": ["Zajmuje 2 pola, oba tuż przy wodzie (R obraca). Przyjmuje 3× więcej ścieków niż wylot (75 m³/godz.), a 33% z nich oczyszcza i oddaje do sieci jako czystą wodę – do rzeki trafia reszta. Potrzebuje prądu ze słupa lub transformatora w promieniu 2 pól (2,5 MW). Utrzymanie 70 T¢/godz.", "Takes 2 tiles, both right by the water (R rotates). Takes 3× more sewage than an outlet (75 m³/h) and cleans 33% of it back into the pipes as clean water – the rest goes into the river. Needs power from a pole or transformer within 2 tiles (2.5 MW). Upkeep 70 T¢/h.", "Belegt 2 Felder, beide direkt am Wasser (R dreht). Nimmt 3× mehr Abwasser auf als ein Auslass (75 m³/Std.) und reinigt 33% davon als sauberes Wasser zurück ins Netz – der Rest fließt in den Fluss. Braucht Strom von einem Mast oder Trafo im Umkreis von 2 Feldern (2,5 MW). Unterhalt 70 T¢/Std."]};
 </script>
@@ -1211,7 +1850,7 @@ function ovrMat(m,key,mk){const ck=m.material.uuid+key;let mt=ovrMats.get(ck);if
 /* part roles from the editor: gl = glows (1 always, 2 at night), rc = random colour per building/vehicle, pt = takes the building's colour setting (shop branch, factory line), an = animation */
 const RC_DEF=['#e25b45','#2f6fb5','#f2c14e','#f4f1ea','#4a9d6c','#7b5ea7','#2b2f36','#e98a3a'];
 const GLOWS=new Map(),ANIMS=new Set(),FXS=new Set(),DAYVIS=new Set();
-function glowSet(mt,G,k){if(G.n){mt.color.copy(G.d).lerp(G.n,k);mt.emissive.copy(G.n).multiplyScalar(k*0.95)}else mt.emissive.copy(mt.color).multiplyScalar(G.m===1?0.6:k*0.95)}const nightK=()=>{try{return 1-dayF}catch(e){return 0}};
+function glowSet(mt,G,k){if(G.n){mt.color.copy(G.d).lerp(G.n,k);mt.emissive.copy(G.n).multiplyScalar(k*0.95*EMB)}else mt.emissive.copy(mt.color).multiplyScalar(G.m===1?0.6:k*0.95*EMB)}const nightK=()=>{try{return 1-dayF}catch(e){return 0}};
 function ovrRoles(m,d,g,ctx,RG){if(m.material&&m.material.color){
     /* rg: parts in one colour group draw a single random colour per building */
     if(d.rc){const pal=Array.isArray(d.rc)&&d.rc.length?d.rc:RC_DEF;let c=pal[(Math.random()*pal.length)|0];if(d.rg&&RG){if(RG[d.rg]&&pal.includes(RG[d.rg]))c=RG[d.rg];else RG[d.rg]=c}ovrMat(m,'rc'+c,mt=>mt.color.set(c))}
@@ -3828,7 +4467,7 @@ function volcBuild(){volcDirty=false;if(volcG){scene.remove(volcG);volcG=null}if
   volcCloudG=new THREE.Group();const cm=new THREE.MeshLambertMaterial({color:'#8d857e',transparent:true,opacity:0.55,depthWrite:false});volcCloudG.userData.m=cm;
   for(let k=0;k<16;k++){const sp=new THREE.Mesh(new THREE.SphereGeometry(0.9+Math.random()*1.1,10,8),cm);const a=Math.random()*Math.PI*2,r=Math.random()*4.5;sp.userData.b=[Math.cos(a)*r,1.5+Math.random()*3,Math.sin(a)*r,Math.random()*6];volcCloudG.add(sp)}
   volcCloudG.visible=false;scene.add(volcCloudG)}
-function volcAnim(){if(!volc||!volcG)return;const t=performance.now()/1000,act=volcActive();{const k=0.5+0.5*Math.sin(t*(act?6:1.6));volcG.userData.m.color.setRGB(1,0.82+0.18*k,0.7+0.3*k*(act?1:0.6))}
+function volcAnim(){if(!volc||!volcG)return;const t=performance.now()/1000,act=volcActive();{const k=0.5+0.5*Math.sin(t*(act?6:1.6)),L=EMB>1?(act?2.3:2.05):1;volcG.userData.m.color.setRGB(L,(0.82+0.18*k)*L,(0.7+0.3*k*(act?1:0.6))*L);VB_M.color.setRGB(1,0.48,0.1).multiplyScalar(EMB>1?4:1)}
   const cl=volcCloud();volcCloudG.visible=cl;if(cl){const age=(gameT-volc.t0)/720,top=volcTop(),c=volc.c;volcCloudG.position.set(cx(c),top,cz(c));volcCloudG.userData.m.opacity=0.6*(age<0.08?age/0.08:1-Math.max(0,(age-0.6)/0.4));
     for(const sp of volcCloudG.children){const b=sp.userData.b,g=Math.min(1,age*6+0.2);sp.position.set(b[0]*g+Math.sin(t*0.2+b[3])*0.3,b[1]*(0.5+0.5*g),b[2]*g)}}}
 /* 8.1.19: on the fjords the rivers partly freeze in winter – not where they flow out of the map nor near sewage outlets; dams on ice stop */
@@ -6114,8 +6753,8 @@ function updateSky(){const h=hourOf(gameT),ang=(h-6)/24*Math.PI*2,el=Math.sin(an
   lightDir.set(Math.cos(ang)*0.9,Math.abs(el)+0.3,0.45).normalize();
   sun.target.position.copy(cam.target);sun.position.copy(cam.target).addScaledVector(lightDir,40);
   const ext=Math.max(10,Math.min(46,cam.radius*0.8));if(Math.abs(ext-shadowExt)>1){shadowExt=ext;Object.assign(sun.shadow.camera,{left:-ext,right:ext,top:ext,bottom:-ext,far:90});sun.shadow.camera.updateProjectionMatrix()}
-  dayF=day;const glow=1-day;mat.glass2.emissive.copy(GLOW).multiplyScalar(glow*0.4);mat.glass.emissive.copy(GLOW).multiplyScalar(glow*0.85);mat.lamp.emissive.copy(GLOW).multiplyScalar(glow*1.1);
-  mat.head.emissive.setRGB(1,0.93,0.72).multiplyScalar(glow*1.1);mat.tail.emissive.setRGB(1,0.12,0.08).multiplyScalar(glow*0.95);mat.beam.opacity=glow*0.32;mat.beam.visible=glow>0.05;
+  dayF=day;const glow=1-day;mat.glass2.emissive.copy(GLOW).multiplyScalar(glow*0.4*EMB);mat.glass.emissive.copy(GLOW).multiplyScalar(glow*0.85*EMB);mat.lamp.emissive.copy(GLOW).multiplyScalar(glow*1.1*EMB);
+  mat.head.emissive.setRGB(1,0.93,0.72).multiplyScalar(glow*1.1*EMB);mat.tail.emissive.setRGB(1,0.12,0.08).multiplyScalar(glow*0.95*EMB);mat.beam.opacity=glow*0.32;mat.beam.visible=glow>0.05;
   for(const[mt,G]of GLOWS)glowSet(mt,G,glow)}
 
 /* ---------- 2D status icons: only when zoomed in; one chip per building listing what is wrong ---------- */
@@ -6145,7 +6784,24 @@ function updateStatus(dt){const sig=[cam.theta,cam.phi,cam.radius,cam.target.x,c
   for(let k=n;k<statPool.length;k++)statPool[k].style.display='none';statEl.classList.remove('moving')}
 
 /* ---------- loop ---------- */
-function resize(){const w=app.clientWidth||innerWidth,h=app.clientHeight||innerHeight;renderer.setSize(w,h);camera.aspect=w/h;
+/* 8.2: graphics quality – "Wysoka" adds tone mapping (a soft highlight shoulder, a touch of contrast and colour) and bloom on glowing things */
+var gfxQ=(()=>{try{const v=localStorage.getItem('lt-gfx');if(v==='low'||v==='high')return v}catch(e){}return touch?'low':'high'})(),composer=null,bloomP=null,gradeP=null,ppHDR=false,EMB=1;
+const GRADE={uniforms:{tDiffuse:{value:null},knee:{value:0.76},sat:{value:1.03},con:{value:1.04},vig:{value:0.14}},
+  vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+  fragmentShader:`uniform sampler2D tDiffuse;uniform float knee,sat,con,vig;varying vec2 vUv;
+    float sh(float x){return x<knee?x:knee+(1.0-knee)*(1.0-exp(-(x-knee)/(1.0-knee)));}
+    void main(){vec4 c=texture2D(tDiffuse,vUv);vec3 x=max(c.rgb,0.0);float m=max(max(x.r,x.g),x.b);vec3 y=m>0.0?x*(sh(m)/m):x;y=mix(y,vec3(sh(x.r),sh(x.g),sh(x.b)),0.12);
+      float l=dot(y,vec3(0.2126,0.7152,0.0722));float lx=dot(x,vec3(0.2126,0.7152,0.0722));float mn=min(min(x.r,x.g),x.b),cs=m>0.0?(m-mn)/m:0.0;y=mix(y,vec3(max(l,sh(lx))),smoothstep(0.9,1.5,lx)*(1.0-smoothstep(0.12,0.35,cs))*0.85);l=dot(y,vec3(0.2126,0.7152,0.0722));y=mix(vec3(l),y,sat);y=(y-0.5)*con+0.5;vec2 d=vUv-0.5;y*=1.0-vig*dot(d,d)*2.2;gl_FragColor=vec4(clamp(y,0.0,1.0),c.a);}`};
+function ppInit(){if(composer)return true;try{THREE.__ppHalf=!!renderer.capabilities.isWebGL2;window.__ltPPInit(THREE);const w=app.clientWidth||innerWidth,h=app.clientHeight||innerHeight,pr=renderer.getPixelRatio();
+    ppHDR=!!renderer.capabilities.isWebGL2;const par={minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,format:THREE.RGBAFormat,type:ppHDR?THREE.HalfFloatType:THREE.UnsignedByteType};
+    let rt;if(ppHDR&&THREE.WebGLMultisampleRenderTarget){rt=new THREE.WebGLMultisampleRenderTarget(w*pr,h*pr,par);rt.samples=4}else rt=new THREE.WebGLRenderTarget(w*pr,h*pr,par);
+    composer=new THREE.EffectComposer(renderer,rt);composer.setPixelRatio(pr);composer.setSize(w,h);composer.addPass(new THREE.RenderPass(scene,camera));
+    bloomP=new THREE.UnrealBloomPass(new THREE.Vector2(w,h),0.42,0.28,1.6);bloomP.enabled=ppHDR;composer.addPass(bloomP);gradeP=new THREE.ShaderPass(GRADE);composer.addPass(gradeP);return true}
+  catch(e){console.warn('postprocessing off',e);composer=null;gfxQ='low';return false}}
+function gfxApply(){const on=gfxQ==='high'&&ppInit();EMB=on&&ppHDR?3.2:1;dayF=-1;for(const b of document.querySelectorAll('[data-gfx]'))b.setAttribute('aria-pressed',String(b.dataset.gfx===gfxQ))}
+setTimeout(()=>{gfxApply();for(const b of document.querySelectorAll('[data-gfx]'))b.addEventListener('click',()=>setGfx(b.dataset.gfx))},0);
+function setGfx(q){gfxQ=q==='high'?'high':'low';try{localStorage.setItem('lt-gfx',gfxQ)}catch(e){}gfxApply()}
+function resize(){const w=app.clientWidth||innerWidth,h=app.clientHeight||innerHeight;renderer.setSize(w,h);if(composer){composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(w,h)}camera.aspect=w/h;
   camera.fov=w<520?52:42;camera.updateProjectionMatrix();
   if(!framed){framed=true;cam.radius=w/h<0.8?52:w/h<1.2?44:38;updateCamera()}}
 let framed=false;
@@ -6230,7 +6886,7 @@ settleHour();cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=
     if(sz.x!==Math.round(app.clientWidth*renderer.getPixelRatio()))resize();
     renderer.render(scene,camera);window.__drawn=true;document.getElementById('err').hidden=true;return}
   if(volcDirty)try{volcBuild()}catch(e){volcDirty=false;console.warn(e)}if(iceDirty)try{iceBuild()}catch(e){iceDirty=false;console.warn(e)}volcAnim();
-  renderer.render(scene,camera)}
+  if(composer&&gfxQ==='high'){if(bloomP)bloomP.threshold=0.95+1.3*Math.max(0,Math.min(1,dayF));composer.render()}else renderer.render(scene,camera)}
 if(!ED)requestAnimationFrame(frame);
 /* the model editor (a separate page) reads the game's models through this */
 const VEH_LIST=[['car','Samochód mieszkańca','Pojazdy','Samochody'],['taxi','Taksówka','Pojazdy','Samochody'],['visitor','Auto turysty','Pojazdy','Samochody'],['van','Dostawczak (kolor sklepu)','Pojazdy','Dostawy'],['truck','Ciężarówka (kolor linii fabryki)','Pojazdy','Dostawy'],['semi','Ciężarówka przegubowa (galerie i supermarkety)','Pojazdy','Dostawy'],
@@ -8585,7 +9241,12 @@ const LT_TR=[
 ["Latem jeziora w oazach wysychają, a zimą zieleń się rozrasta. Planuj wodę i zabudowę z myślą o porach roku.", "In summer the oasis lakes dry up, and in winter the greenery spreads. Plan water and buildings with the seasons in mind.", "Im Sommer trocknen die Oasenseen aus, im Winter breitet sich das Grün aus. Plane Wasser und Bebauung mit Blick auf die Jahreszeiten."],
 ["Zimą rzeki częściowo zamarzają (poza miejscami, gdzie wypływają z mapy, i okolicą wylotów ścieków). Tamy na zamarzniętej wodzie przestają wtedy dawać prąd.", "In winter the rivers partly freeze (except where they flow off the map and around sewage outlets). Dams on frozen water then stop producing power.", "Im Winter frieren die Flüsse teilweise zu (außer dort, wo sie die Karte verlassen, und rund um Abwasserausläufe). Dämme auf gefrorenem Wasser liefern dann keinen Strom."],
 ["Punkty nauki otwierają kolejne poziomy, a ustawę wprowadzasz jednorazową opłatą (uchylenie jest darmowe). Po zbadaniu obu poziomów zostaje trzeci próg: odblokowanie wyjątkowego budynku (jeden na miasto) za punkty nauki.", "Research points open the next levels, and you pass a law with a one-off fee (repealing is free). After researching both levels there is a third step: unlocking a unique building (one per city) for research points.", "Forschungspunkte öffnen die nächsten Stufen, und ein Gesetz führst du gegen eine einmalige Gebühr ein (Aufheben ist kostenlos). Nach beiden Stufen folgt eine dritte: das Freischalten eines einzigartigen Gebäudes (eines pro Stadt) gegen Forschungspunkte."],
-["Trzeci próg: odblokowanie budynku za punkty nauki", "Third step: unlock the building for research points", "Dritte Stufe: Gebäude gegen Forschungspunkte freischalten"]
+["Trzeci próg: odblokowanie budynku za punkty nauki", "Third step: unlock the building for research points", "Dritte Stufe: Gebäude gegen Forschungspunkte freischalten"],
+["Jakość grafiki", "Graphics quality", "Grafikqualität"],
+["Niska", "Low", "Niedrig"],
+["Wysoka", "High", "Hoch"],
+["Bez efektów – najszybsza, dla słabszych urządzeń", "No effects – the fastest, for weaker devices", "Ohne Effekte – am schnellsten, für schwächere Geräte"],
+["Tone mapping i poświata (bloom) lawy, świateł i okien nocą", "Tone mapping and glow (bloom) of lava, lights and windows at night", "Tone Mapping und Leuchten (Bloom) von Lava, Lichtern und Fenstern bei Nacht"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
