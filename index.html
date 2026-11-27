@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.2.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.2.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -1675,12 +1675,15 @@ const surfY=i=>{const c=grid[i];if(c&&c.t==='bridge')return lvY(rh(i))+0.05;if(w
 /* the two ends of a tile edge, seen from tile i: [corner A, corner B] indices */
 const EDGE_C={'1,0':[3,2],'-1,0':[0,1],'0,1':[1,2],'0,-1':[0,3]};
 function buildLand(){calcCorners();landDirty=false;const P=[],U=[],I=[],BP=[],BI=[],BC=[];
+  /* 8.2.1: the edge mist follows the terrain: raised tiles and their walls near the border get the same mist as the ground */
+  const MP=[],MU=[],MI=[],inB=(x,z)=>Math.min(x,z,N-1-x,N-1-z)<=6,mv=(x,y,z)=>{MP.push(x,y,z);MU.push((x+150)/300,(150-z)/300)};
   /* high cliffs are grey rock, low banks brown earth */
   const wall=(ax,az,bx,bz,a0,a1,b0,b1)=>{if(a1-a0<1e-4&&b1-b0<1e-4)return;const b=BP.length/3;BP.push(ax,a0,az, bx,b0,bz, bx,b1,bz, ax,a1,az);BI.push(b,b+1,b+2,b,b+2,b+3);
     const rk=Math.max(a1,b1)>lvY(H_LAND+7),lo=rk?WALL_C.rl:WALL_C.e,hi=rk?WALL_C.r:WALL_C.e;BC.push(lo.r,lo.g,lo.b, lo.r,lo.g,lo.b, hi.r,hi.g,hi.b, hi.r,hi.g,hi.b)};
   for(let i=0;i<N*N;i++){const x=i%N,z=(i/N)|0,x0=x-HALF,z0=z-HALF,k=i*4;
     if(!water[i]){const b=P.length/3;P.push(x0,cornH[k]+0.001,z0, x0,cornH[k+1]+0.001,z0+1, x0+1,cornH[k+2]+0.001,z0+1, x0+1,cornH[k+3]+0.001,z0);
-      U.push(x/N,1-z/N, x/N,1-(z+1)/N, (x+1)/N,1-(z+1)/N, (x+1)/N,1-z/N);I.push(b,b+1,b+2,b,b+2,b+3)}
+      U.push(x/N,1-z/N, x/N,1-(z+1)/N, (x+1)/N,1-(z+1)/N, (x+1)/N,1-z/N);I.push(b,b+1,b+2,b,b+2,b+3);
+      if(inB(x,z)&&Math.max(cornH[k],cornH[k+1],cornH[k+2],cornH[k+3])>0.03){const m=MP.length/3,o=0.025;mv(x0,cornH[k]+o,z0);mv(x0,cornH[k+1]+o,z0+1);mv(x0+1,cornH[k+2]+o,z0+1);mv(x0+1,cornH[k+3]+o,z0);MI.push(m,m+1,m+2,m,m+2,m+3)}}
     /* banks: every edge where this tile stands higher than its neighbour (or the map border) gets an earth wall down to it */
     for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz,[ca,cb]=EDGE_C[dx+','+dz];let ax,az,bx,bz;
       if(dx===1){ax=bx=x0+1;az=z0;bz=z0+1}else if(dx===-1){ax=bx=x0;az=z0;bz=z0+1}else if(dz===1){az=bz=z0+1;ax=x0;bx=x0+1}else{az=bz=z0;ax=x0;bx=x0+1}
@@ -1690,7 +1693,10 @@ function buildLand(){calcCorners();landDirty=false;const P=[],U=[],I=[],BP=[],BI
         if(water[i]&&!water[j]){wall(ax,az,bx,bz,cornH[k+ca],na,cornH[k+cb],nb);continue}if(water[i]&&water[j]&&cornH[kj+ja]>cornH[k+ca]+1e-4){wall(ax,az,bx,bz,cornH[k+ca],na,cornH[k+cb],nb);continue}if(water[i]||water[j])continue}
       /* a tunnel mouth: the bank keeps an opening above the road for the portal */
       if(grid[i]&&grid[i].t==='tunnel'&&nx>=0&&nz>=0&&nx<N&&nz<N){const j=idx(nx,nz);if(grid[j]&&DRIVE[grid[j].t]&&grid[j].t!=='tunnel'&&linkH(i,j)&&(!ovA(i)||(ovA(i)==='x')!==!!dx)){const o=lvY(rh(i))+0.22;na=Math.max(na,o);nb=Math.max(nb,o)}}
-      if(ta>na+1e-4||tb>nb+1e-4)wall(ax,az,bx,bz,Math.min(na,ta),ta,Math.min(nb,tb),tb)}}
+      if(ta>na+1e-4||tb>nb+1e-4){wall(ax,az,bx,bz,Math.min(na,ta),ta,Math.min(nb,tb),tb);
+        if(inB(x,z)&&!water[i]){const o=0.015,m=MP.length/3;mv(ax+dx*o,Math.min(na,ta),az+dz*o);mv(bx+dx*o,Math.min(nb,tb),bz+dz*o);mv(bx+dx*o,tb+0.025,bz+dz*o);mv(ax+dx*o,ta+0.025,az+dz*o);MI.push(m,m+1,m+2,m,m+2,m+3)}}}}
+  try{if(edgeMist){edgeMist.geometry.dispose();scene.remove(edgeMist);edgeMist=null}if(MI.length){const mg=new THREE.BufferGeometry();mg.setAttribute('position',new THREE.Float32BufferAttribute(MP,3));mg.setAttribute('uv',new THREE.Float32BufferAttribute(MU,2));mg.setIndex(MI);
+    fogRing.material.side=THREE.DoubleSide;edgeMist=new THREE.Mesh(mg,fogRing.material);edgeMist.renderOrder=5;edgeMist.frustumCulled=false;scene.add(edgeMist)}}catch(e){console.warn(e)}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));g.setIndex(I);g.computeVertexNormals();
   ground.geometry.dispose();ground.geometry=g;
   const w=new THREE.BufferGeometry();w.setAttribute('position',new THREE.Float32BufferAttribute(BP,3));w.setAttribute('color',new THREE.Float32BufferAttribute(BC,3));w.setIndex(BI);w.computeVertexNormals();
@@ -1722,7 +1728,7 @@ const trunkM=new THREE.MeshLambertMaterial({color:'#7a5536'}),pineM=new THREE.Me
     tr.setMatrixAt(nt++,o.matrix);if(Math.random()<0.55)pi.setMatrixAt(np++,o.matrix);else bl.setMatrixAt(nb++,o.matrix)}
   tr.count=nt;pi.count=np;bl.count=nb;for(const m of[tr,pi,bl])m.frustumCulled=false})();
 /* outside the map there is no land any more: a mist in the sky colour that thickens a few tiles past the edge */
-const fogRing=(()=>{const S=300,R=512,cv=document.createElement('canvas');cv.width=cv.height=R;const f=cv.getContext('2d'),im=f.createImageData(R,R);
+var edgeMist=null;const fogRing=(()=>{const S=300,R=512,cv=document.createElement('canvas');cv.width=cv.height=R;const f=cv.getContext('2d'),im=f.createImageData(R,R);
   for(let y=0;y<R;y++)for(let x=0;x<R;x++){const wx=(x+0.5)/R*S-S/2,wz=(y+0.5)/R*S-S/2,d=Math.max(Math.abs(wx),Math.abs(wz))-HALF,k=Math.max(0,Math.min(1,(d+5)/8)),a=k*k*(3-2*k),o=(y*R+x)*4;im.data[o]=im.data[o+1]=im.data[o+2]=255;im.data[o+3]=Math.round(a*255)}
   f.putImageData(im,0,0);const t=new THREE.CanvasTexture(cv);t.magFilter=THREE.LinearFilter;
   const m=new THREE.Mesh(new THREE.PlaneGeometry(S,S),new THREE.MeshBasicMaterial({color:'#86ccf3',map:t,transparent:true,depthWrite:false,fog:false}));
