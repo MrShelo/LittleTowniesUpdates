@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.17';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.18';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -224,6 +224,25 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (max-width:700px){.modeP .tool .ct{display:none}.modeP .tool .nm{font-size:12px}.dockRow{gap:4px}}
 @media (max-width:560px){.dockRow{flex-direction:column;align-items:stretch;width:100%}.modeP{display:flex;align-items:center;justify-content:space-between;padding:4px 6px}.modeP .mrow .tool{padding:4px 8px 4px 5px}.msub button{width:32px;height:28px}}
 .cats{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.grps{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--line)}.grps::-webkit-scrollbar{display:none}
+.grp{position:relative;display:inline-flex;align-items:center;gap:6px;flex:1 0 auto;justify-content:center;font:700 13px var(--font-b);letter-spacing:.02em;padding:7px 12px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer}
+.grp svg{color:var(--cc)}.grp:hover{color:var(--fg);background:color-mix(in srgb,var(--cc) 10%,transparent)}
+.grp[aria-selected="true"]{color:var(--fg);background:color-mix(in srgb,var(--cc) 16%,transparent);border-color:color-mix(in srgb,var(--cc) 55%,transparent)}
+.grp[aria-selected="true"]::after{content:'';position:absolute;left:50%;bottom:-8px;width:10px;height:10px;background:var(--cc);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.grp .gn{font:700 10px var(--font-b);font-style:normal;color:var(--muted);min-width:0}.grp .gn:empty{display:none}
+.cats{padding:3px;border-radius:999px;background:color-mix(in srgb,var(--gc,transparent) 9%,transparent)}
+.cat.og{display:none!important}
+.autou{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}.autou small{color:var(--muted)}
+[data-ovl="under"].tmp{outline:2px dashed #6f6a62;outline-offset:1px}
+.act.rot{color:#5fb0e8}.act.rot[aria-expanded="true"]{background:color-mix(in srgb,#5fb0e8 18%,transparent);border-color:#5fb0e8}
+.rotpick{display:flex;align-items:center;gap:12px;margin-top:6px;padding:8px;border-radius:10px;border:1px solid var(--line);background:color-mix(in srgb,var(--fg) 5%,transparent)}
+.rotpick p{margin:0;font-size:12px;color:var(--muted);line-height:1.35}.rotpick p b{color:var(--fg)}
+.rpc{position:relative;flex:0 0 112px;height:112px;border-radius:50%;background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.rpc .rpm{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--muted);display:grid}
+.rpc button{position:absolute;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;border:1px solid #5fb0e8;background:var(--panel,#fff);color:#2f86c8;cursor:pointer;padding:0}
+.rpc button:hover:not([disabled]){background:#5fb0e8;color:#fff}
+.rpc button[aria-current]{background:#e9c93a;border-color:#e9c93a;color:#3a2f00;opacity:1}
+.rpc button[disabled]:not([aria-current]){opacity:.3;cursor:default}
 .cats::-webkit-scrollbar{display:none}
 .cat{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;font:600 12.5px var(--font-b);letter-spacing:.02em;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .cat:hover{color:var(--fg)}.cat{border-color:color-mix(in srgb,var(--cc,var(--line)) 45%,var(--line));background:color-mix(in srgb,var(--cc,transparent) 10%,transparent)}.cat svg{color:var(--cc,currentColor)}
@@ -504,7 +523,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="ovl panel" id="ovl" hidden role="group" aria-label="Nakładki"><b>Nakładki</b>
     <button class="chipb" data-ovl="police"><i style="background:#2f6fe0"></i>Zasięg policji</button><button class="chipb" data-ovl="fire"><i style="background:#e8641c"></i>Zasięg straży</button><button class="chipb" data-ovl="pol"><i style="background:#d9b02a"></i>Zanieczyszczenie</button>
     <button class="chipb" data-ovl="noise"><i style="background:#9a5bd6"></i>Hałas</button><button class="chipb" data-ovl="park"><i style="background:#3cae4f"></i>Zadowolenie z parków</button>
-    <button class="chipb" data-ovl="ent"><i style="background:#e0569a"></i>Zadowolenie z rozrywki</button><button class="chipb" data-ovl="shop"><i style="background:#2bb3a0"></i>Zasięg sklepów</button><button class="chipb" data-ovl="med"><i style="background:#d63b3b"></i>Opieka medyczna</button><button class="chipb" data-ovl="edu"><i style="background:#e0b84a"></i>Szkoły</button><button class="chipb" data-ovl="flood"><i style="background:#d6a21f"></i>Zagrożenie powodziami</button><button class="chipb" data-ovl="under"><i style="background:#6f6a62"></i>Pod ziemią</button><button class="chipb" data-ovl="none">Wyłącz</button><small id="ovlNote"></small></div>
+    <button class="chipb" data-ovl="ent"><i style="background:#e0569a"></i>Zadowolenie z rozrywki</button><button class="chipb" data-ovl="shop"><i style="background:#2bb3a0"></i>Zasięg sklepów</button><button class="chipb" data-ovl="med"><i style="background:#d63b3b"></i>Opieka medyczna</button><button class="chipb" data-ovl="edu"><i style="background:#e0b84a"></i>Szkoły</button><button class="chipb" data-ovl="flood"><i style="background:#d6a21f"></i>Zagrożenie powodziami</button><button class="chipb" data-ovl="under"><i style="background:#6f6a62"></i>Pod ziemią</button><button class="chipb" data-ovl="none">Wyłącz</button><small id="ovlNote"></small><div class="autou"><button class="chipb" id="autoU" aria-pressed="true"><i style="background:#6f6a62"></i>Widok podziemny przy budowie tuneli</button><small>PgDn włącza, PgUp wyłącza widok podziemny</small></div></div>
 <div id="app"></div>
 <header class="hud">
   <div class="res panel" id="r-money" title="Gotówka (T¢): stan / limit"><span class="ic tc" aria-hidden="true">T¢</span>
@@ -550,7 +569,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div class="place panel" id="place" hidden><span id="placeT"></span><button class="btn panel" id="pRot" title="Obróć (R)">↻ Obróć</button><button class="btn panel ok" id="pOk" title="Postaw (Enter)">✓ Postaw</button><button class="btn icon panel" id="pNo" aria-label="Anuluj" title="Anuluj">✕</button></div>
   <div class="hint panel" id="hint" aria-live="polite"></div>
   <div class="dockRow"><div class="modeP panel" id="modeP"><div class="mrow" id="modeRow"></div><div class="msub" id="msub" role="group" aria-label="Tryb"></div></div>
-  <div class="build panel"><div class="cats" id="cats" role="tablist" aria-label="Kategorie budowy"></div>
+  <div class="build panel"><div class="grps" id="grps" role="tablist" aria-label="Działy budowy"></div><div class="cats" id="cats" role="tablist" aria-label="Kategorie budowy"></div>
     <div class="tools" id="tools" role="toolbar" aria-label="Budowanie"></div></div></div>
 </footer>
 <div id="floats"></div>
@@ -4295,7 +4314,7 @@ function buildTaps(){taps=[];for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==
 function drawTaps(){const L=0.75;for(const[i,t,j]of taps){const c=grid[i],m=PM[c.water==='ok'?'ok':c.water==='dirty'?'dirty':'none'],dx=Math.sign(cx(t)-cx(j)),dz=Math.sign(cz(t)-cz(j));
     const a=new THREE.Mesh(dx?TAPG.x:TAPG.z,m);a.scale.set(dx?L:1,1,dz?L:1);a.position.set(cx(j)+dx*L/2,pipeY(j)-0.01,cz(j)+dz*L/2);a.renderOrder=5;pipeG.add(a);
     const e=new THREE.Mesh(TAPG.end,m);e.position.set(cx(j)+dx*L,pipeY(j),cz(j)+dz*L);e.renderOrder=5;pipeG.add(e)}}
-var underOn=false;let xray=false;const pipeG=new THREE.Group();pipeG.visible=false;scene.add(pipeG);
+var underOn=false,underTmp=false,underAuto=(()=>{try{return localStorage.getItem('lt-autou')!=='0'}catch(e){return true}})();let xray=false;const isTunT=t=>t==='tunnel'||t==='railTunnel';function undView(){return underOn||underTmp}const pipeG=new THREE.Group();pipeG.visible=false;scene.add(pipeG);
 const PG={node:new THREE.BoxGeometry(0.2,0.08,0.2),ax:new THREE.BoxGeometry(1,0.06,0.09),az:new THREE.BoxGeometry(0.09,0.06,1)};for(const k in PG)PG[k].userData.keep=true;
 const PM={ok:new THREE.MeshBasicMaterial({color:'#3aa0f0'}),dirty:new THREE.MeshBasicMaterial({color:'#8a7a4a'}),none:new THREE.MeshBasicMaterial({color:'#9aa3a8'})};
 const pipeY=i=>{const c=grid[i];return(c&&(c.t==='tunnel'||c.t==='bridge')?lvY(rh(i)):water[i]?0:Math.min(...[0,1,2,3].map(k=>cornH[i*4+k])))+0.06};
@@ -4655,6 +4674,11 @@ function curFP(){if(moveSrc>=0){const f=(grid[moveSrc]&&!grid[moveSrc].tiles?nul
 const freeFor=j=>!water[j]&&(!grid[j]||(moveSrc>=0&&(j===moveSrc||(grid[j].t==='part'&&grid[j].main===moveSrc))));
 const fpCost=()=>moveSrc>=0?moveCost(grid[moveSrc]):DEF[tool].cost;
 const moveCost=c=>Math.floor(DEF[c.t].cost/2);
+const rotCost=c=>Math.ceil((DEF[c.t].cost||0)/4);
+const curRot=c=>{const r=c.tiles?c.rot:c.rot1;return r!=null?r:((Math.round((c.model?c.model.rotation.y:0)/(Math.PI/2))%4)+4)%4};
+function rotOK(c,k){if(!c.tiles||c.tiles.length<2)return true;const xs=c.tiles.map(j=>j%N),zs=c.tiles.map(j=>(j/N)|0);
+  const w=Math.max(...xs)-Math.min(...xs),h=Math.max(...zs)-Math.min(...zs);return w===h||((k-curRot(c))%2+2)%2===0}
+let rotPickI=-1;
 const movable=c=>!!c&&!DRIVE[c.t]&&c.t!=='part'&&c.t!=='hydro'&&!!BUILD[c.t];
 function fpTiles(i){const[fw,fh]=curFP(),x=i%N,z=(i/N)|0;if(x>N-fw||z>N-fh)return null;const t=[];for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++)t.push(idx(x+dx,z+dz));return t}
 /* 7.5.5: a multi-tile building may stand on uneven ground (up to 2 levels of difference): the ground under it is levelled for the terrain price */
@@ -4691,7 +4715,15 @@ let rot1=null,hoverI=-1;
 function rotate1(){rot1=rot1===null?0:rot1>=3?null:rot1+1;setHint(`<b>${DEF[tool].name}</b> · obrót: ${rot1===null?'auto (frontem do ulicy)':rot1*90+'°'} (R)`,false,true);hintEl.hidden=false;if(hoverI>=0)showGhost1(hoverI)}
 function showGhost1(i){if(pendA>=0||moveSrc>=0)return;if(i<0||!BUILD[tool]||DRIVE[tool]||FP(tool)||grid[i]||water[i]){if(ghost&&pendA<0)ghost.visible=false;return}
   try{const g=ghostFor(tool);g.visible=true;g.position.set(cx(i),tYi(i),cz(i));g.rotation.y=rot1!=null?rot1*Math.PI/2:faceRoad(i)}catch(e){}}
-function rotateBuilding(i){const c=grid[i];if(!c||DRIVE[c.t]||c.t==='hydro')return;
+function turnTo(i,k){const c=grid[i];if(!movable(c))return;if(c.burn){setHint('Ten budynek się pali – nie można go obrócić.',true,true);hintEl.hidden=false;return}
+  if(k===curRot(c)||!rotOK(c,k))return;const cost=rotCost(c);if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢ na obrócenie.`,true,true);hintEl.hidden=false;return}
+  spend(cost);if(c.tiles)c.rot=k;else c.rot1=k;refreshBuilding(i);powerDirty=true;topoDirty=true;bfsCache.clear();float(i,'obrócono','neutral');save();
+  setHint(`Obrócono: ${DEF[c.t].name} za ${fmt(cost)} T¢.`,false,true);hintEl.hidden=false;rotPickI=-1;if(inspI===i)renderInsp()}
+function rotPickHTML(i,c){const th=cam.theta,cur=curRot(c),cost=rotCost(c);let b='';
+  for(let k=0;k<4;k++){const dx=Math.sin(k*Math.PI/2),dz=Math.cos(k*Math.PI/2),sx=dx*Math.cos(th)-dz*Math.sin(th),sy=-(dx*Math.sin(th)+dz*Math.cos(th)),ang=Math.atan2(sx,sy)*180/Math.PI,ok=rotOK(c,k),now=k===cur;
+    b+=`<button type="button" data-rk="${k}" style="left:calc(50% + ${(sx*38).toFixed(1)}px);top:calc(50% - ${(sy*38).toFixed(1)}px)"${now||!ok||money<cost?' disabled':''}${now?' aria-current="true"':''} title="${now?'Obecny kierunek':!ok?'Tego budynku nie da się tak obrócić w miejscu – użyj „Przenieś”':'Obróć frontem w tę stronę'}"><svg viewBox="0 0 20 20" width="18" height="18" style="transform:rotate(${ang.toFixed(0)}deg)"><path d="M10 3l6 7h-4v7H8v-7H4z" fill="currentColor"/></svg></button>`}
+  return`<div class="rotpick" id="rotPick"><div class="rpc">${b}<span class="rpm">${ICO_HOUSE1}</span></div><p>Wybierz, w którą stronę ma patrzeć front budynku. Obrót kosztuje ¼ ceny: <b>${fmt(cost)} T¢</b>.</p></div>`}
+function rotateBuilding(i){const c=grid[i];if(!c||DRIVE[c.t]||c.t==='hydro')return;if(movable(c)){rotPickI=rotPickI===i?-1:i;renderInsp();return}
   if(!c.tiles){const cur0=c.rot1!=null?c.rot1:((Math.round((c.model?c.model.rotation.y:0)/(Math.PI/2))%4)+4)%4;c.rot1=(cur0+1)%4}
   else{const sq=c.tiles.length===4||c.tiles.length===1;const cur0=c.rot!=null?c.rot:((Math.round(c.model.rotation.y/(Math.PI/2))%4)+4)%4;c.rot=(cur0+(sq?1:2))%4}
   refreshBuilding(i);save();setHint(`Obrócono: ${DEF[c.t].name}`,false,true);hintEl.hidden=false}
@@ -4713,7 +4745,7 @@ function toolHint(){
   if(tool==='bulldoze')return'<b>Wyburz</b> · zwraca połowę kosztu. Przeciągnij, by usuwać kilka pól.';
   if(roadMode()&&STREET[tool])return`<b>${DEF[tool].name} wzdłuż drogi</b> · przeciągnij od jednej ulicy do drugiej: cały odcinek po drodze zostanie wymieniony na „${DEF[tool].name.toLowerCase()}”. Zobaczysz szkic i zatwierdzisz go przyciskiem „Zbuduj”.`;
   if(roadMode())return`<b>${DEF[tool].name} wzdłuż drogi</b> · przeciągnij od jednej ulicy do drugiej: ${tool==='pipe'?'rura pójdzie':'słupy pójdą'} trasą drogi. Zobaczysz szkic i zatwierdzisz go przyciskiem „Zbuduj”.`;
-  const d=DEF[tool];return`<b>${d.name}</b> · ${d.cost?fmt(d.cost)+' T¢ · ':''}${d.desc}`+(FP(tool)?` Stuknij miejsce, obróć i zatwierdź (${FP(tool).join('×')}).`:BUILD[tool]&&!DRIVE[tool]?' R obraca budynek.':'')+(DEMAND[tool]?` Pobiera ${mw(DEMAND[tool])} MW.`:'')+(UPKEEP[tool]?` Utrzymanie ${UPKEEP[tool]} T¢/godz.`:'')}
+  const d=DEF[tool];return`<b>${d.name}</b> · ${d.cost?fmt(d.cost)+' T¢ · ':''}${d.desc}`+(isTunT(tool)?' PgDn/PgUp: widok podziemny.':'')+(FP(tool)?` Stuknij miejsce, obróć i zatwierdź (${FP(tool).join('×')}).`:BUILD[tool]&&!DRIVE[tool]?' R obraca budynek.':'')+(DEMAND[tool]?` Pobiera ${mw(DEMAND[tool])} MW.`:'')+(UPKEEP[tool]?` Utrzymanie ${UPKEEP[tool]} T¢/godz.`:'')}
 function apply(i,painting){
   if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{apply(i,painting)}finally{tool=sv}return}
   if(moveSrc>=0){if(painting)return;if(!grid[moveSrc]){moveSrc=-1;return}pendA=i;updateGhost();return}
@@ -4881,7 +4913,7 @@ const isec=(k,title,body)=>{if(!body)return'';const cl=inspFold.has(k);return`<s
 const ICO_BOLT='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M13.6 2 5 13.4h6.2L9.8 22 19 10.2h-6.3z" fill="currentColor"/></svg>',
   ICO_DROP='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M12 2.5C8.2 7.6 5.6 11.2 5.6 14.6a6.4 6.4 0 0 0 12.8 0c0-3.4-2.6-7-6.4-12.1z" fill="currentColor"/></svg>',
   ICO_BIN='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M3.8 6.2h16.4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M9.3 6V3.6h5.4V6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.8 8.3h12.4l-1.3 13H7.1z" fill="currentColor"/></svg>',
-  ICO_MOVE='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true"><path d="M6 17.5h18V8l18 16-18 16v-9.5H6z" fill="currentColor"/></svg>',
+  ICO_ROT='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M38 24a14 14 0 1 1-4.1-9.9"/><path d="M36 6v9h-9" stroke-linejoin="round"/></svg>',ICO_HOUSE1='<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z" fill="currentColor" opacity=".85"/><rect x="10" y="14" width="4" height="6" fill="var(--panel,#fff)"/></svg>',ICO_MOVE='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true"><path d="M6 17.5h18V8l18 16-18 16v-9.5H6z" fill="currentColor"/></svg>',
   ICO_DOZER='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M9 14h11l3 9h7v8H9z"/><path d="M12 14V8h7l2 6"/><path d="M30 23l7-7 5 2"/><path d="M42 18v15h-5"/><rect x="7" y="31" width="27" height="9" rx="4.5"/><circle cx="12" cy="35.5" r="1.6"/><circle cx="20.5" cy="35.5" r="1.6"/><circle cx="29" cy="35.5" r="1.6"/></svg>';
 const sTile=(col,ico,label,val,sub)=>`<div class="tile svcT" style="color:${col}"><span class="lab">${label}</span>${ico}<span class="v">${val}</span>${sub?`<small>${sub}</small>`:''}</div>`;
 function faceSvg(h){const m=h>=6?'M14.5 27.5q9.5 9 19 0':h>=4?'M15.5 29q8.5 5 17 0':h>=3?'M16 30.5h16':h>=2?'M16 33q8-4.5 16 0':'M14.5 34.5q9.5-8 19 0';
@@ -5044,7 +5076,7 @@ function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];i
   const hide=new Set(tiles.length?['Prąd','Woda','Ścieki','Śmieci']:[]);const facts=rows.filter(r=>!hide.has(r.l)).map(r=>r.full?`<div class="ffull">${r.v}</div><i hidden></i>`:`<span>${r.l}</span><span class="${r.cls}">${r.v}</span>`).join('');
   const svcS=(tiles.length?`<div class="tiles t3">${tiles.join('')}</div>`:'')+(HOUSING[c.t]&&facts?`<div class="facts">${facts}</div>`:'');
   const refund=Math.floor((DEF[c.t].cost+(c.pole?DEF.pole.cost:0))/2),armed=delArm&&delArm.i===i&&performance.now()-delArm.t<4000;
-  const acts=`<div class="acts">${movable(c)?`<button class="act mv" id="inspMv"${money<moveCost(c)?' disabled':''}><b>Przenieś</b>${ICO_MOVE}<small>${fmt(moveCost(c))} T¢</small></button>`:''}${c.edge?'':`<button class="act del${armed?' armed':''}" id="inspDel"><b>${armed?'Na pewno?':'Wyburz'}</b>${ICO_DOZER}<small>${armed?'Stuknij ponownie':`Otrzymasz: ${fmt(refund)} T¢`}</small></button>`}</div>`;
+  const acts=`<div class="acts">${movable(c)?`<button class="act mv" id="inspMv"${money<moveCost(c)?' disabled':''}><b>Przenieś</b>${ICO_MOVE}<small>${fmt(moveCost(c))} T¢</small></button><button class="act rot" id="inspRot" aria-expanded="${rotPickI===i}"${money<rotCost(c)?' disabled':''}><b>Obróć</b>${ICO_ROT}<small>${fmt(rotCost(c))} T¢</small></button>`:''}${c.edge?'':`<button class="act del${armed?' armed':''}" id="inspDel"><b>${armed?'Na pewno?':'Wyburz'}</b>${ICO_DOZER}<small>${armed?'Stuknij ponownie':`Otrzymasz: ${fmt(refund)} T¢`}</small></button>`}</div>`+(rotPickI===i&&movable(c)?rotPickHTML(i,c):'');
   const offB=HOUSING[c.t]?'':`<button class="btn panel up" id="inspOff">${c.off?ICON_ON+' Włącz budynek':ICON_OFF+' Wyłącz budynek'}<br><small style="color:var(--muted);font-weight:500">${c.off?'Wyłączony: nie produkuje, nie zużywa i nie płaci utrzymania':'Nie produkuje, nie zużywa prądu i wody, nie płaci utrzymania'}</small></button>`;
   const optS=houseOpt+(c.off?'':upg)+offB+acts;
   const body=HOUSING[c.t]?isec('ppl','Mieszkańcy',pplS)+isec('hap','Szczęście',hapS)+isec('svc','Usługi',svcS)+isec('need','Zaspokojone potrzeby',needS)+isec('opt','Opcje i ulepszenia',optS)
@@ -5085,7 +5117,7 @@ function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];i
   const ob=document.getElementById('inspOff');if(ob)ob.onclick=()=>toggleOff(i);
   const fo=document.getElementById('inspFOff');if(fo)fo.onclick=()=>{const g=grid[i];if(!g||!g.filt)return;g.filtOff=!g.filtOff;filterVisual(g,true);envDirty=true;powerDirty=true;save();renderInsp()};
   const hu=document.getElementById('inspHU');if(hu)hu.onclick=()=>upgradeHome(i);
-  const mvb=document.getElementById('inspMv');if(mvb)mvb.onclick=()=>startMove(i);
+  const mvb=document.getElementById('inspMv');if(mvb)mvb.onclick=()=>startMove(i);{const rb=document.getElementById('inspRot');if(rb)rb.onclick=()=>{rotPickI=rotPickI===i?-1:i;renderInsp()};for(const q of inspEl.querySelectorAll('[data-rk]'))q.onclick=()=>turnTo(i,+q.dataset.rk)}
   const db=document.getElementById('inspDel');if(db)db.onclick=()=>{if(!(delArm&&delArm.i===i&&performance.now()-delArm.t<4000)){delArm={i,t:performance.now()};inspEl.__html=null;renderInsp();setTimeout(()=>{if(delArm&&delArm.i===i){delArm=null;inspEl.__html=null;if(inspI===i)renderInsp()}},4100);return}delArm=null;demolishAt(i)};
   for(const h of inspEl.querySelectorAll('[data-fold]')){const go=()=>{const k=h.dataset.fold;inspFold.has(k)?inspFold.delete(k):inspFold.add(k);try{localStorage.setItem('lt-insp-fold',JSON.stringify([...inspFold]))}catch(e){}inspEl.__html=null;renderInsp()};h.onclick=go;h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}}}
 
@@ -5235,12 +5267,17 @@ function renderModes(){const box=document.getElementById('msub');
   box.classList.remove('terr');const del=tool==='bulldoze';const L=del?DMODES:BMODES;const njB=!del&&DRIVE[tool]&&tool!=='roundabout'?`<button type="button" data-nj="1" title="Bez skrzyżowań: nowa droga łączy się tylko z drogą, od której ją ciągniesz, i nie wyrównuje terenu" aria-label="Bez skrzyżowań" aria-pressed="${noJunc}"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICO.nojunc}</svg></button>`:'';
   box.innerHTML=L.map(([k,tt,ic])=>`<button type="button" data-m="${k}" title="${tt}" aria-label="${tt}" aria-pressed="${del?delMode===k:ALONG[tool]?(alongOn?k==='road':k==='many'):buildMode===k}" ${!del&&tool!=='view'&&!(k==='road'?!!ALONG[tool]:ALONG[tool]?k==='many':MODE_OK(tool))?'disabled':''}><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ic||ICO[DELT[k]]}</svg></button>`).join('')+njB;
   {const nb=box.querySelector('[data-nj]');if(nb)nb.onclick=e=>{e.stopPropagation();noJunc=!noJunc;try{localStorage.setItem('lt-nojunc',noJunc?'1':'0')}catch(er){}setHint(noJunc?'<b>Bez skrzyżowań</b> · nowa droga łączy się tylko z drogą, od której ją ciągniesz. Nie tworzy skrzyżowań z drogami obok i nie wyrównuje terenu.':'<b>Skrzyżowania włączone</b> · nowa droga łączy się ze wszystkimi drogami obok.',false,true);renderModes()}}
-  for(const b of box.querySelectorAll('button:not([data-nj])'))b.onclick=()=>{if(del){delMode=b.dataset.m;setXray(delMode==='pipe'||underOn);document.getElementById('hazard').hidden=false;setHint(toolHint())}else if(ALONG[tool]){alongOn=b.dataset.m==='road'?!alongOn:false;if(lineConf||lineA>=0)cancelLine(true);try{localStorage.setItem('lt-along',alongOn?'1':'0')}catch(e){}setHint(toolHint())}else if(b.dataset.m!=='road'){buildMode=b.dataset.m;try{localStorage.setItem('lt-bmode',buildMode)}catch(e){}setHint(toolHint())}renderModes()}}
+  for(const b of box.querySelectorAll('button:not([data-nj])'))b.onclick=()=>{if(del){delMode=b.dataset.m;setXray(delMode==='pipe'||undView());document.getElementById('hazard').hidden=false;setHint(toolHint())}else if(ALONG[tool]){alongOn=b.dataset.m==='road'?!alongOn:false;if(lineConf||lineA>=0)cancelLine(true);try{localStorage.setItem('lt-along',alongOn?'1':'0')}catch(e){}setHint(toolHint())}else if(b.dataset.m!=='road'){buildMode=b.dataset.m;try{localStorage.setItem('lt-bmode',buildMode)}catch(e){}setHint(toolHint())}renderModes()}}
 /* 7.7.4: every tab has its own colour */
 const CAT_COL=['#5b6470','#9a7b4f','#2f8fd8','#e07a3f','#7b6fd6','#7cad3a','#2fa79b','#d9468f','#e0a91c','#2f6fe0','#d8452f','#e05a6a','#8a5cc9','#e8b40c','#3fa34d','#6f8a3a','#2bb3d6','#8c6d5a'];
 CATS.forEach((c,k)=>{const b=document.createElement('button');b.type='button';b.className='cat';try{b.style.setProperty('--cc',CAT_COL[k%CAT_COL.length])}catch(e){}b.innerHTML=svgI(CAT_ICO[k],14)+`<span>${c.name}</span>`;b.setAttribute('role','tab');
   b.addEventListener('click',()=>showCat(k));catsEl.append(b);catBtns.push(b);for(const t of c.tools)toolsEl.append(mkTool(t))});
-function showCat(k){if(CATS[k]&&CATS[k].name==='Teren')k=0;if(catBtns[k]&&catBtns[k].hidden){k=catBtns.findIndex(b=>!b.hidden);if(k<0)k=0}curCat=k;catBtns.forEach((b,j)=>b.setAttribute('aria-selected',String(j===k)));
+/* 8.1.18: the categories sit under five general sections */
+const CGRP=[{name:'Infrastruktura',ico:'road',col:'#5b6470',cats:['Drogi','Transport']},{name:'Zabudowa',ico:'house',col:'#e07a3f',cats:['Domy','Usługi','Przemysł','Farmy']},{name:'Media',ico:'energy',col:'#d9a40c',cats:['Energia','Woda','Odpady']},{name:'Służby miejskie',ico:'shield',col:'#2f6fe0',cats:['Policja','Straż','Zdrowie','Edukacja','Urzędowe']},{name:'Wypoczynek',ico:'park1',col:'#3fa34d',cats:['Rozrywka','Turystyka','Zieleń']}];
+const grpOf=k=>CGRP.findIndex(g=>CATS[k]&&g.cats.includes(CATS[k].name)),grpBtns=[],grpLast={},grpsEl=document.getElementById('grps');
+CGRP.forEach((g,gi)=>{const b=document.createElement('button');b.type='button';b.className='grp';b.setAttribute('role','tab');try{b.style.setProperty('--cc',g.col)}catch(e){}b.innerHTML=svgI(g.ico,16)+`<span>${g.name}</span><i class="gn"></i>`;
+  b.addEventListener('click',()=>{const ks=CATS.map((c,k)=>k).filter(k=>grpOf(k)===gi&&!catBtns[k].hidden);const k=ks.includes(grpLast[gi])?grpLast[gi]:ks[0];if(k!=null)showCat(k)});grpsEl.append(b);grpBtns.push(b)});
+function showCat(k){if(CATS[k]&&CATS[k].name==='Teren')k=0;if(catBtns[k]&&catBtns[k].hidden){k=catBtns.findIndex(b=>!b.hidden);if(k<0)k=0}curCat=k;catBtns.forEach((b,j)=>b.setAttribute('aria-selected',String(j===k)));{const gi=grpOf(k);if(gi>=0)grpLast[gi]=k;grpBtns.forEach((b,j)=>b.setAttribute('aria-selected',String(j===gi)));catBtns.forEach((b,j)=>b.classList.toggle('og',grpOf(j)!==gi));if(gi>=0)try{catsEl.style.setProperty('--gc',CGRP[gi].col)}catch(e){}}
   CATS.forEach((c,j)=>c.tools.forEach(t=>toolBtns[t].hidden=j!==k||!unlocked(t)));toolsEl.scrollLeft=0;
   if(false){let b=document.getElementById('tool-routes');if(!b){b=document.createElement('button');b.className='tool';b.type='button';b.id='tool-routes';toolsEl.append(b);
       b.onclick=()=>{routeAll=!routeAll;try{localStorage.setItem('lt-routes',routeAll?'1':'0')}catch(e){}paintRouteBtn()}}
@@ -5248,9 +5285,9 @@ function showCat(k){if(CATS[k]&&CATS[k].name==='Teren')k=0;if(catBtns[k]&&catBtn
 function paintRouteBtn(){const b=document.getElementById('tool-routes');if(!b)return;b.setAttribute('aria-pressed',String(routeAll));b.title='Podgląd linii na mapie';
   b.innerHTML=`<span class="sw" style="background:${routeAll?'#2f8f5a':'var(--chip)'};color:${routeAll?'#fff':'var(--fg)'}"><svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15c3-8 6 2 9-6s3-3 5-4"/><circle cx="3" cy="15" r="1.4"/><circle cx="17" cy="5" r="1.4"/></svg></span><span class="nm">Podgląd linii</span><span class="ct">${routeAll?'wł.':'wył.'}</span>`}
 /* a category tab exists only once something in it is unlocked */
-function refreshLocks(){CATS.forEach((c,k)=>{catBtns[k].hidden=c.name==='Teren'||!c.tools.some(unlocked)});showCat(curCat);if(linBtn)linBtn.hidden=!unlocked('busLine')}
-function selectTool(t){if(t!=='busStop')stopSide=null;if(!unlocked(t)&&LAW_UNL[t]){const T=LAWS.find(q=>q.k===LAW_UNL[t]);setHint(`Odblokujesz to w ustawach urzędu miasta: zbadaj całe drzewko „${T.name}”.`,true,true);hintEl.hidden=false;return}if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();setXray(t==='pipe'||t==='pipeDel'||underOn);if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=reachHide();for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));try{renderTer()}catch(e){}
-  const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);if(t==='bulldoze'&&delMode==='pipe')setXray(true);setHint(toolHint());if(lmsg)setHint(lmsg,true,true);hl.visible=false;renderModes();
+function refreshLocks(){CATS.forEach((c,k)=>{catBtns[k].hidden=c.name==='Teren'||!c.tools.some(unlocked)});grpBtns.forEach((b,gi)=>{const n=catBtns.filter((q,k)=>grpOf(k)===gi&&!q.hidden).length;b.hidden=!n;b.querySelector('.gn').textContent=n>1?n:''});showCat(curCat);if(linBtn)linBtn.hidden=!unlocked('busLine')}
+function selectTool(t){if(t!=='busStop')stopSide=null;if(!unlocked(t)&&LAW_UNL[t]){const T=LAWS.find(q=>q.k===LAW_UNL[t]);setHint(`Odblokujesz to w ustawach urzędu miasta: zbadaj całe drzewko „${T.name}”.`,true,true);hintEl.hidden=false;return}if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();if(isTunT(t)){if(underAuto&&!isTunT(tool))underTmp=true}else if(isTunT(tool))underTmp=false;setXray(t==='pipe'||t==='pipeDel'||undView());if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=reachHide();for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));try{renderTer()}catch(e){}
+  const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);if(t==='bulldoze'&&delMode==='pipe')setXray(true);try{paintUnder()}catch(e){}setHint(toolHint());if(lmsg)setHint(lmsg,true,true);hl.visible=false;renderModes();
   if(linpEl){linpEl.hidden=!isLineT(t);if(linBtn)linBtn.setAttribute('aria-expanded',String(isLineT(t)));renderLines()}}
 showCat(0);
 const statsEl=document.getElementById('stats'),statsBtn=document.getElementById('statsBtn');
@@ -5676,9 +5713,16 @@ function drawOvl(){if(ovlMode==='none'){ovlMesh.count=0;return}let n=0;const col
   for(let i=0;i<N*N;i++){const v=cov?cov[i]:ovlVal(i);if(!v||water[i])continue;dObj.position.set(cx(i),(fld[i]?lvY(fld[i]-1):surfY(i))+0.075,cz(i));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();ovlMesh.setMatrixAt(n,dObj.matrix);
     const cs=OVL[ovlMode].c;col.set(cs[Math.min(cs.length,v)-1]);ovlMesh.setColorAt(n,col);n++}
   ovlMesh.count=n;ovlMesh.instanceMatrix.needsUpdate=true;if(ovlMesh.instanceColor)ovlMesh.instanceColor.needsUpdate=true}
-function setOvl(m){ovlMode=m;underOn=m==='under';setXray(underOn||(tool==='bulldoze'&&delMode==='pipe')||tool==='pipe'||tool==='pipeDel');for(const b of document.querySelectorAll('[data-ovl]'))b.setAttribute('aria-pressed',String(b.dataset.ovl===m));document.getElementById('ovlNote').textContent=m==='none'?'':OVL[m].note;
+function setOvl(m){ovlMode=m;underOn=m==='under';if(m==='none')underTmp=false;setXray(undView()||(tool==='bulldoze'&&delMode==='pipe')||tool==='pipe'||tool==='pipeDel');for(const b of document.querySelectorAll('[data-ovl]'))b.setAttribute('aria-pressed',String(b.dataset.ovl===m));document.getElementById('ovlNote').textContent=m==='none'?'':OVL[m].note;
   document.getElementById('ovlBtn').classList.toggle('on',m!=='none');drawOvl()}
 for(const b of document.querySelectorAll('[data-ovl]'))b.addEventListener('click',()=>setOvl(b.dataset.ovl));
+/* 8.1.18: underground view follows the tunnel tools; PgDn turns it on, PgUp off */
+function paintUnder(){const a=document.getElementById('autoU');if(a)a.setAttribute('aria-pressed',String(underAuto));const u=document.querySelector('[data-ovl="under"]');if(u)u.classList.toggle('tmp',underTmp&&!underOn)}
+function setUnder(on){if(on)underTmp=true;else{underTmp=false;if(ovlMode==='under')setOvl('none')}setXray(undView()||(tool==='bulldoze'&&delMode==='pipe')||tool==='pipe'||tool==='pipeDel');paintUnder();
+  setHint(on?'<b>Widok podziemny włączony</b> · PgUp go wyłącza.':'<b>Widok podziemny wyłączony</b> · PgDn go włącza.',false,true);hintEl.hidden=false}
+document.getElementById('autoU').addEventListener('click',()=>{underAuto=!underAuto;try{localStorage.setItem('lt-autou',underAuto?'1':'0')}catch(e){}if(!underAuto&&underTmp)setUnder(false);else if(underAuto&&isTunT(tool)&&!undView())setUnder(true);paintUnder()});
+paintUnder();
+addEventListener('keydown',e=>{if(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(titleOpen||!menuEl.hidden||e.ctrlKey||e.metaKey||e.altKey)return;if(e.code==='PageDown'||e.code==='PageUp'){e.preventDefault();setUnder(e.code==='PageDown')}});
 const TAXUI=[['house','Domy jednorodzinne',10,20,1,'%'],['tenement','Kamienice',10,20,1,'%'],['block','Tanie bloki',10,20,1,'%'],['modern','Apartamentowce',10,20,1,'%'],['buy','Od zakupów',0,40,1,'%'],['tour','Turystyczny',0,20,1,' T¢/os.'],['util','Komunalny',0,20,1,'%']];
 function taxSum(){const el=document.getElementById('taxSum');if(!el)return;const H=hist.length?hist[hist.length-1]:cur,inc=Math.round(H.inc||0),out=Math.round(H.upkeep||0),bal=inc-out;
   el.innerHTML=`<div><small>Przychody</small><b class="pos">+${fmt(inc)}</b><small>T¢/godz.</small></div><div><small>Wydatki</small><b class="neg">−${fmt(out)}</b><small>T¢/godz.</small></div><div><small>Bilans</small><b class="${bal>=0?'pos':'neg'}">${bal>=0?'+':'−'}${fmt(Math.abs(bal))}</b><small>T¢/godz.</small></div><div><small>Kasa</small><b>${fmt(Math.round(money))}</b><small>T¢</small></div>`}
@@ -8391,7 +8435,29 @@ const LT_TR=[
 ["{}% dziennie", "{}% a day", "{}% pro Tag"],
 ["Najbliższa rata o północy: {} T¢ (rata i odsetki od reszty).", "Next instalment at midnight: {} T¢ (instalment and interest on the rest).", "Nächste Rate um Mitternacht: {} T¢ (Rate und Zinsen auf den Rest)."],
 ["Nad tym tunelem kolejowym jest za mało ziemi na ulicę.", "There is not enough ground above this rail tunnel for a street.", "Über diesem Bahntunnel ist zu wenig Erde für eine Straße."],
-["Ulica biegnie górą nad tunelem kolejowym – pociągi jadą dalej pod spodem.", "The street now runs over the rail tunnel – trains keep running underneath.", "Die Straße führt jetzt oben über den Bahntunnel – die Züge fahren unten weiter."]
+["Ulica biegnie górą nad tunelem kolejowym – pociągi jadą dalej pod spodem.", "The street now runs over the rail tunnel – trains keep running underneath.", "Die Straße führt jetzt oben über den Bahntunnel – die Züge fahren unten weiter."],
+["Zabudowa", "Buildings", "Bebauung"],
+["Media", "Utilities", "Versorgung"],
+["Wypoczynek", "Leisure", "Freizeit"],
+["Infrastruktura", "Infrastructure", "Infrastruktur"],
+["Służby miejskie", "Public services", "Öffentliche Dienste"],
+["Obróć", "Rotate", "Drehen"],
+["Widok podziemny przy budowie tuneli", "Underground view while building tunnels", "Untergrundansicht beim Tunnelbau"],
+["PgDn włącza, PgUp wyłącza widok podziemny", "PgDn turns the underground view on, PgUp turns it off", "Bild↓ schaltet die Untergrundansicht ein, Bild↑ aus"],
+["Widok podziemny włączony", "Underground view on", "Untergrundansicht an"],
+["Widok podziemny wyłączony", "Underground view off", "Untergrundansicht aus"],
+[" · PgUp go wyłącza.", " · PgUp turns it off.", " · Bild↑ schaltet sie aus."],
+[" · PgDn go włącza.", " · PgDn turns it on.", " · Bild↓ schaltet sie ein."],
+["PgDn/PgUp: widok podziemny.", "PgDn/PgUp: underground view.", "Bild↓/Bild↑: Untergrundansicht."],
+["Obecny kierunek", "Current direction", "Aktuelle Richtung"],
+["Obróć frontem w tę stronę", "Turn the front this way", "Front in diese Richtung drehen"],
+["Tego budynku nie da się tak obrócić w miejscu – użyj „Przenieś”", "This building can't be turned this way in place – use “Move”", "Dieses Gebäude lässt sich so nicht an Ort und Stelle drehen – nutze „Verschieben“"],
+["obrócono", "rotated", "gedreht"],
+["Obrócono: {} za {} T¢.", "Rotated: {} for {} T¢.", "Gedreht: {} für {} T¢."],
+["Brakuje {} T¢ na obrócenie.", "{} T¢ short to rotate.", "Es fehlen {} T¢ zum Drehen."],
+["Ten budynek się pali – nie można go obrócić.", "This building is on fire – it can't be rotated.", "Dieses Gebäude brennt – es kann nicht gedreht werden."],
+["Wybierz, w którą stronę ma patrzeć front budynku. Obrót kosztuje ¼ ceny: ", "Choose which way the front of the building should face. Rotating costs ¼ of the price: ", "Wähle, wohin die Vorderseite des Gebäudes zeigen soll. Drehen kostet ¼ des Preises: "],
+["Działy budowy", "Build sections", "Baubereiche"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
