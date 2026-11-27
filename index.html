@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.19';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.20';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -105,6 +105,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hid
 .title h1{text-align:center}.title h1 small{display:block;font:500 13px var(--font-b);color:var(--muted);margin-top:6px;letter-spacing:0}
 .title .mbtn{display:grid;justify-items:center;gap:1px}.title .mbtn small{font-size:11.5px;opacity:.85;font-weight:400}
 .title .tver{margin:2px 0 0;color:var(--muted);font-size:12px}
+.verTag{position:fixed;right:8px;bottom:4px;z-index:5;font:600 10.5px var(--font-b);letter-spacing:.03em;color:#fff;opacity:.8;background:rgba(20,24,28,.38);padding:2px 7px;border-radius:6px;pointer-events:none;user-select:none}
 .credits{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));display:grid;justify-items:end;gap:6px;color:#fff;text-decoration:none;font:600 12px var(--font-b);text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .credits .ps{display:grid;justify-items:center;gap:4px;background:#000;border-radius:10px;padding:10px 12px 8px;box-shadow:0 4px 16px rgba(0,0,0,.35);text-shadow:none}.credits .ps img{width:84px;height:auto;display:block}.credits .ps em{font-style:normal;font-size:11px;color:#cfd6d8}
 .credits:hover .ps,.credits:focus-visible .ps{outline:2px solid #39b7ff;outline-offset:2px}
@@ -434,6 +435,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .lawTrack.on{background:var(--lc)}.lawTrack.on svg{background:var(--lc);color:#fff}
 .lawUnl{align-self:center;margin-top:auto;background:var(--lw2);color:var(--fg);border:0;border-radius:9px;padding:8px 14px;font-weight:700;font-size:13.5px;line-height:1.25;text-align:center;min-width:60%;cursor:pointer}
 .lawUnl:disabled{opacity:.7;cursor:default}.lawUnl:not(:disabled):not(.on){outline:2px solid var(--lc)}.lawUnl.on{background:var(--lc);color:#fff}
+.lawUnlRp{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:3px;font-size:12px;opacity:.85}.lawUnlRp svg{width:14px;height:14px}
 .lawX{position:absolute;right:12px;top:10px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;width:32px;height:32px;font-size:18px;cursor:pointer}
 @media (max-width:700px){.lawGrid{grid-auto-columns:minmax(270px,88%)}.lawHead h3{font-size:20px}.lawTier{padding:0}}.ordp .ordc.on b{color:var(--money)}.ordp ul{margin:0;padding-left:18px;font-size:12px;color:var(--muted)}.ordp .btn{min-height:34px}.stTabs{position:sticky;top:0;z-index:2;background:var(--panel2);padding:4px 0}.stats [data-tab][hidden]{display:none!important}
 .stTabs{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:thin}.stTabs .chipb{flex:none}
@@ -526,7 +528,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <button class="chipb" data-ovl="police"><i style="background:#2f6fe0"></i>Zasięg policji</button><button class="chipb" data-ovl="fire"><i style="background:#e8641c"></i>Zasięg straży</button><button class="chipb" data-ovl="pol"><i style="background:#d9b02a"></i>Zanieczyszczenie</button>
     <button class="chipb" data-ovl="noise"><i style="background:#9a5bd6"></i>Hałas</button><button class="chipb" data-ovl="park"><i style="background:#3cae4f"></i>Zadowolenie z parków</button>
     <button class="chipb" data-ovl="ent"><i style="background:#e0569a"></i>Zadowolenie z rozrywki</button><button class="chipb" data-ovl="shop"><i style="background:#2bb3a0"></i>Zasięg sklepów</button><button class="chipb" data-ovl="med"><i style="background:#d63b3b"></i>Opieka medyczna</button><button class="chipb" data-ovl="edu"><i style="background:#e0b84a"></i>Szkoły</button><button class="chipb" data-ovl="flood"><i style="background:#d6a21f"></i>Zagrożenie powodziami</button><button class="chipb" data-ovl="under"><i style="background:#6f6a62"></i>Pod ziemią</button><button class="chipb" data-ovl="none">Wyłącz</button><small id="ovlNote"></small><div class="autou"><button class="chipb" id="autoU" aria-pressed="true"><i style="background:#6f6a62"></i>Widok podziemny przy budowie tuneli</button><small>PgDn włącza, PgUp wyłącza widok podziemny</small></div></div>
-<div id="app"></div>
+<div id="app"></div><div class="verTag" id="verTag" data-notr aria-hidden="true"></div>
 <header class="hud">
   <div class="res panel" id="r-money" title="Gotówka (T¢): stan / limit"><span class="ic tc" aria-hidden="true">T¢</span>
     <span class="val"><span id="money">0</span><span class="cap">/<span id="moneyCap">0</span></span></span><span class="dlt" id="moneyD"></span>
@@ -661,7 +663,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <button class="btn panel mbtn" id="tNew">Nowa gra</button>
   <button class="btn panel mbtn" id="tOpt">Opcje</button>
   <button class="btn panel mbtn" id="tExit">Wyjdź</button>
-  <p class="tver">Wersja <span id="tVer"></span></p></div>
+  <p class="tver">Wersja <span id="tVer"></span> · <b data-notr>Pre-Release version</b></p></div>
   <a class="credits" href="https://psinteractive.tech" target="_blank" rel="noopener"><span>Autorzy:</span><span class="ps"><img alt="PS Interactive" src="data:image/png;base64,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"><em>psinteractive.tech</em></span></a></div>
 <div class="menuBg" id="oldSave" hidden><section class="menu panel oldsave" role="alertdialog" aria-modal="true" aria-labelledby="oldT">
   <h2 id="oldT">Duże zmiany w grze</h2><p class="sub">Od wersji 4.0 rozgrywka mocno się zmieniła: kamienie milowe, nowe usługi i transport. Zapis z poprzedniej wersji nie jest zgodny, więc trzeba zacząć nowe miasto.</p>
@@ -967,9 +969,13 @@ function paintGround(pol){let SK=0;try{SK=snowOn()?3:seasonIdx()===2?2:seasonIdx
   if(SK===3){g2.fillStyle='rgba(240,245,249,.8)';g2.fillRect(0,0,N*32,N*32)}
   /* 7.0: higher ground turns darker and rocky, the highest peaks keep snow all year */
   for(let i=0;i<N*N;i++){const h=hgt[i];if(water[i]||h<=H_LAND+4)continue;const x=(i%N)*32,z=((i/N)|0)*32;
-    if(h>=H_MAX-3+(mapType==='tundra'?10:0)&&mapType!=='carib'){g2.fillStyle='rgba(244,247,250,.92)';g2.fillRect(x,z,32,32);continue}
+    if(SK!==1&&h>=H_MAX-3+(mapType==='tundra'?20:0)&&mapType!=='carib'){g2.fillStyle='rgba(244,247,250,.92)';g2.fillRect(x,z,32,32);continue}
     const r=Math.min(1,(h-H_LAND-4)/8);g2.fillStyle=mapType==='carib'&&h>=H_MAX-5?`rgba(70,58,52,${0.55+0.35*r})`:`rgba(108,100,88,${0.18+0.62*r})`;g2.fillRect(x,z,32,32);
     if(r>0.35){g2.fillStyle='rgba(90,84,76,.35)';g2.fillRect(x+((i*7)%22),z+((i*13)%24),6,4);g2.fillRect(x+((i*11)%20),z+((i*5)%22),4,3)}}
+  /* 8.1.20: the volcano: black basalt on the cone, dark ash around its foot */
+  if(volc){const bx=volc.c%N,bz=(volc.c/N)|0,Ri=Math.ceil(volc.R)+3;for(let z=bz-Ri;z<=bz+Ri;z++)for(let x=bx-Ri;x<=bx+Ri;x++){if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);if(water[i])continue;const r=Math.hypot(x-bx,z-bz),X=x*32,Z=z*32;
+    if(volcLock[i]){g2.fillStyle='#2b2725';g2.fillRect(X,Z,32,32);g2.fillStyle='rgba(78,72,68,.75)';for(let k=0;k<5;k++)g2.fillRect(X+((i*7+k*11)%26),Z+((i*13+k*7)%26),3+k%3,2+(k*i)%3);g2.fillStyle='rgba(18,16,15,.6)';g2.fillRect(X+((i*5)%20),Z+((i*3)%20),8,5)}
+    else if(r<=volc.R+2.5){const a=0.75*(1-(r-volc.R-0.5)/2.2);if(a>0){g2.fillStyle=`rgba(46,42,40,${a.toFixed(2)})`;g2.fillRect(X,Z,32,32)}}}}
   for(let i=0;i<N*N;i++){if(!water[i])continue;const x=i%N,z=(i/N)|0;g2.fillStyle=lakeDry(i)?'#b99a5c':'#3d82b5';g2.fillRect(x*32,z*32,32,32);if(lakeDry(i)){g2.strokeStyle='rgba(120,92,50,.6)';g2.lineWidth=1.5;g2.beginPath();g2.moveTo(x*32+4,z*32+10+(i%7));g2.lineTo(x*32+16,z*32+16);g2.lineTo(x*32+28,z*32+8+(i%5));g2.moveTo(x*32+16,z*32+16);g2.lineTo(x*32+14+(i%6),z*32+29);g2.stroke()}
     g2.fillStyle='rgba(224,206,150,.95)';
     for(const[dx,dz]of[[0,1],[1,0],[0,-1],[-1,0]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N||water[nz*N+nx])continue;
@@ -2125,7 +2131,7 @@ const polSeen=new Uint8Array(N*N);
 function dryTrees(){if(typeof pol==='undefined')return;for(let i=0;i<N*N;i++){const g=pol[i]>0?1:0;if(g!==polSeen[i]){polSeen[i]=g;if(!grid[i]&&!water[i])groundDeco(i,true)}}for(const i of deco){const want=pol[i]>0,is=decoDry.has(i);if(want===is)continue;const m=decoMat.get(i),cr=decoCrown.get(i);if(!m||!cr)continue;
     if(want){imDel(cr,i);imSet(dDead,i,m);decoDry.add(i)}else{imDel(dDead,i);imSet(cr,i,m);decoDry.delete(i)}decoUpd=true}}
 for(const m of DECO_M){m.castShadow=true;m.frustumCulled=false;imInit(m);scene.add(m)}
-function setDeco(i){const T=themeOf();dObj.position.set(cx(i)+rnd(-.18,.18),tYi(i),cz(i)+rnd(-.18,.18));dObj.rotation.set(0,rnd(0,6.28),0);dObj.scale.setScalar(rnd(0.75,1.1));
+function setDeco(i){if(volc&&volcLock[i])return;const T=themeOf();dObj.position.set(cx(i)+rnd(-.18,.18),tYi(i),cz(i)+rnd(-.18,.18));dObj.rotation.set(0,rnd(0,6.28),0);dObj.scale.setScalar(rnd(0.75,1.1));
   for(const m of DECO_M)imDel(m,i);let use;const r=Math.random();
   if(T.trees==='palm'&&(beachMap[i]||r<0.7)){dObj.rotation.set(rnd(-0.18,0.18),rnd(0,6.28),rnd(-0.18,0.18));dObj.scale.setScalar(rnd(0.85,1.25));use=[dPT,dPC]}
   else if(T.trees==='conifer')use=r<0.4?[dTr,dPi]:r<0.7?[dTr,dPy]:[dTr,dSt];
@@ -2152,7 +2158,7 @@ function groundDeco(i,on){const x0=cx(i),z0=cz(i);if(on&&beachMap[i])on=false;if
   if(on&&!gr&&!themeOf().noFlowers&&Math.random()<0.08){const fx=x0+rnd(-0.35,0.35),fz=z0+rnd(-0.35,0.35),fy=tYi(i);dObj.position.set(fx,fy,fz);dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();imSet(gSm,i,dObj.matrix);
     dObj.position.set(fx,fy+0.085,fz);dObj.updateMatrix();imSet(gFh,i,dObj.matrix,FLC[(Math.random()*5)|0])}else{imDel(gSm,i);imDel(gFh,i)}
   gdUpd=true}
-function seedGround(){for(let i=0;i<N*N;i++)groundDeco(i,!grid[i]&&!water[i])}
+function seedGround(){for(let i=0;i<N*N;i++)groundDeco(i,!grid[i]&&!water[i]&&!(volc&&volcLock[i]))}
 function seedDeco(){seedGround();const pr=themeOf().trees==='palm'?0.14:themeOf().trees==='conifer'?0.13:0.1;for(let i=0;i<N*N;i++){if(grid[i]||water[i]||dep[i]||deco.has(i)||Math.random()>(beachMap[i]?pr*1.6:oasisOn()?(oasisDist()[i]<=3?pr*2.2:0.006):pr))continue;setDeco(i)}}
 /* deposits: generated per map in groups of 1–4 neighbouring tiles; a few rocks stand on every free deposit tile */
 const depR=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(0.085,0),new THREE.MeshLambertMaterial({color:'#ffffff'}),1200);depR.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(1200*3).fill(1),3);depR.castShadow=true;depR.receiveShadow=true;depR.frustumCulled=false;depR.count=0;scene.add(depR);
@@ -2427,14 +2433,14 @@ function genHeights(type=mapType){try{volcInit(-1)}catch(e){}hgt.fill(H_LAND);fl
     for(let k=0;k<nc;k++){const[n,sx,sz,sxx,szz,sxz]=S[k],mx=sx/n,mz=sz/n,cxx=sxx/n-mx*mx,czz=szz/n-mz*mz,cxz=sxz/n-mx*mz,tr=cxx+czz,det=cxx*czz-cxz*cxz,l1=tr/2+Math.sqrt(Math.max(0,tr*tr/4-det)),l2=tr-l1;
       let ux=cxz,uz=l1-cxx;if(Math.abs(ux)+Math.abs(uz)<1e-6){ux=cxx>=czz?1:0;uz=cxx>=czz?0:1}const L=Math.hypot(ux,uz),sg=Math.random()<0.5?1:-1;pca.push({long:l1>4*Math.max(1e-6,l2),nx:-uz/L*sg,nz:ux/L*sg})}}
   if(type==='bigriver')rollHills(d,2);
-  const n1=noise2(7),n2=noise2(19),n3=noise2(12),n4=noise2(26),gap=fj?1:3,W=fj?10:type==='bigriver'?11:9,A0=fj?22:type==='bigriver'?15:10,CAP=fj?H_CAP:H_MAX;
+  const n1=noise2(7),n2=noise2(19),n3=noise2(12),n4=noise2(26),gap=fj?1:3,W=fj?10:type==='bigriver'?11:9,A0=fj?22:type==='bigriver'?15:10,CAP=fj?52:H_MAX;
   for(let i=0;i<N*N;i++){if(water[i]||d[i]<=gap)continue;const w=src[i],x=i%N,z=(i/N)|0,wx=w%N,wz=(w/N)|0;
     /* the side is taken across the river's main direction (a long river), or across the local stretch (a crossing of rivers) */
     const P=pca[comp[w]];let side;if(P.long)side=(x-wx)*P.nx+(z-wz)*P.nz;else{const ew=run(w,1,0)+run(w,-1,0)>=run(w,0,1)+run(w,0,-1);side=ew?(z-wz)*sideH[comp[w]]:(x-wx)*sideV[comp[w]]}
     if(side<=0)continue;
     const t=(d[i]-gap)/W;if(t>=1.35)continue;const prof=Math.pow(Math.sin(Math.PI*Math.min(1,t/1.35)),0.7),A=A0*(0.55+0.7*n1(x,z));
     /* fjords: sharp, jagged peaks (ridged noise) rising from green slopes instead of broad terraces */
-    const rg=n=>{const v=1-Math.abs(2*n-1);return v*v},h=fj?H_LAND+Math.round(34*Math.pow(prof,0.8)*(0.12+0.95*(0.6*rg(n3(x,z))+0.4*rg(n4(x,z))))):H_LAND+Math.round(prof*A+2.2*(n2(x,z)-0.5));if(h-H_LAND>=2&&h>hgt[i])hgt[i]=Math.min(CAP,h)}
+    const rg=n=>{const v=1-Math.abs(2*n-1);return v*v},h=fj?H_LAND+Math.round(44*Math.pow(prof,0.8)*(0.12+0.95*(0.6*rg(n3(x,z))+0.4*rg(n4(x,z))))):H_LAND+Math.round(prof*A+2.2*(n2(x,z)-0.5));if(h-H_LAND>=2&&h>hgt[i])hgt[i]=Math.min(CAP,h)}
   /* no thin ridges: a raised tile needs raised neighbours on two sides; single spikes are cut down */
   /* no notches: a dip up to five tiles wide between higher ground on both sides is filled up */
   const hAt=(x,z)=>x<0||z<0||x>=N||z>=N||water[idx(x,z)]?0:hgt[idx(x,z)];
@@ -3192,21 +3198,22 @@ function researchRate(){return eduCount().pts}
 /* 8.1: research points come only from lyceum and technikum pupils (1 each) and university students (1.5 each) */
 function eduCount(){let sec=0,uni=0;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!HLV[c.t]||!c.pp||c.off)continue;const ts=tilesOf(i),L=ts.some(k=>lycCov[k]),T=ts.some(k=>techCov[k]),U=ts.some(k=>uniCov[k]);
     for(const q of c.pp){if(q.a>=15&&q.a<19&&(q.ed||0)>=1&&(L||T))sec++;else if(q.a>=19&&q.a<24&&(q.ed===2||q.ed===3)&&U)uni++}}return{sec,uni,pts:sec+uni*1.5}}
+const unlRp=T=>Math.round(T.tiers.reduce((a,t)=>a+t.rp,0)*0.66/100)*100;
 function renderOrd(){const el=document.getElementById('ordp');if(!el||el.hidden)return;const ok=hallOK(),rr=researchRate();const sc=el.querySelector('.lawGrid'),sx=sc?sc.scrollLeft:0;
   const card=(c,open)=>{const on=!!LAWB[c.k];return`<div class="lawc${on?' on':''}${open?'':' lock'}"><b>${c.name}</b><ul>${c.fx.map(f=>`<li>${f}</li>`).join('')}</ul><button class="lawBuy" data-law="${c.k}" title="${on?'Uchyl ustawę':'Wprowadź ustawę'}"${on?'':!open||money<c.cost?' disabled':''}>${on?'✓ Uchyl':`${fmt(c.cost)} T¢`}</button></div>`};
   el.innerHTML=`<button class="lawX" data-close aria-label="Zamknij">✕</button><div class="lawHead"><h3>Projekty ustaw</h3><span class="lawRp" title="Punkty nauki: każdy uczeń w zasięgu szkoły daje punkty co godzinę">${lawI('book')} ${fmt(Math.floor(research))} <small>+${(Math.round(rr*10)/10).toLocaleString()}/godz.</small></span></div>
-  <div class="lawNote">${ok?'Punkty nauki otwierają kolejne poziomy, a ustawę wprowadzasz jednorazową opłatą (uchylenie jest darmowe). Po zbadaniu obu poziomów odblokujesz wyjątkowy budynek (jeden na miasto).':`<span class="neg">${hallWhy()} Ustawy są zawieszone, ale możesz je już badać i wprowadzać.</span>`}</div>
+  <div class="lawNote">${ok?'Punkty nauki otwierają kolejne poziomy, a ustawę wprowadzasz jednorazową opłatą (uchylenie jest darmowe). Po zbadaniu obu poziomów zostaje trzeci próg: odblokowanie wyjątkowego budynku (jeden na miasto) za punkty nauki.':`<span class="neg">${hallWhy()} Ustawy są zawieszone, ale możesz je już badać i wprowadzać.</span>`}</div>
   <div class="lawGrid">${LAWS.map(T=>{let prev=true;const tiers=T.tiers.map((t,n)=>{const key=T.k+n,open=!!LAWT[key];
       const h=`<div class="lawTier">${t.cards.map(c=>card(c,open)).join('')}</div><div class="lawBar"><button class="lawRpB" data-tier="${key}" title="${open?'Poziom zbadany':'Zbadaj poziom za punkty nauki'}"${open||!prev||research<t.rp?' disabled':''}>${lawI('book')}${fmt(t.rp)}</button><div class="lawTrack${open?' on':''}">${lawI(open?'ok':'lock')}</div></div>`;prev=open;return h}).join('');
     const all=T.tiers.every((t,n)=>LAWT[T.k+n]),bn=DEF[T.unl].name;
-    return`<section class="lawT" style="--lc:${T.col}"><div class="lawIco">${lawI(T.k)}</div><div class="lawName">${T.name}</div>${tiers}${LAWU[T.k]?`<div class="lawUnl on">✓ Odblokowano<br>${bn}</div>`:`<button class="lawUnl" data-unl="${T.k}"${all?'':' disabled'}>Odblokuj<br>${bn}</button>`}</section>`}).join('')}</div>`;
+    return`<section class="lawT" style="--lc:${T.col}"><div class="lawIco">${lawI(T.k)}</div><div class="lawName">${T.name}</div>${tiers}${LAWU[T.k]?`<div class="lawUnl on">✓ Odblokowano<br>${bn}</div>`:`<button class="lawUnl" data-unl="${T.k}" title="Trzeci próg: odblokowanie budynku za punkty nauki"${all&&research>=unlRp(T)?'':' disabled'}>Odblokuj<br>${bn}<span class="lawUnlRp">${lawI('book')}${fmt(unlRp(T))}</span></button>`}</section>`}).join('')}</div>`;
   const g2=el.querySelector('.lawGrid');if(g2)g2.scrollLeft=sx;
   const done=m=>{hintEl.hidden=false;setHint(m,false,true);envDirty=true;powerDirty=true;save();renderOrd()};
   const cl=el.querySelector('[data-close]');if(cl)cl.onclick=()=>{el.hidden=true;const ob=document.getElementById('ordBtn');if(ob)ob.setAttribute('aria-expanded','false')};
   for(const b of el.querySelectorAll('[data-law]'))b.onclick=()=>{const k=b.dataset.law;let c=null;for(const T of LAWS)for(const t of T.tiers)for(const q of t.cards)if(q.k===k)c=q;if(!c)return;
     if(LAWB[k]){delete LAWB[k];done(`Uchylono: ${c.name}.`)}else{if(money<c.cost)return;spend(c.cost);LAWB[k]=1;done(`Wprowadzono ustawę: ${c.name}.`)}};
   for(const b of el.querySelectorAll('[data-tier]'))b.onclick=()=>{const key=b.dataset.tier,T=LAWS.find(q=>key.startsWith(q.k)&&key.length===q.k.length+1),n=+key.slice(-1),t=T.tiers[n];if(LAWT[key]||research<t.rp||(n&&!LAWT[T.k+(n-1)]))return;research-=t.rp;LAWT[key]=1;done(`Zbadano poziom ${n+1}: ${T.name}.`)};
-  for(const b of el.querySelectorAll('[data-unl]'))b.onclick=()=>{const T=LAWS.find(q=>q.k===b.dataset.unl);if(!T||!T.tiers.every((t,n)=>LAWT[T.k+n]))return;LAWU[T.k]=1;try{refreshLocks()}catch(e){}done(`Odblokowano: ${DEF[T.unl].name}.`)}}
+  for(const b of el.querySelectorAll('[data-unl]'))b.onclick=()=>{const T=LAWS.find(q=>q.k===b.dataset.unl);if(!T||!T.tiers.every((t,n)=>LAWT[T.k+n])||research<unlRp(T))return;research-=unlRp(T);LAWU[T.k]=1;try{refreshLocks()}catch(e){}done(`Odblokowano: ${DEF[T.unl].name}.`)}}
 /* ---------- shipping centre: every 6 hours trucks take the chosen goods from the warehouses, in bulk ---------- */
 /* 6.6: every run is one load: you set how many kilograms of each good go on it, at most 100 kg in total */
 const SHIP_LOAD=150,SHIP_STEP=5;const isShipper=c=>!!c&&(c.t==='shipC'||(c.t==='airport'&&!!c.up)),shipLoad=c=>c&&c.t==='airport'?250:SHIP_LOAD,shipEvery=c=>c&&c.t==='airport'?60:SHIP_EVERY;
@@ -3771,7 +3778,7 @@ function neighboursToBurn(i){const c=grid[i],o=new Set();for(const t of tilesOf(
 /* 8.1.19: the Caribbean volcano erupts every few days: magma bombs can set buildings on fire up to 7 tiles from the lava,
    and an ash cloud pollutes 11×11 tiles for 12 hours (1 h of eruption + 11 h after). Nothing can be built on, in or under the cone. */
 var volc=null,volcLock=new Uint8Array(N*N),volcDirty=true,volcG=null,volcCloudG=null,volcBalls=[];
-function volcInit(c,R){volcLock.fill(0);volc=null;volcDirty=true;if(c==null||c<0)return;volc={c,R,lava:[],next:Math.max(3*1440,gameT+1440*(3+3*Math.random())),t0:-1e9,q:[]};
+function volcInit(c,R){volcLock.fill(0);volc=null;volcDirty=true;groundSig=-1;if(c==null||c<0)return;volc={c,R,lava:[],next:Math.max(3*1440,gameT+1440*(3+3*Math.random())),t0:-1e9,q:[]};
   const bx=c%N,bz=(c/N)|0,Ri=Math.ceil(R)+1;for(let z=bz-Ri;z<=bz+Ri;z++)for(let x=bx-Ri;x<=bx+Ri;x++){if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z),r=Math.hypot(x-bx,z-bz);if(water[i])continue;if(r<=R+0.5)volcLock[i]=1;if(r<1.5)volc.lava.push(i)}}
 function volcLoad(s){if(mapType!=='carib'){volcInit(-1);return}const v=s&&s.volc;
   if(v&&v.c>=0&&v.c<N*N){volcInit(v.c,+v.R||5);if(v.n!=null)volc.next=+v.n;if(v.t!=null)volc.t0=+v.t;return}
@@ -3792,13 +3799,36 @@ function volcTick(dt){if(!volc)return;if(volc.q&&volc.q.length){const top=volcTo
       q.m.position.set(x0+(x1-x0)*p,q.y0+(q.y1-q.y0)*p+Math.sin(Math.PI*p)*5,z0+(z1-z0)*p);
       if(p>=1){q.done=true;scene.remove(q.m);if(q.fire&&hazOn('fire')){let j=q.i;if(grid[j]&&grid[j].t==='part')j=grid[j].main;const c=grid[j];if(canBurn(c)){if(startFire(j))float(j,'magma podpaliła budynek','warn')}}}}
     volc.q=volc.q.filter(q=>!q.done)}}
+var lavaTexC=null;function lavaTex(){if(lavaTexC)return lavaTexC;const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#ff6a12';g.fillRect(0,0,64,64);
+  let sd=3;const r=()=>{sd=(sd*9301+49297)%233280;return sd/233280};for(let k=0;k<14;k++){const x=r()*64,y=r()*64,rad=4+r()*9,gr=g.createRadialGradient(x,y,0,x,y,rad);gr.addColorStop(0,'rgba(255,220,90,.95)');gr.addColorStop(1,'rgba(255,140,30,0)');g.fillStyle=gr;g.fillRect(x-rad,y-rad,rad*2,rad*2)}
+  g.strokeStyle='rgba(120,30,10,.55)';g.lineWidth=1.3;for(let k=0;k<6;k++){let x=r()*64,y=r()*64;g.beginPath();g.moveTo(x,y);for(let q=0;q<4;q++){x+=(r()-0.5)*22;y+=(r()-0.5)*22;g.lineTo(x,y)}g.stroke()}
+  lavaTexC=new THREE.CanvasTexture(c);lavaTexC.wrapS=lavaTexC.wrapT=THREE.RepeatWrapping;return lavaTexC}
 function volcBuild(){volcDirty=false;if(volcG){scene.remove(volcG);volcG=null}if(volcCloudG){scene.remove(volcCloudG);volcCloudG=null}if(!volc)return;
-  volcG=new THREE.Group();const m=new THREE.MeshBasicMaterial({color:'#ff5a14'});volcG.userData.m=m;
-  for(const i of volc.lava){const b=new THREE.Mesh(new THREE.BoxGeometry(1,0.12,1),m);b.position.set(cx(i),lvY(hgt[i])+0.07,cz(i));volcG.add(b)}scene.add(volcG);
+  volcG=new THREE.Group();const m=new THREE.MeshBasicMaterial({color:'#ffffff',map:lavaTex()});volcG.userData.m=m;
+  for(const i of volc.lava){const b=new THREE.Mesh(new THREE.BoxGeometry(1,0.12,1),m);b.position.set(cx(i),lvY(hgt[i])+0.07,cz(i));volcG.add(b)}
+  /* lava streams run down the cone, step by step (seeded, so they stay put) */
+  let sd=volc.c*9301+49297;const rr=()=>{sd=(sd*9301+49297)%233280;return sd/233280};const bx=volc.c%N,bz=(volc.c/N)|0,lv=new Set(volc.lava),D4=[[1,0],[-1,0],[0,1],[0,-1]];
+  const yT=i=>lvY(hgt[i]);const strip=(x,y,z,sx,sy,sz)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),m);b.position.set(x,y,z);volcG.add(b)};
+  const nS=3,a0=rr()*Math.PI*2;for(let k=0;k<nS;k++){const ang=a0+k*Math.PI*2/nS+(rr()-0.5)*0.8,ux=Math.cos(ang),uz=Math.sin(ang);
+    let p=volc.lava.reduce((b,i)=>{const s0=(i%N-bx)*ux+(((i/N)|0)-bz)*uz;return b<0||s0>((b%N-bx)*ux+(((b/N)|0)-bz)*uz)?i:b},-1),w=0.22+rr()*0.12,guard=0;
+    {const px=p%N,pz=(p/N)|0;let bd=null,best=-1,bs=-1e9;for(const[dx,dz]of D4){const nx=px+dx,nz=pz+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(lv.has(j)||water[j])continue;const sc=dx*ux+dz*uz;if(sc>bs){bs=sc;best=j;bd=[dx,dz]}}
+      if(best>=0){const ya=yT(p),yb=yT(best),X=cx(p),Z=cz(p);strip(X+bd[0]*0.25,ya+0.02,Z+bd[1]*0.25,bd[0]?0.5:w,0.05,bd[1]?0.5:w);if(yb>ya)strip(X+bd[0]*0.485,(ya+yb)/2+0.01,Z+bd[1]*0.485,bd[0]?0.04:w,yb-ya+0.04,bd[1]?0.04:w);strip(cx(best)-bd[0]*0.25,yb+0.02,cz(best)-bd[1]*0.25,bd[0]?0.5:w,0.05,bd[1]?0.5:w);lv.add(best);p=best}}
+    while(guard++<20){const px=p%N,pz=(p/N)|0;let best=-1,bs=1e9,bd=null;for(const[dx,dz]of D4){const nx=px+dx,nz=pz+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const j=idx(nx,nz);if(lv.has(j)||water[j])continue;
+        const rp=Math.hypot(px-bx,pz-bz),rn=Math.hypot(nx-bx,nz-bz);if(rn<=rp)continue;const sc=hgt[j]-(dx*ux+dz*uz)*1.6+rr()*0.8;if(hgt[j]<=hgt[p]+1&&sc<bs){bs=sc;best=j;bd=[dx,dz]}}
+      if(best<0)break;const ya=yT(p),yb=yT(best),X=cx(p),Z=cz(p);w=Math.max(0.14,w*(0.93+rr()*0.1));
+      strip(X+bd[0]*0.25,ya+0.02,Z+bd[1]*0.25,bd[0]?0.5:w,0.05,bd[1]?0.5:w);
+      if(Math.abs(ya-yb)>0.01)strip(X+bd[0]*(ya>yb?0.515:0.485),(ya+yb)/2+0.01,Z+bd[1]*(ya>yb?0.515:0.485),bd[0]?0.04:w,Math.abs(ya-yb)+0.04,bd[1]?0.04:w);
+      strip(cx(best)-bd[0]*0.25,yb+0.02,cz(best)-bd[1]*0.25,bd[0]?0.5:w,0.05,bd[1]?0.5:w);lv.add(best);p=best;
+      if(Math.hypot(p%N-bx,((p/N)|0)-bz)>volc.R-0.2||!volcLock[p])break}
+    const pd=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.34,0.05,9),m);pd.position.set(cx(p),yT(p)+0.02,cz(p));volcG.add(pd)}
+  /* basalt boulders on the slopes */
+  const rk=new THREE.MeshPhongMaterial({color:'#4a4542',flatShading:true,shininess:4}),rk2=new THREE.MeshPhongMaterial({color:'#6a6460',flatShading:true,shininess:4});
+  for(let i=0;i<N*N;i++){if(!volcLock[i]||lv.has(i)||rr()>0.35)continue;const g=new THREE.DodecahedronGeometry(0.1+rr()*0.18,0),b=new THREE.Mesh(g,rr()<0.6?rk:rk2);b.position.set(cx(i)+(rr()-0.5)*0.6,yT(i)+0.05,cz(i)+(rr()-0.5)*0.6);b.rotation.set(rr()*3,rr()*3,0);b.scale.y=0.7;b.castShadow=true;volcG.add(b)}
+  scene.add(volcG);
   volcCloudG=new THREE.Group();const cm=new THREE.MeshLambertMaterial({color:'#8d857e',transparent:true,opacity:0.55,depthWrite:false});volcCloudG.userData.m=cm;
   for(let k=0;k<16;k++){const sp=new THREE.Mesh(new THREE.SphereGeometry(0.9+Math.random()*1.1,10,8),cm);const a=Math.random()*Math.PI*2,r=Math.random()*4.5;sp.userData.b=[Math.cos(a)*r,1.5+Math.random()*3,Math.sin(a)*r,Math.random()*6];volcCloudG.add(sp)}
   volcCloudG.visible=false;scene.add(volcCloudG)}
-function volcAnim(){if(!volc||!volcG)return;const t=performance.now()/1000,act=volcActive();volcG.userData.m.color.setHSL(0.045+0.03*Math.sin(t*(act?6:1.5)),1,act?0.6:0.5);
+function volcAnim(){if(!volc||!volcG)return;const t=performance.now()/1000,act=volcActive();{const k=0.5+0.5*Math.sin(t*(act?6:1.6));volcG.userData.m.color.setRGB(1,0.82+0.18*k,0.7+0.3*k*(act?1:0.6))}
   const cl=volcCloud();volcCloudG.visible=cl;if(cl){const age=(gameT-volc.t0)/720,top=volcTop(),c=volc.c;volcCloudG.position.set(cx(c),top,cz(c));volcCloudG.userData.m.opacity=0.6*(age<0.08?age/0.08:1-Math.max(0,(age-0.6)/0.4));
     for(const sp of volcCloudG.children){const b=sp.userData.b,g=Math.min(1,age*6+0.2);sp.position.set(b[0]*g+Math.sin(t*0.2+b[3])*0.3,b[1]*(0.5+0.5*g),b[2]*g)}}}
 /* 8.1.19: on the fjords the rivers partly freeze in winter – not where they flow out of the map nor near sewage outlets; dams on ice stop */
@@ -3816,8 +3846,21 @@ function iceHour(){const f=iceLevel(),nw=new Uint8Array(N*N);
   const now=ice.some(v=>v);if(now&&!was){setHint('<b>Rzeki zamarzają</b> · tamy na lodzie przestają dawać prąd, ujścia rzek i okolice wylotów ścieków nie zamarzają.',true,true);hintEl.hidden=false}else if(!now&&was){setHint('Odwilż: rzeki znów płyną.',false,true);hintEl.hidden=false}}
 function hydroIce(i){if(!ice[i]&&water[i])return false;if(water[i])return true;const k=nearWater(i);return k>=0&&!!ice[k]}
 function iceBuild(){iceDirty=false;if(iceG){scene.remove(iceG);iceG.geometry.dispose();iceG=null}const L=[];for(let i=0;i<N*N;i++)if(ice[i])L.push(i);if(!L.length)return;
-  const g=new THREE.BoxGeometry(1.002,0.05,1.002),m=new THREE.MeshLambertMaterial({color:'#e4f1fb',transparent:true,opacity:0.93});iceG=new THREE.InstancedMesh(g,m,L.length);const o=new THREE.Object3D();
-  L.forEach((i,k)=>{o.position.set(cx(i),wSurfY(i)-LOW_DROP*Math.min(3,lowW[i]||0)+0.02,cz(i));o.scale.set(1,1,1);o.updateMatrix();iceG.setMatrixAt(k,o.matrix)});scene.add(iceG)}
+  const g=new THREE.BoxGeometry(1.002,0.05,1.002),m=new THREE.MeshPhongMaterial({map:iceTex(),transparent:true,opacity:0.9,shininess:90,specular:new THREE.Color('#9fbfd0')});iceG=new THREE.InstancedMesh(g,m,L.length);const o=new THREE.Object3D(),col=new THREE.Color();
+  const shards=[];L.forEach((i,k)=>{o.position.set(cx(i),wSurfY(i)-LOW_DROP*Math.min(3,lowW[i]||0)+0.02,cz(i));o.rotation.set(0,((i*7)%4)*Math.PI/2,0);o.scale.set(1,1,1);o.updateMatrix();iceG.setMatrixAt(k,o.matrix);
+    const v=((i*2654435761)>>>0)%1000/1000;col.setRGB(0.66+0.12*v,0.84+0.08*v,0.97);iceG.setColorAt(k,col);if(((i*40503)>>>0)%100<7)shards.push(i)});
+  if(iceG.instanceColor)iceG.instanceColor.needsUpdate=true;
+  if(shards.length){const sg=new THREE.ConeGeometry(0.1,0.32,4),sm=new THREE.MeshPhongMaterial({color:'#cfe9f7',transparent:true,opacity:0.85,flatShading:true,shininess:60}),SM=new THREE.InstancedMesh(sg,sm,shards.length*2);let n=0;
+    for(const i of shards)for(let q=0;q<2;q++){const y=wSurfY(i)-LOW_DROP*Math.min(3,lowW[i]||0)+0.13;o.position.set(cx(i)+(q?0.12:-0.1)+((i%5)-2)*0.05,y,cz(i)+(q?-0.08:0.1));o.rotation.set((q?0.35:-0.25),i%6,(q?-0.2:0.3));o.scale.set(1,q?0.7:1,1);o.updateMatrix();SM.setMatrixAt(n++,o.matrix)}
+    iceG.add(SM)}
+  scene.add(iceG)}
+var iceTexC=null;function iceTex(){if(iceTexC)return iceTexC;const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');
+  const gr=g.createLinearGradient(0,0,128,128);gr.addColorStop(0,'#cdeaf7');gr.addColorStop(0.5,'#a9d9ef');gr.addColorStop(1,'#c4e6f5');g.fillStyle=gr;g.fillRect(0,0,128,128);
+  g.fillStyle='rgba(255,255,255,.35)';for(let k=0;k<6;k++){g.beginPath();g.ellipse(10+k*21,20+((k*37)%90),18,7,k,0,Math.PI*2);g.fill()}
+  let sd=7;const r=()=>{sd=(sd*9301+49297)%233280;return sd/233280};g.lineCap='round';
+  for(let k=0;k<9;k++){let x=r()*128,y=r()*128,a=r()*6.28;g.strokeStyle=k<5?'rgba(255,255,255,.95)':'rgba(90,150,190,.6)';g.lineWidth=k<5?2:1.2;g.beginPath();g.moveTo(x,y);for(let s=0;s<5;s++){a+=(r()-0.5)*1.3;x+=Math.cos(a)*14;y+=Math.sin(a)*14;g.lineTo(x,y)}g.stroke()}
+  g.strokeStyle='rgba(240,250,255,.8)';g.lineWidth=4;g.strokeRect(2,2,124,124);
+  iceTexC=new THREE.CanvasTexture(c);try{iceTexC.anisotropy=4}catch(e){}return iceTexC}
 function fireHour(){if(firstDay()||!hazOn('fire'))return;for(let i=0;i<N*N;i++){const c=grid[i];if(!canBurn(c)||c.off)continue;if(Math.random()<FIRE_P[fireGroup(c.t)])startFire(i)}}
 let fireFlash=0;
 /* helicopters fly straight to a fire within 25 tiles of their base, drop water from above, and fly back */
@@ -6019,7 +6062,7 @@ function clearCity(){tLines=[];paxQ.clear();lineDraft=null;lineEdit=null;transVe
   for(const f of floats)f.el.remove();floats=[]}
 function preset(type,d){if(type&&MAPS[type])mapType=type;applyTheme();if(d&&DIFF[d])diff=d;pipe.fill(0);money=startCash();pendIn=0;pendOut=0;matl=0;for(const k in goods)goods[k]=0;gameT=360;cur=L0();hist=[];genRivers(null);genHeights();oasNat=null;applyWater();drawFlood();riseAcc.clear();floodWarned=false;makeEntries();genDeposits()}
 /* ---------- main menu: continue / new game / options / exit, with a small town turning slowly behind it ---------- */
-let titleOpen=false;const titleEl=document.getElementById('title');document.getElementById('tVer').textContent=LT_VERSION;
+let titleOpen=false;const titleEl=document.getElementById('title');document.getElementById('tVer').textContent=LT_VERSION;try{document.getElementById('verTag').textContent='Little Townies '+LT_VERSION+' · Pre-Release version'}catch(e){}
 const hasSave=()=>{if(oldSave||saveBlocked)return false;try{return!!localStorage.getItem(KEY)}catch(e){return true}};
 function openTitle(){if(saveReq)saveNow();titleOpen=true;paused=true;closeHouse();menuEl.hidden=true;document.body.classList.add('intitle');titleEl.hidden=false;try{radioSync();menuMusicSync()}catch(e){}const ok=hasSave();const tc=document.getElementById('tCont');tc.hidden=!ok;
   if(ok)document.getElementById('tContS').textContent=`${cityName} · dzień ${Math.floor(gameT/1440)+1} · ${fmt(popNow())} mieszk.`;(ok?tc:document.getElementById('tNew')).focus();dcLast=''}
@@ -8540,7 +8583,9 @@ const LT_TR=[
 ["Wybierz inną mapę", "Choose another map", "Andere Karte wählen"],
 ["Na największej wyspie stoi wulkan. Co kilka dni wybucha: kule magmy mogą podpalić budynki do 7 pól od krateru, a chmura pyłu przez 12 godzin zanieczyszcza teren 11×11 pól. Na stożku wulkanu, w kraterze i pod nim nie da się nic zbudować ani zmienić terenu.", "A volcano stands on the biggest island. It erupts every few days: magma bombs can set buildings on fire up to 7 tiles from the crater, and an ash cloud pollutes an 11×11-tile area for 12 hours. Nothing can be built and the terrain can't be changed on the cone, in the crater or under it.", "Auf der größten Insel steht ein Vulkan. Er bricht alle paar Tage aus: Magmabomben können Gebäude bis zu 7 Felder vom Krater entfernt in Brand setzen, und eine Aschewolke verschmutzt 12 Stunden lang ein Gebiet von 11×11 Feldern. Auf dem Kegel, im Krater und darunter kann nichts gebaut und das Gelände nicht verändert werden."],
 ["Latem jeziora w oazach wysychają, a zimą zieleń się rozrasta. Planuj wodę i zabudowę z myślą o porach roku.", "In summer the oasis lakes dry up, and in winter the greenery spreads. Plan water and buildings with the seasons in mind.", "Im Sommer trocknen die Oasenseen aus, im Winter breitet sich das Grün aus. Plane Wasser und Bebauung mit Blick auf die Jahreszeiten."],
-["Zimą rzeki częściowo zamarzają (poza miejscami, gdzie wypływają z mapy, i okolicą wylotów ścieków). Tamy na zamarzniętej wodzie przestają wtedy dawać prąd.", "In winter the rivers partly freeze (except where they flow off the map and around sewage outlets). Dams on frozen water then stop producing power.", "Im Winter frieren die Flüsse teilweise zu (außer dort, wo sie die Karte verlassen, und rund um Abwasserausläufe). Dämme auf gefrorenem Wasser liefern dann keinen Strom."]
+["Zimą rzeki częściowo zamarzają (poza miejscami, gdzie wypływają z mapy, i okolicą wylotów ścieków). Tamy na zamarzniętej wodzie przestają wtedy dawać prąd.", "In winter the rivers partly freeze (except where they flow off the map and around sewage outlets). Dams on frozen water then stop producing power.", "Im Winter frieren die Flüsse teilweise zu (außer dort, wo sie die Karte verlassen, und rund um Abwasserausläufe). Dämme auf gefrorenem Wasser liefern dann keinen Strom."],
+["Punkty nauki otwierają kolejne poziomy, a ustawę wprowadzasz jednorazową opłatą (uchylenie jest darmowe). Po zbadaniu obu poziomów zostaje trzeci próg: odblokowanie wyjątkowego budynku (jeden na miasto) za punkty nauki.", "Research points open the next levels, and you pass a law with a one-off fee (repealing is free). After researching both levels there is a third step: unlocking a unique building (one per city) for research points.", "Forschungspunkte öffnen die nächsten Stufen, und ein Gesetz führst du gegen eine einmalige Gebühr ein (Aufheben ist kostenlos). Nach beiden Stufen folgt eine dritte: das Freischalten eines einzigartigen Gebäudes (eines pro Stadt) gegen Forschungspunkte."],
+["Trzeci próg: odblokowanie budynku za punkty nauki", "Third step: unlock the building for research points", "Dritte Stufe: Gebäude gegen Forschungspunkte freischalten"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
