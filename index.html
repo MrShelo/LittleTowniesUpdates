@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.1.18';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.1.19';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -224,6 +224,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (max-width:700px){.modeP .tool .ct{display:none}.modeP .tool .nm{font-size:12px}.dockRow{gap:4px}}
 @media (max-width:560px){.dockRow{flex-direction:column;align-items:stretch;width:100%}.modeP{display:flex;align-items:center;justify-content:space-between;padding:4px 6px}.modeP .mrow .tool{padding:4px 8px 4px 5px}.msub button{width:32px;height:28px}}
 .cats{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.mapWarn{border:1px solid #e0a91c;background:color-mix(in srgb,#e0a91c 14%,var(--panel));border-radius:12px;padding:10px 12px;text-align:left}.mapWarn b{color:#c98a00}.mapWarn p{margin:4px 0 8px;font-size:13px;line-height:1.4}.mwB{display:flex;gap:6px;flex-wrap:wrap}.mwB .mbtn{flex:1 1 140px;margin:0}
+.mapb.pick{outline:2px solid #e0a91c;outline-offset:1px}
 .grps{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--line)}.grps::-webkit-scrollbar{display:none}
 .grp{position:relative;display:inline-flex;align-items:center;gap:6px;flex:1 0 auto;justify-content:center;font:700 13px var(--font-b);letter-spacing:.02em;padding:7px 12px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer}
 .grp svg{color:var(--cc)}.grp:hover{color:var(--fg);background:color-mix(in srgb,var(--cc) 10%,transparent)}
@@ -627,6 +629,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <button class="btn panel mbtn mapb" data-map="bigriver"><b>Wielka rzeka</b><small>Szeroka rzeka przez całą mapę z piaszczystymi wyspami</small></button>
   <button class="btn panel mbtn mapb" data-map="oasis"><b>Oazy</b><small>Pustynia nad morzem: rzeka z zielonymi brzegami i oazy wokół jezior. Latem jeziora wysychają, zimą zieleń się rozrasta</small></button>
   <button class="btn panel mbtn mapb" data-map="tundra"><b>Fiordy</b><small>Szerokie fiordy pod stromymi górami, ciemna trawa i drzewa iglaste</small></button>
+  <div class="mapWarn panel" id="mapWarn" hidden role="alert"><b>Uwaga: zmienny klimat</b><p id="mapWarnT"></p><div class="mwB"><button class="btn panel mbtn primary" id="mapGo">Rozumiem, zaczynam</button><button class="btn panel mbtn" id="mapBack">Wybierz inną mapę</button></div></div>
   <button class="btn panel mbtn" id="mapsNo">Anuluj</button>
 </section></div>
 <div class="menuBg" id="menu" hidden><section class="menu panel" role="dialog" aria-modal="true" aria-labelledby="menuT">
@@ -2397,17 +2400,21 @@ function noise2(G){const g=[];for(let k=0;k<(G+1)*(G+1);k++)g.push(Math.random()
 /* gentle rolling ground: patches up to two levels higher, at least `gap` tiles from the water */
 function rollHills(d,gap){const a=noise2(5),b=noise2(11);for(let i=0;i<N*N;i++){if(water[i]||d[i]<=gap)continue;const x=i%N,z=(i/N)|0,v=0.65*a(x,z)+0.35*b(x,z),fade=Math.min(1,(d[i]-gap)/3);
   const h=H_LAND+Math.round(Math.max(0,v-0.42)*16*fade);if(h>hgt[i])hgt[i]=Math.min(H_LAND+5,h)}}
-function genHeights(type=mapType){hgt.fill(H_LAND);fld.fill(0);for(let i=0;i<N*N;i++){wKnown[i]=water[i];wlv[i]=0;if(water[i])hgt[i]=0}if(window.__testUnlock&&!window.__testHills)return;
+function genHeights(type=mapType){try{volcInit(-1)}catch(e){}hgt.fill(H_LAND);fld.fill(0);for(let i=0;i<N*N;i++){wKnown[i]=water[i];wlv[i]=0;if(water[i])hgt[i]=0}if(window.__testUnlock&&!window.__testHills)return;
   const fj=type==='tundra';
   if(type==='oasis'){/* low dunes, never close to the water */const d=new Int16Array(N*N).fill(-1),q=[];for(let i=0;i<N*N;i++)if(water[i]){d[i]=0;q.push(i)}for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(d[j]<0){d[j]=d[q[h]]+1;q.push(j)}rollHills(d,4);return}
   if(type==='carib'){/* the volcano: on the biggest island, as far from the sea as it gets */
     const d=new Int16Array(N*N).fill(-1),q=[];for(let i=0;i<N*N;i++)if(water[i]){d[i]=0;q.push(i)}for(let h=0;h<q.length;h++)for(const j of nbrs(q[h]))if(d[j]<0){d[j]=d[q[h]]+1;q.push(j)}
     let best=-1;for(let i=0;i<N*N;i++){const x=i%N,z=(i/N)|0;if(x<6||z<6||x>N-7||z>N-7)continue;if(best<0||d[i]>d[best])best=i}
     rollHills(d,2);
-    if(best>=0){const R=Math.max(4,Math.min(6.5,d[best]+1.5)),bx=best%N,bz=(best/N)|0,top=H_TOP-8,n=noise2(18);
+    if(best>=0){const R=Math.max(5,Math.min(6.5,d[best]+1.5)),bx=best%N,bz=(best/N)|0,top=H_TOP-8,n=noise2(18);
       const Ri=Math.ceil(R);for(let z=bz-Ri-1;z<=bz+Ri+1;z++)for(let x=bx-Ri-1;x<=bx+Ri+1;x++){if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);if(water[i]||d[i]<2)continue;const r=Math.hypot(x-bx,z-bz);if(r>R)continue;
         /* a sharp cone: gentle foot, very steep top, jagged sides and a crater */
-        const k=1-r/R,rg=1-Math.abs(2*n(x,z)-1);let h=H_LAND+Math.round((top-H_LAND)*Math.pow(k,1.6)*(0.82+0.25*rg));if(r<0.8&&R>=5)h-=12;hgt[i]=Math.max(hgt[i],Math.min(H_TOP,h))}}
+        const k=1-r/R,rg=1-Math.abs(2*n(x,z)-1);let h=H_LAND+Math.round((top-H_LAND)*Math.pow(k,1.6)*(0.82+0.25*rg));hgt[i]=Math.max(hgt[i],Math.min(H_TOP,h))}
+      /* 8.1.19: the crater: the lava tiles sit well below the rim around them */
+      {let rim=1e9;for(let z=bz-3;z<=bz+3;z++)for(let x=bx-3;x<=bx+3;x++){if(x<0||z<0||x>=N||z>=N)continue;const r=Math.hypot(x-bx,z-bz);if(r>=1.5&&r<2.6&&!water[idx(x,z)])rim=Math.min(rim,hgt[idx(x,z)])}
+       if(rim<1e9)for(let z=bz-1;z<=bz+1;z++)for(let x=bx-1;x<=bx+1;x++){if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);if(Math.hypot(x-bx,z-bz)<1.5&&!water[i])hgt[i]=Math.max(H_LAND,rim-2)}}
+      volcInit(best,R)}
     return}
   /* distance to the nearest water, which water tile it is, and whether that stretch runs east-west */
   const d=new Int16Array(N*N).fill(-1),src=new Int32Array(N*N).fill(-1),q=[];for(let i=0;i<N*N;i++)if(water[i]){d[i]=0;src[i]=i;q.push(i)}
@@ -3761,6 +3768,56 @@ function fireArrive(v){if(v.phase==='back')return removeCar(v);const f=v.task;if
   const sp=new THREE.Group();for(let j=0;j<8;j++){const d=new THREE.Mesh(sprayG,sprayM);sp.add(d)}scene.add(sp);f.spray=sp;f.truck=v}
 const sprayG=new THREE.SphereGeometry(0.035,6,4);sprayG.userData.keep=true;const sprayM=new THREE.MeshBasicMaterial({color:'#7cc8ff',transparent:true,opacity:0.85});
 function neighboursToBurn(i){const c=grid[i],o=new Set();for(const t of tilesOf(i))for(const j of nbrs8(t)){const g=grid[j];const m=g&&g.t==='part'?g.main:j;if(m!=null&&grid[m]!==c&&canBurn(grid[m]))o.add(m)}return[...o]}
+/* 8.1.19: the Caribbean volcano erupts every few days: magma bombs can set buildings on fire up to 7 tiles from the lava,
+   and an ash cloud pollutes 11×11 tiles for 12 hours (1 h of eruption + 11 h after). Nothing can be built on, in or under the cone. */
+var volc=null,volcLock=new Uint8Array(N*N),volcDirty=true,volcG=null,volcCloudG=null,volcBalls=[];
+function volcInit(c,R){volcLock.fill(0);volc=null;volcDirty=true;if(c==null||c<0)return;volc={c,R,lava:[],next:Math.max(3*1440,gameT+1440*(3+3*Math.random())),t0:-1e9,q:[]};
+  const bx=c%N,bz=(c/N)|0,Ri=Math.ceil(R)+1;for(let z=bz-Ri;z<=bz+Ri;z++)for(let x=bx-Ri;x<=bx+Ri;x++){if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z),r=Math.hypot(x-bx,z-bz);if(water[i])continue;if(r<=R+0.5)volcLock[i]=1;if(r<1.5)volc.lava.push(i)}}
+function volcLoad(s){if(mapType!=='carib'){volcInit(-1);return}const v=s&&s.volc;
+  if(v&&v.c>=0&&v.c<N*N){volcInit(v.c,+v.R||5);if(v.n!=null)volc.next=+v.n;if(v.t!=null)volc.t0=+v.t;return}
+  let best=-1;for(let i=0;i<N*N;i++)if(!water[i]&&(best<0||hgt[i]>hgt[best]))best=i;volcInit(best,5);if(volc)volc.next=Math.max(volc.next,gameT+1440*2)}
+const volcCloud=()=>!!volc&&gameT>=volc.t0&&gameT-volc.t0<720,volcActive=()=>!!volc&&gameT>=volc.t0&&gameT-volc.t0<60;
+const volcTop=()=>{let m=-1e9;for(const i of volc.lava)m=Math.max(m,lvY(hgt[i]));return m};
+function volcHour(){if(!volc||mapType!=='carib')return;if(gameT>=volc.next&&!volcCloud())volcErupt();const cl=volcCloud();if(cl!==!!volc.clOn){volc.clOn=cl;envDirty=true}}
+function volcErupt(){if(!volc)return;volc.t0=gameT;volc.next=gameT+1440*(3+Math.floor(Math.random()*4));
+  const day=Math.floor(gameT/1440)+1,mx=Math.min(10,2+Math.floor(day/5)),n=1+Math.floor(Math.random()*mx);volc.q=[];
+  const pick=()=>{const L=volc.lava[(Math.random()*volc.lava.length)|0]??volc.c,x=Math.max(0,Math.min(N-1,L%N+Math.round(Math.random()*14-7))),z=Math.max(0,Math.min(N-1,((L/N)|0)+Math.round(Math.random()*14-7)));return{from:L,i:idx(x,z)}};
+  for(let k=0;k<n;k++)volc.q.push({...pick(),at:gameT+Math.random()*50,fire:true});for(let k=0;k<n*2+5;k++)volc.q.push({...pick(),at:gameT+Math.random()*55,fire:false});
+  volc.n=n;volc.clOn=true;envDirty=true;
+  setHint(`<b>Erupcja wulkanu!</b> Kule magmy (${n}) mogą podpalić budynki do 7 pól od krateru, a chmura pyłu przez 12 godzin zanieczyszcza okolicę.`,true,true);hintEl.hidden=false;save()}
+const VB_G=new THREE.SphereGeometry(0.16,8,6),VB_M=new THREE.MeshBasicMaterial({color:'#ff7a1a'});VB_G.userData.keep=true;
+function volcTick(dt){if(!volc)return;if(volc.q&&volc.q.length){const top=volcTop()+0.3;
+    for(const q of volc.q)if(!q.m&&gameT>=q.at){q.m=new THREE.Mesh(VB_G,VB_M);q.y0=top;q.y1=tYi(q.i);scene.add(q.m)}
+    for(const q of volc.q){if(!q.m||q.done)continue;const p=Math.min(1,(gameT-q.at)/6),x0=cx(q.from),z0=cz(q.from),x1=cx(q.i),z1=cz(q.i);
+      q.m.position.set(x0+(x1-x0)*p,q.y0+(q.y1-q.y0)*p+Math.sin(Math.PI*p)*5,z0+(z1-z0)*p);
+      if(p>=1){q.done=true;scene.remove(q.m);if(q.fire&&hazOn('fire')){let j=q.i;if(grid[j]&&grid[j].t==='part')j=grid[j].main;const c=grid[j];if(canBurn(c)){if(startFire(j))float(j,'magma podpaliła budynek','warn')}}}}
+    volc.q=volc.q.filter(q=>!q.done)}}
+function volcBuild(){volcDirty=false;if(volcG){scene.remove(volcG);volcG=null}if(volcCloudG){scene.remove(volcCloudG);volcCloudG=null}if(!volc)return;
+  volcG=new THREE.Group();const m=new THREE.MeshBasicMaterial({color:'#ff5a14'});volcG.userData.m=m;
+  for(const i of volc.lava){const b=new THREE.Mesh(new THREE.BoxGeometry(1,0.12,1),m);b.position.set(cx(i),lvY(hgt[i])+0.07,cz(i));volcG.add(b)}scene.add(volcG);
+  volcCloudG=new THREE.Group();const cm=new THREE.MeshLambertMaterial({color:'#8d857e',transparent:true,opacity:0.55,depthWrite:false});volcCloudG.userData.m=cm;
+  for(let k=0;k<16;k++){const sp=new THREE.Mesh(new THREE.SphereGeometry(0.9+Math.random()*1.1,10,8),cm);const a=Math.random()*Math.PI*2,r=Math.random()*4.5;sp.userData.b=[Math.cos(a)*r,1.5+Math.random()*3,Math.sin(a)*r,Math.random()*6];volcCloudG.add(sp)}
+  volcCloudG.visible=false;scene.add(volcCloudG)}
+function volcAnim(){if(!volc||!volcG)return;const t=performance.now()/1000,act=volcActive();volcG.userData.m.color.setHSL(0.045+0.03*Math.sin(t*(act?6:1.5)),1,act?0.6:0.5);
+  const cl=volcCloud();volcCloudG.visible=cl;if(cl){const age=(gameT-volc.t0)/720,top=volcTop(),c=volc.c;volcCloudG.position.set(cx(c),top,cz(c));volcCloudG.userData.m.opacity=0.6*(age<0.08?age/0.08:1-Math.max(0,(age-0.6)/0.4));
+    for(const sp of volcCloudG.children){const b=sp.userData.b,g=Math.min(1,age*6+0.2);sp.position.set(b[0]*g+Math.sin(t*0.2+b[3])*0.3,b[1]*(0.5+0.5*g),b[2]*g)}}}
+/* 8.1.19: on the fjords the rivers partly freeze in winter – not where they flow out of the map nor near sewage outlets; dams on ice stop */
+var ice=new Uint8Array(N*N),iceDirty=false,iceG=null;
+function iceNoise(i){const x=i%N,z=(i/N)|0,h=(a,b)=>{let n=Math.imul(a,374761393)+Math.imul(b,668265263)|0;n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967295};
+  const gx=x/5,gz=z/5,ix=Math.floor(gx),iz=Math.floor(gz),sm=t=>t*t*(3-2*t),tx=sm(gx-ix),tz=sm(gz-iz),a=h(ix,iz),b=h(ix+1,iz),c=h(ix,iz+1),d=h(ix+1,iz+1);return a+(b-a)*tx+(c-a)*tz+(a-b-c+d)*tx*tz}
+function iceLevel(){if(mapType!=='tundra'||seasonIdx()!==3)return 0;const L=SEASON_DAYS*1440,p=((gameT%(4*L))-3*L)/L;return 0.55*Math.sin(Math.PI*Math.max(0,Math.min(1,p)))}
+function iceHour(){const f=iceLevel(),nw=new Uint8Array(N*N);
+  if(f>0.02){const warm=new Uint8Array(N*N),d=new Int16Array(N*N).fill(-1),q=[];
+    for(let i=0;i<N*N;i++){const x=i%N,z=(i/N)|0;if(water[i]&&(x===0||z===0||x===N-1||z===N-1)){d[i]=0;q.push(i)}}
+    for(let h=0;h<q.length;h++){const i=q[h];warm[i]=1;if(d[i]>=4)continue;for(const j of nbrs(i))if(water[j]&&d[j]<0){d[j]=d[i]+1;q.push(j)}}
+    for(let i=0;i<N*N;i++){const c=grid[i];if(!c||(c.t!=='outlet'&&c.t!=='outletB'))continue;const x=i%N,z=(i/N)|0;for(let dz=-3;dz<=3;dz++)for(let dx=-3;dx<=3;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)warm[idx(nx,nz)]=1}}
+    for(let i=0;i<N*N;i++)if(water[i]&&!warm[i]&&iceNoise(i)<f)nw[i]=1}
+  let ch=false;for(let i=0;i<N*N;i++)if(nw[i]!==ice[i]){ch=true;break}if(!ch)return;const was=ice.some(v=>v);ice=nw;iceDirty=true;powerDirty=true;
+  const now=ice.some(v=>v);if(now&&!was){setHint('<b>Rzeki zamarzają</b> · tamy na lodzie przestają dawać prąd, ujścia rzek i okolice wylotów ścieków nie zamarzają.',true,true);hintEl.hidden=false}else if(!now&&was){setHint('Odwilż: rzeki znów płyną.',false,true);hintEl.hidden=false}}
+function hydroIce(i){if(!ice[i]&&water[i])return false;if(water[i])return true;const k=nearWater(i);return k>=0&&!!ice[k]}
+function iceBuild(){iceDirty=false;if(iceG){scene.remove(iceG);iceG.geometry.dispose();iceG=null}const L=[];for(let i=0;i<N*N;i++)if(ice[i])L.push(i);if(!L.length)return;
+  const g=new THREE.BoxGeometry(1.002,0.05,1.002),m=new THREE.MeshLambertMaterial({color:'#e4f1fb',transparent:true,opacity:0.93});iceG=new THREE.InstancedMesh(g,m,L.length);const o=new THREE.Object3D();
+  L.forEach((i,k)=>{o.position.set(cx(i),wSurfY(i)-LOW_DROP*Math.min(3,lowW[i]||0)+0.02,cz(i));o.scale.set(1,1,1);o.updateMatrix();iceG.setMatrixAt(k,o.matrix)});scene.add(iceG)}
 function fireHour(){if(firstDay()||!hazOn('fire'))return;for(let i=0;i<N*N;i++){const c=grid[i];if(!canBurn(c)||c.off)continue;if(Math.random()<FIRE_P[fireGroup(c.t)])startFire(i)}}
 let fireFlash=0;
 /* helicopters fly straight to a fire within 25 tiles of their base, drop water from above, and fly back */
@@ -4236,7 +4293,7 @@ function computePower(dt){if(topoDirty||powerSig()!==topoSig)rebuildHV();compute
   {const seen=new Set();for(const i of gens){if(grid[i].t!=='hydro'||seen.has(i))continue;const cl=[i];seen.add(i);for(let h=0;h<cl.length;h++)for(const j of nbrs(cl[h]))if(grid[j]&&grid[j].t==='hydro'&&!grid[j].off&&!seen.has(j)){seen.add(j);cl.push(j)}
     const k=cl.map(j=>grid[j].net).find(v=>v>=0);for(const j of cl){grid[j].net=k===undefined?-1:k;grid[j].damN=cl.length}}}
   for(const i of gens){const c=grid[i];if(c.t==='wind'&&c.net>=0){c.wake=nbrs8(i).filter(j=>grid[j]&&grid[j].t==='wind').length;const mwv=Math.max(0,windMW(i)+(c.up2?3:0)-c.wake)+(c.up?SOLAR_MW*dayF:0);c.windMW=mwv;sup[c.net]+=mwv;cap+=mwv}}
-  for(const i of gens){const c=grid[i];c.mw=0;if(c.net<0)continue;if(c.t==='hydro'){c.mw=water[i]?(damSealed[i]?Math.round(12*Math.pow(DAM_EFF,damRank[i])*10)/10:0):nearWater(i)>=0?15:0;sup[c.net]+=c.mw;cap+=c.mw}
+  for(const i of gens){const c=grid[i];c.mw=0;if(c.net<0)continue;if(c.t==='hydro'){c.mw=hydroIce(i)?0:water[i]?(damSealed[i]?Math.round(12*Math.pow(DAM_EFF,damRank[i])*10)/10:0):nearWater(i)>=0?15:0;sup[c.net]+=c.mw;cap+=c.mw}
     if(c.t==='hydrogen'){if(c.model)c.model.userData.off=!(c.water==='ok'||c.water==='dirty');c.mw=(c.water==='ok'?60:c.water==='dirty'?30:0)+(c.up&&c.water==='ok'?30:c.up&&c.water==='dirty'?15:0);sup[c.net]+=c.mw;cap+=c.mw}}
   /* fuel plants: coal burns mined coal, the biomass plant burns wood; both start only when the rest of the network falls short */
   for(const i of gens){const c=grid[i];if(c.t!=='coal'&&c.t!=='biomass')continue;const bio=c.t==='biomass',fk=bio?'wood':'coal';c.running=false;c.fuel=c.fuel||0;
@@ -4373,6 +4430,7 @@ function computeEnv0(){retCov.fill(0);for(let i=0;i<N*N;i++){const c=grid[i];if(
   /* 8.1: a lyceum and a technikum boost the whole city, once: more of them adds nothing */
   {let L=false,T=false;for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.off||c.powered===false||!EDU[c.t])continue;if(EDU[c.t].lyc)L=true;if(EDU[c.t].tech)T=true}
    for(let i=0;i<N*N;i++){const c=grid[i];if(!c||c.t==='part')continue;c.lyc=L;c.techB=T}}
+  if(volcCloud())stamp(pol,volc.c,5,d=>d<=3?2:1,true);
   paintGround(pol);envDirty=false}
 const TAX_BASE=10;let taxRate=12;
 /* taxes: on homes by building type (%), on every purchase (%), a tourist tax per visit (T¢) and a communal tax on residents (%) */
@@ -4618,7 +4676,7 @@ function terraform(i,painting){if(!painting){brushDone.clear();strokeH=null}if((
   if(!want.size){for(const j of ts)brushDone.add(j);return}
   let cost=0;for(const[j,h]of want)cost+=DEF[tool].cost*Math.abs(h-hgt[j]);if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢.`,true,true);return}
   spend(cost);for(const[j,h]of want)setH(j,h);for(const j of ts)brushDone.add(j);save()}
-function setH(i,h){gridVerN++;hgt[i]=h;fld[i]=0;landDirty=true;groundSig=-1;envDirty=true;if(dep[i])depDirty=true;
+function setH(i,h){if(volc&&volcLock[i])return;gridVerN++;hgt[i]=h;fld[i]=0;landDirty=true;groundSig=-1;envDirty=true;if(dep[i])depDirty=true;
   /* dug down to the water beside it: the tile becomes water */
   const w=nbrs(i).filter(j=>water[j]);if(w.length&&h<=Math.max(...w.map(j=>wlv[j]))){water[i]=1;wKnown[i]=1;wlv[i]=Math.max(h,...w.map(j=>wlv[j]));clearDeco(i);applyWater()}
   for(const j of[i,...nbrs(i)])if(grid[j]){if(DRIVE[grid[j].t])rebuildRoad(j);else refreshBuilding(j)}floodCheck=0;groundDeco(i,!grid[i]&&!water[i]);redecoY(i)}
@@ -4671,7 +4729,7 @@ sel.rotation.x=-Math.PI/2;sel.visible=false;scene.add(sel);
 const placeEl=document.getElementById('place');
 const curT=()=>moveSrc>=0&&grid[moveSrc]?grid[moveSrc].t:tool;
 function curFP(){if(moveSrc>=0){const f=(grid[moveSrc]&&!grid[moveSrc].tiles?null:FP0(curT()))||[1,1];return rotIdx%2?[f[1],f[0]]:f}return FP(tool)}
-const freeFor=j=>!water[j]&&(!grid[j]||(moveSrc>=0&&(j===moveSrc||(grid[j].t==='part'&&grid[j].main===moveSrc))));
+const freeFor=j=>!water[j]&&!(volc&&volcLock[j])&&(!grid[j]||(moveSrc>=0&&(j===moveSrc||(grid[j].t==='part'&&grid[j].main===moveSrc))));
 const fpCost=()=>moveSrc>=0?moveCost(grid[moveSrc]):DEF[tool].cost;
 const moveCost=c=>Math.floor(DEF[c.t].cost/2);
 const rotCost=c=>Math.ceil((DEF[c.t].cost||0)/4);
@@ -4747,6 +4805,7 @@ function toolHint(){
   if(roadMode())return`<b>${DEF[tool].name} wzdłuż drogi</b> · przeciągnij od jednej ulicy do drugiej: ${tool==='pipe'?'rura pójdzie':'słupy pójdą'} trasą drogi. Zobaczysz szkic i zatwierdzisz go przyciskiem „Zbuduj”.`;
   const d=DEF[tool];return`<b>${d.name}</b> · ${d.cost?fmt(d.cost)+' T¢ · ':''}${d.desc}`+(isTunT(tool)?' PgDn/PgUp: widok podziemny.':'')+(FP(tool)?` Stuknij miejsce, obróć i zatwierdź (${FP(tool).join('×')}).`:BUILD[tool]&&!DRIVE[tool]?' R obraca budynek.':'')+(DEMAND[tool]?` Pobiera ${mw(DEMAND[tool])} MW.`:'')+(UPKEEP[tool]?` Utrzymanie ${UPKEEP[tool]} T¢/godz.`:'')}
 function apply(i,painting){
+  if(volc&&volcLock[i]&&tool!=='view'&&tool!=='bulldoze'&&moveSrc<0){if(!painting){setHint('<b>Wulkan</b> · na jego stożku, w kraterze ani pod nim nie da się nic zbudować ani zmienić terenu.',true,true);hintEl.hidden=false}return}
   if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{apply(i,painting)}finally{tool=sv}return}
   if(moveSrc>=0){if(painting)return;if(!grid[moveSrc]){moveSrc=-1;return}pendA=i;updateGhost();return}
   if(tool==='busStop'){if(!painting)placeStop(i);return}
@@ -5010,6 +5069,7 @@ function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];i
   if(c.t==='bank')R('Limit gotówki',`+${fmt(BANK_CAP*(c.up?2:1))} T¢`+(c.powered?'':' (nieaktywny)'));
   if(PARKS.includes(c.t)){const r=parkR(c);R('Zasięg',`${2*r+1}×${2*r+1}`);if(full)R('Stan','nie działa: pełno śmieci','warnv')}
   if(c.t==='wind'){if(c.wake)R('Sąsiednie wiatraki',`${c.wake} · −${c.wake} MW`,'warnv');R('Moc',`${Math.max(0,windMW(i)+(c.up2?3:0)-(c.wake||0))} MW`+(c.up?` + ${mw(Math.round(SOLAR_MW*dayF*10)/10)} MW z paneli`:''));R('Sieć',c.net>=0?'podłączony':'brak transformatora obok',c.net>=0?'':'warnv')}
+  if(c.t==='hydro'&&hydroIce(i))R('Lód','rzeka zamarzła – turbiny stoją do odwilży','warnv');
   if(c.t==='hydro'&&water[i])R('Przepływ',damSealed[i]?(damRank[i]?`zatamowany · ${damRank[i]+1}. tama w kaskadzie: mniej wody, wydajność ${Math.round(Math.pow(DAM_EFF,damRank[i])*100)}%`:'zatamowany, turbiny pracują'):'woda omija tamę: zatamuj całą szerokość koryta (a poniżej połączenia rzek każdą rzekę, która tu wpływa)',damSealed[i]?'':'warnv');
   if(c.t==='hydro'){R('Tama',`${c.damN||1} ${(c.damN||1)===1?'segment':'segmenty'} · ${mw((c.damN||1)*(c.mw||0))} MW razem`);R('Moc segmentu',c.net<0?'niepodłączona: transformator obok albo słup WN':`${c.mw||0} MW`,c.net<0?'warnv':'')}
   if(PARKS.includes(c.t)||isFarm(c.t))R('Zabrudzenie smogiem',`${Math.round((c.dirt||0)*100)}%`+((c.dirt||0)>=0.5?(isFarm(c.t)?' · plony słabsze':' · park nie daje zadowolenia'):'')+(svcBases().some(b=>svcCover(b,i))?' · w zasięgu służb':' · poza zasięgiem służb drogowych'),(c.dirt||0)>=0.5?'warnv':'');
@@ -5516,7 +5576,13 @@ function openMaps(cancel){paused=true;mapsEl.hidden=false;document.getElementByI
   document.getElementById('mapsSub').textContent=hasSave()?'Nazwij miasto, wybierz trudność i teren. Obecne miasto zostanie zastąpione.':'Nazwij miasto, wybierz trudność i ukształtowanie terenu.';ci.focus();ci.select()}
 const diffBtns=[...mapsEl.querySelectorAll('[data-diff]')];function showDiff(){for(const b of diffBtns)b.setAttribute('aria-checked',String(b.dataset.diff===diffPick))}showDiff();
 for(const b of diffBtns)b.addEventListener('click',()=>{diffPick=b.dataset.diff;showDiff()});
-for(const b of mapsEl.querySelectorAll('.mapb'))b.addEventListener('click',()=>{mapsEl.hidden=true;overEl.hidden=true;newCity(b.dataset.map,diffPick,document.getElementById('cityIn').value);paused=false;prev=performance.now()});
+const CLIMATE={carib:'Na największej wyspie stoi wulkan. Co kilka dni wybucha: kule magmy mogą podpalić budynki do 7 pól od krateru, a chmura pyłu przez 12 godzin zanieczyszcza teren 11×11 pól. Na stożku wulkanu, w kraterze i pod nim nie da się nic zbudować ani zmienić terenu.',oasis:'Latem jeziora w oazach wysychają, a zimą zieleń się rozrasta. Planuj wodę i zabudowę z myślą o porach roku.',tundra:'Zimą rzeki częściowo zamarzają (poza miejscami, gdzie wypływają z mapy, i okolicą wylotów ścieków). Tamy na zamarzniętej wodzie przestają wtedy dawać prąd.'};
+let mapPend=null;const mapWarnEl=document.getElementById('mapWarn');
+function startMap(m){mapPend=null;mapWarnEl.hidden=true;mapsEl.hidden=true;overEl.hidden=true;newCity(m,diffPick,document.getElementById('cityIn').value);paused=false;prev=performance.now()}
+for(const b of mapsEl.querySelectorAll('.mapb'))b.addEventListener('click',()=>{const m=b.dataset.map;if(!CLIMATE[m])return startMap(m);mapPend=m;document.getElementById('mapWarnT').textContent=CLIMATE[m];mapWarnEl.hidden=false;
+  for(const q of mapsEl.querySelectorAll('.mapb'))q.classList.toggle('pick',q===b);try{mapWarnEl.scrollIntoView({block:'nearest'})}catch(e){}});
+document.getElementById('mapGo').addEventListener('click',()=>{if(mapPend)startMap(mapPend)});
+document.getElementById('mapBack').addEventListener('click',()=>{mapPend=null;mapWarnEl.hidden=true;for(const q of mapsEl.querySelectorAll('.mapb'))q.classList.remove('pick')});
 document.getElementById('mapsNo').addEventListener('click',()=>{mapsEl.hidden=true;if(titleOpen)return;if(gameOver){overEl.hidden=false;return}openMenu()});
 function checkBankrupt(){if(gameOver||money>=-2000)return;gameOver=true;paused=true;closeHouse();menuEl.hidden=true;overEl.hidden=false;
   document.getElementById('overSub').textContent=`Dług miasta przekroczył 2 000 T¢ (stan konta ${fmt(money)} T¢). Bank przejął kasę miejską i gra jest przegrana.`;save()}
@@ -5885,7 +5951,7 @@ let saveReq=false,saveRT=0;
 function save(){if(window.__testUnlock||saveBlocked||window.__LT_EDITOR)return writeSave();saveReq=true}
 function writeSave(){saveReq=false;saveRT=0;if(saveBlocked||window.__LT_EDITOR)return;try{const cells=[],wl=[];grid.forEach((c,i)=>{if(c){if(c.t==='part')return;cells.push(rowOf(c,i))}});for(let i=0;i<N*N;i++)if(water[i])wl.push(i);
   const old=localStorage.getItem(KEY);if(old)localStorage.setItem(KEY+'-prev',old);
-  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),oasL:mapType==='oasis'?(()=>{const o=[];for(let i=0;i<N*N;i++)if(natLake(i))o.push(i);return o})():undefined,map:mapType,diff,tut,tax:taxRate,taxes:TAX,ord:ORD,law:{b:Object.keys(LAWB),t:Object.keys(LAWT),u:Object.keys(LAWU),rp:Math.round(research*10)/10},loan,pend:[Math.round(pendIn),Math.round(pendOut)],sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),bus:[...grid.keys()].filter(i=>grid[i]&&grid[i].bus).map(i=>grid[i].sname?[i,grid[i].bus,stopAxOf(i),grid[i].sname]:[i,grid[i].bus,stopAxOf(i)]),tl:tLines.map(L=>({id:L.id,kind:L.kind,name:L.name,col:L.col,stops:[...L.stops],veh:L.veh,on:L.on?1:0,...(L.hid?{hid:1}:{})})),tls:lineSeq,litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),dep:[...dep.keys()].filter(i=>dep[i]).map(i=>[i,dep[i]]),hg:hgtStr(),wv:[...wlv.keys()].filter(i=>water[i]&&wlv[i]!==hgt[i]).map(i=>[i,wlv[i]]),fl:[...fld.keys()].filter(i=>fld[i]).map(i=>[i,fld[i]]),ms:msLevel,n:N,whst:1,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
+  localStorage.setItem(KEY,JSON.stringify({savedAt:Date.now(),pipes:[...pipe.keys()].filter(i=>pipe[i]),edges:edgeOuts().length?[...grid.keys()].filter(i=>grid[i]&&grid[i].edge).map(i=>[i,grid[i].edgeOut?1:0]):[],cells,water:wl,money,matl,goods,gameT,cur,hist:hist.slice(-48),oasL:mapType==='oasis'?(()=>{const o=[];for(let i=0;i<N*N;i++)if(natLake(i))o.push(i);return o})():undefined,map:mapType,volc:volc?{c:volc.c,R:volc.R,n:volc.next,t:volc.t0}:undefined,diff,tut,tax:taxRate,taxes:TAX,ord:ORD,law:{b:Object.keys(LAWB),t:Object.keys(LAWT),u:Object.keys(LAWU),rp:Math.round(research*10)/10},loan,pend:[Math.round(pendIn),Math.round(pendOut)],sv:4,rails:[...grid.keys()].filter(i=>grid[i]&&grid[i].rail),cross:[...grid.keys()].filter(i=>grid[i]&&grid[i].cross),bus:[...grid.keys()].filter(i=>grid[i]&&grid[i].bus).map(i=>grid[i].sname?[i,grid[i].bus,stopAxOf(i),grid[i].sname]:[i,grid[i].bus,stopAxOf(i)]),tl:tLines.map(L=>({id:L.id,kind:L.kind,name:L.name,col:L.col,stops:[...L.stops],veh:L.veh,on:L.on?1:0,...(L.hid?{hid:1}:{})})),tls:lineSeq,litter:[...grid.keys()].filter(i=>grid[i]&&grid[i].litter).map(i=>[i,grid[i].litter]),dep:[...dep.keys()].filter(i=>dep[i]).map(i=>[i,dep[i]]),hg:hgtStr(),wv:[...wlv.keys()].filter(i=>water[i]&&wlv[i]!==hgt[i]).map(i=>[i,wlv[i]]),fl:[...fld.keys()].filter(i=>fld[i]).map(i=>[i,fld[i]]),ms:msLevel,n:N,whst:1,name:cityName,imports:Object.fromEntries(Object.entries(imports).map(([k,t])=>[k,Math.round(t-gameT)]))}))}catch(e){}}
 function load(){if(loadKey(KEY))return true;if(oldSave){try{const r=localStorage.getItem(KEY);if(r&&!localStorage.getItem(KEY+'-pre4'))localStorage.setItem(KEY+'-pre4',r)}catch(e){}saveBlocked=true;return false}if(loadKey(KEY+'-prev')){setHint('Ostatni zapis był uszkodzony, wczytano poprzedni.',true,true);return true}
   let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
   if(raw){saveBlocked=true;try{localStorage.setItem(KEY+'-broken',raw)}catch(e){}setHint('Nie udało się wczytać zapisu. Kopia jest bezpieczna i gra jej nie nadpisze. Tylko „Zresetuj miasto” zaczyna od nowa.',true,true);hintTimer=12}
@@ -5929,7 +5995,7 @@ function loadKey(K){loadFires=[];try{let s=JSON.parse(localStorage.getItem(K)||'
   mapType=MAPS[s.map]?s.map:'standard';oasNat=null;if(Array.isArray(s.oasL)){oasNat=new Uint8Array(N*N);for(const i of s.oasL)if(i>=0&&i<N*N)oasNat[i]=1}applyTheme();
   if(Array.isArray(s.water)){water.fill(0);for(const i of s.water)water[i]=1}
   else{const av=new Uint8Array(N*N);for(const[i]of s.cells){const x=i%N,z=(i/N)|0;for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,nz=z+dz;if(nx>=0&&nz>=0&&nx<N&&nz<N)av[idx(nx,nz)]=1}}genRivers(av)}
-  hgtLoad(s);applyWater();drawFlood();
+  hgtLoad(s);applyWater();drawFlood();try{volcLoad(s)}catch(e){console.warn(e)}ice.fill(0);iceDirty=true;
   /* 8.1.12: roads load with their extras too: the deck height of tunnels and bridges and the street on top of a tunnel (it used to be lost on loading) */
   const thMiss=[];for(const[i,t,p,,,,,,x]of s.cells)if(DRIVE[t]){try{const hasTh=x&&x.th!=null&&(t==='tunnel'||t==='bridge');if(hasTh)deckNext=+x.th;addCell(i,t,false);deckNext=null;const c=grid[i];if(p)c.pole=true;
       if(t==='tunnel'&&!hasTh)thMiss.push(i);if(x&&t==='tunnel'&&(x.ov==='x'||x.ov==='z')){c.ov=x.ov;c.ovT=(STREET[x.ovT]||x.ovT==='highway')?x.ovT:'road'}if(x&&x.scr&&t==='highway')c.scr=true;if(x&&x.nb>0)c.nb=x.nb&15}catch(e){console.warn('pole zapisu pominięte',i,t,e)}}
@@ -6084,7 +6150,7 @@ function frame(now){requestAnimationFrame(frame);
   if(landDirty)buildLand();terrainTick(dt);
   buildOcc();for(const c of cars)if(!c.dead){updateCar(c,dt);liftY(c.mesh)}
   if(cars.some(c=>c.dead))cars=cars.filter(c=>!c.dead);
-  constructTick(paused&&!titleOpen?rdt:dt);shipTick(dt);policeTick(dt,night);svcTick(dt);fireTick(dt);heliTick(dt);transportTick(dt);transitTick(dt);riverTick(dt);tutTick(Math.max(dt,0.016));ovlTick(Math.max(dt,0.016));
+  constructTick(paused&&!titleOpen?rdt:dt);shipTick(dt);policeTick(dt,night);svcTick(dt);fireTick(dt);try{volcTick(dt)}catch(e){console.warn(e)}heliTick(dt);transportTick(dt);transitTick(dt);riverTick(dt);tutTick(Math.max(dt,0.016));ovlTick(Math.max(dt,0.016));
   for(let k=popping.length-1;k>=0;k--){const p=popping[k];p.t+=vdt*5;const s=p.t>=1?1:0.5+0.5*Math.sin(p.t*Math.PI/2)*1.08;p.g.scale.setScalar(Math.min(s,1.05));if(p.t>=1){p.g.scale.setScalar(1);popping.splice(k,1)}}
   powerAcc+=dt;if(powerAcc>=0.5||powerDirty){computePower(powerAcc);powerAcc=0}
   const hBefore=Math.floor(gameT/60),tenthBefore=Math.floor(gameT/6);gameT+=dt;cur.secs+=dt;cur.powDem+=pw.dem*dt;if(pw.cat){cur.powCat=cur.powCat||{};for(const k in pw.cat)cur.powCat[k]=(cur.powCat[k]||0)+pw.cat[k]*dt}if(pw.gen){cur.genCat=cur.genCat||{};for(const k in pw.gen)cur.genCat[k]=(cur.genCat[k]||0)+pw.gen[k]*dt}cur.wDem=(cur.wDem||0)+wtr.dem*dt;cur.wClean=(cur.wClean||0)+wtr.clean*dt;cur.wDirty=(cur.wDirty||0)+wtr.dirty*dt;cur.wTreat=(cur.wTreat||0)+wtr.treated*dt;cur.wOut=(cur.wOut||0)+wtr.out*dt;cur.wOver=(cur.wOver||0)+wtr.over*dt;cur.powCap+=pw.cap*dt;
@@ -6093,7 +6159,7 @@ function frame(now){requestAnimationFrame(frame);
     if(bill>0){owe(bill);cur.upkeep+=bill}}
   checkBankrupt();
   if(Math.floor(gameT/1440)!==Math.floor((gameT-dt)/1440))loanDay();
-  if(Math.floor(gameT/60)!==hBefore){{const six=Math.floor(gameT/60)%6===0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HLV[c.t])lifeHour(i,c,six)}envDirty=true;powerDirty=true}deathTick();fireHour();needsHour();ordHour();depotHour();transitHour();{const tx=taxIncome();if(tx>0){const n=earn(tx);cur.inc+=n;cur.taxInc=(cur.taxInc||0)+n}const ut=utilIncome();if(ut>0){const n=earn(ut);cur.inc+=n;cur.utilTax=(cur.utilTax||0)+n}litterHour();dirtHour();}{const w=inmates().w;if(w>0){const n=addMoney(w);cur.inc+=n;cur.prisonInc=(cur.prisonInc||0)+n}}
+  if(Math.floor(gameT/60)!==hBefore){{const six=Math.floor(gameT/60)%6===0;for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HLV[c.t])lifeHour(i,c,six)}envDirty=true;powerDirty=true}deathTick();fireHour();try{volcHour()}catch(e){console.warn(e)}try{iceHour()}catch(e){console.warn(e)}needsHour();ordHour();depotHour();transitHour();{const tx=taxIncome();if(tx>0){const n=earn(tx);cur.inc+=n;cur.taxInc=(cur.taxInc||0)+n}const ut=utilIncome();if(ut>0){const n=earn(ut);cur.inc+=n;cur.utilTax=(cur.utilTax||0)+n}litterHour();dirtHour();}{const w=inmates().w;if(w>0){const n=addMoney(w);cur.inc+=n;cur.prisonInc=(cur.prisonInc||0)+n}}
 settleHour();cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=L0();if(Math.floor(gameT/60)%24===0)dayReport();save()}
   statsAcc+=vdt;if(!statsEl.hidden&&statsAcc>0.5){statsAcc=0;renderStats()}
   for(const g of factories){const b=g.userData.sb||{x:0.3,y:0.85,z:-0.25,spread:0.25};const on=!g.userData.off&&!reduce;const ps=g.userData.puffs||[];
@@ -6120,6 +6186,7 @@ settleHour();cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=
     const sz=renderer.getDrawingBufferSize(new THREE.Vector2());
     if(sz.x!==Math.round(app.clientWidth*renderer.getPixelRatio()))resize();
     renderer.render(scene,camera);window.__drawn=true;document.getElementById('err').hidden=true;return}
+  if(volcDirty)try{volcBuild()}catch(e){volcDirty=false;console.warn(e)}if(iceDirty)try{iceBuild()}catch(e){iceDirty=false;console.warn(e)}volcAnim();
   renderer.render(scene,camera)}
 if(!ED)requestAnimationFrame(frame);
 /* the model editor (a separate page) reads the game's models through this */
@@ -8457,7 +8524,23 @@ const LT_TR=[
 ["Brakuje {} T¢ na obrócenie.", "{} T¢ short to rotate.", "Es fehlen {} T¢ zum Drehen."],
 ["Ten budynek się pali – nie można go obrócić.", "This building is on fire – it can't be rotated.", "Dieses Gebäude brennt – es kann nicht gedreht werden."],
 ["Wybierz, w którą stronę ma patrzeć front budynku. Obrót kosztuje ¼ ceny: ", "Choose which way the front of the building should face. Rotating costs ¼ of the price: ", "Wähle, wohin die Vorderseite des Gebäudes zeigen soll. Drehen kostet ¼ des Preises: "],
-["Działy budowy", "Build sections", "Baubereiche"]
+["Działy budowy", "Build sections", "Baubereiche"],
+["Wulkan", "Volcano", "Vulkan"],
+[" · na jego stożku, w kraterze ani pod nim nie da się nic zbudować ani zmienić terenu.", " · nothing can be built and the terrain can't be changed on its cone, in the crater or under it.", " · auf seinem Kegel, im Krater und darunter kann nichts gebaut und das Gelände nicht verändert werden."],
+["Erupcja wulkanu!", "Volcanic eruption!", "Vulkanausbruch!"],
+[" Kule magmy ({}) mogą podpalić budynki do 7 pól od krateru, a chmura pyłu przez 12 godzin zanieczyszcza okolicę.", " Magma bombs ({}) can set buildings on fire up to 7 tiles from the crater, and an ash cloud pollutes the area for 12 hours.", " Magmabomben ({}) können Gebäude bis zu 7 Felder vom Krater entfernt in Brand setzen, und eine Aschewolke verschmutzt die Umgebung 12 Stunden lang."],
+["magma podpaliła budynek", "magma set the building on fire", "Magma hat das Gebäude in Brand gesetzt"],
+["Rzeki zamarzają", "Rivers are freezing", "Die Flüsse frieren zu"],
+[" · tamy na lodzie przestają dawać prąd, ujścia rzek i okolice wylotów ścieków nie zamarzają.", " · dams on ice stop producing power; river mouths and the areas around sewage outlets don't freeze.", " · Dämme auf dem Eis liefern keinen Strom mehr; Flussmündungen und die Umgebung von Abwasserausläufen frieren nicht zu."],
+["Odwilż: rzeki znów płyną.", "Thaw: the rivers flow again.", "Tauwetter: Die Flüsse fließen wieder."],
+["Lód", "Ice", "Eis"],
+["rzeka zamarzła – turbiny stoją do odwilży", "the river has frozen – the turbines stand still until the thaw", "der Fluss ist zugefroren – die Turbinen stehen bis zum Tauwetter still"],
+["Uwaga: zmienny klimat", "Warning: changing climate", "Achtung: wechselhaftes Klima"],
+["Rozumiem, zaczynam", "Got it, start", "Verstanden, los geht's"],
+["Wybierz inną mapę", "Choose another map", "Andere Karte wählen"],
+["Na największej wyspie stoi wulkan. Co kilka dni wybucha: kule magmy mogą podpalić budynki do 7 pól od krateru, a chmura pyłu przez 12 godzin zanieczyszcza teren 11×11 pól. Na stożku wulkanu, w kraterze i pod nim nie da się nic zbudować ani zmienić terenu.", "A volcano stands on the biggest island. It erupts every few days: magma bombs can set buildings on fire up to 7 tiles from the crater, and an ash cloud pollutes an 11×11-tile area for 12 hours. Nothing can be built and the terrain can't be changed on the cone, in the crater or under it.", "Auf der größten Insel steht ein Vulkan. Er bricht alle paar Tage aus: Magmabomben können Gebäude bis zu 7 Felder vom Krater entfernt in Brand setzen, und eine Aschewolke verschmutzt 12 Stunden lang ein Gebiet von 11×11 Feldern. Auf dem Kegel, im Krater und darunter kann nichts gebaut und das Gelände nicht verändert werden."],
+["Latem jeziora w oazach wysychają, a zimą zieleń się rozrasta. Planuj wodę i zabudowę z myślą o porach roku.", "In summer the oasis lakes dry up, and in winter the greenery spreads. Plan water and buildings with the seasons in mind.", "Im Sommer trocknen die Oasenseen aus, im Winter breitet sich das Grün aus. Plane Wasser und Bebauung mit Blick auf die Jahreszeiten."],
+["Zimą rzeki częściowo zamarzają (poza miejscami, gdzie wypływają z mapy, i okolicą wylotów ścieków). Tamy na zamarzniętej wodzie przestają wtedy dawać prąd.", "In winter the rivers partly freeze (except where they flow off the map and around sewage outlets). Dams on frozen water then stop producing power.", "Im Winter frieren die Flüsse teilweise zu (außer dort, wo sie die Karte verlassen, und rund um Abwasserausläufe). Dämme auf gefrorenem Wasser liefern dann keinen Strom."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
