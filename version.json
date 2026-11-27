@@ -1,1 +1,1 @@
-{"v": "8.3.0", "notes": "8.3.0: szczegółowe opcje grafiki (presety Niska–Ultra, rozdzielczość renderowania, MSAA/FXAA/SMAA, cienie, tone mapping, bloom z siłą, ambient occlusion SAO, winieta, nasycenie, kontrast), licznik FPS (F2), pełny ekran, język jako lista rozwijana"}
+{"v": "8.4.0", "notes": "8.4.0: 3 sloty zapisu (różne miasta i mapy), opcje w 3 szerokich zakładkach, czytelniejszy pasek budowy, bloom słabszy o 30%, usunięte SSAO"}
