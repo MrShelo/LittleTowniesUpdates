@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.4.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.4.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2850,8 +2850,8 @@ function paintGround(pol){let SK=0;try{SK=snowOn()?3:seasonIdx()===2?2:seasonIdx
   if(volc){const bx=volc.c%N,bz=(volc.c/N)|0,Ri=Math.ceil(volc.R)+3;for(let z=bz-Ri;z<=bz+Ri;z++)for(let x=bx-Ri;x<=bx+Ri;x++){if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);if(water[i])continue;const r=Math.hypot(x-bx,z-bz),X=x*32,Z=z*32;
     const hs=k=>{let v=(i*374761393+k*668265263)|0;v=Math.imul(v^(v>>>13),1274126177);return((v^(v>>>16))>>>0)/4294967295};
     if(volcLock[i]){g2.fillStyle='#2e2a27';g2.fillRect(X,Z,32,32);
-      for(let k=0;k<7;k++){const w=4+Math.floor(hs(k)*3)*2,x=Math.floor(hs(k+20)*(32-w)),z=Math.floor(hs(k+40)*(32-w));g2.fillStyle=k<3?'#1d1b19':k<6?'#433d39':'#5a534e';g2.fillRect(X+x,Z+z,w,w);if(k>=3&&k<6){g2.fillStyle='#2e2a27';g2.fillRect(X+x+2,Z+z+2,Math.max(2,w-4),Math.max(2,w-4))}}}
-    else if(r<=volc.R+2){for(let k=0;k<3;k++){if(hs(k+60)>0.55)continue;const w=4+Math.floor(hs(k+70)*2)*2;g2.fillStyle=k?'#3b3632':'#4c4642';g2.fillRect(X+Math.floor(hs(k+80)*(32-w)),Z+Math.floor(hs(k+90)*(32-w)),w,w)}}}}
+      for(let k=0;k<3;k++){const w=4+Math.floor(hs(k)*3)*2,x=Math.floor(hs(k+20)*(32-w)),z=Math.floor(hs(k+40)*(32-w));g2.fillStyle=k<1?'#1d1b19':k<2?'#433d39':'#5a534e';g2.fillRect(X+x,Z+z,w,w);if(k===1){g2.fillStyle='#2e2a27';g2.fillRect(X+x+2,Z+z+2,Math.max(2,w-4),Math.max(2,w-4))}}}
+    else if(r<=volc.R+2){for(let k=0;k<1;k++){if(hs(k+60)>0.6)continue;const w=4+Math.floor(hs(k+70)*2)*2;g2.fillStyle=k?'#3b3632':'#4c4642';g2.fillRect(X+Math.floor(hs(k+80)*(32-w)),Z+Math.floor(hs(k+90)*(32-w)),w,w)}}}}
   for(let i=0;i<N*N;i++){if(!water[i])continue;const x=i%N,z=(i/N)|0;g2.fillStyle=lakeDry(i)?'#b99a5c':'#3d82b5';g2.fillRect(x*32,z*32,32,32);if(lakeDry(i)){g2.strokeStyle='rgba(120,92,50,.6)';g2.lineWidth=1.5;g2.beginPath();g2.moveTo(x*32+4,z*32+10+(i%7));g2.lineTo(x*32+16,z*32+16);g2.lineTo(x*32+28,z*32+8+(i%5));g2.moveTo(x*32+16,z*32+16);g2.lineTo(x*32+14+(i%6),z*32+29);g2.stroke()}
     g2.fillStyle='rgba(224,206,150,.95)';
     for(const[dx,dz]of[[0,1],[1,0],[0,-1],[-1,0]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N||water[nz*N+nx])continue;
@@ -3019,7 +3019,10 @@ const mat={road:M('#3d4248'),dash:M('#ece3bf'),roof:M('#9b4a3a'),roof2:M('#5e6f8
 mat.skylight=M('#9cb7c4');
 mat.head=M('#f3ecd2');mat.tail=M('#7a2a24');
 mat.beam=new THREE.MeshBasicMaterial({color:'#ffe6a3',transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending});
-const CL={light:new THREE.BoxGeometry(0.045,0.028,0.016),beam:new THREE.PlaneGeometry(0.24,0.5).rotateX(-Math.PI/2)};CL.light.userData.keep=true;CL.beam.userData.keep=true;
+const CL={light:new THREE.BoxGeometry(0.045,0.028,0.016),beam:new THREE.PlaneGeometry(0.24,0.5).rotateX(-Math.PI/2),pool:new THREE.PlaneGeometry(1.7,1.7).rotateX(-Math.PI/2)};CL.light.userData.keep=true;CL.beam.userData.keep=true;CL.pool.userData.keep=true;
+/* 8.4.5: street lamps throw a warm pool of light on the road at night */
+mat.pool=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d'),gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,226,150,1)');gr.addColorStop(0.35,'rgba(255,214,130,.55)');gr.addColorStop(0.7,'rgba(255,200,110,.15)');gr.addColorStop(1,'rgba(255,200,110,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);
+  const t=new THREE.CanvasTexture(c);return new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2})})();
 for(const k in CL)CL[k].userData.keep=true;
 const houseCols=['#efd2b4','#e9e2cf','#cfe0d6','#f2c9be','#d6dbe8','#e7d9a8'].map(M);
 mat.signB=M('#2f6fb5');
@@ -4584,6 +4587,7 @@ function rebuildRoad(i){const c=grid[i];if(!c||!DRIVE[c.t])return;const g=c.grou
     const pl=new THREE.Mesh(G.pole,mat.wood);pl.position.set(P,0,P);pl.castShadow=true;g.add(pl);
     const arm=new THREE.Mesh(G.arm,mat.wood);arm.position.set(P,H-0.04,P);arm.rotation.y=Math.PI/4;g.add(arm);
     const lamp=new THREE.Mesh(G.lamp,mat.lamp);lamp.position.set(P-0.07,H-0.07,P-0.07);g.add(lamp);
+    {const pool=new THREE.Mesh(CL.pool,mat.pool);pool.position.set(P*0.45,(c.t==='highway'?0.075:0.045),P*0.45);pool.renderOrder=3;g.add(pool)}
     const top=new THREE.Vector3(P,H-0.03,P);
     for(const[dx,dz]of DIRS){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const nb=grid[idx(nx,nz)];if(!nb)continue;
       if(isLV(idx(nx,nz))&&(dx>0||dz>0)){const o=poleOff(idx(nx,nz));g.add(wire(top,new THREE.Vector3(o+dx,H-0.03,o+dz)))}
@@ -5684,7 +5688,7 @@ function volcTick(dt){if(!volc)return;if(volc.q&&volc.q.length){const top=volcTo
     volc.q=volc.q.filter(q=>!q.done)}}
 var lavaTexC=null;function lavaTex(){if(lavaTexC)return lavaTexC;const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d');g.fillStyle='#ff6a12';g.fillRect(0,0,32,32);
   let sd=11;const r=()=>{sd=(sd*9301+49297)%233280;return sd/233280};
-  for(const[col,n,s0]of[['#e8480c',7,6],['#ff8a1c',9,5],['#ffb02e',8,4],['#ffd955',6,2]])for(let k=0;k<n;k++){const w=s0+Math.floor(r()*3)*2,x=Math.floor(r()*32),y=Math.floor(r()*32);g.fillStyle=col;
+  for(const[col,n,s0]of[['#e8480c',3,6],['#ff8a1c',4,5],['#ffb02e',3,4],['#ffd955',2,2]])for(let k=0;k<n;k++){const w=s0+Math.floor(r()*3)*2,x=Math.floor(r()*32),y=Math.floor(r()*32);g.fillStyle=col;
     for(const dx of[0,-32])for(const dy of[0,-32])g.fillRect(x+dx,y+dy,w,w)}
   lavaTexC=new THREE.CanvasTexture(c);lavaTexC.wrapS=lavaTexC.wrapT=THREE.RepeatWrapping;lavaTexC.magFilter=THREE.NearestFilter;lavaTexC.minFilter=THREE.NearestMipmapLinearFilter||THREE.LinearMipMapLinearFilter;return lavaTexC}
 function volcBuild(){volcDirty=false;if(volcG){scene.remove(volcG);volcG=null}if(volcCloudG){scene.remove(volcCloudG);volcCloudG=null}if(!volc)return;
@@ -7275,7 +7279,7 @@ const MODE_OK=t=>!!t&&!!DEF[t]&&!DRIVE[t]&&!['pipe','pole','poleline','rail','pi
 const DELT={all:'bulldoze',pipe:'pipeDel',power:'poleDel',cross:'crossDel'};
 const BMODES=[['one','Pojedynczo: po postawieniu wraca do podglądu','<rect x="3" y="3" width="9.5" height="9.5" rx="1.6"/><path d="M11 11l6.3 2.3-2.8 1.2-1.2 2.8z" fill="currentColor" stroke-width="1.2"/>'],['many','Wiele: stawiaj, aż wrócisz do podglądu','<rect x="2.5" y="2.5" width="6.5" height="6.5" rx="1.2"/><rect x="11" y="2.5" width="6.5" height="6.5" rx="1.2"/><rect x="2.5" y="11" width="6.5" height="6.5" rx="1.2"/><path d="M14.25 11.3v6M11.25 14.3h6"/>'],['line','Linia: przeciągnij poziomo albo pionowo, zobaczysz szkic i zatwierdzisz','<rect x="2" y="10" width="4.4" height="4.4" rx=".9"/><rect x="7.8" y="10" width="4.4" height="4.4" rx=".9"/><rect x="13.6" y="10" width="4.4" height="4.4" rx=".9"/><path d="M3 5.5h13.5M14.2 3.2l2.3 2.3-2.3 2.3"/>'],['road','Wzdłuż drogi (słupy, rury, wymiana ulic na lepsze): przeciągnij od ulicy do ulicy','<path d="M2.5 17h15M2.5 12.5h15M5 14.75h2M9 14.75h2M13 14.75h2"/><path d="M5.5 12.5V3.5M3.8 5h3.4M14.5 12.5V3.5M12.8 5h3.4"/><path d="M7.2 5c2.3 1.2 3.3 1.2 5.6 0"/>']];
 const DMODES=[['all','Wyburzaj wszystko',null],['pipe','Usuwaj tylko rury (zwrot 2 T¢)',null],['power','Usuwaj tylko słupy (zwrot 50%)',null],['cross','Usuwaj tylko przejścia dla pieszych i przystanki',null]];
-function renderModes(){const box=document.getElementById('msub');
+function renderModes(){const box=document.getElementById('msub');{const lb=document.querySelector('#modeP .mlab');if(lb){const t=tool==='bulldoze'?'Tryb wyburzania':TERR[tool]?'Pędzel terenu':'Tryb budowy';if(lb.dataset.k!==t){lb.dataset.k=t;lb.textContent=window.LT_tr?LT_tr(t):t}}}
   if(TERR[tool]){const lb=['1 pole','R1','R2','R3'][brushR];let h=`<button type="button" data-b="-" title="Mniejszy pędzel" aria-label="Mniejszy pędzel" ${brushR?'':'disabled'}>−</button><span class="mlb" title="Pędzel">${lb}</span><button type="button" data-b="+" title="Większy pędzel" aria-label="Większy pędzel" ${brushR<3?'':'disabled'}>+</button>`;
     if(tool==='tLevel')h+=`<span class="mbr"></span><button type="button" data-l="pick" title="Pobierz wysokość z pola" aria-label="Pobierz wysokość z pola" aria-pressed="${levelPick||levelH==null}"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3.5l3.5 3.5-2 2-3.5-3.5z"/><path d="M11.5 7L5 13.5 4 17l3.5-1L14 9.5"/></svg></button><button type="button" data-l="-" title="Niżej" aria-label="Niżej">−</button><span class="mlb" title="Wysokość wyrównania">${levelH==null?'—':'poz. '+mw(levelH/2)}</span><button type="button" data-l="+" title="Wyżej" aria-label="Wyżej">+</button>`;
     box.innerHTML=h;box.classList.add('terr');
@@ -8056,7 +8060,7 @@ function updateSky(){const h=hourOf(gameT),ang=(h-6)/24*Math.PI*2,el=Math.sin(an
   lightDir.set(Math.cos(ang)*0.9,Math.abs(el)+0.3,0.45).normalize();
   fitShadow(lightDir);
   dayF=day;const glow=1-day;mat.glass2.emissive.copy(GLOW).multiplyScalar(glow*0.4*EMB);mat.glass.emissive.copy(GLOW).multiplyScalar(glow*0.85*EMB);mat.lamp.emissive.copy(GLOW).multiplyScalar(glow*1.1*EMB);
-  mat.head.emissive.setRGB(1,0.93,0.72).multiplyScalar(glow*1.1*EMB);mat.tail.emissive.setRGB(1,0.12,0.08).multiplyScalar(glow*0.95*EMB);mat.beam.opacity=glow*0.32;mat.beam.visible=glow>0.05;
+  mat.head.emissive.setRGB(1,0.93,0.72).multiplyScalar(glow*1.1*EMB);mat.tail.emissive.setRGB(1,0.12,0.08).multiplyScalar(glow*0.95*EMB);mat.beam.opacity=glow*0.32;mat.beam.visible=glow>0.05;mat.pool.opacity=Math.max(0,glow-0.15)*0.8;mat.pool.visible=glow>0.2;
   for(const[mt,G]of GLOWS)glowSet(mt,G,glow)}
 
 /* ---------- 2D status icons: only when zoomed in; one chip per building listing what is wrong ---------- */
@@ -10665,7 +10669,9 @@ const LT_TR=[
 ["Odbuduj", "Rebuild", "Wiederaufbauen"],
 ["odbudowa", "rebuilding", "Wiederaufbau"],
 ["Odbudowa: {} za {} T¢.", "Rebuilding: {} for {} T¢.", "Wiederaufbau: {} für {} T¢."],
-["Brakuje {} T¢ na odbudowę.", "{} T¢ short to rebuild.", "Es fehlen {} T¢ für den Wiederaufbau."]
+["Brakuje {} T¢ na odbudowę.", "{} T¢ short to rebuild.", "Es fehlen {} T¢ für den Wiederaufbau."],
+["Tryb wyburzania", "Demolish mode", "Abrissmodus"],
+["Pędzel terenu", "Terrain brush", "Geländepinsel"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
