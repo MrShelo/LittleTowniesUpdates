@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.4.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.4.4';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2809,7 +2809,16 @@ sun.shadow.mapSize.set(touch?1536:2048,touch?1536:2048);
 Object.assign(sun.shadow.camera,{left:-23,right:23,top:23,bottom:-23,near:1,far:70});
 sun.shadow.camera.updateProjectionMatrix();
 sun.shadow.bias=-0.0008;
-scene.add(sun);scene.add(sun.target);let shadowExt=23;
+scene.add(sun);scene.add(sun.target);let shadowExt=23;sun.shadow.normalBias=0.025;
+/* 8.4.4: the shadow box follows the visible ground (the four screen corners projected onto the ground), so homes near the bottom of the screen keep their shadows at any tilt and zoom */
+const shHelp=new THREE.OrthographicCamera(-1,1,1,-1,1,200),_fv=new THREE.Vector3(),_fp=[0,1,2,3,4,5].map(()=>new THREE.Vector3()),_fc=new THREE.Vector3(),_fq=new THREE.Vector3(),_fs=new THREE.Vector3();let shSig='';
+function fitShadow(L){const o=camera.position,far=Math.min(150,cam.radius*3);let n=0;_fc.set(0,0,0);
+  for(const[nx,ny]of[[-1,-1],[1,-1],[1,1],[-1,1],[0,-1],[0,0]]){_fv.set(nx,ny,0.5).unproject(camera).sub(o).normalize();let t=_fv.y<-1e-3?(-0.2-o.y)/_fv.y:far;t=Math.max(0,Math.min(t,far));_fp[n].copy(o).addScaledVector(_fv,t);_fp[n].y=0;_fc.add(_fp[n]);n++}
+  _fc.divideScalar(n);sun.target.position.copy(_fc);sun.position.copy(_fc).addScaledVector(L,80);sun.target.updateMatrixWorld();
+  shHelp.position.copy(sun.position);shHelp.lookAt(_fc);shHelp.updateMatrixWorld();const inv=shHelp.matrixWorldInverse;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  for(let k=0;k<n;k++)for(const h of[0,5]){_fq.copy(_fp[k]);_fq.y=h;_fq.applyMatrix4(inv);x0=Math.min(x0,_fq.x);x1=Math.max(x1,_fq.x);y0=Math.min(y0,_fq.y);y1=Math.max(y1,_fq.y)}
+  const lim=75;x0=Math.max(x0-3,-lim);x1=Math.min(x1+3,lim);y0=Math.max(y0-3,-lim);y1=Math.min(y1+3,lim);
+  const sig=[x0,x1,y0,y1].map(v=>Math.round(v*2)).join();if(sig!==shSig){shSig=sig;Object.assign(sun.shadow.camera,{left:x0,right:x1,top:y1,bottom:y0,near:1,far:200});sun.shadow.camera.updateProjectionMatrix()}}
 
 /* green ground: soft low-frequency colour drift, mown checker, grass strokes and a few flower patches; one canvas, 32 px per tile */
 const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -2839,8 +2848,10 @@ function paintGround(pol){let SK=0;try{SK=snowOn()?3:seasonIdx()===2?2:seasonIdx
     if(r>0.35){g2.fillStyle='rgba(90,84,76,.35)';g2.fillRect(x+((i*7)%22),z+((i*13)%24),6,4);g2.fillRect(x+((i*11)%20),z+((i*5)%22),4,3)}}
   /* 8.1.20: the volcano: black basalt on the cone, dark ash around its foot */
   if(volc){const bx=volc.c%N,bz=(volc.c/N)|0,Ri=Math.ceil(volc.R)+3;for(let z=bz-Ri;z<=bz+Ri;z++)for(let x=bx-Ri;x<=bx+Ri;x++){if(x<0||z<0||x>=N||z>=N)continue;const i=idx(x,z);if(water[i])continue;const r=Math.hypot(x-bx,z-bz),X=x*32,Z=z*32;
-    if(volcLock[i]){g2.fillStyle='#2b2725';g2.fillRect(X,Z,32,32);g2.fillStyle='rgba(78,72,68,.75)';for(let k=0;k<5;k++)g2.fillRect(X+((i*7+k*11)%26),Z+((i*13+k*7)%26),3+k%3,2+(k*i)%3);g2.fillStyle='rgba(18,16,15,.6)';g2.fillRect(X+((i*5)%20),Z+((i*3)%20),8,5)}
-    else if(r<=volc.R+2.5){const a=0.75*(1-(r-volc.R-0.5)/2.2);if(a>0){g2.fillStyle=`rgba(46,42,40,${a.toFixed(2)})`;g2.fillRect(X,Z,32,32)}}}}
+    const hs=k=>{let v=(i*374761393+k*668265263)|0;v=Math.imul(v^(v>>>13),1274126177);return((v^(v>>>16))>>>0)/4294967295};
+    if(volcLock[i]){g2.fillStyle='#2e2a27';g2.fillRect(X,Z,32,32);
+      for(let k=0;k<7;k++){const w=4+Math.floor(hs(k)*3)*2,x=Math.floor(hs(k+20)*(32-w)),z=Math.floor(hs(k+40)*(32-w));g2.fillStyle=k<3?'#1d1b19':k<6?'#433d39':'#5a534e';g2.fillRect(X+x,Z+z,w,w);if(k>=3&&k<6){g2.fillStyle='#2e2a27';g2.fillRect(X+x+2,Z+z+2,Math.max(2,w-4),Math.max(2,w-4))}}}
+    else if(r<=volc.R+2){for(let k=0;k<3;k++){if(hs(k+60)>0.55)continue;const w=4+Math.floor(hs(k+70)*2)*2;g2.fillStyle=k?'#3b3632':'#4c4642';g2.fillRect(X+Math.floor(hs(k+80)*(32-w)),Z+Math.floor(hs(k+90)*(32-w)),w,w)}}}}
   for(let i=0;i<N*N;i++){if(!water[i])continue;const x=i%N,z=(i/N)|0;g2.fillStyle=lakeDry(i)?'#b99a5c':'#3d82b5';g2.fillRect(x*32,z*32,32,32);if(lakeDry(i)){g2.strokeStyle='rgba(120,92,50,.6)';g2.lineWidth=1.5;g2.beginPath();g2.moveTo(x*32+4,z*32+10+(i%7));g2.lineTo(x*32+16,z*32+16);g2.lineTo(x*32+28,z*32+8+(i%5));g2.moveTo(x*32+16,z*32+16);g2.lineTo(x*32+14+(i%6),z*32+29);g2.stroke()}
     g2.fillStyle='rgba(224,206,150,.95)';
     for(const[dx,dz]of[[0,1],[1,0],[0,-1],[-1,0]]){const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N||water[nz*N+nx])continue;
@@ -2904,8 +2915,9 @@ function buildLand(){calcCorners();landDirty=false;const P=[],U=[],I=[],BP=[],BI
   /* 8.2.1: the edge mist follows the terrain: raised tiles and their walls near the border get the same mist as the ground */
   const MP=[],MU=[],MI=[],inB=(x,z)=>Math.min(x,z,N-1-x,N-1-z)<=6,mv=(x,y,z)=>{MP.push(x,y,z);MU.push((x+150)/300,(150-z)/300)};
   /* high cliffs are grey rock, low banks brown earth */
+  let wallI=-1;const VWALL_LO=new THREE.Color('#1c1a18'),VWALL_HI=new THREE.Color('#2b2724');
   const wall=(ax,az,bx,bz,a0,a1,b0,b1)=>{if(a1-a0<1e-4&&b1-b0<1e-4)return;const b=BP.length/3;BP.push(ax,a0,az, bx,b0,bz, bx,b1,bz, ax,a1,az);BI.push(b,b+1,b+2,b,b+2,b+3);
-    const rk=Math.max(a1,b1)>lvY(H_LAND+7),lo=rk?WALL_C.rl:WALL_C.e,hi=rk?WALL_C.r:WALL_C.e;BC.push(lo.r,lo.g,lo.b, lo.r,lo.g,lo.b, hi.r,hi.g,hi.b, hi.r,hi.g,hi.b)};
+    const rk=Math.max(a1,b1)>lvY(H_LAND+7),vw=volc&&volcLock[wallI],lo=vw?VWALL_LO:rk?WALL_C.rl:WALL_C.e,hi=vw?VWALL_HI:rk?WALL_C.r:WALL_C.e;BC.push(lo.r,lo.g,lo.b, lo.r,lo.g,lo.b, hi.r,hi.g,hi.b, hi.r,hi.g,hi.b)};
   for(let i=0;i<N*N;i++){const x=i%N,z=(i/N)|0,x0=x-HALF,z0=z-HALF,k=i*4;
     if(!water[i]){const b=P.length/3;P.push(x0,cornH[k]+0.001,z0, x0,cornH[k+1]+0.001,z0+1, x0+1,cornH[k+2]+0.001,z0+1, x0+1,cornH[k+3]+0.001,z0);
       U.push(x/N,1-z/N, x/N,1-(z+1)/N, (x+1)/N,1-(z+1)/N, (x+1)/N,1-z/N);I.push(b,b+1,b+2,b,b+2,b+3);
@@ -2919,7 +2931,7 @@ function buildLand(){calcCorners();landDirty=false;const P=[],U=[],I=[],BP=[],BI
         if(water[i]&&!water[j]){wall(ax,az,bx,bz,cornH[k+ca],na,cornH[k+cb],nb);continue}if(water[i]&&water[j]&&cornH[kj+ja]>cornH[k+ca]+1e-4){wall(ax,az,bx,bz,cornH[k+ca],na,cornH[k+cb],nb);continue}if(water[i]||water[j])continue}
       /* a tunnel mouth: the bank keeps an opening above the road for the portal */
       if(grid[i]&&grid[i].t==='tunnel'&&nx>=0&&nz>=0&&nx<N&&nz<N){const j=idx(nx,nz);if(grid[j]&&DRIVE[grid[j].t]&&grid[j].t!=='tunnel'&&linkH(i,j)&&(!ovA(i)||(ovA(i)==='x')!==!!dx)){const o=lvY(rh(i))+0.22;na=Math.max(na,o);nb=Math.max(nb,o)}}
-      if(ta>na+1e-4||tb>nb+1e-4){wall(ax,az,bx,bz,Math.min(na,ta),ta,Math.min(nb,tb),tb);
+      if(ta>na+1e-4||tb>nb+1e-4){wallI=i;wall(ax,az,bx,bz,Math.min(na,ta),ta,Math.min(nb,tb),tb);wallI=-1;
         if(inB(x,z)&&!water[i]){const o=0.015,m=MP.length/3;mv(ax+dx*o,Math.min(na,ta),az+dz*o);mv(bx+dx*o,Math.min(nb,tb),bz+dz*o);mv(bx+dx*o,tb+0.025,bz+dz*o);mv(ax+dx*o,ta+0.025,az+dz*o);MI.push(m,m+1,m+2,m,m+2,m+3)}}}}
   try{if(edgeMist){edgeMist.geometry.dispose();scene.remove(edgeMist);edgeMist=null}if(MI.length){const mg=new THREE.BufferGeometry();mg.setAttribute('position',new THREE.Float32BufferAttribute(MP,3));mg.setAttribute('uv',new THREE.Float32BufferAttribute(MU,2));mg.setIndex(MI);
     fogRing.material.side=THREE.DoubleSide;edgeMist=new THREE.Mesh(mg,fogRing.material);edgeMist.renderOrder=5;edgeMist.frustumCulled=false;scene.add(edgeMist)}}catch(e){console.warn(e)}
@@ -5670,10 +5682,11 @@ function volcTick(dt){if(!volc)return;if(volc.q&&volc.q.length){const top=volcTo
       q.m.position.set(x0+(x1-x0)*p,q.y0+(q.y1-q.y0)*p+Math.sin(Math.PI*p)*5,z0+(z1-z0)*p);
       if(p>=1){q.done=true;scene.remove(q.m);if(q.fire&&hazOn('fire')){let j=q.i;if(grid[j]&&grid[j].t==='part')j=grid[j].main;const c=grid[j];if(canBurn(c)){if(startFire(j))float(j,'magma podpaliła budynek','warn')}}}}
     volc.q=volc.q.filter(q=>!q.done)}}
-var lavaTexC=null;function lavaTex(){if(lavaTexC)return lavaTexC;const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#ff6a12';g.fillRect(0,0,64,64);
-  let sd=3;const r=()=>{sd=(sd*9301+49297)%233280;return sd/233280};for(let k=0;k<14;k++){const x=r()*64,y=r()*64,rad=4+r()*9,gr=g.createRadialGradient(x,y,0,x,y,rad);gr.addColorStop(0,'rgba(255,220,90,.95)');gr.addColorStop(1,'rgba(255,140,30,0)');g.fillStyle=gr;g.fillRect(x-rad,y-rad,rad*2,rad*2)}
-  g.strokeStyle='rgba(120,30,10,.55)';g.lineWidth=1.3;for(let k=0;k<6;k++){let x=r()*64,y=r()*64;g.beginPath();g.moveTo(x,y);for(let q=0;q<4;q++){x+=(r()-0.5)*22;y+=(r()-0.5)*22;g.lineTo(x,y)}g.stroke()}
-  lavaTexC=new THREE.CanvasTexture(c);lavaTexC.wrapS=lavaTexC.wrapT=THREE.RepeatWrapping;return lavaTexC}
+var lavaTexC=null;function lavaTex(){if(lavaTexC)return lavaTexC;const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d');g.fillStyle='#ff6a12';g.fillRect(0,0,32,32);
+  let sd=11;const r=()=>{sd=(sd*9301+49297)%233280;return sd/233280};
+  for(const[col,n,s0]of[['#e8480c',7,6],['#ff8a1c',9,5],['#ffb02e',8,4],['#ffd955',6,2]])for(let k=0;k<n;k++){const w=s0+Math.floor(r()*3)*2,x=Math.floor(r()*32),y=Math.floor(r()*32);g.fillStyle=col;
+    for(const dx of[0,-32])for(const dy of[0,-32])g.fillRect(x+dx,y+dy,w,w)}
+  lavaTexC=new THREE.CanvasTexture(c);lavaTexC.wrapS=lavaTexC.wrapT=THREE.RepeatWrapping;lavaTexC.magFilter=THREE.NearestFilter;lavaTexC.minFilter=THREE.NearestMipmapLinearFilter||THREE.LinearMipMapLinearFilter;return lavaTexC}
 function volcBuild(){volcDirty=false;if(volcG){scene.remove(volcG);volcG=null}if(volcCloudG){scene.remove(volcCloudG);volcCloudG=null}if(!volc)return;
   volcG=new THREE.Group();const m=new THREE.MeshBasicMaterial({color:'#ffffff',map:lavaTex()});volcG.userData.m=m;
   for(const i of volc.lava){const b=new THREE.Mesh(new THREE.BoxGeometry(1,0.12,1),m);b.position.set(cx(i),lvY(hgt[i])+0.07,cz(i));volcG.add(b)}
@@ -8041,8 +8054,7 @@ function updateSky(){const h=hourOf(gameT),ang=(h-6)/24*Math.PI*2,el=Math.sin(an
   hemi.intensity=0.2+0.6*day;hemi.color.copy(HEMI.night).lerp(HEMI.day,day);
   if(el>-0.05){sun.color.copy(SUNC.low).lerp(SUNC.day,sstep(0,0.45,el));sun.intensity=0.12+0.78*day}else{sun.color.copy(SUNC.moon);sun.intensity=0.16}
   lightDir.set(Math.cos(ang)*0.9,Math.abs(el)+0.3,0.45).normalize();
-  sun.target.position.copy(cam.target);sun.position.copy(cam.target).addScaledVector(lightDir,40);
-  const ext=Math.max(10,Math.min(46,cam.radius*0.8));if(Math.abs(ext-shadowExt)>1){shadowExt=ext;Object.assign(sun.shadow.camera,{left:-ext,right:ext,top:ext,bottom:-ext,far:90});sun.shadow.camera.updateProjectionMatrix()}
+  fitShadow(lightDir);
   dayF=day;const glow=1-day;mat.glass2.emissive.copy(GLOW).multiplyScalar(glow*0.4*EMB);mat.glass.emissive.copy(GLOW).multiplyScalar(glow*0.85*EMB);mat.lamp.emissive.copy(GLOW).multiplyScalar(glow*1.1*EMB);
   mat.head.emissive.setRGB(1,0.93,0.72).multiplyScalar(glow*1.1*EMB);mat.tail.emissive.setRGB(1,0.12,0.08).multiplyScalar(glow*0.95*EMB);mat.beam.opacity=glow*0.32;mat.beam.visible=glow>0.05;
   for(const[mt,G]of GLOWS)glowSet(mt,G,glow)}
