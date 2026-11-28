@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.4.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.4.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -723,7 +723,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div class="opane" data-pane="gen" hidden><div class="ocol"><div class="optH">Ogólne</div>
   <div class="tgl"><span data-notr>Język · Language · Sprache</span><select class="osel" id="langSel" data-notr aria-label="Język"></select></div>
   <div class="tgl"><span>Licznik FPS<small>klawisz F2</small></span><button type="button" class="btn panel tglB" data-gk="fps"></button></div>
-  <div class="tgl"><span>Pełny ekran</span><button type="button" class="btn panel tglB" id="gFull">Wyłączony</button></div>
+  <div class="tgl"><span>Pełny ekran<small>klawisz F11 · Esc zostaje w grze</small></span><button type="button" class="btn panel tglB" id="gFull">Wyłączony</button></div>
   <div class="tgl"><span>Zapisy<small>trzy niezależne miasta</small></span><button type="button" class="btn panel tglB" id="oSlots">Otwórz</button></div>
   </div><div class="ocol">
   <div class="upd"><b>Aktualizacje z GitHuba</b><span class="st">Wersja gry <span id="uVer"></span></span>
@@ -8083,8 +8083,12 @@ function tagPos(){try{const b=document.querySelector('.build');if(!b)return;cons
   const l=document.getElementById('modeRow');const lr=l?l.closest('.panel').getBoundingClientRect():r;fpsEl.style.bottom=(Math.min(lr.left,r.left)<170&&Math.max(lr.bottom,r.bottom)>innerHeight-30)?(innerHeight-Math.min(lr.top,r.top)+6)+'px':'4px'}catch(e){}}
 (function tp(){tagPos();setTimeout(tp,1500)})();addEventListener('resize',tagPos);
 function fpsTick(){if(fpsEl.hidden)return;fpsN++;const t=performance.now();if(t-fpsT>=500){const f=fpsN*1000/(t-fpsT);fpsEl.textContent=`${Math.round(f)} FPS · ${(1000/f).toFixed(1)} ms${ppOn?' · PP':''}`;fpsEl.classList.toggle('bad',f<30);fpsN=0;fpsT=t}}
-function toggleFull(){try{if(document.fullscreenElement)document.exitFullscreen();else(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen).call(document.documentElement)}catch(e){}}
-document.addEventListener('fullscreenchange',()=>{try{gfxUI()}catch(e){}});
+/* 8.4.2: fullscreen is toggled by F11 (and the Options button); Escape stays a game key – the Keyboard Lock API keeps it inside the game
+   (the browser still lets you leave by holding Esc for ~2 s – that safety exit cannot be blocked) */
+const kbLock=()=>{try{if(navigator.keyboard&&navigator.keyboard.lock)navigator.keyboard.lock(['Escape','F11']).catch(()=>{})}catch(e){}},kbUnlock=()=>{try{if(navigator.keyboard&&navigator.keyboard.unlock)navigator.keyboard.unlock()}catch(e){}};
+function toggleFull(){try{if(document.fullscreenElement){kbUnlock();document.exitFullscreen()}else{const el=document.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen;const p=rq.call(el,{navigationUI:'hide'});if(p&&p.then)p.then(kbLock).catch(()=>{});else kbLock()}}catch(e){}}
+addEventListener('keydown',e=>{if(e.key==='F11'||e.code==='F11'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)toggleFull()}},true);
+document.addEventListener('fullscreenchange',()=>{if(document.fullscreenElement)kbLock();else kbUnlock();try{gfxUI()}catch(e){}});
 setTimeout(()=>{const $=id=>document.getElementById(id);gfxApply();
   $('gPre').addEventListener('change',e=>{if(e.target.value!=='custom')gfxPreset(e.target.value)});
   $('gAA').addEventListener('change',e=>gfxSet('aa',e.target.value));$('gSh').addEventListener('change',e=>gfxSet('sh',e.target.value));
@@ -10600,7 +10604,8 @@ const LT_TR=[
 [" Usuń nieużywane miasto w „Zapisach”.", " Delete an unused city in “Saves”.", " Lösche eine ungenutzte Stadt unter „Spielstände“."],
 ["Wczytano slot {}: „{}”.", "Loaded slot {}: “{}”.", "Platz {} geladen: „{}“."],
 ["Kategorie opcji", "Option categories", "Optionskategorien"],
-["Tryb budowy", "Build mode", "Baumodus"]
+["Tryb budowy", "Build mode", "Baumodus"],
+["klawisz F11 · Esc zostaje w grze", "F11 key · Esc stays in the game", "Taste F11 · Esc bleibt im Spiel"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
