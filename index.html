@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.4.5';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.4.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -6558,6 +6558,16 @@ function demTip(i){let c=grid[i];if(!c){return deco.has(i)?'<b>Drzewo</b> · usu
   if(HOUSING[c.t]&&!c.ruin)h+=`<br><span class="tipWarn">Okoliczni mieszkańcy: −0,5 do szczęścia przez 1 h</span>`;
   if(c.t==='landfill'){const cap=facCap(c),fill=cap?(c.gstock||0)/cap:0;if(fill>=0.999)h+='<br><span class="tipWarn">Pełnego wysypiska nie da się zlikwidować</span>';else if(fill>=0.3)h+=`<br><span class="tipWarn">Kara za wywóz śmieci: −${fmt(Math.round((c.gstock||0)*3))} T¢</span>`}
   return h}
+/* 8.4.6: a road over a lone pole keeps the pole – the tile glows yellow and a yellow preview shows the street with its lamp */
+let pGhost=null;function poleGhost(i){if(i<0){if(pGhost)pGhost.visible=false;return}
+  if(!pGhost){pGhost=new THREE.Group();const Y=new THREE.MeshBasicMaterial({color:'#ffd23a',transparent:true,opacity:0.45,depthWrite:false}),L=new THREE.MeshBasicMaterial({color:'#fff2a8'}),P=POLE_P;
+    const slab=new THREE.Mesh(new THREE.BoxGeometry(1,0.05,1),Y);slab.position.y=0.03;pGhost.add(slab);
+    const pl=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.9,0.05),Y);pl.position.set(P,0.45,P);pGhost.add(pl);
+    const arm=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.03,0.03),Y);arm.position.set(P-0.06,0.85,P-0.06);arm.rotation.y=Math.PI/4;pGhost.add(arm);
+    const lp=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.05,0.09),L);lp.position.set(P-0.09,0.8,P-0.09);pGhost.add(lp);
+    const pool=new THREE.Mesh(CL.pool,new THREE.MeshBasicMaterial({map:mat.pool.map,transparent:true,opacity:0.85,depthWrite:false,blending:THREE.AdditiveBlending}));pool.position.set(P*0.45,0.07,P*0.45);pGhost.add(pool);
+    pGhost.renderOrder=6;scene.add(pGhost)}
+  pGhost.visible=true;pGhost.position.set(cx(i),surfY(i),cz(i))}
 function hover(x,y){if(lineConf)return;if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{hover(x,y)}finally{tool=sv}return}const i=tileAt(x,y);if(!areaT)area.visible=reachHide();hoverI=i;showGhost1(i);
   if(tool==='bulldoze'&&delMode==='all'&&i>=0&&!(grid[i]&&grid[i].edge)){const h=demTip(i);if(h){const src='dem:'+i;if(tipSrc!==src||tipEl.hidden)tipEl.innerHTML=h;tipSrc=src;tipEl.hidden=false;placeTip(x,y,false)}else if(String(tipSrc).startsWith('dem:'))hideTip()}else if(String(tipSrc).startsWith('dem:'))hideTip();
   if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,grid[i].t==='rail'?'Tory wjazdowe · połącz z nimi dworzec, a pociągi przywiozą turystów':'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
@@ -6565,10 +6575,12 @@ function hover(x,y){if(lineConf)return;if(tool==='bulldoze'&&delMode!=='all'){co
   hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;hl.position.y=surfY(i)+0.06;if(TERR[tool])showBrush(i);
   const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='busStop')ok=showStopGhost(i)&&(!!grid[i].bus||money>=DEF.busStop.cost);else if(isLineT(tool))ok=lineStopAt(i,tool==='busLine')>=0;else if(tool==='crosswalk')ok=crossOK(i)&&!grid[i].cross&&!grid[i].bus&&money>=DEF.crosswalk.cost;else if((STREET[tool]||tool==='highway')&&grid[i]&&grid[i].t==='rail'&&grid[i].tun)ok=!grid[i].ov&&hgt[i]>=(grid[i].th??H_LAND)+3&&money>=DEF[tool].cost;else if(tool==='tunnel'&&grid[i]&&(STREET[grid[i].t]||grid[i].t==='highway'))ok=hgt[i]>=3&&money>=DEF.tunnel.cost;else if(tool==='crossDel')ok=!!grid[i]&&(!!grid[i].cross||!!grid[i].bus||!!grid[i].scr);else if(tool==='hwScreen')ok=!!grid[i]&&grid[i].t==='highway'&&!grid[i].scr&&money>=DEF.hwScreen.cost;else if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c?!railNearWhy(i):(!!STREET[c.t]&&!c.rail&&!c.edge&&!crossWhy(i)))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
   else if((STREET[tool]||tool==='highway')&&grid[i]&&grid[i].t==='tunnel')ok=!ovWhy(i)&&money>=DEF[tool].cost;
+  else if((STREET[tool]||tool==='highway')&&grid[i]&&grid[i].t==='lpole')ok=!water[i]&&money>=DEF[tool].cost;
   else if(STREET[tool]||tool==='roundabout'){const c=grid[i];ok=c&&c.t==='rail'&&STREET[tool]?!water[i]&&!c.edge&&money>=DEF[tool].cost:c?(STREET[c.t]||c.t==='roundabout')&&c.t!==tool&&money>=DEF[tool].cost-DEF[c.t].cost:!water[i]&&money>=DEF[tool].cost&&tool!=='roundabout'}
   else if(tool==='bulldoze')ok=!!grid[i];else if(tool==='poleline')ok=!!grid[i]&&!!STREET[grid[i].t]&&money>=DEF.pole.cost;else if(tool==='pole')ok=money>=DEF.pole.cost&&((!grid[i]&&!water[i])||(!!grid[i]&&!!POLEABLE[grid[i].t]&&!grid[i].pole));else if(tool==='poleDel')ok=isLV(i);else if(FP(tool)){const x=i%N,z=(i/N)|0,[fw,fh]=FP(tool);ok=x<=N-fw&&z<=N-fh&&money>=DEF[tool].cost;if(ok)for(let dz=0;dz<fh;dz++)for(let dx=0;dx<fw;dx++){const j=idx(x+dx,z+dz);if(grid[j]||water[j])ok=false}}
   else if(tool==='fill')ok=fillOK(i)&&money>=DEF.fill.cost;else ok=!grid[i]&&money>=DEF[tool].cost&&(tool==='pitS'?!water[i]&&!!dep[i]:tool==='bridge'?!!water[i]&&straightOK(i):tool==='hydro'?!!water[i]:!water[i]);
-  hl.material.color.set(tool==='bulldoze'?(ok?'#e0402b':'#ffffff'):(ok?'#ffffff':'#e0402b'))}
+  const onPole=(STREET[tool]||tool==='highway')&&grid[i]&&grid[i].t==='lpole';poleGhost(onPole&&ok?i:-1);
+  hl.material.color.set(tool==='bulldoze'?(ok?'#e0402b':'#ffffff'):onPole&&ok?'#ffd23a':(ok?'#ffffff':'#e0402b'))}
 
 /* ---------- 7.0: water with no way out rises ----------
    Water and flooded land form connected bodies. A body reaching the map edge drains there and keeps (or goes back to) the level of the water at the edge.
@@ -8234,7 +8246,7 @@ settleHour();cur.hour=hBefore;hist.push(cur);if(hist.length>48)hist.shift();cur=
     if(sz.x!==Math.round(app.clientWidth*renderer.getPixelRatio()))resize();
     renderer.render(scene,camera);window.__drawn=true;document.getElementById('err').hidden=true;return}
   if(volcDirty)try{volcBuild()}catch(e){volcDirty=false;console.warn(e)}if(iceDirty)try{iceBuild()}catch(e){iceDirty=false;console.warn(e)}volcAnim();
-  fpsTick();if(composer&&ppOn){if(bloomP)bloomP.threshold=0.95+1.3*Math.max(0,Math.min(1,dayF));composer.render()}else renderer.render(scene,camera)}
+  if(pGhost&&pGhost.visible&&(!hl.visible||!(STREET[tool]||tool==='highway')))pGhost.visible=false;fpsTick();if(composer&&ppOn){if(bloomP)bloomP.threshold=0.95+1.3*Math.max(0,Math.min(1,dayF));composer.render()}else renderer.render(scene,camera)}
 if(!ED)requestAnimationFrame(frame);
 /* the model editor (a separate page) reads the game's models through this */
 const VEH_LIST=[['car','Samochód mieszkańca','Pojazdy','Samochody'],['taxi','Taksówka','Pojazdy','Samochody'],['visitor','Auto turysty','Pojazdy','Samochody'],['van','Dostawczak (kolor sklepu)','Pojazdy','Dostawy'],['truck','Ciężarówka (kolor linii fabryki)','Pojazdy','Dostawy'],['semi','Ciężarówka przegubowa (galerie i supermarkety)','Pojazdy','Dostawy'],
