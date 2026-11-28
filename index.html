@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.4.2';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.4.3';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -227,7 +227,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* 8.4.1: the view/demolish dock is laid out as a neat card: two equal buttons on top, the mode buttons centred under a divider */
 @media (min-width:561px){.modeP{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:8px;min-width:236px;background:var(--panel2,var(--panel));box-shadow:0 10px 30px rgba(0,0,0,.25)}
   .modeP .mrow{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0;background:none;border:0}
-  .modeP .mrow .tool{width:100%;box-sizing:border-box;justify-content:start;margin:0;border-radius:10px;padding:7px 9px 7px 7px}
+  .modeP .mrow .tool{width:100%;box-sizing:border-box;margin:0;border-radius:12px;padding:10px 6px 8px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:76px}
+  .modeP .mrow .tool .sw{width:38px;height:38px;border-radius:11px}.modeP .mrow .tool .sw svg{width:22px;height:22px}
+  .modeP .mrow .tool .nm{font-size:13.5px;font-weight:700;text-align:center}.modeP .mrow .tool .ct{display:none}
   .modeP .mlab{margin-top:auto;padding-top:8px;border-top:1px solid var(--line);text-align:center;font:700 10.5px var(--font-b);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
   .modeP .msub{gap:6px}
   .modeP .msub:empty,.modeP .mlab:has(+ .msub:empty){display:none}
@@ -281,7 +283,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .cat.og{display:none!important}
 .autou{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}.autou small{color:var(--muted)}
 [data-ovl="under"].tmp{outline:2px dashed #6f6a62;outline-offset:1px}
-.act.rot{color:#5fb0e8}.act.rot[aria-expanded="true"]{background:color-mix(in srgb,#5fb0e8 18%,transparent);border-color:#5fb0e8}
+.act.rot{color:#5fb0e8}.act.reb{color:#3fae6a}
+.fl.face{padding:0;background:none;border:0;box-shadow:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}.fl.face svg{display:block}
+.tipWarn{color:#e0574a;font-weight:600}.act.rot[aria-expanded="true"]{background:color-mix(in srgb,#5fb0e8 18%,transparent);border-color:#5fb0e8}
 .rotpick{display:flex;align-items:center;gap:12px;margin-top:6px;padding:8px;border-radius:10px;border:1px solid var(--line);background:color-mix(in srgb,var(--fg) 5%,transparent)}
 .rotpick p{margin:0;font-size:12px;color:var(--muted);line-height:1.35}.rotpick p b{color:var(--fg)}
 .rpc{position:relative;flex:0 0 112px;height:112px;border-radius:50%;background:color-mix(in srgb,var(--fg) 6%,transparent)}
@@ -6346,10 +6350,12 @@ const TAX_BASE=10;let taxRate=12;
 /* taxes: on homes by building type (%), on every purchase (%), a tourist tax per visit (T¢) and a communal tax on residents (%) */
 const TAX0={house:12,tenement:12,block:12,modern:12,buy:20,tour:5,util:5};let TAX={...TAX0};
 const buyMul=()=>Math.max(0.4,Math.min(1.25,1-(TAX.buy-20)*0.02)),tourMul=()=>Math.max(0.25,Math.min(1.25,1-(TAX.tour-5)*0.05)),litterP=()=>Math.max(0,TAX.util-5)*0.02;const taxHappy=r=>r<=10?2:r<=11?1:r<=13?0:-Math.min(6,Math.round((r-13)*6/7));
-function happyParts(i){const c=grid[i],ts=tilesOf(i);const ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]);const e=entryOf(i);return{ord:-(LAW('pl_foot')?1:0)-(LAW('cm_hero')?1:0),ret:ts.some(k=>retCov[k])&&(c.pp||[]).some(q=>stageOf(q.a)===4)?1:0,needs:needPen(c),litter:e>=0&&grid[e]&&grid[e].litter>0?-1:0,edu:ep&&es?1:ep?0.5:0,ill:(c.pp||[]).some(q=>q.s===1)?-1:0,dead:c.dead>0?-1:0,tax:taxHappy(TAX[c.t]??taxRate),base:HOUSING[c.t].base,shop:ts.some(k=>shopCov[k])?1:0,park:ts.some(k=>parkCov[k])?1:0,ent:ts.some(k=>entCov[k])?1:0,pol:-Math.max(...ts.map(k=>pol[k])),pow:c.powered?0:-1,trash:c.trash>=TRASH[c.t].cap?-1:0,water:c.water==='dirty'?-3:c.water==='ok'?0:-1,sewer:c.sewer?-1:0,noise:ts.some(k=>noiseCov[k])?-1:0,crowd:ts.some(k=>crowdCov[k])?-1:0}}
+var moodMods=[];function moodOf(i){if(!moodMods.length)return 0;moodMods=moodMods.filter(m=>gameT<m.until);const x=i%N,z=(i/N)|0;let v=0;for(const m of moodMods)if(Math.max(Math.abs(m.i%N-x),Math.abs(((m.i/N)|0)-z))<=m.r)v+=m.v;return Math.max(-2,v)}
+function happyParts(i){const c=grid[i],ts=tilesOf(i);const ep=ts.some(k=>eduP[k]),es=ts.some(k=>eduS[k]);const e=entryOf(i);return{mood:moodOf(i),ord:-(LAW('pl_foot')?1:0)-(LAW('cm_hero')?1:0),ret:ts.some(k=>retCov[k])&&(c.pp||[]).some(q=>stageOf(q.a)===4)?1:0,needs:needPen(c),litter:e>=0&&grid[e]&&grid[e].litter>0?-1:0,edu:ep&&es?1:ep?0.5:0,ill:(c.pp||[]).some(q=>q.s===1)?-1:0,dead:c.dead>0?-1:0,tax:taxHappy(TAX[c.t]??taxRate),base:HOUSING[c.t].base,shop:ts.some(k=>shopCov[k])?1:0,park:ts.some(k=>parkCov[k])?1:0,ent:ts.some(k=>entCov[k])?1:0,pol:-Math.max(...ts.map(k=>pol[k])),pow:c.powered?0:-1,trash:c.trash>=TRASH[c.t].cap?-1:0,water:c.water==='dirty'?-3:c.water==='ok'?0:-1,sewer:c.sewer?-1:0,noise:ts.some(k=>noiseCov[k])?-1:0,crowd:ts.some(k=>crowdCov[k])?-1:0}}
+const happySum=p=>p.mood+p.ord+p.ret+p.base+p.shop+p.park+p.ent+p.pol+p.pow+p.trash+p.water+p.sewer+p.noise+p.crowd+p.tax+p.edu+p.ill+p.dead;
 function computeHappy(){if(envDirty)computeEnv();const dist=new Array(HMAX+1).fill(0);let sum=0,n=0;
   for(let i=0;i<N*N;i++){const c=grid[i];if(!c||!HOUSING[c.t]||c.off)continue;const p=happyParts(i);
-    c.happy=Math.round(Math.max(0,Math.min(HMAX,p.ord+p.ret+p.base+p.shop+p.park+p.ent+p.pol+p.pow+p.trash+p.water+p.sewer+p.noise+p.crowd+p.tax+p.edu+p.ill+p.dead)));dist[c.happy]++;sum+=c.happy;n++}
+    c.happy=Math.round(Math.max(0,Math.min(HMAX,happySum(p))));dist[c.happy]++;sum+=c.happy;n++}
   pw.happy=n?sum/n:0;pw.dist=dist}
 
 /* ---------- floating labels ---------- */
@@ -6359,6 +6365,21 @@ const v3=new THREE.Vector3();
    and one label per building per 1.5 s (warnings: per 5 s) */
 const lastFloat=new Map();
 const hudEl=document.querySelector('.hud'),dockEl=document.querySelector('.dock'),gameEl=document.getElementById('game');
+/* 8.4.3: after building or demolishing, a green or red face pops up over every home whose happiness went up or down */
+let moodBefore=null,moodT=0,moodAt=[];
+function moodSnap(at){if(window.__testUnlock&&!window.__moodTest)return;clearTimeout(moodT);moodT=setTimeout(moodCheck,450);if(at!=null&&at>=0&&moodAt.length<400)moodAt.push(at);if(moodBefore)return;try{if(envDirty)computeEnv();moodBefore=new Map();for(let i=0;i<N*N;i++){const c=grid[i];if(c&&HOUSING[c.t]&&!c.off)moodBefore.set(i,happySum(happyParts(i)))}}catch(e){moodBefore=null}}
+function moodCheck(){const B=moodBefore,A=moodAt;moodBefore=null;moodAt=[];if(!B)return;try{computeEnv();let n=0;const near=i=>{const x=i%N,z=(i/N)|0;return A.some(a=>Math.max(Math.abs(a%N-x),Math.abs(((a/N)|0)-z))<=14)};for(const[i,v0]of B){const c=grid[i];if(!c||!HOUSING[c.t]||c.off||!near(i))continue;const d=happySum(happyParts(i))-v0;if(Math.abs(d)<0.4)continue;faceAt(i,d>0);if(++n>=40)break}computeHappy()}catch(e){console.warn(e)}}
+const FACE_UP='<svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10.5" fill="#3fbf6a" stroke="#fff" stroke-width="2"/><circle cx="8.6" cy="9.6" r="1.5" fill="#123"/><circle cx="15.4" cy="9.6" r="1.5" fill="#123"/><path d="M7.2 13.6q4.8 5 9.6 0" fill="none" stroke="#123" stroke-width="1.9" stroke-linecap="round"/></svg>',
+  FACE_DN='<svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10.5" fill="#e0483a" stroke="#fff" stroke-width="2"/><circle cx="8.6" cy="9.6" r="1.5" fill="#2a0b08"/><circle cx="15.4" cy="9.6" r="1.5" fill="#2a0b08"/><path d="M7.4 17q4.6-4.6 9.2 0" fill="none" stroke="#2a0b08" stroke-width="1.9" stroke-linecap="round"/></svg>';
+function faceAt(i,up){try{if(cine.on)return}catch(e){}if(floats.length>=60){floats[0].el.remove();floats.shift()}const el=document.createElement('div');el.className='fl face';el.innerHTML=up?FACE_UP:FACE_DN;el.style.visibility='hidden';floatsEl.appendChild(el);floats.push({el,x:cx(i),z:cz(i),t:-0.6})}
+/* 8.4.3: demolition sound – a low thump, a crumbling rumble and falling debris, synthesised once */
+let demBuf=null;function demSnd(i){try{if(!sfx.ctx||sfx.ctx.state!=='running'||!(sfx.vol>0))return;const ctx=sfx.ctx;
+  if(!demBuf){const sr=ctx.sampleRate,L=Math.floor(sr*1.5),b=ctx.createBuffer(1,L,sr),d=b.getChannelData(0);let lp=0,lp2=0;
+    for(let k=0;k<L;k++){const t=k/sr,n=Math.random()*2-1;lp+=(n-lp)*0.06;lp2+=(lp-lp2)*0.12;const rumble=lp2*3.2*Math.exp(-t*2.6)*(1-Math.exp(-t*40)),thump=Math.sin(2*Math.PI*(52-18*t)*t)*Math.exp(-t*9)*0.9;d[k]=rumble+thump}
+    for(let q=0;q<26;q++){const t0=0.08+Math.random()*1.1,k0=Math.floor(t0*sr),len=Math.floor(sr*(0.01+Math.random()*0.03)),a=0.25+Math.random()*0.35;for(let k=0;k<len&&k0+k<L;k++)d[k0+k]+=(Math.random()*2-1)*a*Math.exp(-k/len*5)*Math.exp(-t0*1.2)}
+    let mx=0;for(let k=0;k<L;k++)mx=Math.max(mx,Math.abs(d[k]));for(let k=0;k<L;k++)d[k]*=0.9/(mx||1);demBuf=b}
+  const src=ctx.createBufferSource();src.buffer=demBuf;src.playbackRate.value=0.9+Math.random()*0.2;const g=ctx.createGain();g.gain.value=0.9;src.connect(g);
+  if(ctx.createStereoPanner&&i!=null&&i>=0){const p=ctx.createStereoPanner(),v=new THREE.Vector3(cx(i),0,cz(i)).project(camera);p.pan.value=Math.max(-0.8,Math.min(0.8,v.x));g.connect(p);p.connect(sfx.master)}else g.connect(sfx.master);src.start()}catch(e){}}
 function float(i,text,cls){
   if(i==null||i<0)return;try{if(cine.on)return}catch(e){}/* 7.7.16: no pop-ups over buildings in the cinematic camera */const now=performance.now();const key=i+(cls==='warn'?'w':'');
   if(now-(lastFloat.get(key)||0)<(cls==='warn'?5000:1500))return;lastFloat.set(key,now);
@@ -6370,7 +6391,7 @@ function updateFloats(dt){const w=renderer.domElement.clientWidth,h=renderer.dom
   const top=hudEl.getBoundingClientRect().bottom-g.top+14,bottom=dockEl.getBoundingClientRect().top-g.top+8;
   placeCrimeChips(w,h,top,bottom);
   floats=floats.filter(f=>{f.t+=dt;if(f.t>1.4){f.el.remove();return false}
-    v3.set(f.x,1.05+f.t*0.55,f.z).project(camera);
+    v3.set(f.x,1.05+Math.max(0,f.t)*0.55,f.z).project(camera);
     const sx=(v3.x*0.5+0.5)*w,sy=(-v3.y*0.5+0.5)*h;
     const ok=isFinite(sx)&&isFinite(sy)&&v3.z<1&&sx>30&&sx<w-30&&sy>top&&sy<bottom;
     f.el.style.visibility=ok?'visible':'hidden';
@@ -6514,7 +6535,14 @@ function placeLine(){const ts=lineTiles();if(!ts.length)return;lineRun=true;let 
   try{for(const t of ts){if(FP(tool)&&!roadMode()){pendA=t;const T=curT(),tt=fpTiles(t);if(fpOK(tt,T)&&money>=fpCost()){placeFP();n++}else pendA=-1}else{const m1=money;apply(t,true);if(money<m1)n++}}}finally{lineRun=false}
   updateGhost();setHint(n?`Postawiono w linii: ${n} × ${DEF[tool]?DEF[tool].name:''} za ${fmt(m0-money)} T¢.`:'Nic nie postawiono: pola zajęte albo brak gotówki.',!n,true);hintEl.hidden=false}
 let paintPrev=-1;function paintAt(x,y){const i=tileAt(x,y);if(i<0||i===lastPaint)return;paintPrev=lastPaint;lastPaint=i;apply(i,true)}
+function demTip(i){let c=grid[i];if(!c){return deco.has(i)?'<b>Drzewo</b> · usunięcie jest darmowe':''}if(c.t==='part')c=grid[c.main]||c;const d=DEF[c.t];if(!d)return'';
+  if(c.burn)return`<b>${d.name}</b> · pali się – nie da się go teraz wyburzyć`;
+  const refund=Math.floor((d.cost+(c.pole?DEF.pole.cost:0))/2);let h=`<b>${c.ruin?'Zgliszcza · ':''}${d.name}</b> · otrzymasz <b>+${fmt(refund)} T¢</b>`;
+  if(HOUSING[c.t]&&!c.ruin)h+=`<br><span class="tipWarn">Okoliczni mieszkańcy: −0,5 do szczęścia przez 1 h</span>`;
+  if(c.t==='landfill'){const cap=facCap(c),fill=cap?(c.gstock||0)/cap:0;if(fill>=0.999)h+='<br><span class="tipWarn">Pełnego wysypiska nie da się zlikwidować</span>';else if(fill>=0.3)h+=`<br><span class="tipWarn">Kara za wywóz śmieci: −${fmt(Math.round((c.gstock||0)*3))} T¢</span>`}
+  return h}
 function hover(x,y){if(lineConf)return;if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{hover(x,y)}finally{tool=sv}return}const i=tileAt(x,y);if(!areaT)area.visible=reachHide();hoverI=i;showGhost1(i);
+  if(tool==='bulldoze'&&delMode==='all'&&i>=0&&!(grid[i]&&grid[i].edge)){const h=demTip(i);if(h){const src='dem:'+i;if(tipSrc!==src||tipEl.hidden)tipEl.innerHTML=h;tipSrc=src;tipEl.hidden=false;placeTip(x,y,false)}else if(String(tipSrc).startsWith('dem:'))hideTip()}else if(String(tipSrc).startsWith('dem:'))hideTip();
   if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,grid[i].t==='rail'?'Tory wjazdowe · połącz z nimi dworzec, a pociągi przywiozą turystów':'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
   const ar=toolRange(tool);if(ar)showArea(i,ar,false,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool),tool);
   hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;hl.position.y=surfY(i)+0.06;if(TERR[tool])showBrush(i);
@@ -6671,7 +6699,7 @@ function updateGhost(){if(lineConf&&pendA<0){sel.visible=false;if(ghost)ghost.vi
   try{const g=ghostFor(T);g.visible=true;g.position.set(cx(pendA)+(fw-1)/2,tYi(pendA),cz(pendA)+(fh-1)/2);g.rotation.y=FP0(T)?rotIdx*Math.PI/2:faceRoad(pendA)}catch(e){}
   document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?(!fpLevel(t)?'teren zbyt nierówny (ponad 2 poziomy różnicy)':T==='pitB'||T==='pitS'?'oba pola muszą leżeć na tym samym złożu':'musi stać przy rzece'):'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:lvc?`${fmt(cost-lvc)} T¢ + ${fmt(lvc)} T¢ za wyrównanie terenu`:`${fmt(cost)} T¢`}`;
   document.getElementById('pOk').disabled=!(ok&&afford)}
-function placeFP(){if(pendA<0)return;const T=curT(),t=fpTiles(pendA),cost=fpCost();if(!fpOK(t,T))return updateGhost();const LV=fpLevel(t);if(money<cost+LV.cost)return updateGhost();if(LV.cost){spend(LV.cost);for(const j of t)if(hgt[j]!==LV.h)setH(j,LV.h)}
+function placeFP(){if(pendA<0)return;moodSnap(pendA);const T=curT(),t=fpTiles(pendA),cost=fpCost();if(!fpOK(t,T))return updateGhost();const LV=fpLevel(t);if(money<cost+LV.cost)return updateGhost();if(LV.cost){spend(LV.cost);for(const j of t)if(hgt[j]!==LV.h)setH(j,LV.h)}
   const a=pendA;pendA=-1;lockBuy();
   if(moveSrc>=0){const src=moveSrc;moveSrc=-1;doMove(src,a,t,cost);updateGhost();hintEl.hidden=false;
     if(entryOf(a)<0&&!NOROAD[T])setHint('Przeniesiono. Budynek nie ma dojazdu: dołóż ulicę obok.',true,true);else setHint(`Przeniesiono za ${fmt(cost)} T¢.`,false,true);return}
@@ -6715,6 +6743,7 @@ function toolHint(){
   if(roadMode())return`<b>${DEF[tool].name} wzdłuż drogi</b> · przeciągnij od jednej ulicy do drugiej: ${tool==='pipe'?'rura pójdzie':'słupy pójdą'} trasą drogi. Zobaczysz szkic i zatwierdzisz go przyciskiem „Zbuduj”.`;
   const d=DEF[tool];return`<b>${d.name}</b> · ${d.cost?fmt(d.cost)+' T¢ · ':''}${d.desc}`+(isTunT(tool)?' PgDn/PgUp: widok podziemny.':'')+(FP(tool)?` Stuknij miejsce, obróć i zatwierdź (${FP(tool).join('×')}).`:BUILD[tool]&&!DRIVE[tool]?' R obraca budynek.':'')+(DEMAND[tool]?` Pobiera ${mw(DEMAND[tool])} MW.`:'')+(UPKEEP[tool]?` Utrzymanie ${UPKEEP[tool]} T¢/godz.`:'')}
 function apply(i,painting){
+  if(tool!=='view')moodSnap(i);
   if(volc&&volcLock[i]&&tool!=='view'&&tool!=='bulldoze'&&moveSrc<0){if(!painting){setHint('<b>Wulkan</b> · na jego stożku, w kraterze ani pod nim nie da się nic zbudować ani zmienić terenu.',true,true);hintEl.hidden=false}return}
   if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{apply(i,painting)}finally{tool=sv}return}
   if(moveSrc>=0){if(painting)return;if(!grid[moveSrc]){moveSrc=-1;return}pendA=i;updateGhost();return}
@@ -6760,7 +6789,8 @@ function apply(i,painting){
     if(railOv(i)){const T0=c.ovT||'road';c.ov=null;c.ovT=null;drawRailOver(i);roadVer++;bfsCache.clear();for(const j of nbrs(i))if(grid[j]&&DRIVE[grid[j].t])rebuildRoad(j);const n=addMoney(Math.floor((DEF[T0]||DEF.road).cost/2));cur.refund+=n;save();return}
     if(c.burn){if(!painting)setHint('Ten budynek się pali – nie można go wyburzyć, dopóki straż nie ugasi pożaru.',true,true);hintEl.hidden=false;return}
     if(c.t==='landfill'){const cap=facCap(c),fill=cap?(c.gstock||0)/cap:0;if(fill>=0.999){setHint('Pełnego wysypiska nie da się zlikwidować – śmieci nie mają gdzie trafić.',true,true);hintEl.hidden=false;return}
-      if(fill>=0.3){const pen=Math.round((c.gstock||0)*3);money-=pen;cur.upkeep+=pen;float(i,`−${fmt(pen)} T¢ za wywóz śmieci`,'warn');setHint(`Likwidacja zapełnionego wysypiska: kara ${fmt(pen)} T¢ (3 T¢ za każdy kg odpadów).`,true,true);hintEl.hidden=false}}const refund=Math.floor((DEF[c.t].cost+(c.pole?DEF.pole.cost:0))/2);removeCell(i);
+      if(fill>=0.3){const pen=Math.round((c.gstock||0)*3);money-=pen;cur.upkeep+=pen;float(i,`−${fmt(pen)} T¢ za wywóz śmieci`,'warn');setHint(`Likwidacja zapełnionego wysypiska: kara ${fmt(pen)} T¢ (3 T¢ za każdy kg odpadów).`,true,true);hintEl.hidden=false}}const refund=Math.floor((DEF[c.t].cost+(c.pole?DEF.pole.cost:0))/2);const wasHome=HOUSING[c.t]&&!c.ruin,mi=c.t==='part'?c.main:i;removeCell(i);demSnd(i);
+    if(wasHome)moodMods.push({i:mi,r:4,v:-0.5,until:gameT+60});
     const n=addMoney(refund);cur.refund+=n;if(n>=0.5)float(i,`+${fmt(n)} T¢`,'money');save();return}
   if(tool==='poleDel'){if(c&&c.t==='lpole'){removeCell(i);const n=addMoney(Math.floor(DEF.pole.cost/2));cur.refund+=n;powerDirty=true;topoDirty=true;save();return}
     if(c&&POLEABLE[c.t]&&c.pole){c.pole=false;refreshAround(i);const n=addMoney(Math.floor(DEF.pole.cost/2));cur.refund+=n;powerDirty=true;save();return}
@@ -6882,7 +6912,7 @@ const isec=(k,title,body)=>{if(!body)return'';const cl=inspFold.has(k);return`<s
 const ICO_BOLT='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M13.6 2 5 13.4h6.2L9.8 22 19 10.2h-6.3z" fill="currentColor"/></svg>',
   ICO_DROP='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M12 2.5C8.2 7.6 5.6 11.2 5.6 14.6a6.4 6.4 0 0 0 12.8 0c0-3.4-2.6-7-6.4-12.1z" fill="currentColor"/></svg>',
   ICO_BIN='<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M3.8 6.2h16.4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M9.3 6V3.6h5.4V6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.8 8.3h12.4l-1.3 13H7.1z" fill="currentColor"/></svg>',
-  ICO_ROT='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M38 24a14 14 0 1 1-4.1-9.9"/><path d="M36 6v9h-9" stroke-linejoin="round"/></svg>',ICO_HOUSE1='<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z" fill="currentColor" opacity=".85"/><rect x="10" y="14" width="4" height="6" fill="var(--panel,#fff)"/></svg>',ICO_MOVE='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true"><path d="M6 17.5h18V8l18 16-18 16v-9.5H6z" fill="currentColor"/></svg>',
+  ICO_REB='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"><path d="M8 22 24 9l16 13v17H8z"/><path d="M19 39V28h10v11"/><path d="M31 5l4 4-4 4"/></svg>',ICO_ROT='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M38 24a14 14 0 1 1-4.1-9.9"/><path d="M36 6v9h-9" stroke-linejoin="round"/></svg>',ICO_HOUSE1='<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z" fill="currentColor" opacity=".85"/><rect x="10" y="14" width="4" height="6" fill="var(--panel,#fff)"/></svg>',ICO_MOVE='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true"><path d="M6 17.5h18V8l18 16-18 16v-9.5H6z" fill="currentColor"/></svg>',
   ICO_DOZER='<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M9 14h11l3 9h7v8H9z"/><path d="M12 14V8h7l2 6"/><path d="M30 23l7-7 5 2"/><path d="M42 18v15h-5"/><rect x="7" y="31" width="27" height="9" rx="4.5"/><circle cx="12" cy="35.5" r="1.6"/><circle cx="20.5" cy="35.5" r="1.6"/><circle cx="29" cy="35.5" r="1.6"/></svg>';
 const sTile=(col,ico,label,val,sub)=>`<div class="tile svcT" style="color:${col}"><span class="lab">${label}</span>${ico}<span class="v">${val}</span>${sub?`<small>${sub}</small>`:''}</div>`;
 function faceSvg(h){const m=h>=6?'M14.5 27.5q9.5 9 19 0':h>=4?'M15.5 29q8.5 5 17 0':h>=3?'M16 30.5h16':h>=2?'M16 33q8-4.5 16 0':'M14.5 34.5q9.5-8 19 0';
@@ -6892,9 +6922,13 @@ const NEED_SVG=['<path d="M10 6.5c-3.6-2-6 .8-5.5 4.2.5 3.3 3 6 5.5 5 2.5 1 5-1.
   '<path d="M5.5 7h9a3 3 0 0 1 3 3.2l-.4 3.2a1.8 1.8 0 0 1-3.1.9L12.5 13h-5L6 14.3a1.8 1.8 0 0 1-3.1-.9l-.4-3.2A3 3 0 0 1 5.5 7z"/><path d="M6.5 9v2.5M5.2 10.2h2.6"/>'].map(d=>`<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`);
 /* demolish from the inspector: the same rules and refund as the bulldozer */
 function demolishAt(i){const sv=tool,sd=delMode;tool='bulldoze';delMode='all';try{apply(i,false)}finally{tool=sv;delMode=sd}if(!grid[i])closeHouse();else{inspEl.__html=null;renderInsp()}}
+const rebCost=c=>Math.round((DEF[c.t].cost||0)*0.9);
+function rebuildRuin(i){let c=grid[i];if(!c)return;if(c.t==='part'){i=c.main;c=grid[i]}if(!c||!c.ruin)return;const cost=rebCost(c);if(money<cost){setHint(`Brakuje ${fmt(cost-money)} T¢ na odbudowę.`,true,true);hintEl.hidden=false;return}
+  moodSnap(i);spend(cost);c.ruin=false;c.off=false;c.aband=false;delete c.dead;if(HOUSING[c.t])c.pp=c.pp||[];refreshBuilding(i);try{startConstruction(grid[i])}catch(e){}
+  powerDirty=true;topoDirty=true;envDirty=true;bfsCache.clear();cur.ruins=Math.max(0,(cur.ruins||0)-1);float(i,'odbudowa','neutral');setHint(`Odbudowa: ${DEF[c.t].name} za ${fmt(cost)} T¢.`,false,true);hintEl.hidden=false;save();inspEl.__html=null;renderInsp()}
 function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];if(c&&DRIVE[c.t]&&c.bus)return renderStopInsp(i);if(!c||DRIVE[c.t])return closeHouse();
-  if(c.ruin){const html=`<div class="top"><b>Zgliszcza · ${DEF[c.t].name}</b><small>pole ${i%N+1}, ${((i/N)|0)+1}</small><button class="btn icon panel x" id="inspX" aria-label="Zamknij">×</button></div><div class="eff">Budynek spłonął i nie działa. Wyburz go narzędziem Wyburz, żeby zwolnić miejsce.</div>`;
-    if(html!==inspEl.__html){inspEl.__html=html;inspEl.innerHTML=html;document.getElementById('inspX').onclick=closeHouse}return}
+  if(c.ruin){const html=`<div class="top"><b>Zgliszcza · ${DEF[c.t].name}</b><small>pole ${i%N+1}, ${((i/N)|0)+1}</small><button class="btn icon panel x" id="inspX" aria-label="Zamknij">×</button></div><div class="eff">Budynek spłonął i nie działa. Możesz go odbudować za 90% ceny nowego albo wyburzyć, żeby zwolnić miejsce.</div><div class="acts"><button class="act reb" id="inspReb"${money<rebCost(c)?' disabled':''}><b>Odbuduj</b>${ICO_REB}<small>${fmt(rebCost(c))} T¢</small></button><button class="act del" id="inspRDel"><b>Wyburz</b>${ICO_DOZER}<small>Otrzymasz: ${fmt(Math.floor(DEF[c.t].cost/2))} T¢</small></button></div>`;
+    if(html!==inspEl.__html){inspEl.__html=html;inspEl.innerHTML=html;document.getElementById('inspX').onclick=closeHouse;document.getElementById('inspReb').onclick=()=>rebuildRuin(i);document.getElementById('inspRDel').onclick=()=>demolishAt(i)}return}
   const ccat=catOfT(c.t),list=catList(ccat),k=list.indexOf(i),rows=[],night=isNight(),nt=nextType(c.t);
   const R=(l,v,cls='')=>rows.push({l,v,cls});
   let pplS='',hapS='',needS='',houseOpt='';
@@ -6902,7 +6936,7 @@ function renderInsp(){if(cutMark)cutMark.visible=false;const i=inspI,c=grid[i];i
     const mods=[['Bazowe szczęście budynku',p.base],[p.shop?'Sklep w zasięgu 5 pól':'Brak sklepu w zasięgu 5 pól',p.shop],[p.park?'Park w zasięgu':'Brak parku w zasięgu',p.park],[p.ent?'Rozrywka w zasięgu':'Brak rozrywki w zasięgu',p.ent],
       [p.pol===-2?'Silny smog':p.pol===-1?'Lekki smog':'Czyste powietrze',p.pol],['Uchwały urzędu',p.ord],['Niezaspokojone potrzeby',p.needs],['Śmieci na ulicy',p.litter],['Brak prądu',p.pow],['Pełny kosz na śmieci',p.trash],
       [p.water===-3?'Brudna woda: choroby':'Brak wody z wodociągu',p.water],['Ścieki się cofają',p.sewer],['Hałas wiatraków lub transformatora',p.noise],['Tłok w sklepach',p.crowd],[`Podatki ${taxRate}%`,p.tax],
-      [p.edu===1?'Podstawówka i szkoła średnia':p.edu?'Szkoła podstawowa w zasięgu':'Brak szkoły w zasięgu',p.edu],['Chorzy bez leczenia',p.ill],['Zmarli czekają na pochówek',p.dead]];
+      [p.edu===1?'Podstawówka i szkoła średnia':p.edu?'Szkoła podstawowa w zasięgu':'Brak szkoły w zasięgu',p.edu],['Chorzy bez leczenia',p.ill],['Zmarli czekają na pochówek',p.dead],['Wyburzony dom w sąsiedztwie (1 h)',p.mood]];
     const chips=mods.filter(m=>m[1]).map(([l,v])=>`<span class="mod${v<0?' neg':''}"><span>${l}</span><b>${v>0?'+':''}${mw(v)}</b></span>`).join('');
     hapS=`<div class="hap"><div class="tile hapF" style="color:${HCOL[h]}">${faceSvg(h)}<b>Szczęście ${h}/${HMAX}</b><small>${T.name}</small></div><div class="mods">${chips||'<small class="muted">Nic nie wpływa na szczęście.</small>'}</div></div>`;
     if(c.aband)hapS+=`<div class="eff" style="color:var(--warn)"><b>Pustostan.</b> Mieszkańcy wrócą po 6 godz. przy zadowoleniu 4+${c.backT?` (${Math.round(c.backT/360*100)}%)`:''}.</div>`;else if(h<=2)hapS+=`<div class="eff" style="color:var(--warn)">Ryzyko pustostanu: ${Math.round((c.lowT||0)*100)}% (przy ${h} szansa co ${ABAND_T[h]/60} godz.)</div>`;
@@ -7216,8 +7250,8 @@ function icoInk(hex){if(!/^#[0-9a-f]{6}$/i.test(hex))return'#ffffff';const v=[1,
   return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2]>0.42?'#26302f':'#ffffff'}
 function mkTool(t){const b=document.createElement('button');b.className='tool';b.type='button';b.id='tool-'+t;
   let sw,nm,ct;
-  if(t==='view'){sw='background:var(--chip);color:var(--fg)';nm='Podgląd';ct='kamera'}
-  else if(t==='bulldoze'){sw='background:var(--warn);color:#fff';nm='Wyburz';ct='zwrot 50%'}
+  if(t==='view'){sw='background:var(--chip);color:var(--fg)';nm='Podgląd';ct=''}
+  else if(t==='bulldoze'){sw='background:var(--warn);color:#fff';nm='Wyburzanie';ct=''}
   else{const d=DEF[t],bg=/^#/.test(d.sw)?d.sw:'#8a6a4a';sw=`background:${bg};color:${icoInk(bg)}`;nm=d.name;ct=d.lbl||fmt(d.cost)+' '+(d.unit||'T¢')}
   b.innerHTML=`<span class="sw" style="${sw}">${svgI(t,17)}</span><span class="nm">${nm}</span><span class="ct">${ct}</span>`;
   b.setAttribute('aria-pressed','false');b.addEventListener('click',()=>selectTool(t));toolBtns[t]=b;return b}
@@ -7256,7 +7290,7 @@ function paintRouteBtn(){const b=document.getElementById('tool-routes');if(!b)re
   b.innerHTML=`<span class="sw" style="background:${routeAll?'#2f8f5a':'var(--chip)'};color:${routeAll?'#fff':'var(--fg)'}"><svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15c3-8 6 2 9-6s3-3 5-4"/><circle cx="3" cy="15" r="1.4"/><circle cx="17" cy="5" r="1.4"/></svg></span><span class="nm">Podgląd linii</span><span class="ct">${routeAll?'wł.':'wył.'}</span>`}
 /* a category tab exists only once something in it is unlocked */
 function refreshLocks(){CATS.forEach((c,k)=>{catBtns[k].hidden=c.name==='Teren'||!c.tools.some(unlocked)});grpBtns.forEach((b,gi)=>{const n=catBtns.filter((q,k)=>grpOf(k)===gi&&!q.hidden).length;b.hidden=!n;b.querySelector('.gn').textContent=n>1?n:''});showCat(curCat);if(linBtn)linBtn.hidden=!unlocked('busLine')}
-function selectTool(t){if(t!=='busStop')stopSide=null;if(!unlocked(t)&&LAW_UNL[t]){const T=LAWS.find(q=>q.k===LAW_UNL[t]);setHint(`Odblokujesz to w ustawach urzędu miasta: zbadaj całe drzewko „${T.name}”.`,true,true);hintEl.hidden=false;return}if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();if(isTunT(t)){if(underAuto&&!isTunT(tool))underTmp=true}else if(isTunT(tool))underTmp=false;setXray(t==='pipe'||t==='pipeDel'||undView());if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=reachHide();for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));try{renderTer()}catch(e){}
+function selectTool(t){if(t!=='busStop')stopSide=null;try{if(String(tipSrc).startsWith('dem:'))hideTip()}catch(e){}if(!unlocked(t)&&LAW_UNL[t]){const T=LAWS.find(q=>q.k===LAW_UNL[t]);setHint(`Odblokujesz to w ustawach urzędu miasta: zbadaj całe drzewko „${T.name}”.`,true,true);hintEl.hidden=false;return}if(!unlocked(t)){const m=MS[MS_OF[t]];setHint(`Odblokujesz to przy ${fmt(m.pop)} mieszkańcach (kamień milowy ${MS_OF[t]}: ${m.name}).`,true,true);hintEl.hidden=false;return}if(lineConf||lineA>=0)cancelLine(true);const lmsg=lineToolChange(t);if(stopGhost)stopGhost.visible=false;rot1=null;document.getElementById('hazard').hidden=!(t==='bulldoze'||t==='pipeDel'||t==='poleDel');if(t!=='view')closeHouse();if(isTunT(t)){if(underAuto&&!isTunT(tool))underTmp=true}else if(isTunT(tool))underTmp=false;setXray(t==='pipe'||t==='pipeDel'||undView());if(t==='tLevel'){levelH=null;levelPick=false}pendA=-1;moveSrc=-1;if(ghost)ghost.visible=false;sel.visible=false;placeEl.hidden=true;hintEl.hidden=false;tool=t;area.visible=reachHide();for(const k in toolBtns)toolBtns[k].setAttribute('aria-pressed',String(k===t));try{renderTer()}catch(e){}
   const ci=CATS.findIndex(c=>c.tools.includes(t));if(ci>=0&&ci!==curCat)showCat(ci);if(t==='bulldoze'&&delMode==='pipe')setXray(true);try{paintUnder()}catch(e){}setHint(toolHint());if(lmsg)setHint(lmsg,true,true);hl.visible=false;renderModes();
   if(linpEl){linpEl.hidden=!isLineT(t);if(linBtn)linBtn.setAttribute('aria-expanded',String(isLineT(t)));renderLines()}}
 showCat(0);
@@ -10605,7 +10639,21 @@ const LT_TR=[
 ["Wczytano slot {}: „{}”.", "Loaded slot {}: “{}”.", "Platz {} geladen: „{}“."],
 ["Kategorie opcji", "Option categories", "Optionskategorien"],
 ["Tryb budowy", "Build mode", "Baumodus"],
-["klawisz F11 · Esc zostaje w grze", "F11 key · Esc stays in the game", "Taste F11 · Esc bleibt im Spiel"]
+["klawisz F11 · Esc zostaje w grze", "F11 key · Esc stays in the game", "Taste F11 · Esc bleibt im Spiel"],
+["Wyburzanie", "Demolish", "Abreißen"],
+["Drzewo", "Tree", "Baum"],
+[" · usunięcie jest darmowe", " · removing it is free", " · Entfernen ist kostenlos"],
+[" · pali się – nie da się go teraz wyburzyć", " · on fire – it can't be demolished now", " · brennt – kann gerade nicht abgerissen werden"],
+[" · otrzymasz ", " · you get ", " · du erhältst "],
+["Okoliczni mieszkańcy: −0,5 do szczęścia przez 1 h", "Nearby residents: −0.5 happiness for 1 h", "Anwohner in der Nähe: −0,5 Zufriedenheit für 1 h"],
+["Pełnego wysypiska nie da się zlikwidować", "A full landfill can't be removed", "Eine volle Deponie kann nicht aufgelöst werden"],
+["Kara za wywóz śmieci: −{} T¢", "Waste removal fine: −{} T¢", "Strafe für den Müllabtransport: −{} T¢"],
+["Wyburzony dom w sąsiedztwie (1 h)", "Demolished home nearby (1 h)", "Abgerissenes Haus in der Nähe (1 h)"],
+["Budynek spłonął i nie działa. Możesz go odbudować za 90% ceny nowego albo wyburzyć, żeby zwolnić miejsce.", "The building burned down and doesn't work. You can rebuild it for 90% of a new one's price or demolish it to free the space.", "Das Gebäude ist abgebrannt und funktioniert nicht. Du kannst es für 90 % des Neupreises wieder aufbauen oder abreißen, um Platz zu schaffen."],
+["Odbuduj", "Rebuild", "Wiederaufbauen"],
+["odbudowa", "rebuilding", "Wiederaufbau"],
+["Odbudowa: {} za {} T¢.", "Rebuilding: {} for {} T¢.", "Wiederaufbau: {} für {} T¢."],
+["Brakuje {} T¢ na odbudowę.", "{} T¢ short to rebuild.", "Es fehlen {} T¢ für den Wiederaufbau."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
