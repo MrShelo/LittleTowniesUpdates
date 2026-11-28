@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.4.0';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.4.1';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -224,7 +224,16 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .modeP{display:grid;gap:5px;padding:6px;align-content:space-between;flex:0 0 auto}.modeP .mrow{display:flex;gap:4px}.modeP .msub{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;align-items:center}.msub .mlb{min-width:40px;text-align:center;font:700 12px var(--font-d,inherit);white-space:nowrap}.msub .mbr{flex-basis:100%;height:0}.msub.terr button{font:700 16px var(--font-d,inherit);color:var(--fg)}
 .msub button{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);display:grid;place-items:center;cursor:pointer;padding:0}.msub button svg{width:17px;height:17px}.msub button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}.msub button:disabled{opacity:.3;cursor:default}
 @media (max-width:700px){.modeP .tool .ct{display:none}.modeP .tool .nm{font-size:12px}.dockRow{gap:4px}}
-@media (max-width:560px){.dockRow{flex-direction:column;align-items:stretch;width:100%}.modeP{display:flex;align-items:center;justify-content:space-between;padding:4px 6px}.modeP .mrow .tool{padding:4px 8px 4px 5px}.msub button{width:32px;height:28px}}
+/* 8.4.1: the view/demolish dock is laid out as a neat card: two equal buttons on top, the mode buttons centred under a divider */
+@media (min-width:561px){.modeP{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:8px;min-width:236px;background:var(--panel2,var(--panel));box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .modeP .mrow{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0;background:none;border:0}
+  .modeP .mrow .tool{width:100%;box-sizing:border-box;justify-content:start;margin:0;border-radius:10px;padding:7px 9px 7px 7px}
+  .modeP .mlab{margin-top:auto;padding-top:8px;border-top:1px solid var(--line);text-align:center;font:700 10.5px var(--font-b);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .modeP .msub{gap:6px}
+  .modeP .msub:empty,.modeP .mlab:has(+ .msub:empty){display:none}
+  .modeP .msub button{width:38px;height:32px;border-radius:9px;background:color-mix(in srgb,var(--fg) 6%,transparent)}
+  .modeP .msub button[aria-pressed="true"]{background:var(--accent);box-shadow:0 2px 8px color-mix(in srgb,var(--accent) 45%,transparent)}}
+@media (max-width:560px){.modeP .mlab{display:none}.dockRow{flex-direction:column;align-items:stretch;width:100%}.modeP{display:flex;align-items:center;justify-content:space-between;padding:4px 6px}.modeP .mrow .tool{padding:4px 8px 4px 5px}.msub button{width:32px;height:28px}}
 .cats{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
 /* 8.4: options in three wide tabs, save slots, a more readable build bar */
 .menu{max-height:calc(100vh - 32px);overflow:auto;overscroll-behavior:contain}
@@ -252,10 +261,10 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .slotB .armed{background:var(--warn);border-color:var(--warn);color:#fff}
 .build.panel{background:var(--panel2,var(--panel));box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .grp{color:var(--fg);opacity:.85}.grp:hover{opacity:1}
-.grp[aria-selected="true"]{opacity:1;background:var(--cc);border-color:var(--cc);color:#fff;box-shadow:0 3px 10px color-mix(in srgb,var(--cc) 40%,transparent)}
-.grp[aria-selected="true"] svg{color:#fff}
+.grps .grp[aria-selected="true"]{opacity:1;background:var(--cc);border-color:var(--cc);color:#fff;box-shadow:0 3px 10px color-mix(in srgb,var(--cc) 40%,transparent)}
+.grps .grp[aria-selected="true"] svg{color:#fff}
 .grp .gn{min-width:17px;height:17px;padding:0 5px;box-sizing:border-box;border-radius:9px;background:color-mix(in srgb,var(--fg) 12%,transparent);color:inherit;display:inline-grid;place-items:center;font-size:10.5px;opacity:.9}
-.grp[aria-selected="true"] .gn{background:rgba(255,255,255,.25);color:#fff}
+.grps .grp[aria-selected="true"] .gn{background:rgba(255,255,255,.25);color:#fff}
 .cats{border:1px solid color-mix(in srgb,var(--gc,var(--line)) 35%,transparent);background:color-mix(in srgb,var(--gc,transparent) 15%,transparent)!important}
 .cats .cat:not([aria-selected="true"]){color:var(--fg);background:color-mix(in srgb,var(--cc) 14%,var(--panel2,transparent))}
 .tool .nm{color:var(--fg);font-weight:650}
@@ -612,7 +621,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div class="insp panel" id="insp" hidden aria-live="polite"></div>
   <div class="place panel" id="place" hidden><span id="placeT"></span><button class="btn panel" id="pRot" title="Obróć (R)">↻ Obróć</button><button class="btn panel ok" id="pOk" title="Postaw (Enter)">✓ Postaw</button><button class="btn icon panel" id="pNo" aria-label="Anuluj" title="Anuluj">✕</button></div>
   <div class="hint panel" id="hint" aria-live="polite"></div>
-  <div class="dockRow"><div class="modeP panel" id="modeP"><div class="mrow" id="modeRow"></div><div class="msub" id="msub" role="group" aria-label="Tryb"></div></div>
+  <div class="dockRow"><div class="modeP panel" id="modeP"><div class="mrow" id="modeRow"></div><div class="mlab">Tryb budowy</div><div class="msub" id="msub" role="group" aria-label="Tryb"></div></div>
   <div class="build panel"><div class="grps" id="grps" role="tablist" aria-label="Działy budowy"></div><div class="cats" id="cats" role="tablist" aria-label="Kategorie budowy"></div>
     <div class="tools" id="tools" role="toolbar" aria-label="Budowanie"></div></div></div>
 </footer>
@@ -10590,7 +10599,8 @@ const LT_TR=[
 ["Brak miejsca na zapis!", "No space to save!", "Kein Platz zum Speichern!"],
 [" Usuń nieużywane miasto w „Zapisach”.", " Delete an unused city in “Saves”.", " Lösche eine ungenutzte Stadt unter „Spielstände“."],
 ["Wczytano slot {}: „{}”.", "Loaded slot {}: “{}”.", "Platz {} geladen: „{}“."],
-["Kategorie opcji", "Option categories", "Optionskategorien"]
+["Kategorie opcji", "Option categories", "Optionskategorien"],
+["Tryb budowy", "Build mode", "Baumodus"]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
