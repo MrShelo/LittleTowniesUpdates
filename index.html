@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.4.7';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.4.8';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -285,6 +285,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 [data-ovl="under"].tmp{outline:2px dashed #6f6a62;outline-offset:1px}
 .act.rot{color:#5fb0e8}.act.reb{color:#3fae6a}
 .fl.face{padding:0;background:none;border:0;box-shadow:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}.fl.face svg{display:block}
+.impT{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px;font-variant-numeric:tabular-nums}.impT th{font:700 11px var(--font-b);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:right;padding:4px 6px;border-bottom:1px solid var(--line)}.impT th:first-child,.impT td:first-child{text-align:left}
+.impT td{padding:5px 6px;text-align:right;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);color:#e0574a}.impT td:first-child{color:var(--fg)}.impT tfoot td{font-weight:700;border-bottom:0}.impE{margin:8px 0 0;color:var(--muted)}
 .tipWarn{color:#e0574a;font-weight:600}.act.rot[aria-expanded="true"]{background:color-mix(in srgb,#5fb0e8 18%,transparent);border-color:#5fb0e8}
 .rotpick{display:flex;align-items:center;gap:12px;margin-top:6px;padding:8px;border-radius:10px;border:1px solid var(--line);background:color-mix(in srgb,var(--fg) 5%,transparent)}
 .rotpick p{margin:0;font-size:12px;color:var(--muted);line-height:1.35}.rotpick p b{color:var(--fg)}
@@ -5112,7 +5114,7 @@ const shipTot=c=>Object.values(shipQ(c)).reduce((a,v)=>a+v,0);
 const SHIP_EVERY=120,SHIP_P=0.6,SHIP_GOODS=['mat',...Object.keys(GOODS).filter(k=>k!=='mat')],SHIP_N0=50,SHIP_NMIN=25,SHIP_NMAX=300,SHIP_IMP=0.5;
 function shipImport(i){const c=grid[i],Q=shipQ(c),sel=c.ship;let tot=0,cost=0;
   for(const k of sel){const unit=frPrice(k)*SHIP_IMP,room=Math.floor(whFreeFor(k));const n0=Math.min(Q[k]||0,room,Math.floor(Math.max(0,cashNow()-cost)/unit));if(n0<=0)continue;
-    const n=addGood(k,n0,i);tot+=n;cost+=n*unit;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
+    const n=addGood(k,n0,i);tot+=n;cost+=n*unit;impBy(k,Math.round(n*unit*expMul()));cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
   if(!tot){float(i,sel.every(k=>whFreeFor(k)<1)?'spedycja: magazyny pełne':'spedycja: brak gotówki lub towaru do sprowadzenia','warn');return}cost=Math.round(cost*expMul());owe(cost);cur.upkeep+=cost;cur.shipImp=(cur.shipImp||0)+cost;float(i,`sprowadzono ${fmt(tot)} kg · −${fmt(cost)} T¢`,'mat');
   if(c.t==='airport'){planeFly(i,true);return}const e=entryOf(i);if(e>=0){const b=bfs(e);const outs=edgeOuts().filter(o=>b.dist[o]>=0);for(let k=0;k<Math.min(5,Math.ceil(tot/20))&&outs.length&&cars.length<MAX_CARS;k++){const v=createCar('truck',pathTo(b,outs[k%outs.length]).reverse(),{home:i,dest:-1});v.kind='export';v.mesh.userData.cargo&&(v.mesh.userData.cargo.material=GM[sel[k%sel.length]]||GM.mix)}}}
 function shipRun(i){const c=grid[i];if(!c)return;if(c.shipM==='imp')return shipImport(i);const Q=shipQ(c),sel=c.ship;let tot=0,inc=0;for(const k of sel){const n=Math.min(Q[k]||0,Math.floor(have(k)));if(n<=0)continue;take(k,n,i);tot+=n;inc+=n*frPrice(k)*SHIP_P;cur.shipped=cur.shipped||{};cur.shipped[k]=(cur.shipped[k]||0)+n}
@@ -5290,7 +5292,7 @@ const frName=k=>k==='mat'?'Materiały':GOODS[k].name,frPrice=k=>k==='mat'?8:GOOD
 const frRamps=c=>{c.fr=c.fr||[{k:'mat',m:'off',n:FR_MIN}];if(c.up&&c.fr.length<2)c.fr.push({k:'veg',m:'off',n:FR_MIN});return c.fr.slice(0,c.up?2:1)};
 function freightRun(st){const c=grid[st];for(const R0 of frRamps(c)){if(R0.m==='off')continue;const k=R0.k;
     if(R0.m==='imp'){const room=Math.floor(whFreeFor(k)),unit=frPrice(k)*FR_IMP;let n=Math.min(R0.n,room,Math.floor(Math.max(0,cashNow())/unit));
-      if(n<=0){float(st,room<=0?'import: magazyny pełne':'import: brak gotówki','warn');continue}n=Math.floor(addGood(k,n,st));const cost=Math.round(n*unit*expMul());owe(cost);cur.upkeep+=cost;cur.frImp=(cur.frImp||0)+cost;
+      if(n<=0){float(st,room<=0?'import: magazyny pełne':'import: brak gotówki','warn');continue}n=Math.floor(addGood(k,n,st));const cost=Math.round(n*unit*expMul());owe(cost);cur.upkeep+=cost;cur.frImp=(cur.frImp||0)+cost;impBy(k,cost);
       cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n;float(st,`+${n} kg ${frName(k).toLowerCase()} (−${fmt(cost)} T¢)`,'mat')}
     else{const have=k==='mat'?matl:(goods[k]||0),n=Math.min(R0.n,Math.floor(have));if(n<=0){float(st,`eksport: brak towaru (${frName(k).toLowerCase()})`,'warn');continue}
       take(k,n,st);const inc=earn(Math.round(n*frPrice(k)*FR_EXP));cur.inc+=inc;cur.frExp=(cur.frExp||0)+inc;float(st,`−${n} kg ${frName(k).toLowerCase()} (+${fmt(inc)} T¢)`,'money')}}}
@@ -5673,7 +5675,7 @@ function volcLoad(s){if(mapType!=='carib'){volcInit(-1);return}const v=s&&s.volc
   let best=-1;for(let i=0;i<N*N;i++)if(!water[i]&&(best<0||hgt[i]>hgt[best]))best=i;volcInit(best,5);if(volc)volc.next=Math.max(volc.next,gameT+1440*2)}
 const volcCloud=()=>!!volc&&gameT>=volc.t0&&gameT-volc.t0<720,volcActive=()=>!!volc&&gameT>=volc.t0&&gameT-volc.t0<60;
 const volcTop=()=>{let m=-1e9;for(const i of volc.lava)m=Math.max(m,lvY(hgt[i]));return m};
-function volcHour(){if(!volc||mapType!=='carib')return;if(gameT>=volc.next&&!volcCloud())volcErupt();const cl=volcCloud();if(cl!==!!volc.clOn){volc.clOn=cl;envDirty=true}}
+function volcHour(){if(!volc||mapType!=='carib')return;if(!unlocked('fireS')){if(volc.next<gameT+1440)volc.next=gameT+1440;volc.wait=true}else if(volc.wait){volc.wait=false;volc.next=Math.max(volc.next,gameT+1440*2);setHint('<b>Wulkan się budzi</b> · masz już straż pożarną, więc od teraz co kilka dni mogą być erupcje.',true,true);hintEl.hidden=false}if(gameT>=volc.next&&!volcCloud())volcErupt();const cl=volcCloud();if(cl!==!!volc.clOn){volc.clOn=cl;envDirty=true}}
 function volcErupt(){if(!volc)return;volc.t0=gameT;volc.next=gameT+1440*(3+Math.floor(Math.random()*4));
   const day=Math.floor(gameT/1440)+1,mx=Math.min(10,2+Math.floor(day/5)),n=1+Math.floor(Math.random()*mx);volc.q=[];
   const pick=()=>{const L=volc.lava[(Math.random()*volc.lava.length)|0]??volc.c,x=Math.max(0,Math.min(N-1,L%N+Math.round(Math.random()*14-7))),z=Math.max(0,Math.min(N-1,((L/N)|0)+Math.round(Math.random()*14-7)));return{from:L,i:idx(x,z)}};
@@ -6913,12 +6915,18 @@ function loanUI(){const el=document.getElementById('loanBox');if(!el)return;if(l
   el.innerHTML=Object.entries(LOANS).map(([k,L])=>{const lock=L.need&&!counts[L.need],tot=Math.round(L.amt*(1+L.rate*(L.days+1)/2));return`<div class="tcard lnc${lock?' lock':''}"><div class="tch"><b>${fmt(L.amt)} T¢</b><span>${L.days} dni · ${mw(L.rate*100)}% dziennie</span></div><div class="lnf"><span>Rata ok. <b>${fmt(Math.round(L.amt/L.days))} T¢</b> + odsetki</span><span>Łącznie ok. <b>${fmt(tot)} T¢</b></span></div>${lock?'<small class="lst">Wymaga banku rezerw złota.</small>':''}<button class="btn panel" data-loan="${k}"${lock?' disabled':''}>Weź pożyczkę</button></div>`}).join('')+'<small class="lst">Naraz możesz mieć jedną pożyczkę. Raty pobierane są codziennie o północy.</small>';loanImp();
   for(const b of el.querySelectorAll('[data-loan]'))b.onclick=()=>takeLoan(b.dataset.loan)}
 function loanImp(){
-  const im=document.getElementById('impN');if(im){const ks=importKinds();im.innerHTML=(ks.length?`Importowane w ostatniej godzinie: ${ks.map(k=>GOODS[k].name.toLowerCase()).join(', ')}. `:'Brak importu. ')+`Spoza miasta kupują tylko sklepy (bez magazynu albo gdy w magazynach przez godzinę brakuje ich towaru, za ${Math.round(SHOP_IMP*100)}% ceny półkowej) oraz elektrownie węglowa i na biomasę (gdy brak paliwa: węgiel ${FUEL_IMP.coal} T¢/kg, drewno ${FUEL_IMP.wood} T¢/kg). Fabryki nie importują: bez surowca czekają.`+(cur.impCost?` Ta godzina: −${fmt(Math.round(cur.impCost))} T¢ za import.`:'')}}
+  const im=document.getElementById('impN');if(im){const ks=importKinds();im.innerHTML=(ks.length?`Importowane w ostatniej godzinie: ${ks.map(k=>GOODS[k].name.toLowerCase()).join(', ')}. `:'Brak importu. ')+`Spoza miasta kupują tylko sklepy (bez magazynu albo gdy w magazynach przez godzinę brakuje ich towaru, za ${Math.round(SHOP_IMP*100)}% ceny półkowej) oraz elektrownie węglowa i na biomasę (gdy brak paliwa: węgiel ${FUEL_IMP.coal} T¢/kg, drewno ${FUEL_IMP.wood} T¢/kg). Fabryki nie importują: bez surowca czekają.`+impTable()}}
 /* automatic imports: a missing input is brought in, and each imported kind adds to the upkeep for an hour */
 const IMPORT_FEE=0;let imports={};
 /* imports cost per kilogram: a shop pays 70% of the shelf price, power plants twice the export price of their fuel */
 const SHOP_IMP=0.5,FUEL_IMP={coal:24,wood:16};
-function payImport(k,n,cost){cost=Math.round(cost*expMul());owe(cost);cur.upkeep+=cost;cur.impCost=(cur.impCost||0)+cost;imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
+/* 8.4.8: import spending per good – the last full hour next to the hour in progress */
+function impTable(){const L=hist.length?hist[hist.length-1].impBy||{}:{},C=cur.impBy||{},ks=[...new Set([...Object.keys(L),...Object.keys(C)])].filter(k=>(L[k]||0)+(C[k]||0)>=1).sort((a,b)=>((L[b]||0)+(C[b]||0))-((L[a]||0)+(C[a]||0)));
+  if(!ks.length)return'<div class="impT"><p class="impE">W ostatniej godzinie nic nie importowano.</p></div>';const nm=k=>k==='mat'?'Materiały':GOODS[k]?GOODS[k].name:k==='coal'?'Węgiel':k==='wood'?'Drewno':k;
+  const sL=ks.reduce((a,k)=>a+(L[k]||0),0),sC=ks.reduce((a,k)=>a+(C[k]||0),0);
+  return`<table class="impT"><thead><tr><th>Towar</th><th>Ostatnia godz.</th><th>Ta godzina</th></tr></thead><tbody>${ks.map(k=>`<tr><td>${esc(nm(k))}</td><td>${L[k]?'−'+fmt(Math.round(L[k]))+' T¢':'–'}</td><td>${C[k]?'−'+fmt(Math.round(C[k]))+' T¢':'–'}</td></tr>`).join('')}</tbody><tfoot><tr><td>Razem</td><td>−${fmt(Math.round(sL))} T¢</td><td>−${fmt(Math.round(sC))} T¢</td></tr></tfoot></table>`}
+function impBy(k,cost){cur.impBy=cur.impBy||{};cur.impBy[k]=(cur.impBy[k]||0)+cost}
+function payImport(k,n,cost){cost=Math.round(cost*expMul());owe(cost);cur.upkeep+=cost;cur.impCost=(cur.impCost||0)+cost;impBy(k,cost);imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
 function importGood(k,n){if(n<=0)return;addGood(k,n);imports[k]=gameT;cur.imported=cur.imported||{};cur.imported[k]=(cur.imported[k]||0)+n}
 const importKinds=()=>Object.keys(imports).filter(k=>gameT-imports[k]<60);
 function taxIncome(){let t=0;for(const c of grid)if(c&&HLV[c.t]&&!c.aband)t+=popOf(c)*(TAX[c.t]??taxRate)/100*TAX_BASE*(c.lyc?1.05:1);return Math.round(t)}
@@ -7552,7 +7560,7 @@ function openMaps(cancel){paused=true;mapsEl.hidden=false;document.getElementByI
   document.getElementById('mapsSub').textContent=hasSave()?'Nazwij miasto, wybierz trudność i teren. Obecne miasto zostanie zastąpione.':'Nazwij miasto, wybierz trudność i ukształtowanie terenu.';ci.focus();ci.select()}
 const diffBtns=[...mapsEl.querySelectorAll('[data-diff]')];function showDiff(){for(const b of diffBtns)b.setAttribute('aria-checked',String(b.dataset.diff===diffPick))}showDiff();
 for(const b of diffBtns)b.addEventListener('click',()=>{diffPick=b.dataset.diff;showDiff()});
-const CLIMATE={carib:'Na największej wyspie stoi wulkan. Co kilka dni wybucha: kule magmy mogą podpalić budynki do 7 pól od krateru, a chmura pyłu przez 12 godzin zanieczyszcza teren 11×11 pól. Na stożku wulkanu, w kraterze i pod nim nie da się nic zbudować ani zmienić terenu.',oasis:'Latem jeziora w oazach wysychają, a zimą zieleń się rozrasta. Planuj wodę i zabudowę z myślą o porach roku.',tundra:'Zimą rzeki częściowo zamarzają (poza miejscami, gdzie wypływają z mapy, i okolicą wylotów ścieków). Tamy na zamarzniętej wodzie przestają wtedy dawać prąd.'};
+const CLIMATE={carib:'Na największej wyspie stoi wulkan. Od odblokowania straży pożarnej co kilka dni wybucha: kule magmy mogą podpalić budynki do 7 pól od krateru, a chmura pyłu przez 12 godzin zanieczyszcza teren 11×11 pól. Na stożku wulkanu, w kraterze i pod nim nie da się nic zbudować ani zmienić terenu.',oasis:'Latem jeziora w oazach wysychają, a zimą zieleń się rozrasta. Planuj wodę i zabudowę z myślą o porach roku.',tundra:'Zimą rzeki częściowo zamarzają (poza miejscami, gdzie wypływają z mapy, i okolicą wylotów ścieków). Tamy na zamarzniętej wodzie przestają wtedy dawać prąd.'};
 let mapPend=null;const mapWarnEl=document.getElementById('mapWarn');
 function startMap(m){mapPend=null;mapWarnEl.hidden=true;mapsEl.hidden=true;overEl.hidden=true;newCity(m,diffPick,document.getElementById('cityIn').value);paused=false;prev=performance.now()}
 for(const b of mapsEl.querySelectorAll('.mapb'))b.addEventListener('click',()=>{const m=b.dataset.map;if(!CLIMATE[m])return startMap(m);mapPend=m;document.getElementById('mapWarnT').textContent=CLIMATE[m];mapWarnEl.hidden=false;
@@ -10684,7 +10692,13 @@ const LT_TR=[
 ["Odbudowa: {} za {} T¢.", "Rebuilding: {} for {} T¢.", "Wiederaufbau: {} für {} T¢."],
 ["Brakuje {} T¢ na odbudowę.", "{} T¢ short to rebuild.", "Es fehlen {} T¢ für den Wiederaufbau."],
 ["Tryb wyburzania", "Demolish mode", "Abrissmodus"],
-["Pędzel terenu", "Terrain brush", "Geländepinsel"]
+["Pędzel terenu", "Terrain brush", "Geländepinsel"],
+["Towar", "Good", "Ware"],
+["Ostatnia godz.", "Last hour", "Letzte Std."],
+["W ostatniej godzinie nic nie importowano.", "Nothing was imported in the last hour.", "In der letzten Stunde wurde nichts importiert."],
+["Wulkan się budzi", "The volcano is waking up", "Der Vulkan erwacht"],
+[" · masz już straż pożarną, więc od teraz co kilka dni mogą być erupcje.", " · you have a fire brigade now, so eruptions can happen every few days from now on.", " · du hast jetzt eine Feuerwehr, daher kann es ab jetzt alle paar Tage Ausbrüche geben."],
+["Na największej wyspie stoi wulkan. Od odblokowania straży pożarnej co kilka dni wybucha: kule magmy mogą podpalić budynki do 7 pól od krateru, a chmura pyłu przez 12 godzin zanieczyszcza teren 11×11 pól. Na stożku wulkanu, w kraterze i pod nim nie da się nic zbudować ani zmienić terenu.", "A volcano stands on the biggest island. Once the fire brigade is unlocked it erupts every few days: magma bombs can set buildings on fire up to 7 tiles from the crater, and an ash cloud pollutes an 11×11-tile area for 12 hours. Nothing can be built and the terrain can't be changed on the cone, in the crater or under it.", "Auf der größten Insel steht ein Vulkan. Sobald die Feuerwehr freigeschaltet ist, bricht er alle paar Tage aus: Magmabomben können Gebäude bis zu 7 Felder vom Krater entfernt in Brand setzen, und eine Aschewolke verschmutzt 12 Stunden lang ein Gebiet von 11×11 Feldern. Auf dem Kegel, im Krater und darunter kann nichts gebaut und das Gelände nicht verändert werden."]
 ];
 /* ===== the language engine (no need to edit this part) =====
    The game is written in Polish. Every piece of text that appears on screen is looked up in LT_TR above and swapped for the chosen language:
