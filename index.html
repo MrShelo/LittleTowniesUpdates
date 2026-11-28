@@ -59,7 +59,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.4.6';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.4.7';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -2987,6 +2987,7 @@ function frameRect(x,z,sx,sz,w,m){for(const[dx,dz,a,b]of[[0,-1,sx+w,w],[0,1,sx+w
 /* 7.0.7: public services (health, schools, police, fire, road service) reach along the roads: their range is drawn as the tiles they reach */
 function reachHide(){if(reachMesh)reachMesh.count=0;return false}
 var reachMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(0.96,0.96).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:'#5fd84a',transparent:true,opacity:0.38,depthWrite:false}),N*N);reachMesh.count=0;reachMesh.frustumCulled=false;reachMesh.renderOrder=3;scene.add(reachMesh);
+function parkArea(i,r,flash){const c=grid[i],ts=c&&c.tiles?c.tiles:[i],xs=ts.map(k=>k%N),zs=ts.map(k=>(k/N)|0),x0=Math.min(...xs),z0=Math.min(...zs);showArea(idx(x0,z0),r,flash,'green',[Math.max(...xs)-x0+1,Math.max(...zs)-z0+1])}
 function showArea(i,r,flash,kind='green',fp=null,T=null){reachMesh.count=0;
   if(T&&roadRangeT(T)&&r){const fw0=fp?fp[0]:1,fh0=fp?fp[1]:1,c=grid[i];const ts=c&&c.t===T?tilesOf(i):[];if(!ts.length)for(let dz=0;dz<fh0;dz++)for(let dx=0;dx<fw0;dx++){const x=i%N+dx,z=((i/N)|0)+dz;if(x<N&&z<N)ts.push(idx(x,z))}
     const cov=c&&c.t===T?reachOf(i,r):reachFrom(ts,r,reachSp(T),sqOf(T,ts.length,c&&c.t===T?c:null));let n=0;for(let j=0;j<N*N;j++){if(!cov[j]||water[j])continue;dObj.position.set(cx(j),surfY(j)+0.07,cz(j));dObj.rotation.set(0,0,0);dObj.scale.setScalar(1);dObj.updateMatrix();reachMesh.setMatrixAt(n++,dObj.matrix)}
@@ -3004,7 +3005,7 @@ function eduReach(i,r){const cov=reachOf(i,r);if(typeof tLines==='undefined'||!t
 function svcRange(t,c){if(MED[t])return MED[t].r;if(EDU[t])return EDU[t].r;if(POL[t])return c?polRad(c):POL[t].r;if(FIRE[t])return c?fireRad(c):FIRE[t].r;
   if(t==='heliB')return HELI_R;if(t==='roadSvc')return SVC_R+(c&&c.up?2:0);if(ENT_R[t])return c?entR(c):ENT_R[t];if(SHOPS_R.has(t))return shopR(t);return 0}
 const rangeKind=t=>POL[t]?'pol':'green',rangeFP=t=>SHOPS_R.has(t)||ENT_R[t]?null:FP(t);
-function toolRange(t){const d=DEF[t];return(d&&(d.r||d.area))||svcRange(t)}
+function toolRange(t){const d=DEF[t];return(d&&(d.r?d.r+1:d.area))||svcRange(t)}/* 8.4.7: a park's real reach is r+1 (see parkR) */
 const ring=new THREE.Mesh(new THREE.RingGeometry(0.5,0.6,40),new THREE.MeshBasicMaterial({color:'#f07a4f',side:THREE.DoubleSide,depthWrite:false,transparent:true}));
 ring.rotation.x=-Math.PI/2;ring.position.y=0.07;ring.visible=false;scene.add(ring);
 
@@ -6571,7 +6572,7 @@ let pGhost=null;function poleGhost(i){if(i<0){if(pGhost)pGhost.visible=false;ret
 function hover(x,y){if(lineConf)return;if(tool==='bulldoze'&&delMode!=='all'){const sv=tool;tool=DELT[delMode];try{hover(x,y)}finally{tool=sv}return}const i=tileAt(x,y);if(!areaT)area.visible=reachHide();hoverI=i;showGhost1(i);
   if(tool==='bulldoze'&&delMode==='all'&&i>=0&&!(grid[i]&&grid[i].edge)){const h=demTip(i);if(h){const src='dem:'+i;if(tipSrc!==src||tipEl.hidden)tipEl.innerHTML=h;tipSrc=src;tipEl.hidden=false;placeTip(x,y,false)}else if(String(tipSrc).startsWith('dem:'))hideTip()}else if(String(tipSrc).startsWith('dem:'))hideTip();
   if(i>=0&&grid[i]&&grid[i].edge)showTipAt(x,y,grid[i].t==='rail'?'Tory wjazdowe · połącz z nimi dworzec, a pociągi przywiozą turystów':'Droga wjazdowa · tędy przyjeżdżają turyści i odbywa się wymiana towarów z miejscami poza miastem','edge');else if(tipSrc==='edge')hideTip();if(i<0||tool==='view'){hl.visible=false;return}
-  const ar=toolRange(tool);if(ar)showArea(i,ar,false,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool),tool);
+  const ar=toolRange(tool);if(ar)showArea(i,ar,false,rangeKind(tool),DEF[tool]&&DEF[tool].area?null:rangeFP(tool),tool);
   hl.visible=true;const fp=FP(tool)||[1,1];hl.scale.set(fp[0],fp[1],1);hl.position.x=cx(i)+(fp[0]-1)/2;hl.position.z=cz(i)+(fp[1]-1)/2;hl.position.y=surfY(i)+0.06;if(TERR[tool])showBrush(i);
   const onBr=grid[i]&&grid[i].t==='bridge';let ok;if(tool==='busStop')ok=showStopGhost(i)&&(!!grid[i].bus||money>=DEF.busStop.cost);else if(isLineT(tool))ok=lineStopAt(i,tool==='busLine')>=0;else if(tool==='crosswalk')ok=crossOK(i)&&!grid[i].cross&&!grid[i].bus&&money>=DEF.crosswalk.cost;else if((STREET[tool]||tool==='highway')&&grid[i]&&grid[i].t==='rail'&&grid[i].tun)ok=!grid[i].ov&&hgt[i]>=(grid[i].th??H_LAND)+3&&money>=DEF[tool].cost;else if(tool==='tunnel'&&grid[i]&&(STREET[grid[i].t]||grid[i].t==='highway'))ok=hgt[i]>=3&&money>=DEF.tunnel.cost;else if(tool==='crossDel')ok=!!grid[i]&&(!!grid[i].cross||!!grid[i].bus||!!grid[i].scr);else if(tool==='hwScreen')ok=!!grid[i]&&grid[i].t==='highway'&&!grid[i].scr&&money>=DEF.hwScreen.cost;else if(tool==='rail'){const c=grid[i];ok=money>=DEF.rail.cost&&(!c?!railNearWhy(i):(!!STREET[c.t]&&!c.rail&&!c.edge&&!crossWhy(i)))}else if(tool==='pipe')ok=(!water[i]||onBr)&&!pipe[i]&&money>=DEF.pipe.cost;else if(tool==='pipeDel')ok=!!pipe[i];
   else if((STREET[tool]||tool==='highway')&&grid[i]&&grid[i].t==='tunnel')ok=!ovWhy(i)&&money>=DEF[tool].cost;
@@ -6724,7 +6725,7 @@ const faceRoad=i=>{const e=nbrs(i).find(k=>grid[k]&&DRIVE[grid[k].t]);return e!=
 function updateGhost(){if(lineConf&&pendA<0){sel.visible=false;if(ghost)ghost.visible=false;return}const F=curFP();if(pendA<0||!F){sel.visible=false;placeEl.hidden=true;if(ghost)ghost.visible=false;if(areaT>=1e9&&inspI<0){area.visible=reachHide();areaT=0}return}const[fw,fh]=F,T=curT(),t=fpTiles(pendA);
   const ok=fpOK(t,T),LV=ok?fpLevel(t):null,lvc=LV?LV.cost:0,cost=fpCost()+lvc,afford=money>=cost;sel.visible=true;sel.scale.set(fw,fh,1);sel.position.set(cx(pendA)+(fw-1)/2,tYi(pendA)+0.065,cz(pendA)+(fh-1)/2);
   sel.material.color.set(ok&&afford?'#3fbf5a':'#e0402b');placeEl.hidden=false;hintEl.hidden=true;
-  {const ar=toolRange(T);if(ar)showArea(pendA,ar,'hold',rangeKind(T),DEF[T]&&(DEF[T].r||DEF[T].area)?null:[fw,fh],T)}
+  {const ar=toolRange(T);if(ar)showArea(pendA,ar,'hold',rangeKind(T),DEF[T]&&DEF[T].area?null:[fw,fh],T)}
   try{const g=ghostFor(T);g.visible=true;g.position.set(cx(pendA)+(fw-1)/2,tYi(pendA),cz(pendA)+(fh-1)/2);g.rotation.y=FP0(T)?rotIdx*Math.PI/2:faceRoad(pendA)}catch(e){}
   document.getElementById('placeT').innerHTML=`${moveSrc>=0?'Przenieś: ':''}<b>${DEF[T].name}</b> ${fw}×${fh} · ${!t?'za blisko krawędzi':!ok?(t.every(freeFor)?(!fpLevel(t)?'teren zbyt nierówny (ponad 2 poziomy różnicy)':T==='pitB'||T==='pitS'?'oba pola muszą leżeć na tym samym złożu':'musi stać przy rzece'):'pola zajęte'):!afford?`brakuje ${fmt(cost-money)} T¢`:lvc?`${fmt(cost-lvc)} T¢ + ${fmt(lvc)} T¢ za wyrównanie terenu`:`${fmt(cost)} T¢`}`;
   document.getElementById('pOk').disabled=!(ok&&afford)}
@@ -6732,7 +6733,7 @@ function placeFP(){if(pendA<0)return;moodSnap(pendA);const T=curT(),t=fpTiles(pe
   const a=pendA;pendA=-1;lockBuy();
   if(moveSrc>=0){const src=moveSrc;moveSrc=-1;doMove(src,a,t,cost);updateGhost();hintEl.hidden=false;
     if(entryOf(a)<0&&!NOROAD[T])setHint('Przeniesiono. Budynek nie ma dojazdu: dołóż ulicę obok.',true,true);else setHint(`Przeniesiono za ${fmt(cost)} T¢.`,false,true);return}
-  spend(cost);addCell(a,tool,true,t.slice(1));if(grid[a]&&grid[a].tiles){grid[a].rot=rotIdx;refreshBuilding(a)}updateGhost();{const ar=toolRange(tool);if(ar&&grid[a])showArea(a,svcRange(tool,grid[a])||ar,true,rangeKind(tool),DEF[tool]&&(DEF[tool].r||DEF[tool].area)?null:rangeFP(tool),tool)}hintEl.hidden=false;
+  spend(cost);addCell(a,tool,true,t.slice(1));if(grid[a]&&grid[a].tiles){grid[a].rot=rotIdx;refreshBuilding(a)}updateGhost();{const ar=toolRange(tool);if(ar&&grid[a])showArea(a,svcRange(tool,grid[a])||ar,true,rangeKind(tool),DEF[tool]&&DEF[tool].area?null:rangeFP(tool),tool)}hintEl.hidden=false;
   if(entryOf(a)<0)setHint('Budynek nie ma dojazdu. Dołóż ulicę obok, by zaczął działać.',true,true);else setHint(toolHint());save();afterPlace(true)}
 function cancelFP(){pendA=-1;const mv=moveSrc>=0;moveSrc=-1;updateGhost();hintEl.hidden=false;if(mv)setHint('Przenoszenie anulowane.',false,true)}
 /* R: single-tile buildings get a fixed facing (auto = front to the street); with a building open in the inspector, R turns that building */
@@ -6872,7 +6873,7 @@ function inspect(i){if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(xray&&pipe[
       bakery:`<b>Piekarnia</b> · ${c.shelf?c.shelf.bread||0:0} bochenków`,gallery:'<b>Galeria handlowa</b>',restaurant:'<b>Restauracja</b>',cinema:'<b>Kino</b>',theater:'<b>Teatr</b>',casino:'<b>Kasyno</b>',hotelS:'<b>Mały hotel</b>',hotelB:'<b>Duży hotel</b>',tenement:'<b>Kamienica</b>',block:'<b>Tani blok</b>',modern:'<b>Apartamentowiec</b>',
       shop:`<b>Sklep</b> · półki ${c.shelf?shelfTotal(c):0}/${slotsOf(c)}`,bank:`<b>Bank</b> · +${fmt(BANK_CAP)} T¢ limitu`,warehouse:`<b>Magazyn</b> · +${fmt(whCap(c))} kg limitu`,smallwh:`<b>Mały magazyn</b> · +${WHCAP.smallwh} kg limitu`,
       park1:`<b>Skwer</b> · zasięg 5×5 · ${UPKEEP.park1} T¢/godz.`,park2:`<b>Park</b> · zasięg 7×7 · ${UPKEEP.park2} T¢/godz.`,park3:`<b>Park miejski</b> · zasięg 9×9 · ${UPKEEP.park3} T¢/godz.`}[c.t]??`<b>${DEF[c.t]?DEF[c.t].name:c.t}</b>`)+pwr+no+((conductive(i)||(DEMAND[c.t]&&!c.powered))&&lvWhy(i).length?' · <b>Wysokość:</b> '+lvWhy(i).slice(0,2).map(w=>`<span>${w}</span>`).join(' '):'');
-    if(DEF[c.t].r||DEF[c.t].area)showArea(i,DEF[c.t].r?parkR(c):c.t==='hvpole'?hvR(i):DEF[c.t].area,true);
+    if(DEF[c.t].r||DEF[c.t].area)(DEF[c.t].r&&c.tiles?parkArea:showArea)(i,DEF[c.t].r?parkR(c):c.t==='hvpole'?hvR(i):DEF[c.t].area,true);
     if(pol[i]&&!isFactory(c.t)&&c.t!=='coal')s+=pol[i]===2?' · silny smog (szare pole)':' · lekki smog'}
   if(c&&c.bus)s+=stopInfo(i);
   setHint(s,false,true)}
@@ -6888,7 +6889,7 @@ const houses=()=>{const o=[];for(let i=0;i<N*N;i++)if(grid[i]&&HOUSING[grid[i].t
 let buyLock=0;const lockBuy=()=>{buyLock=performance.now()+500;inspEl.classList.add('locked');setTimeout(()=>inspEl.classList.remove('locked'),520)};
 function openHouse(i){lockBuy();if(grid[i]&&grid[i].t==='part')i=grid[i].main;if(tut&&tut.on&&grid[i]&&grid[i].t==='wind')tut.windSeen=true;
   if(tut&&tut.on&&grid[i]&&HLV[grid[i].t]&&tutNow()==='house'&&!tut.houseSeen){tut.houseSeen=true;setTimeout(()=>tutInfo('Dom zdobywa doświadczenie','Podświetlony pasek to <b>doświadczenie</b> domu. Budynki mieszkalne zdobywają je same, tym szybciej, im <b>wyższe zadowolenie</b> mieszkańców (przy zadowoleniu 0 stoją w miejscu). Gdy pasek się zapełni, dom możesz rozbudować na wyższy poziom: więcej mieszkańców, podatków i zakupów.','tutXP'),300)}inspI=i;inspEl.hidden=false;hintEl.hidden=true;document.body&&document.body.classList.add('inspOn');ring.visible=true;{const gp=grid[i]?grid[i].group.position:{x:cx(i),z:cz(i)};ring.position.set(gp.x,0.07,gp.z);ring.scale.setScalar(grid[i]&&grid[i].tiles?(grid[i].tiles.length>4?3.4:grid[i].tiles.length>2?2.6:1.9):1);focus={x:gp.x,z:gp.z}}
-  const c=grid[i];area.visible=reachHide();areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))showArea(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='heliB'?HELI_R:c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold','green',null,c.t);
+  const c=grid[i];area.visible=reachHide();areaT=0;if(c&&DEF[c.t]&&(DEF[c.t].r||DEF[c.t].area))(DEF[c.t].r&&c.tiles?parkArea:showArea)(i,DEF[c.t].r?parkR(c):isPolice(c.t)?polRad(c):isFireSt(c.t)?fireRad(c):c.t==='heliB'?HELI_R:c.t==='hvpole'?hvR(i):DEF[c.t].area,'hold','green',null,c.t);
   else if(c&&entR(c)&&!c.tiles)showArea(i,entR(c),'hold','green',null,c.t);else if(noisy(c))showArea(i,1,'hold','noise');else if(polR(c)&&!c.tiles)showArea(i,polR(c),'hold','pol');else if(c&&svcRange(c.t,c))showArea(i,svcRange(c.t,c),'hold',rangeKind(c.t),rangeFP(c.t),c.t);renderInsp()}
 /* the card refreshes twice a second; a refresh between pressing and releasing a button would swallow the click, so it waits while a finger or the mouse is down on the card */
 let inspDown=0,inspRel=0;inspEl.addEventListener('pointerdown',()=>{inspDown=performance.now()},true);
