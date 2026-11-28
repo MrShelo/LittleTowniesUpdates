@@ -72,7 +72,7 @@
 </style>
 <title>Little Townies</title>
 <script>/* updates from GitHub: a newer downloaded build replaces this one before anything else runs */
-window.LT_VERSION='8.4.10';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
+window.LT_VERSION='8.4.11';window.ltCmpV=function(a,b){a=String(a).split('.');b=String(b).split('.');for(var k=0;k<3;k++){var d=(+a[k]||0)-(+b[k]||0);if(d)return d>0?1:-1}return 0};
 (function(){try{if(window.__LT_EDITOR)return;var u=JSON.parse(localStorage.getItem('lt-update')||'null');if(!u||!u.html||ltCmpV(u.v,LT_VERSION)<=0)return;
   window.__ltNew=u.html;document.write('<plaintext style="display:none">');
   addEventListener('DOMContentLoaded',function(){var h=window.__ltNew;document.open();document.write(h);document.close();
@@ -774,10 +774,10 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <script>/* 8.4.10: loading screen – logo + progress bar; it stays 2 s longer than the city takes to load */
 (function(){try{const L=document.getElementById('ltLoad');if(!L)return;const t=document.querySelector('.tlogo');if(t)document.getElementById('ldLogo').src=t.src;
   const skip=!!(window.__testUnlock||window.__LT_EDITOR||(navigator.webdriver&&!/ltload/.test(location.search)));if(skip){L.remove();return}
-  let p=0,goal=0.3,rate=0.35,done=false,t0=performance.now(),tDone=0;const fill=document.getElementById('ldFill'),pct=document.getElementById('ldPct'),msg=document.getElementById('ldMsg');
+  let pS=0,p=0,goal=0.3,rate=0.35,done=false,t0=performance.now(),tDone=0;const fill=document.getElementById('ldFill'),pct=document.getElementById('ldPct'),msg=document.getElementById('ldMsg');
   window.__ldStep=(g,m)=>{goal=Math.max(goal,g);if(g<1){p=Math.max(p,g*0.85);fill.style.width=(p*100).toFixed(1)+'%';pct.textContent=Math.round(p*100)+'%'}if(m)msg.textContent=window.LT_tr?LT_tr(m):m};
-  window.__ldDone=()=>{if(done)return;done=true;tDone=performance.now();window.__ldStep(1,'Gotowe!')};
-  (function f(){const now=performance.now();if(done){const k=Math.min(1,(now-tDone)/2000);p=Math.max(p,p+(1-p)*k*0.08+0.002*(k<1?1:0));if(k>=1)p=1}else p+=(goal-p)*0.04;
+  window.__ldDone=()=>{if(done)return;done=true;tDone=performance.now();pS=p;window.__ldStep(1,'Gotowe!')};
+  (function f(){const now=performance.now();if(done){const k=Math.min(1,(now-tDone)/2000),e=1-Math.pow(1-k,2);p=pS+(1-pS)*e}else p+=(Math.min(goal,0.95)-p)*0.04;p=Math.max(0,Math.min(1,p));
     fill.style.width=(p*100).toFixed(1)+'%';pct.textContent=Math.round(p*100)+'%';L.setAttribute('aria-valuenow',String(Math.round(p*100)));
     if(done&&now-tDone>=2000&&p>=0.999){L.classList.add('out');setTimeout(()=>L.remove(),450);return}requestAnimationFrame(f)})();
   try{document.getElementById('ldVer').textContent='Little Townies '+(window.LT_VERSION||'')+' · Pre-Release version'}catch(e){}}catch(e){}})();</script>
